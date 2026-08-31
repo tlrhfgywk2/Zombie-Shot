@@ -3,6 +3,7 @@ import type { AmmoType } from '../combat/types';
 import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
+import { PRESENTATION_TIMING } from '../presentation/presentationConfig';
 import { GameUI } from '../ui/GameUI';
 import { GameStateMachine } from './GameStateMachine';
 
@@ -17,7 +18,7 @@ export class Game {
 
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
-      onAddAmmo: (ammo) => this.addAmmo(ammo), onRemoveAmmo: (index) => this.removeAmmo(index), onReplaceAmmo: (index, ammo) => this.replaceAmmo(index, ammo), onSwapAmmo: (first, second) => this.swapAmmo(first, second), onLoad: () => void this.beginCombat(), onRestart: () => this.restart(),
+      onAddAmmo: (ammo) => this.addAmmo(ammo), onRemoveAmmo: (index) => this.removeAmmo(index), onReplaceAmmo: (index, ammo) => this.replaceAmmo(index, ammo), onSwapAmmo: (first, second) => this.swapAmmo(first, second), onMoveAmmo: (from, to) => this.moveAmmo(from, to), onLoad: () => void this.beginCombat(), onRestart: () => this.restart(),
     });
     this.presentation = new GamePresentation(this.ui.canvasHost);
     this.sync();
@@ -33,6 +34,7 @@ export class Game {
   private removeAmmo(index: number): void { if (this.state.phase === 'AMMO_SELECTION') { this.player.magazine.remove(index); this.syncMagazine(); } }
   private replaceAmmo(index: number, ammo: AmmoType): void { if (this.state.phase === 'AMMO_SELECTION') { this.player.magazine.set(index, ammo); this.syncMagazine(); } }
   private swapAmmo(first: number, second: number): void { if (this.state.phase === 'AMMO_SELECTION') { this.player.magazine.swap(first, second); this.syncMagazine(); } }
+  private moveAmmo(from: number, to: number): void { if (this.state.phase === 'AMMO_SELECTION') { this.player.magazine.move(from, to); this.syncMagazine(); } }
 
   private async beginCombat(): Promise<void> {
     if (this.busy || this.state.phase !== 'AMMO_SELECTION' || this.player.magazine.size === 0) return;
@@ -55,7 +57,7 @@ export class Game {
       this.zombie.takeDamage(result.damage);
       if (result.burnApplied) this.zombie.applyBurn(result.burnApplied);
       this.syncEnemy();
-      await this.pause(280);
+      await this.pause(PRESENTATION_TIMING.betweenShots);
     }
     this.player.magazine.clear();
     this.syncMagazine();

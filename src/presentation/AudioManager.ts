@@ -1,48 +1,113 @@
+import type { AmmoType } from '../combat/types';
+
 export class AudioManager {
   private context?: AudioContext;
+  private unavailable = false;
+
+  prepare(): void {
+    void this.getContext()?.resume().catch(() => { this.unavailable = true; });
+  }
+
+  insertRound(ammoType: AmmoType, index: number): void {
+    const frequency: Record<AmmoType, number> = { standard: 430, tracer: 540, fragmenting: 360, incendiary: 620 };
+    this.tone(frequency[ammoType] + index * 18, 0.045, 0.045, 'square');
+    this.tone(180, 0.028, 0.025, 'triangle', 0.022);
+  }
+
+  magazineSeat(): void {
+    this.noise(0.055, 0.05, 760);
+    this.tone(145, 0.07, 0.08, 'square');
+    this.tone(520, 0.035, 0.035, 'triangle', 0.045);
+  }
+
+  slidePull(): void {
+    this.noise(0.13, 0.035, 980);
+    this.tone(165, 0.1, 0.04, 'sawtooth');
+  }
+
+  slideRelease(): void {
+    this.noise(0.045, 0.06, 1250);
+    this.tone(245, 0.055, 0.075, 'square');
+    this.tone(720, 0.025, 0.028, 'triangle', 0.025);
+  }
+
+  shot(ammoType: AmmoType): void {
+    const lowFrequency: Record<AmmoType, number> = { standard: 92, tracer: 112, fragmenting: 76, incendiary: 102 };
+    const volume = ammoType === 'fragmenting' ? 0.16 : 0.135;
+    this.noise(ammoType === 'fragmenting' ? 0.16 : 0.12, volume, ammoType === 'tracer' ? 1800 : 1250);
+    this.tone(lowFrequency[ammoType], 0.11, 0.09, 'sawtooth');
+    if (ammoType === 'tracer') this.tone(880, 0.055, 0.025, 'sine', 0.015);
+    if (ammoType === 'incendiary') this.noise(0.2, 0.028, 2400, 0.055);
+  }
+
+  impact(ammoType: AmmoType): void {
+    if (ammoType === 'fragmenting') {
+      this.noise(0.09, 0.065, 2100);
+      this.tone(285, 0.06, 0.035, 'square');
+    } else if (ammoType === 'incendiary') {
+      this.noise(0.16, 0.04, 2800);
+      this.tone(460, 0.09, 0.025, 'sawtooth');
+    } else this.tone(ammoType === 'tracer' ? 390 : 310, 0.045, 0.035, 'triangle');
+  }
+
+  burn(): void {
+    this.noise(0.32, 0.035, 3200);
+    this.tone(240, 0.22, 0.02, 'sawtooth');
+  }
+
+  growl(): void {
+    this.tone(72, 0.18, 0.024, 'sawtooth');
+  }
+
+  death(): void {
+    this.noise(0.24, 0.04, 480);
+    this.tone(105, 0.35, 0.045, 'sawtooth');
+    this.tone(62, 0.42, 0.035, 'square', 0.13);
+  }
 
   private getContext(): AudioContext | undefined {
-    if (typeof AudioContext === 'undefined') return undefined;
-    this.context ??= new AudioContext();
-    if (this.context.state === 'suspended') void this.context.resume();
-    return this.context;
+    if (this.unavailable || typeof AudioContext === 'undefined') return undefined;
+    try {
+      this.context ??= new AudioContext();
+      if (this.context.state === 'suspended') void this.context.resume().catch(() => { this.unavailable = true; });
+      return this.context;
+    } catch {
+      this.unavailable = true;
+      return undefined;
+    }
   }
 
-  click(frequency = 460): void {
-    this.tone(frequency, 0.035, 0.055, 'square');
-  }
-
-  rack(): void {
-    this.tone(190, 0.08, 0.08, 'sawtooth');
-    window.setTimeout(() => this.click(620), 110);
-  }
-
-  shot(): void {
+  private tone(frequency: number, duration: number, volume: number, type: 'sine' | 'square' | 'sawtooth' | 'triangle', delay = 0): void {
     const context = this.getContext();
     if (!context) return;
-    const length = Math.floor(context.sampleRate * 0.12);
-    const buffer = context.createBuffer(1, length, context.sampleRate);
-    const channel = buffer.getChannelData(0);
-    for (let i = 0; i < length; i += 1) channel[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 3);
-    const source = context.createBufferSource();
-    const gain = context.createGain();
-    source.buffer = buffer;
-    gain.gain.value = 0.12;
-    source.connect(gain).connect(context.destination);
-    source.start();
-  }
-
-  private tone(frequency: number, duration: number, volume: number, type: 'square' | 'sawtooth'): void {
-    const context = this.getContext();
-    if (!context) return;
+    const start = context.currentTime + delay;
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     oscillator.type = type;
-    oscillator.frequency.value = frequency;
-    gain.gain.setValueAtTime(volume, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + duration);
+    oscillator.frequency.setValueAtTime(frequency, start);
+    oscillator.frequency.exponentialRampToValueAtTime(Math.max(40, frequency * 0.72), start + duration);
+    gain.gain.setValueAtTime(Math.max(volume, 0.001), start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
     oscillator.connect(gain).connect(context.destination);
-    oscillator.start();
-    oscillator.stop(context.currentTime + duration);
+    oscillator.start(start);
+    oscillator.stop(start + duration);
+  }
+
+  private noise(duration: number, volume: number, filterFrequency: number, delay = 0): void {
+    const context = this.getContext();
+    if (!context) return;
+    const length = Math.max(1, Math.floor(context.sampleRate * duration));
+    const buffer = context.createBuffer(1, length, context.sampleRate);
+    const channel = buffer.getChannelData(0);
+    for (let index = 0; index < length; index += 1) channel[index] = (Math.random() * 2 - 1) * Math.pow(1 - index / length, 2.4);
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const gain = context.createGain();
+    filter.type = 'lowpass';
+    filter.frequency.value = filterFrequency;
+    gain.gain.value = volume;
+    source.buffer = buffer;
+    source.connect(filter).connect(gain).connect(context.destination);
+    source.start(context.currentTime + delay);
   }
 }

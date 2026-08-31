@@ -27,4 +27,23 @@ describe('Magazine', () => {
     expect(magazine.remove(1)).toBe('incendiary');
     expect(magazine.getRounds()).toEqual(['tracer']);
   });
+
+  it('탄환을 다른 위치나 마지막 빈 슬롯으로 이동한다', () => {
+    const magazine = new Magazine();
+    magazine.add('standard');
+    magazine.add('tracer');
+    magazine.add('incendiary');
+    expect(magazine.move(0, 2)).toBe(true);
+    expect(magazine.getRounds()).toEqual(['tracer', 'incendiary', 'standard']);
+    expect(magazine.move(0, 3)).toBe(true);
+    expect(magazine.getRounds()).toEqual(['incendiary', 'standard', 'tracer']);
+  });
+
+  it('유효하지 않은 이동은 탄창을 변경하지 않는다', () => {
+    const magazine = new Magazine();
+    magazine.add('standard');
+    expect(magazine.move(-1, 0)).toBe(false);
+    expect(magazine.move(0, 2)).toBe(false);
+    expect(magazine.getRounds()).toEqual(['standard']);
+  });
 });
