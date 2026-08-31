@@ -1,11 +1,36 @@
 import type { AmmoType } from '../combat/types';
+import { DEFAULT_AUDIO_PREFERENCES, type AudioPreferences, clampVolume } from './AudioPreferences';
 
 export class AudioManager {
   private context?: AudioContext;
+  private masterGain?: GainNode;
+  private preferences: AudioPreferences = { ...DEFAULT_AUDIO_PREFERENCES };
+  private active = true;
+  private activityRevision = 0;
   private unavailable = false;
 
   prepare(): void {
-    void this.getContext()?.resume().catch(() => { this.unavailable = true; });
+    if (!this.active || this.preferences.muted || this.preferences.volume === 0) return;
+    const context = this.getContext();
+    if (context) this.resumeContext(context);
+  }
+
+  setPreferences(preferences: AudioPreferences): void {
+    this.preferences = { muted: preferences.muted, volume: clampVolume(preferences.volume) };
+    this.applyMasterGain();
+  }
+
+  setActive(active: boolean): void {
+    this.active = active;
+    const revision = ++this.activityRevision;
+    const context = this.context;
+    if (!context) return;
+    if (!active) {
+      this.applyMasterGain(true);
+      if (context.state === 'running') void context.suspend().then(() => {
+        if (this.active && revision !== this.activityRevision) this.resumeContext(context);
+      }).catch(() => undefined);
+    } else if (!this.preferences.muted && this.preferences.volume > 0) this.resumeContext(context);
   }
 
   insertRound(ammoType: AmmoType, index: number): void {
@@ -69,7 +94,11 @@ export class AudioManager {
     if (this.unavailable || typeof AudioContext === 'undefined') return undefined;
     try {
       this.context ??= new AudioContext();
-      if (this.context.state === 'suspended') void this.context.resume().catch(() => { this.unavailable = true; });
+      if (!this.masterGain) {
+        this.masterGain = this.context.createGain();
+        this.masterGain.connect(this.context.destination);
+      }
+      this.applyMasterGain(true);
       return this.context;
     } catch {
       this.unavailable = true;
@@ -78,7 +107,7 @@ export class AudioManager {
   }
 
   private tone(frequency: number, duration: number, volume: number, type: 'sine' | 'square' | 'sawtooth' | 'triangle', delay = 0): void {
-    const context = this.getContext();
+    const context = this.getPlayableContext();
     if (!context) return;
     const start = context.currentTime + delay;
     const oscillator = context.createOscillator();
@@ -88,13 +117,13 @@ export class AudioManager {
     oscillator.frequency.exponentialRampToValueAtTime(Math.max(40, frequency * 0.72), start + duration);
     gain.gain.setValueAtTime(Math.max(volume, 0.001), start);
     gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-    oscillator.connect(gain).connect(context.destination);
+    oscillator.connect(gain).connect(this.masterGain!);
     oscillator.start(start);
     oscillator.stop(start + duration);
   }
 
   private noise(duration: number, volume: number, filterFrequency: number, delay = 0): void {
-    const context = this.getContext();
+    const context = this.getPlayableContext();
     if (!context) return;
     const length = Math.max(1, Math.floor(context.sampleRate * duration));
     const buffer = context.createBuffer(1, length, context.sampleRate);
@@ -107,7 +136,28 @@ export class AudioManager {
     filter.frequency.value = filterFrequency;
     gain.gain.value = volume;
     source.buffer = buffer;
-    source.connect(filter).connect(gain).connect(context.destination);
+    source.connect(filter).connect(gain).connect(this.masterGain!);
     source.start(context.currentTime + delay);
+  }
+
+  private getPlayableContext(): AudioContext | undefined {
+    if (!this.active || this.preferences.muted || this.preferences.volume === 0) return undefined;
+    const context = this.getContext();
+    if (!context || context.state !== 'running') return undefined;
+    return context;
+  }
+
+  private applyMasterGain(immediate = false): void {
+    if (!this.masterGain || !this.context) return;
+    const target = this.active && !this.preferences.muted ? this.preferences.volume : 0;
+    const now = this.context.currentTime;
+    this.masterGain.gain.cancelScheduledValues(now);
+    if (immediate) this.masterGain.gain.setValueAtTime(target, now);
+    else this.masterGain.gain.setTargetAtTime(target, now, 0.025);
+  }
+
+  private resumeContext(context: AudioContext): void {
+    if (!this.active || this.preferences.muted || this.preferences.volume === 0 || context.state !== 'suspended') return;
+    void context.resume().then(() => this.applyMasterGain()).catch(() => undefined);
   }
 }
