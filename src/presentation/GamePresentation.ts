@@ -2,10 +2,9 @@ import * as THREE from 'three';
 import type { AmmoType } from '../combat/types';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
+import type { AudioPreferences } from './AudioPreferences';
 import { PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
 import { createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
-
-const wait = (milliseconds: number): Promise<void> => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 export class GamePresentation {
   private readonly scene = new THREE.Scene();
@@ -23,6 +22,9 @@ export class GamePresentation {
   private zombieTargetZ = -6.1;
   private elapsed = 0;
   private zombieFallen = false;
+  private paused = document.hidden;
+  private windowBlurred = false;
+  private resizeObserver?: ResizeObserver;
   private animationFrame = 0;
 
   constructor(private readonly host: HTMLElement) {
@@ -40,12 +42,27 @@ export class GamePresentation {
     this.buildActors();
     this.resize();
     window.addEventListener('resize', this.resize);
+    window.visualViewport?.addEventListener('resize', this.resize);
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    window.addEventListener('blur', this.handleBlur);
+    window.addEventListener('focus', this.handleFocus);
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(this.resize);
+      this.resizeObserver.observe(this.host);
+    }
+    this.audio.setActive(!this.paused);
     this.tick();
   }
 
   destroy(): void {
     cancelAnimationFrame(this.animationFrame);
     window.removeEventListener('resize', this.resize);
+    window.visualViewport?.removeEventListener('resize', this.resize);
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    window.removeEventListener('blur', this.handleBlur);
+    window.removeEventListener('focus', this.handleFocus);
+    this.resizeObserver?.disconnect();
+    this.audio.setActive(false);
     this.scene.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;
       object.geometry.dispose();
@@ -53,6 +70,14 @@ export class GamePresentation {
       materials.forEach((material) => material.dispose());
     });
     this.renderer.dispose();
+  }
+
+  setAudioPreferences(preferences: AudioPreferences): void {
+    this.audio.setPreferences(preferences);
+  }
+
+  wait(milliseconds: number): Promise<void> {
+    return this.tween(milliseconds, () => undefined);
   }
 
   setZombie(distance: number, hpRatio: number, burning: boolean, level: number): void {
@@ -89,7 +114,7 @@ export class GamePresentation {
       });
       magazine.attach(cartridge);
       this.audio.insertRound(ammo, index);
-      await wait(PRESENTATION_TIMING.roundSettle);
+      await this.wait(PRESENTATION_TIMING.roundSettle);
     }
     this.camera.position.y = 2.15;
     await this.tween(PRESENTATION_TIMING.magazineApproach, (progress) => {
@@ -260,7 +285,7 @@ export class GamePresentation {
       slide.position.x = THREE.MathUtils.lerp(0, -PRESENTATION_MOTION.slideTravel, this.easeInOut(progress));
       this.pistolModel.root.position.z = this.weaponRest.z + Math.sin(progress * Math.PI) * 0.08;
     });
-    await wait(PRESENTATION_TIMING.slideHold);
+    await this.wait(PRESENTATION_TIMING.slideHold);
     this.audio.slideRelease();
     await this.tween(PRESENTATION_TIMING.slideRelease, (progress) => {
       slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel, 0, this.easeOutBack(progress));
@@ -357,8 +382,32 @@ export class GamePresentation {
     this.renderer.setSize(width, height, false);
   };
 
+  private readonly handleVisibilityChange = (): void => {
+    this.updateActivity();
+  };
+
+  private readonly handleBlur = (): void => {
+    this.windowBlurred = true;
+    this.updateActivity();
+  };
+
+  private readonly handleFocus = (): void => {
+    this.windowBlurred = false;
+    this.updateActivity();
+  };
+
+  private updateActivity(): void {
+    this.paused = document.hidden || this.windowBlurred;
+    this.audio.setActive(!this.paused);
+    this.clock.getDelta();
+  }
+
   private tick = (): void => {
     const delta = Math.min(this.clock.getDelta(), 0.05);
+    if (this.paused) {
+      this.animationFrame = requestAnimationFrame(this.tick);
+      return;
+    }
     this.elapsed += delta;
     if (!this.zombieFallen) {
       this.zombieModel.root.position.y = Math.sin(this.elapsed * 2.35) * 0.032;
@@ -376,9 +425,13 @@ export class GamePresentation {
 
   private tween(duration: number, update: (progress: number) => void): Promise<void> {
     return new Promise((resolve) => {
-      const start = performance.now();
+      let elapsed = 0;
+      let previous = performance.now();
       const frame = (now: number): void => {
-        const progress = Math.min((now - start) / duration, 1);
+        const frameTime = Math.min(Math.max(now - previous, 0), 50);
+        previous = now;
+        if (!this.paused) elapsed += frameTime;
+        const progress = Math.min(elapsed / duration, 1);
         update(progress);
         if (progress < 1) requestAnimationFrame(frame);
         else resolve();

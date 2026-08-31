@@ -1,6 +1,7 @@
 import type { AmmoType, ShotResult } from '../combat/types';
 import type { GamePhase } from '../core/GameStateMachine';
 import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE } from '../data/ammoDefinitions';
+import type { AudioPreferences } from '../presentation/AudioPreferences';
 
 export interface GameUICallbacks {
   onAddAmmo: (ammo: AmmoType) => void;
@@ -8,6 +9,8 @@ export interface GameUICallbacks {
   onReplaceAmmo: (index: number, ammo: AmmoType) => void;
   onSwapAmmo: (first: number, second: number) => void;
   onMoveAmmo: (from: number, to: number) => void;
+  onAudioMutedChange: (muted: boolean) => void;
+  onAudioVolumeChange: (volume: number) => void;
   onLoad: () => void;
   onRestart: () => void;
 }
@@ -29,10 +32,14 @@ export class GameUI {
   private readonly combatLog: HTMLElement;
   private readonly selectionActions: HTMLElement;
   private readonly selectionText: HTMLElement;
+  private readonly audioMute: HTMLButtonElement;
+  private readonly audioState: HTMLElement;
+  private readonly audioVolume: HTMLInputElement;
   private rounds: readonly AmmoType[] = [];
   private locked = false;
   private selectedIndex: number | null = null;
   private suppressClick = false;
+  private gestureVersion = 0;
 
   constructor(root: HTMLElement, private readonly callbacks: GameUICallbacks) {
     root.innerHTML = `
@@ -41,7 +48,7 @@ export class GameUI {
         <header class="top-hud">
           <div class="brand"><span class="brand-mark"></span><div><small>전술 생존 실험</small><strong>좀비 샷</strong></div></div>
           <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">감염체 01</span><span id="hp-text">74 / 74</span></div><div class="hp-track"><span id="hp-fill"></span></div></div>
-          <div class="distance-card"><small>거리</small><strong id="distance-text">10.0 m</strong></div>
+          <div class="utility-stack"><div class="distance-card"><small>거리</small><strong id="distance-text">10.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
         </header>
         <aside class="phase-panel"><span class="eyebrow">현재 단계</span><strong id="phase-text">탄약 선택</strong><p id="status-text">탄약을 누르거나 빈 슬롯으로 끌어 놓으세요.</p><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
         <section class="loadout" aria-label="탄창 장전 영역">
@@ -68,6 +75,9 @@ export class GameUI {
     this.overlay = this.required(root, '#game-over');
     this.selectionActions = this.required(root, '#selection-actions');
     this.selectionText = this.required(root, '#selection-text');
+    this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
+    this.audioState = this.required(root, '#audio-state');
+    this.audioVolume = this.required(root, '#audio-volume') as HTMLInputElement;
     this.slots = [...root.querySelectorAll<HTMLButtonElement>('.mag-slot')];
 
     root.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
@@ -95,8 +105,13 @@ export class GameUI {
       this.clearSelection();
     });
     this.required(root, '#cancel-selection').addEventListener('click', () => this.clearSelection());
+    this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
+    this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
     this.loadButton.addEventListener('click', this.callbacks.onLoad);
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
+    window.addEventListener('blur', this.resetDragVisuals);
+    window.addEventListener('resize', this.resetDragVisuals);
+    document.addEventListener('visibilitychange', this.resetDragVisuals);
   }
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
@@ -121,6 +136,15 @@ export class GameUI {
     if (locked) this.clearSelection();
     document.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => { button.disabled = locked; });
     this.renderMagazine(this.rounds);
+  }
+
+  renderAudioPreferences(preferences: AudioPreferences): void {
+    this.audioMute.setAttribute('aria-pressed', String(preferences.muted));
+    this.audioMute.setAttribute('aria-label', preferences.muted ? '음향 켜기' : '음향 끄기');
+    this.audioState.textContent = preferences.muted ? '꺼짐' : '켜짐';
+    this.audioVolume.value = String(preferences.volume);
+    this.audioVolume.setAttribute('aria-valuetext', `${Math.round(preferences.volume * 100)}%`);
+    this.audioVolume.disabled = preferences.muted;
   }
 
   setPhase(phase: GamePhase, message: string): void {
@@ -191,6 +215,12 @@ export class GameUI {
     return true;
   }
 
+  private readonly resetDragVisuals = (): void => {
+    this.gestureVersion += 1;
+    document.body.classList.remove('ammo-drag-active');
+    document.querySelectorAll('.is-dragging, .drop-target').forEach((element) => element.classList.remove('is-dragging', 'drop-target'));
+  };
+
   private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined): void {
     element.addEventListener('pointerdown', (event) => {
       if (this.locked || event.button !== 0) return;
@@ -198,9 +228,11 @@ export class GameUI {
       if (!payload) return;
       const startX = event.clientX;
       const startY = event.clientY;
+      const gestureVersion = this.gestureVersion;
       let dragging = false;
       element.setPointerCapture(event.pointerId);
       const move = (moveEvent: PointerEvent): void => {
+        if (gestureVersion !== this.gestureVersion) return;
         if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) >= 8) {
           dragging = true;
           element.classList.add('is-dragging');
@@ -211,12 +243,19 @@ export class GameUI {
         const target = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)?.closest<HTMLButtonElement>('.mag-slot');
         this.slots.forEach((slot) => slot.classList.toggle('drop-target', slot === target));
       };
-      const end = (endEvent: PointerEvent): void => {
+      const cleanup = (pointerId: number): void => {
         element.removeEventListener('pointermove', move);
         element.removeEventListener('pointerup', end);
         element.removeEventListener('pointercancel', cancel);
-        if (element.hasPointerCapture(endEvent.pointerId)) element.releasePointerCapture(endEvent.pointerId);
-        if (dragging) {
+        element.removeEventListener('lostpointercapture', lostCapture);
+        if (element.hasPointerCapture(pointerId)) element.releasePointerCapture(pointerId);
+        element.classList.remove('is-dragging');
+        document.body.classList.remove('ammo-drag-active');
+        this.slots.forEach((slot) => slot.classList.remove('drop-target'));
+      };
+      const end = (endEvent: PointerEvent): void => {
+        cleanup(endEvent.pointerId);
+        if (dragging && gestureVersion === this.gestureVersion) {
           const target = document.elementFromPoint(endEvent.clientX, endEvent.clientY)?.closest<HTMLButtonElement>('.mag-slot');
           const destination = target ? Number(target.dataset.slot) : Number.NaN;
           if (Number.isInteger(destination)) {
@@ -224,15 +263,15 @@ export class GameUI {
             else if (payload.sourceIndex !== undefined) this.callbacks.onMoveAmmo(payload.sourceIndex, destination);
           }
           this.suppressClick = true;
+          window.setTimeout(() => { this.suppressClick = false; }, 0);
         }
-        element.classList.remove('is-dragging');
-        document.body.classList.remove('ammo-drag-active');
-        this.slots.forEach((slot) => slot.classList.remove('drop-target'));
       };
-      const cancel = (cancelEvent: PointerEvent): void => end(cancelEvent);
+      const cancel = (cancelEvent: PointerEvent): void => cleanup(cancelEvent.pointerId);
+      const lostCapture = (lostEvent: PointerEvent): void => cleanup(lostEvent.pointerId);
       element.addEventListener('pointermove', move);
       element.addEventListener('pointerup', end);
       element.addEventListener('pointercancel', cancel);
+      element.addEventListener('lostpointercapture', lostCapture);
     });
   }
 }
