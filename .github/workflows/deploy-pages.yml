@@ -2,7 +2,7 @@ name: GitHub Pages 배포
 
 on:
   push:
-    branches: [release]
+    branches: [develop]
   workflow_dispatch:
 
 permissions:
