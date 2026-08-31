@@ -3,6 +3,7 @@ import type { AmmoType } from '../combat/types';
 import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
+import { PRESENTATION_TIMING } from '../presentation/presentationConfig';
 import { GameUI } from '../ui/GameUI';
 import { GameStateMachine } from './GameStateMachine';
 
@@ -56,7 +57,7 @@ export class Game {
       this.zombie.takeDamage(result.damage);
       if (result.burnApplied) this.zombie.applyBurn(result.burnApplied);
       this.syncEnemy();
-      await this.pause(280);
+      await this.pause(PRESENTATION_TIMING.betweenShots);
     }
     this.player.magazine.clear();
     this.syncMagazine();

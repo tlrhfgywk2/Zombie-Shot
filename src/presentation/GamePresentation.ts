@@ -1,41 +1,43 @@
 import * as THREE from 'three';
-import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import type { AmmoType } from '../combat/types';
+import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
+import { PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
+import { createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
 const wait = (milliseconds: number): Promise<void> => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
 export class GamePresentation {
   private readonly scene = new THREE.Scene();
   private readonly camera = new THREE.PerspectiveCamera(43, 1, 0.1, 100);
-  private readonly renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+  private readonly renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   private readonly clock = new THREE.Clock();
   private readonly audio = new AudioManager();
-  private readonly zombie = new THREE.Group();
-  private readonly weapon = new THREE.Group();
-  private readonly magazine = new THREE.Group();
-  private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 8);
+  private readonly zombieModel = createZombieModel();
+  private readonly pistolModel = createPistolModel();
+  private readonly magazineModel = createMagazineModel();
+  private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 7);
   private readonly burnLight = new THREE.PointLight(0xff5a18, 0, 5);
   private readonly cartridges: THREE.Group[] = [];
-  private zombieTargetZ = -5;
-  private zombieBob = 0;
+  private readonly weaponRest = new THREE.Vector3(0.58, 0.68, 3.72);
+  private zombieTargetZ = -6.1;
+  private elapsed = 0;
+  private zombieFallen = false;
   private animationFrame = 0;
 
   constructor(private readonly host: HTMLElement) {
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
     this.renderer.setClearColor(0x080c0a, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.renderer.domElement.setAttribute('aria-label', '플레이어 앞에 다가오는 좀비와 권총이 보이는 3D 전투 화면');
+    this.renderer.domElement.setAttribute('aria-label', '다가오는 감염체와 장전 동작을 보여 주는 3D 전투 화면');
     this.host.append(this.renderer.domElement);
     this.camera.position.set(0, 2.15, 7.6);
-    this.camera.lookAt(0, 1.45, -4.5);
-    this.scene.fog = new THREE.FogExp2(0x0b110e, 0.045);
+    this.camera.lookAt(0, 1.4, -4.4);
+    this.scene.fog = new THREE.FogExp2(0x0b110e, 0.044);
     this.buildEnvironment();
-    this.buildZombie();
-    this.buildWeapon();
-    this.buildMagazine();
+    this.buildActors();
     this.resize();
     window.addEventListener('resize', this.resize);
     this.tick();
@@ -44,145 +46,200 @@ export class GamePresentation {
   destroy(): void {
     cancelAnimationFrame(this.animationFrame);
     window.removeEventListener('resize', this.resize);
+    this.scene.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      object.geometry.dispose();
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach((material) => material.dispose());
+    });
     this.renderer.dispose();
   }
 
   setZombie(distance: number, hpRatio: number, burning: boolean, level: number): void {
     this.zombieTargetZ = 1.1 - distance * 0.72;
-    this.zombie.position.z = this.zombieTargetZ;
     const scale = 1 + Math.min(level - 1, 10) * 0.025;
-    this.zombie.scale.setScalar(scale);
-    const body = this.zombie.getObjectByName('body') as THREE.Mesh | undefined;
-    if (body) {
-      const material = body.material as THREE.MeshStandardMaterial;
-      material.emissive.setHex(burning ? 0x5e1705 : hpRatio < 0.35 ? 0x33110d : 0x08110a);
-      material.emissiveIntensity = burning ? 0.85 : 0.35;
-    }
-    this.burnLight.intensity = burning ? 1.4 : 0;
+    this.zombieModel.root.scale.setScalar(scale);
+    const material = this.zombieModel.torso.material as THREE.MeshStandardMaterial;
+    material.emissive.setHex(burning ? 0x5e1705 : hpRatio < 0.35 ? 0x33110d : 0x08110a);
+    material.emissiveIntensity = burning ? 0.82 : 0.32;
+    this.burnLight.intensity = burning ? 1.35 : 0;
   }
 
   async animateLoading(rounds: readonly AmmoType[]): Promise<void> {
-    this.audio.click(310);
-    this.magazine.visible = true;
-    this.magazine.position.set(-1.35, -0.25, 4.2);
-    this.magazine.rotation.set(-0.15, 0, -0.2);
+    this.audio.prepare();
+    this.resetWeaponPose();
     this.clearCartridges();
+    const magazine = this.magazineModel.root;
+    magazine.visible = true;
+    magazine.position.set(-1.18, 0.5, 4.08);
+    magazine.rotation.set(-0.14, 0.06, -0.22);
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo) continue;
-      const cartridge = this.createCartridge(ammo);
-      cartridge.position.set(-1.35, 1.05, 4.2);
+      const cartridge = createCartridge(ammo, 1.12);
+      cartridge.position.set(-1.17 + (index % 2) * 0.035, 1.72, 4.06);
+      cartridge.rotation.z = -0.08;
       this.scene.add(cartridge);
       this.cartridges.push(cartridge);
-      await this.tween(230, (progress) => {
-        cartridge.position.y = THREE.MathUtils.lerp(1.05, -0.04 + index * 0.14, this.ease(progress));
+      await this.tween(PRESENTATION_TIMING.roundInsert, (progress) => {
+        const eased = this.easeOutBack(progress);
+        cartridge.position.y = THREE.MathUtils.lerp(1.72, 0.94 - index * 0.13, eased);
+        cartridge.rotation.z = THREE.MathUtils.lerp(-0.08, -0.2, eased);
+        this.camera.position.y = 2.15 - Math.sin(progress * Math.PI) * 0.018;
       });
-      this.audio.click(430 + index * 45);
+      magazine.attach(cartridge);
+      this.audio.insertRound(ammo, index);
+      await wait(PRESENTATION_TIMING.roundSettle);
     }
-    await wait(100);
-    await this.tween(430, (progress) => {
-      const eased = this.ease(progress);
-      this.magazine.position.x = THREE.MathUtils.lerp(-1.35, 1.02, eased);
-      this.magazine.position.y = THREE.MathUtils.lerp(-0.25, -0.43, eased);
-      this.magazine.rotation.z = THREE.MathUtils.lerp(-0.2, 0, eased);
+    this.camera.position.y = 2.15;
+    await this.tween(PRESENTATION_TIMING.magazineApproach, (progress) => {
+      const eased = this.easeInOut(progress);
+      magazine.position.set(
+        THREE.MathUtils.lerp(-1.18, this.weaponRest.x - 0.21, eased),
+        THREE.MathUtils.lerp(0.5, this.weaponRest.y - 0.73, eased),
+        THREE.MathUtils.lerp(4.08, this.weaponRest.z + 0.01, eased),
+      );
+      magazine.rotation.set(
+        THREE.MathUtils.lerp(-0.14, 0, eased),
+        THREE.MathUtils.lerp(0.06, -0.04, eased),
+        THREE.MathUtils.lerp(-0.22, -0.15, eased),
+      );
     });
-    this.audio.rack();
-    await this.tween(300, (progress) => {
-      this.weapon.position.z = Math.sin(progress * Math.PI) * 0.16;
-      this.weapon.rotation.x = -0.07 * Math.sin(progress * Math.PI);
+    await this.tween(PRESENTATION_TIMING.magazineSeat, (progress) => {
+      magazine.position.y = THREE.MathUtils.lerp(this.weaponRest.y - 0.73, this.weaponRest.y - 0.52, this.easeOutBack(progress));
+      this.pistolModel.root.position.y = this.weaponRest.y + Math.sin(progress * Math.PI) * 0.035;
     });
-    this.magazine.visible = false;
+    this.audio.magazineSeat();
+    await this.animateChamber();
+    magazine.visible = false;
     this.clearCartridges();
+    await this.tween(PRESENTATION_TIMING.readySettle, (progress) => {
+      this.pistolModel.root.rotation.z = THREE.MathUtils.lerp(-0.08, -0.035, this.easeInOut(progress));
+    });
   }
 
   async animateShot(ammoType: AmmoType): Promise<void> {
     const definition = AMMO_DEFINITIONS[ammoType];
-    const projectile = new THREE.Mesh(new THREE.SphereGeometry(ammoType === 'fragmenting' ? 0.075 : 0.045, 8, 8), new THREE.MeshBasicMaterial({ color: definition.color }));
-    projectile.position.set(1.16, 0.73, 3.2);
+    const projectile = this.createProjectile(ammoType);
+    const start = new THREE.Vector3();
+    this.pistolModel.muzzle.getWorldPosition(start);
+    projectile.position.copy(start);
     this.scene.add(projectile);
+    const target = this.zombieModel.root.position.clone().add(new THREE.Vector3(0, 1.05, 0.15));
     this.muzzleFlash.color.setHex(definition.color);
-    this.muzzleFlash.intensity = 7;
-    this.audio.shot();
-    await this.tween(230, (progress) => {
-      const eased = progress * progress;
-      projectile.position.z = THREE.MathUtils.lerp(3.2, this.zombie.position.z + 0.2, eased);
-      projectile.position.y = THREE.MathUtils.lerp(0.73, 1.55, eased);
-      this.weapon.rotation.x = -0.16 * (1 - progress);
-      this.camera.position.x = Math.sin(progress * Math.PI * 5) * 0.025 * (1 - progress);
-      this.muzzleFlash.intensity = 7 * (1 - progress);
+    this.muzzleFlash.intensity = ammoType === 'incendiary' ? 10 : 7.5;
+    this.audio.shot(ammoType);
+    const slideTravel = PRESENTATION_MOTION.slideTravel * (ammoType === 'fragmenting' ? 1.12 : 1);
+    await this.tween(PRESENTATION_TIMING.shotTravel, (progress) => {
+      const projectileProgress = Math.min(progress * 1.55, 1);
+      projectile.position.lerpVectors(start, target, projectileProgress * projectileProgress);
+      this.pistolModel.slide.position.x = -slideTravel * Math.sin(Math.min(progress * 2.2, 1) * Math.PI);
+      this.pistolModel.root.rotation.z = -0.035 - PRESENTATION_MOTION.weaponRecoil * Math.sin(Math.min(progress * 1.7, 1) * Math.PI);
+      this.camera.position.x = Math.sin(progress * Math.PI * 7) * PRESENTATION_MOTION.cameraShake * (1 - progress);
+      this.muzzleFlash.intensity = 8 * Math.max(0, 1 - progress * 4);
     });
-    this.scene.remove(projectile);
-    projectile.geometry.dispose();
-    (projectile.material as THREE.Material).dispose();
+    this.disposeObject(projectile);
+    this.audio.impact(ammoType);
+    await Promise.all([this.animateImpact(ammoType, target), this.animateHitReaction(ammoType)]);
+    await this.tween(PRESENTATION_TIMING.shotSettle, (progress) => {
+      this.pistolModel.root.rotation.z = THREE.MathUtils.lerp(-0.08, -0.035, this.easeInOut(progress));
+    });
     this.camera.position.x = 0;
-    this.weapon.rotation.x = 0;
-    await this.tween(170, (progress) => {
-      this.zombie.rotation.z = Math.sin(progress * Math.PI) * 0.075;
-      this.zombie.position.x = Math.sin(progress * Math.PI) * -0.11;
-    });
-    this.zombie.rotation.z = 0;
-    this.zombie.position.x = 0;
+    this.pistolModel.slide.position.x = 0;
+    this.muzzleFlash.intensity = 0;
   }
 
   async animateBurn(): Promise<void> {
-    this.burnLight.intensity = 3;
-    await this.tween(520, (progress) => {
-      this.burnLight.intensity = 1.2 + Math.sin(progress * Math.PI * 6) * 0.8;
-      this.zombie.rotation.y = Math.sin(progress * Math.PI * 4) * 0.08;
+    this.audio.burn();
+    this.burnLight.intensity = 3.2;
+    await this.tween(PRESENTATION_TIMING.burnPulse, (progress) => {
+      this.burnLight.intensity = 1.3 + Math.sin(progress * Math.PI * 7) * 0.85;
+      this.zombieModel.root.rotation.y = Math.sin(progress * Math.PI * 4) * 0.085;
+      this.zombieModel.head.rotation.z = -0.08 + Math.sin(progress * Math.PI * 5) * 0.05;
     });
-    this.zombie.rotation.y = 0;
+    this.zombieModel.root.rotation.y = 0;
+    this.zombieModel.head.rotation.z = -0.08;
   }
 
   async animateAdvance(distance: number): Promise<void> {
-    const start = this.zombie.position.z;
+    const start = this.zombieModel.root.position.z;
     const end = 1.1 - distance * 0.72;
-    await this.tween(650, (progress) => {
-      this.zombie.position.z = THREE.MathUtils.lerp(start, end, this.ease(progress));
-      this.zombie.position.x = Math.sin(progress * Math.PI * 4) * 0.06;
+    this.audio.growl();
+    await this.tween(PRESENTATION_TIMING.advance, (progress) => {
+      this.zombieModel.root.position.z = THREE.MathUtils.lerp(start, end, this.easeInOut(progress));
+      this.zombieModel.root.position.x = Math.sin(progress * Math.PI * 4) * 0.07;
     });
-    this.zombie.position.x = 0;
+    this.zombieModel.root.position.x = 0;
     this.zombieTargetZ = end;
   }
 
   async animateDeath(): Promise<void> {
-    await this.tween(620, (progress) => {
-      this.zombie.rotation.z = progress * 1.45;
-      this.zombie.position.y = -progress * 0.75;
+    this.zombieFallen = true;
+    this.audio.death();
+    await this.tween(PRESENTATION_TIMING.death, (progress) => {
+      const eased = this.easeInOut(progress);
+      this.zombieModel.root.rotation.z = eased * 1.38;
+      this.zombieModel.root.rotation.x = eased * -0.25;
+      this.zombieModel.root.position.y = -eased * 0.78;
+      this.zombieModel.leftArm.rotation.x = 0.9 - eased * 0.8;
+      this.zombieModel.rightArm.rotation.x = 1.05 - eased * 1.05;
     });
   }
 
   async animateSpawn(distance: number): Promise<void> {
-    this.zombie.visible = true;
-    this.zombie.rotation.set(0, 0, 0);
-    this.zombie.position.set(0, -0.9, 1.1 - distance * 0.72);
-    await this.tween(500, (progress) => {
-      this.zombie.position.y = THREE.MathUtils.lerp(-0.9, 0, this.ease(progress));
+    this.zombieFallen = true;
+    const zombie = this.zombieModel.root;
+    zombie.visible = true;
+    zombie.rotation.set(0, 0, 0);
+    zombie.position.set(0, -0.9, 1.1 - distance * 0.72);
+    await this.tween(PRESENTATION_TIMING.spawn, (progress) => {
+      zombie.position.y = THREE.MathUtils.lerp(-0.9, 0, this.easeOutBack(progress));
     });
-    this.zombieTargetZ = this.zombie.position.z;
+    this.zombieTargetZ = zombie.position.z;
+    this.zombieFallen = false;
+  }
+
+  private buildActors(): void {
+    this.zombieModel.root.position.z = this.zombieTargetZ;
+    this.burnLight.position.set(0, 0.9, 0.4);
+    this.zombieModel.root.add(this.burnLight);
+    this.scene.add(this.zombieModel.root);
+    this.pistolModel.root.position.copy(this.weaponRest);
+    this.pistolModel.root.rotation.set(-0.02, -0.04, -0.08);
+    const weaponFill = new THREE.PointLight(0xc9ffe0, 0.72, 4.5);
+    weaponFill.position.set(0.2, 1.25, 1.2);
+    this.pistolModel.root.add(weaponFill);
+    this.muzzleFlash.position.set(0, 0, 0);
+    this.pistolModel.muzzle.add(this.muzzleFlash);
+    this.scene.add(this.pistolModel.root);
+    this.magazineModel.root.visible = false;
+    this.scene.add(this.magazineModel.root);
   }
 
   private buildEnvironment(): void {
-    this.scene.add(new THREE.HemisphereLight(0x9eb7a5, 0x080a08, 1.4));
-    const key = new THREE.DirectionalLight(0xd7ffe1, 2.4);
+    this.scene.add(new THREE.HemisphereLight(0x9eb7a5, 0x080a08, 1.3));
+    const key = new THREE.DirectionalLight(0xd7ffe1, 2.35);
     key.position.set(-3, 7, 4);
     key.castShadow = true;
+    key.shadow.mapSize.set(1024, 1024);
     this.scene.add(key);
-    const danger = new THREE.PointLight(0x8cff52, 1.6, 16);
+    const danger = new THREE.PointLight(0x8cff52, 1.5, 16);
     danger.position.set(2.5, 1.8, -5);
     this.scene.add(danger);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(28, 35), new THREE.MeshStandardMaterial({ color: 0x101713, roughness: 0.95, metalness: 0.05 }));
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x101713, roughness: 0.95, metalness: 0.05 });
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(28, 35), floorMaterial);
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, -0.9, -5);
     floor.receiveShadow = true;
     this.scene.add(floor);
-    const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x24352b, transparent: true, opacity: 0.7 });
-    for (let index = 0; index < 9; index += 1) {
+    const lineMaterial = new THREE.MeshBasicMaterial({ color: 0x24352b, transparent: true, opacity: 0.68 });
+    for (let index = 0; index < 8; index += 1) {
       const line = new THREE.Mesh(new THREE.PlaneGeometry(0.025, 18), lineMaterial);
       line.rotation.x = -Math.PI / 2;
-      line.position.set((index - 4) * 1.4, -0.892, -6);
+      line.position.set((index - 3.5) * 1.4, -0.892, -6);
       this.scene.add(line);
     }
-    for (let index = 0; index < 13; index += 1) {
+    for (let index = 0; index < 12; index += 1) {
       const cross = new THREE.Mesh(new THREE.PlaneGeometry(12, 0.018), lineMaterial);
       cross.rotation.x = -Math.PI / 2;
       cross.position.set(0, -0.89, 2 - index * 1.5);
@@ -196,113 +253,123 @@ export class GamePresentation {
     this.scene.add(leftWall, rightWall);
   }
 
-  private buildZombie(): void {
-    const skin = new THREE.MeshStandardMaterial({ color: 0x78906b, roughness: 0.9, emissive: 0x08110a });
-    const cloth = new THREE.MeshStandardMaterial({ color: 0x34443b, roughness: 1 });
-    const dark = new THREE.MeshStandardMaterial({ color: 0x161d19, roughness: 1 });
-    const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.52, 1.15, 7, 12), cloth);
-    body.name = 'body';
-    body.position.y = 0.72;
-    body.castShadow = true;
-    const head = new THREE.Mesh(new THREE.SphereGeometry(0.42, 16, 12), skin);
-    head.position.set(0.06, 1.75, 0);
-    head.scale.set(0.88, 1.06, 0.9);
-    head.castShadow = true;
-    const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0xbfff4e });
-    for (const x of [-0.13, 0.17]) {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.035, 6, 5), eyeMaterial);
-      eye.position.set(x, 1.83, 0.37);
-      this.zombie.add(eye);
-    }
-    const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.055, 0.035), dark);
-    mouth.position.set(0.04, 1.59, 0.38);
-    this.zombie.add(mouth);
-    for (const side of [-1, 1]) {
-      const arm = new THREE.Mesh(new THREE.CapsuleGeometry(0.13, 1, 5, 8), skin);
-      arm.position.set(side * 0.58, 0.78, 0.23);
-      arm.rotation.set(Math.PI / 2.6, 0, side * -0.17);
-      arm.castShadow = true;
-      this.zombie.add(arm);
-      const leg = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.85, 5, 8), dark);
-      leg.position.set(side * 0.25, -0.36, 0);
-      leg.castShadow = true;
-      this.zombie.add(leg);
-    }
-    this.zombie.add(body, head, this.burnLight);
-    this.zombie.position.z = this.zombieTargetZ;
-    this.scene.add(this.zombie);
+  private async animateChamber(): Promise<void> {
+    const slide = this.pistolModel.slide;
+    this.audio.slidePull();
+    await this.tween(PRESENTATION_TIMING.slidePull, (progress) => {
+      slide.position.x = THREE.MathUtils.lerp(0, -PRESENTATION_MOTION.slideTravel, this.easeInOut(progress));
+      this.pistolModel.root.position.z = this.weaponRest.z + Math.sin(progress * Math.PI) * 0.08;
+    });
+    await wait(PRESENTATION_TIMING.slideHold);
+    this.audio.slideRelease();
+    await this.tween(PRESENTATION_TIMING.slideRelease, (progress) => {
+      slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel, 0, this.easeOutBack(progress));
+      this.pistolModel.root.position.z = THREE.MathUtils.lerp(this.weaponRest.z + 0.08, this.weaponRest.z, progress);
+    });
+    slide.position.x = 0;
   }
 
-  private buildWeapon(): void {
-    const metal = new THREE.MeshStandardMaterial({ color: 0x252c29, roughness: 0.38, metalness: 0.78 });
-    const grip = new THREE.MeshStandardMaterial({ color: 0x111513, roughness: 0.82 });
-    const slide = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.28, 0.36), metal);
-    slide.position.set(0.25, 0.45, 0);
-    const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.075, 1.5, 12), metal);
-    barrel.rotation.z = Math.PI / 2;
-    barrel.position.set(0.47, 0.41, 0);
-    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.95, 0.46), grip);
-    handle.position.set(-0.17, -0.08, 0);
-    handle.rotation.z = -0.18;
-    const guard = new THREE.Mesh(new THREE.TorusGeometry(0.23, 0.045, 7, 12, Math.PI), metal);
-    guard.position.set(0.27, 0.11, 0);
-    guard.rotation.z = Math.PI;
-    this.weapon.add(slide, barrel, handle, guard);
-    this.weapon.position.set(0.62, -0.18, 3.75);
-    this.weapon.rotation.set(-0.02, -0.05, -0.08);
-    this.muzzleFlash.position.set(1.17, 0.66, -0.02);
-    this.weapon.add(this.muzzleFlash);
-    this.scene.add(this.weapon);
-  }
-
-  private buildMagazine(): void {
-    const material = new THREE.MeshStandardMaterial({ color: 0x252c29, roughness: 0.45, metalness: 0.65 });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.42, 1.05, 0.3), material);
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.12, 0.38), material);
-    base.position.y = -0.56;
-    this.magazine.add(body, base);
-    this.magazine.visible = false;
-    this.scene.add(this.magazine);
-  }
-
-  private createCartridge(ammoType: AmmoType): THREE.Group {
+  private createProjectile(ammoType: AmmoType): THREE.Group {
     const group = new THREE.Group();
-    const brass = new THREE.MeshStandardMaterial({ color: 0xc9a556, roughness: 0.35, metalness: 0.75 });
-    const tip = new THREE.MeshStandardMaterial({ color: AMMO_DEFINITIONS[ammoType].color, roughness: 0.45, metalness: 0.3 });
-    const casing = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.055, 0.27, 10), brass);
-    const bullet = new THREE.Mesh(new THREE.ConeGeometry(0.055, 0.13, 10), tip);
-    bullet.position.y = 0.2;
-    group.add(casing, bullet);
+    const color = AMMO_DEFINITIONS[ammoType].color;
+    const radius = ammoType === 'fragmenting' ? 0.065 : 0.042;
+    const projectile = new THREE.Mesh(new THREE.SphereGeometry(radius, 7, 7), new THREE.MeshBasicMaterial({ color }));
+    group.add(projectile);
+    if (ammoType === 'tracer' || ammoType === 'incendiary') {
+      const trail = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.35, radius, ammoType === 'tracer' ? 0.85 : 0.42, 6), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.68 }));
+      trail.rotation.x = Math.PI / 2;
+      trail.position.z = 0.3;
+      group.add(trail);
+    }
     return group;
   }
 
-  private clearCartridges(): void {
-    for (const cartridge of this.cartridges) {
-      this.scene.remove(cartridge);
-      cartridge.traverse((object) => {
-        if (object instanceof THREE.Mesh) {
-          object.geometry.dispose();
-          const materials = Array.isArray(object.material) ? object.material : [object.material];
-          materials.forEach((material) => material.dispose());
-        }
-      });
+  private async animateImpact(ammoType: AmmoType, position: THREE.Vector3): Promise<void> {
+    const effect = new THREE.Group();
+    effect.position.copy(position);
+    const color = AMMO_DEFINITIONS[ammoType].color;
+    const count = ammoType === 'fragmenting' ? 7 : ammoType === 'incendiary' ? 5 : 3;
+    const pieces: THREE.Mesh[] = [];
+    for (let index = 0; index < count; index += 1) {
+      const geometry = ammoType === 'incendiary' ? new THREE.SphereGeometry(0.045, 5, 4) : new THREE.TetrahedronGeometry(0.04);
+      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
+      const piece = new THREE.Mesh(geometry, material);
+      piece.userData.direction = new THREE.Vector3(Math.cos(index * 2.4), Math.sin(index * 1.8), Math.sin(index) * 0.4).normalize();
+      pieces.push(piece);
+      effect.add(piece);
     }
+    this.scene.add(effect);
+    await this.tween(170, (progress) => {
+      for (const piece of pieces) {
+        const direction = piece.userData.direction as THREE.Vector3;
+        piece.position.copy(direction).multiplyScalar(progress * (ammoType === 'fragmenting' ? 0.42 : 0.25));
+        (piece.material as THREE.MeshBasicMaterial).opacity = 1 - progress;
+      }
+    });
+    this.disposeObject(effect);
+  }
+
+  private async animateHitReaction(ammoType: AmmoType): Promise<void> {
+    const strength = PRESENTATION_MOTION.hitLean * (ammoType === 'fragmenting' ? 1.5 : 1);
+    await this.tween(PRESENTATION_TIMING.hitReaction, (progress) => {
+      const impulse = Math.sin(progress * Math.PI);
+      this.zombieModel.root.rotation.z = impulse * strength;
+      this.zombieModel.root.position.x = -impulse * strength;
+      this.zombieModel.head.rotation.x = impulse * 0.12;
+    });
+    this.zombieModel.root.rotation.z = 0;
+    this.zombieModel.root.position.x = 0;
+    this.zombieModel.head.rotation.x = 0;
+  }
+
+  private clearCartridges(): void {
+    for (const cartridge of this.cartridges) this.disposeObject(cartridge);
     this.cartridges.length = 0;
+  }
+
+  private disposeObject(object: THREE.Object3D): void {
+    object.removeFromParent();
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+      child.geometry.dispose();
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      materials.forEach((material) => material.dispose());
+    });
+  }
+
+  private resetWeaponPose(): void {
+    this.pistolModel.root.position.copy(this.weaponRest);
+    this.pistolModel.root.rotation.set(-0.02, -0.04, -0.08);
+    this.pistolModel.slide.position.set(0, 0, 0);
   }
 
   private readonly resize = (): void => {
     const width = this.host.clientWidth;
     const height = this.host.clientHeight;
+    const portrait = width < 650;
+    this.weaponRest.set(portrait ? 0.08 : 0.58, portrait ? 1.48 : height < 500 ? 1.1 : 0.82, 3.72);
+    this.pistolModel.root.scale.setScalar(portrait ? 0.65 : height < 500 ? 0.86 : 0.92);
+    this.magazineModel.root.scale.setScalar(portrait ? 0.88 : 1);
+    this.pistolModel.root.position.copy(this.weaponRest);
     this.camera.aspect = width / Math.max(height, 1);
+    this.camera.fov = width < 650 ? 49 : height < 500 ? 46 : 43;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
   };
 
   private tick = (): void => {
     const delta = Math.min(this.clock.getDelta(), 0.05);
-    this.zombieBob += delta;
-    if (Math.abs(this.zombie.position.y) < 0.2) this.zombie.position.y = Math.sin(this.zombieBob * 2.3) * 0.035;
-    this.zombie.position.z += (this.zombieTargetZ - this.zombie.position.z) * Math.min(delta * 4, 1);
+    this.elapsed += delta;
+    if (!this.zombieFallen) {
+      this.zombieModel.root.position.y = Math.sin(this.elapsed * 2.35) * 0.032;
+      const stride = Math.sin(this.elapsed * 3.1) * 0.16;
+      this.zombieModel.leftLeg.rotation.x = stride;
+      this.zombieModel.rightLeg.rotation.x = -stride;
+      this.zombieModel.leftArm.rotation.z = -0.08 + stride * 0.35;
+      this.zombieModel.rightArm.rotation.z = 0.08 - stride * 0.35;
+      this.zombieModel.head.rotation.y = Math.sin(this.elapsed * 1.45) * 0.045;
+    }
+    this.zombieModel.root.position.z += (this.zombieTargetZ - this.zombieModel.root.position.z) * Math.min(delta * 4, 1);
     this.renderer.render(this.scene, this.camera);
     this.animationFrame = requestAnimationFrame(this.tick);
   };
@@ -320,7 +387,12 @@ export class GamePresentation {
     });
   }
 
-  private ease(value: number): number {
-    return 1 - Math.pow(1 - value, 3);
+  private easeInOut(value: number): number {
+    return value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2;
+  }
+
+  private easeOutBack(value: number): number {
+    const overshoot = 1.32;
+    return 1 + (overshoot + 1) * Math.pow(value - 1, 3) + overshoot * Math.pow(value - 1, 2);
   }
 }
