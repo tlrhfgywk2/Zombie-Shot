@@ -45,6 +45,16 @@ export class Magazine {
     return true;
   }
 
+  move(from: number, to: number): boolean {
+    if (from < 0 || from >= this.rounds.length || to < 0 || to > this.rounds.length) return false;
+    if (from === to || (from === this.rounds.length - 1 && to === this.rounds.length)) return true;
+    const [round] = this.rounds.splice(from, 1);
+    if (!round) return false;
+    const destination = Math.min(to, this.rounds.length);
+    this.rounds.splice(destination, 0, round);
+    return true;
+  }
+
   clear(): void {
     this.rounds = [];
   }
