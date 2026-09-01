@@ -177,26 +177,26 @@ export class GamePresentation {
       this.pistolModel.root.quaternion.slerpQuaternions(pistolStartQuaternion, insertionQuaternion, eased);
       this.pistolModel.root.scale.setScalar(THREE.MathUtils.lerp(this.layout.pistolScale, insertionScale, eased));
       this.pistolModel.root.updateMatrixWorld(true);
-      const approachPose = this.getMagazineSocketPose(PRESENTATION_MOTION.magazineApproachOffset);
+      const approachPose = this.getMagazineInsertionPose(
+        PRESENTATION_MOTION.magazineApproachDistance,
+        insertionScale,
+      );
       magazine.position.lerpVectors(magazineStartPosition, approachPose.position, eased);
       magazine.quaternion.slerpQuaternions(magazineStartQuaternion, approachPose.quaternion, eased);
       magazine.scale.setScalar(THREE.MathUtils.lerp(magazineStartScale, insertionScale, eased));
     });
     await this.tween(PRESENTATION_TIMING.magazineSeat, (progress) => {
-      const pose = this.getMagazineSocketPose(THREE.MathUtils.lerp(
-        PRESENTATION_MOTION.magazineApproachOffset,
-        PRESENTATION_MOTION.magazineSeatedOffset,
+      const pose = this.getMagazineInsertionPose(THREE.MathUtils.lerp(
+        PRESENTATION_MOTION.magazineApproachDistance,
+        0,
         this.easeOutBack(progress),
-      ));
+      ), insertionScale);
       magazine.position.copy(pose.position);
       magazine.quaternion.copy(pose.quaternion);
       this.pistolModel.root.position.y = this.layout.weaponInsertion.y + Math.sin(progress * Math.PI) * 0.035;
     });
-    this.pistolModel.root.updateMatrixWorld(true);
-    this.pistolModel.magazineSocket.attach(magazine);
-    magazine.position.set(0, -PRESENTATION_MOTION.magazineSeatedOffset, 0);
-    magazine.quaternion.identity();
-    magazine.scale.setScalar(1);
+    this.attachMagazineAtSeat();
+    if (!this.isMagazineSeated()) throw new Error('탄창이 실제 착좌 기준점에 도달하지 못했습니다.');
     this.audio.magazineSeat();
     await this.wait(PRESENTATION_TIMING.magazineSeatingPause);
     await this.animateChamber();
@@ -390,8 +390,8 @@ export class GamePresentation {
       });
       const puffOffsets = [
         new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(0.7, 0.22, 0.18),
-        new THREE.Vector3(1.15, 0.5, -0.14),
+        new THREE.Vector3(0.62, 0.35, 0.28),
+        new THREE.Vector3(1.05, 0.8, -0.24),
       ];
       for (let puffIndex = 0; puffIndex < puffOffsets.length; puffIndex += 1) {
         const puff = new THREE.Mesh(geometry, material);
@@ -441,14 +441,14 @@ export class GamePresentation {
     const variation = this.effectVariation(this.shotEffectSequence, 0.07);
     const forward = new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion).normalize();
     const outward = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
-    effect.root.position.copy(position).addScaledVector(forward, 0.025 * weaponScale.x);
+    effect.root.position.copy(position).addScaledVector(forward, 0.08 * weaponScale.x);
     effect.root.quaternion.copy(quaternion);
     effect.velocity.copy(forward).multiplyScalar(PRESENTATION_EFFECTS.smokeForwardSpeed)
       .addScaledVector(new THREE.Vector3(0, 1, 0), PRESENTATION_EFFECTS.smokeUpSpeed)
-      .addScaledVector(outward, variation);
+      .addScaledVector(outward, PRESENTATION_EFFECTS.smokeOutwardSpeed + variation);
     effect.baseScale = Math.max(weaponScale.x, 0.72) * PRESENTATION_EFFECTS.smokeInitialScale;
     effect.root.scale.setScalar(effect.baseScale);
-    effect.material.opacity = 0.28;
+    effect.material.opacity = PRESENTATION_EFFECTS.smokeInitialOpacity;
     effect.age = 0;
     effect.active = true;
     effect.root.visible = true;
@@ -494,7 +494,12 @@ export class GamePresentation {
       const progress = Math.min(effect.age / (PRESENTATION_EFFECTS.smokeLifetime / 1000), 1);
       effect.root.position.addScaledVector(effect.velocity, delta);
       effect.root.scale.setScalar(effect.baseScale * (1 + PRESENTATION_EFFECTS.smokeExpansion * this.easeInOut(progress)));
-      effect.material.opacity = 0.28 * Math.pow(1 - progress, 1.35);
+      const fadeProgress = THREE.MathUtils.clamp(
+        (progress - PRESENTATION_EFFECTS.smokeFadeDelay) / (1 - PRESENTATION_EFFECTS.smokeFadeDelay),
+        0,
+        1,
+      );
+      effect.material.opacity = PRESENTATION_EFFECTS.smokeInitialOpacity * Math.pow(1 - fadeProgress, 1.25);
       if (progress >= 1) {
         effect.active = false;
         effect.root.visible = false;
@@ -593,15 +598,50 @@ export class GamePresentation {
     }
   }
 
-  private getMagazineSocketPose(offset: number): { position: THREE.Vector3; quaternion: THREE.Quaternion } {
+  private getMagazineInsertionPose(distance: number, scale: number): { position: THREE.Vector3; quaternion: THREE.Quaternion } {
     this.pistolModel.root.updateMatrixWorld(true);
-    const position = new THREE.Vector3();
+    this.magazineModel.magazineInsertAnchor.updateMatrix();
+    const seatPosition = new THREE.Vector3();
     const quaternion = new THREE.Quaternion();
-    this.pistolModel.magazineSocket.getWorldPosition(position);
-    this.pistolModel.magazineSocket.getWorldQuaternion(quaternion);
+    this.pistolModel.magazineSeatAnchor.getWorldPosition(seatPosition);
+    this.pistolModel.magazineSeatAnchor.getWorldQuaternion(quaternion);
     const down = new THREE.Vector3(0, -1, 0).applyQuaternion(quaternion);
-    position.addScaledVector(down, offset * this.pistolModel.root.scale.y);
+    seatPosition.addScaledVector(down, distance * scale);
+    const anchorMatrix = new THREE.Matrix4().compose(
+      seatPosition,
+      quaternion,
+      new THREE.Vector3(scale, scale, scale),
+    );
+    const magazineMatrix = anchorMatrix.multiply(this.magazineModel.magazineInsertAnchor.matrix.clone().invert());
+    const position = new THREE.Vector3();
+    const ignoredScale = new THREE.Vector3();
+    magazineMatrix.decompose(position, quaternion, ignoredScale);
     return { position, quaternion };
+  }
+
+  private attachMagazineAtSeat(): void {
+    const magazine = this.magazineModel.root;
+    this.pistolModel.root.updateMatrixWorld(true);
+    this.pistolModel.magazineSeatAnchor.attach(magazine);
+    this.magazineModel.magazineInsertAnchor.updateMatrix();
+    const localMatrix = this.magazineModel.magazineInsertAnchor.matrix.clone().invert();
+    localMatrix.decompose(magazine.position, magazine.quaternion, magazine.scale);
+    this.pistolModel.root.updateMatrixWorld(true);
+  }
+
+  private isMagazineSeated(): boolean {
+    if (this.magazineModel.root.parent !== this.pistolModel.magazineSeatAnchor) return false;
+    const seatPosition = new THREE.Vector3();
+    const insertPosition = new THREE.Vector3();
+    const seatQuaternion = new THREE.Quaternion();
+    const insertQuaternion = new THREE.Quaternion();
+    this.pistolModel.magazineSeatAnchor.getWorldPosition(seatPosition);
+    this.magazineModel.magazineInsertAnchor.getWorldPosition(insertPosition);
+    this.pistolModel.magazineSeatAnchor.getWorldQuaternion(seatQuaternion);
+    this.magazineModel.magazineInsertAnchor.getWorldQuaternion(insertQuaternion);
+    return seatPosition.distanceToSquared(insertPosition) < 0.000001
+      && seatQuaternion.angleTo(insertQuaternion) < 0.000001
+      && this.magazineModel.root.scale.distanceToSquared(new THREE.Vector3(1, 1, 1)) < 0.000001;
   }
 
   private getZombieTarget(): THREE.Vector3 {
@@ -648,7 +688,7 @@ export class GamePresentation {
     this.layout = getPresentationLayout(width, height);
     this.pistolModel.root.scale.setScalar(this.layout.pistolScale);
     this.magazineModel.root.scale.setScalar(
-      this.magazineModel.root.parent === this.pistolModel.magazineSocket ? 1 : this.layout.magazineScale,
+      this.magazineModel.root.parent === this.pistolModel.magazineSeatAnchor ? 1 : this.layout.magazineScale,
     );
     if (!this.animationInProgress) {
       this.pistolModel.root.position.copy(this.layout.weaponRest);

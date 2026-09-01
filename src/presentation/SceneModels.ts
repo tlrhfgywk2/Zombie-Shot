@@ -6,12 +6,13 @@ export interface PistolModel {
   root: THREE.Group;
   slide: THREE.Group;
   muzzle: THREE.Object3D;
-  magazineSocket: THREE.Object3D;
+  magazineSeatAnchor: THREE.Object3D;
   ejectionPort: THREE.Object3D;
 }
 
 export interface MagazineModel {
   root: THREE.Group;
+  magazineInsertAnchor: THREE.Object3D;
   roundDisplay: THREE.Group;
   witnessRounds: THREE.Mesh[];
 }
@@ -52,7 +53,8 @@ export const createPistolModel = (): PistolModel => {
   const grip = new THREE.Group();
   grip.position.set(-0.28, 0.08, 0);
   grip.rotation.z = -0.18;
-  const gripBody = mesh(new THREE.BoxGeometry(0.48, 0.98, 0.49), polymer);
+  const gripHeight = 0.98;
+  const gripBody = mesh(new THREE.BoxGeometry(0.48, gripHeight, 0.49), polymer);
   gripBody.position.y = -0.48;
   grip.add(gripBody);
   for (const z of [-0.256, 0.256]) {
@@ -65,10 +67,10 @@ export const createPistolModel = (): PistolModel => {
       grip.add(ridge);
     }
   }
-  const magazineSocket = new THREE.Object3D();
-  magazineSocket.name = 'magazineSocket';
-  magazineSocket.position.set(-0.05, -0.93, 0);
-  grip.add(magazineSocket);
+  const magazineSeatAnchor = new THREE.Object3D();
+  magazineSeatAnchor.name = 'magazineSeatAnchor';
+  magazineSeatAnchor.position.set(0, gripBody.position.y - gripHeight / 2, 0);
+  grip.add(magazineSeatAnchor);
   root.add(grip);
 
   const guard = mesh(new THREE.TorusGeometry(0.24, 0.035, 7, 18, Math.PI * 1.16), frameMaterial);
@@ -119,19 +121,24 @@ export const createPistolModel = (): PistolModel => {
   muzzle.position.set(1.13, 0.48, 0);
   root.add(muzzle);
 
-  return { root, slide, muzzle, magazineSocket, ejectionPort };
+  return { root, slide, muzzle, magazineSeatAnchor, ejectionPort };
 };
 
 export const createMagazineModel = (): MagazineModel => {
   const root = new THREE.Group();
+  const magazineInsertAnchor = new THREE.Object3D();
   const roundDisplay = new THREE.Group();
   const witnessRounds: THREE.Mesh[] = [];
   const metal = new THREE.MeshStandardMaterial({ color: 0x303936, roughness: 0.42, metalness: 0.7 });
   const edge = new THREE.MeshStandardMaterial({ color: 0x111715, roughness: 0.5, metalness: 0.62 });
   const witnessFrame = new THREE.MeshStandardMaterial({ color: 0x090d0c, roughness: 0.7, metalness: 0.45 });
-  const body = mesh(new THREE.BoxGeometry(0.46, 1.08, 0.34), metal);
+  const bodyHeight = 1.08;
+  const body = mesh(new THREE.BoxGeometry(0.46, bodyHeight, 0.34), metal);
   body.position.y = -0.02;
   root.add(body);
+  magazineInsertAnchor.name = 'magazineInsertAnchor';
+  magazineInsertAnchor.position.set(0, body.position.y - bodyHeight / 2, 0);
+  root.add(magazineInsertAnchor);
   const front = mesh(new THREE.BoxGeometry(0.3, 0.89, 0.018), edge, false);
   front.position.set(0, -0.02, 0.18);
   root.add(front);
@@ -162,7 +169,7 @@ export const createMagazineModel = (): MagazineModel => {
   const baseAccent = mesh(new THREE.BoxGeometry(0.4, 0.025, 0.32), metal, false);
   baseAccent.position.y = -0.69;
   root.add(roundDisplay, feedLeft, feedRight, base, baseAccent);
-  return { root, roundDisplay, witnessRounds };
+  return { root, magazineInsertAnchor, roundDisplay, witnessRounds };
 };
 
 export const createZombieModel = (): ZombieModel => {
