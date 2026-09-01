@@ -21,8 +21,7 @@ export const PRESENTATION_TIMING = {
 } as const;
 
 export const PRESENTATION_MOTION = {
-  magazineApproachOffset: 0.72,
-  magazineSeatedOffset: -0.42,
+  magazineApproachDistance: 0.72,
   slideTravel: 0.34,
   weaponRecoil: 0.19,
   cameraShake: 0.032,
@@ -31,11 +30,14 @@ export const PRESENTATION_MOTION = {
 
 export const PRESENTATION_EFFECTS = {
   smokePoolSize: 6,
-  smokeLifetime: 420,
-  smokeInitialScale: 0.055,
-  smokeExpansion: 2.6,
+  smokeLifetime: 520,
+  smokeInitialScale: 0.125,
+  smokeExpansion: 1.35,
+  smokeInitialOpacity: 0.36,
+  smokeFadeDelay: 0.12,
   smokeForwardSpeed: 0.34,
-  smokeUpSpeed: 0.16,
+  smokeUpSpeed: 0.32,
+  smokeOutwardSpeed: 0.12,
   casingPoolSize: 6,
   casingLifetime: 950,
   casingScale: 0.78,
