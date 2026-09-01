@@ -25,7 +25,7 @@ export const getPresentationLayout = (width: number, height: number): Presentati
       mode,
       weaponRest: new THREE.Vector3(0.3, 2.02, 3.72),
       weaponInsertion: new THREE.Vector3(0.02, 2.64, 2.4),
-      weaponAim: new THREE.Vector3(0.55, 1.94, 3.68),
+      weaponAim: new THREE.Vector3(0.35, 1.94, 3.68),
       magazineLoad: new THREE.Vector3(-0.56, 2.08, 4.04),
       magazineInspect: new THREE.Vector3(-0.48, 2.3, 3.98),
       pistolScale: 0.58,

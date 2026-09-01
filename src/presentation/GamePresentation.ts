@@ -3,9 +3,27 @@ import type { AmmoType } from '../combat/types';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
 import type { AudioPreferences } from './AudioPreferences';
-import { PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
+import { PRESENTATION_EFFECTS, PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
 import { getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
 import { createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
+
+interface MuzzleSmokeEffect {
+  root: THREE.Group;
+  material: THREE.MeshBasicMaterial;
+  velocity: THREE.Vector3;
+  age: number;
+  baseScale: number;
+  active: boolean;
+}
+
+interface CasingEffect {
+  root: THREE.Group;
+  materials: THREE.MeshStandardMaterial[];
+  velocity: THREE.Vector3;
+  angularVelocity: THREE.Vector3;
+  age: number;
+  active: boolean;
+}
 
 export class GamePresentation {
   private readonly scene = new THREE.Scene();
@@ -19,6 +37,8 @@ export class GamePresentation {
   private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 7);
   private readonly burnLight = new THREE.PointLight(0xff5a18, 0, 5);
   private readonly cartridges: THREE.Group[] = [];
+  private readonly muzzleSmokePool: MuzzleSmokeEffect[] = [];
+  private readonly casingPool: CasingEffect[] = [];
   private layout: PresentationLayout = getPresentationLayout(1280, 720);
   private readonly baseAimQuaternion = new THREE.Quaternion();
   private readonly baseWeaponPosition = new THREE.Vector3();
@@ -30,6 +50,7 @@ export class GamePresentation {
   private animationInProgress = false;
   private resizeObserver?: ResizeObserver;
   private animationFrame = 0;
+  private shotEffectSequence = 0;
 
   constructor(private readonly host: HTMLElement) {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -44,6 +65,7 @@ export class GamePresentation {
     this.scene.fog = new THREE.FogExp2(0x0b110e, 0.044);
     this.buildEnvironment();
     this.buildActors();
+    this.buildShotEffectPools();
     this.resize();
     window.addEventListener('resize', this.resize);
     window.visualViewport?.addEventListener('resize', this.resize);
@@ -155,18 +177,28 @@ export class GamePresentation {
       this.pistolModel.root.quaternion.slerpQuaternions(pistolStartQuaternion, insertionQuaternion, eased);
       this.pistolModel.root.scale.setScalar(THREE.MathUtils.lerp(this.layout.pistolScale, insertionScale, eased));
       this.pistolModel.root.updateMatrixWorld(true);
-      const approachPose = this.getMagazineSocketPose(1.08);
+      const approachPose = this.getMagazineSocketPose(PRESENTATION_MOTION.magazineApproachOffset);
       magazine.position.lerpVectors(magazineStartPosition, approachPose.position, eased);
       magazine.quaternion.slerpQuaternions(magazineStartQuaternion, approachPose.quaternion, eased);
       magazine.scale.setScalar(THREE.MathUtils.lerp(magazineStartScale, insertionScale, eased));
     });
     await this.tween(PRESENTATION_TIMING.magazineSeat, (progress) => {
-      const pose = this.getMagazineSocketPose(THREE.MathUtils.lerp(1.08, 0.46, this.easeOutBack(progress)));
+      const pose = this.getMagazineSocketPose(THREE.MathUtils.lerp(
+        PRESENTATION_MOTION.magazineApproachOffset,
+        PRESENTATION_MOTION.magazineSeatedOffset,
+        this.easeOutBack(progress),
+      ));
       magazine.position.copy(pose.position);
       magazine.quaternion.copy(pose.quaternion);
       this.pistolModel.root.position.y = this.layout.weaponInsertion.y + Math.sin(progress * Math.PI) * 0.035;
     });
+    this.pistolModel.root.updateMatrixWorld(true);
+    this.pistolModel.magazineSocket.attach(magazine);
+    magazine.position.set(0, -PRESENTATION_MOTION.magazineSeatedOffset, 0);
+    magazine.quaternion.identity();
+    magazine.scale.setScalar(1);
     this.audio.magazineSeat();
+    await this.wait(PRESENTATION_TIMING.magazineSeatingPause);
     await this.animateChamber();
     const readyPosition = this.pistolModel.root.position.clone();
     const readyQuaternion = this.pistolModel.root.quaternion.clone();
@@ -177,14 +209,8 @@ export class GamePresentation {
       this.pistolModel.root.position.lerpVectors(readyPosition, this.layout.weaponAim, eased);
       this.pistolModel.root.quaternion.slerpQuaternions(readyQuaternion, aimQuaternion, eased);
       this.pistolModel.root.scale.setScalar(THREE.MathUtils.lerp(insertionScale, this.layout.pistolScale, eased));
-      magazine.scale.setScalar(THREE.MathUtils.lerp(insertionScale, this.layout.pistolScale, eased));
-      this.pistolModel.root.updateMatrixWorld(true);
-      const seatedPose = this.getMagazineSocketPose(0.46);
-      magazine.position.copy(seatedPose.position);
-      magazine.quaternion.copy(seatedPose.quaternion);
     });
     this.aimPistolAtTarget(target);
-    magazine.visible = false;
     this.clearCartridges();
     this.animationInProgress = false;
   }
@@ -202,6 +228,8 @@ export class GamePresentation {
     this.scene.add(projectile);
     this.muzzleFlash.color.setHex(definition.color);
     this.muzzleFlash.intensity = ammoType === 'incendiary' ? 10 : 7.5;
+    this.spawnMuzzleSmoke();
+    this.ejectShellCasing();
     this.audio.shot(ammoType);
     const slideTravel = PRESENTATION_MOTION.slideTravel * (ammoType === 'magnum' ? 1.12 : 1);
     await this.tween(PRESENTATION_TIMING.shotTravel, (progress) => {
@@ -338,19 +366,157 @@ export class GamePresentation {
 
   private async animateChamber(): Promise<void> {
     const slide = this.pistolModel.slide;
-    const chamberZ = this.pistolModel.root.position.z;
     this.audio.slidePull();
     await this.tween(PRESENTATION_TIMING.slidePull, (progress) => {
       slide.position.x = THREE.MathUtils.lerp(0, -PRESENTATION_MOTION.slideTravel, this.easeInOut(progress));
-      this.pistolModel.root.position.z = chamberZ + Math.sin(progress * Math.PI) * 0.08;
     });
     await this.wait(PRESENTATION_TIMING.slideHold);
     this.audio.slideRelease();
     await this.tween(PRESENTATION_TIMING.slideRelease, (progress) => {
       slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel, 0, this.easeOutBack(progress));
-      this.pistolModel.root.position.z = THREE.MathUtils.lerp(chamberZ + 0.08, chamberZ, progress);
     });
     slide.position.x = 0;
+  }
+
+  private buildShotEffectPools(): void {
+    for (let index = 0; index < PRESENTATION_EFFECTS.smokePoolSize; index += 1) {
+      const root = new THREE.Group();
+      const geometry = new THREE.SphereGeometry(1, 6, 5);
+      const material = new THREE.MeshBasicMaterial({
+        color: 0xd7ddd9,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      const puffOffsets = [
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0.7, 0.22, 0.18),
+        new THREE.Vector3(1.15, 0.5, -0.14),
+      ];
+      for (let puffIndex = 0; puffIndex < puffOffsets.length; puffIndex += 1) {
+        const puff = new THREE.Mesh(geometry, material);
+        puff.position.copy(puffOffsets[puffIndex] ?? new THREE.Vector3());
+        puff.scale.setScalar(1 - puffIndex * 0.18);
+        root.add(puff);
+      }
+      root.visible = false;
+      this.scene.add(root);
+      this.muzzleSmokePool.push({ root, material, velocity: new THREE.Vector3(), age: 0, baseScale: 1, active: false });
+    }
+
+    for (let index = 0; index < PRESENTATION_EFFECTS.casingPoolSize; index += 1) {
+      const root = new THREE.Group();
+      const brass = new THREE.MeshStandardMaterial({ color: 0xc7a04b, roughness: 0.3, metalness: 0.82, transparent: true });
+      const dark = new THREE.MeshStandardMaterial({ color: 0x392d18, roughness: 0.48, metalness: 0.45, transparent: true });
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.043, 0.048, 0.18, 8), brass);
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.054, 0.054, 0.018, 8), brass);
+      const mouth = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.034, 0.006, 8), dark);
+      rim.position.y = -0.096;
+      mouth.position.y = 0.093;
+      body.castShadow = true;
+      rim.castShadow = true;
+      root.add(body, rim, mouth);
+      root.visible = false;
+      this.scene.add(root);
+      this.casingPool.push({
+        root,
+        materials: [brass, dark],
+        velocity: new THREE.Vector3(),
+        angularVelocity: new THREE.Vector3(),
+        age: 0,
+        active: false,
+      });
+    }
+  }
+
+  private spawnMuzzleSmoke(): void {
+    const effect = this.muzzleSmokePool.find((candidate) => !candidate.active) ?? this.muzzleSmokePool[0];
+    if (!effect) return;
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const weaponScale = new THREE.Vector3();
+    this.pistolModel.muzzle.getWorldPosition(position);
+    this.pistolModel.muzzle.getWorldQuaternion(quaternion);
+    this.pistolModel.root.getWorldScale(weaponScale);
+    const variation = this.effectVariation(this.shotEffectSequence, 0.07);
+    const forward = new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion).normalize();
+    const outward = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
+    effect.root.position.copy(position).addScaledVector(forward, 0.025 * weaponScale.x);
+    effect.root.quaternion.copy(quaternion);
+    effect.velocity.copy(forward).multiplyScalar(PRESENTATION_EFFECTS.smokeForwardSpeed)
+      .addScaledVector(new THREE.Vector3(0, 1, 0), PRESENTATION_EFFECTS.smokeUpSpeed)
+      .addScaledVector(outward, variation);
+    effect.baseScale = Math.max(weaponScale.x, 0.72) * PRESENTATION_EFFECTS.smokeInitialScale;
+    effect.root.scale.setScalar(effect.baseScale);
+    effect.material.opacity = 0.28;
+    effect.age = 0;
+    effect.active = true;
+    effect.root.visible = true;
+  }
+
+  private ejectShellCasing(): void {
+    const effect = this.casingPool.find((candidate) => !candidate.active) ?? this.casingPool[0];
+    if (!effect) return;
+    const position = new THREE.Vector3();
+    const quaternion = new THREE.Quaternion();
+    const weaponScale = new THREE.Vector3();
+    this.pistolModel.ejectionPort.getWorldPosition(position);
+    this.pistolModel.ejectionPort.getWorldQuaternion(quaternion);
+    this.pistolModel.root.getWorldScale(weaponScale);
+    const variation = this.effectVariation(this.shotEffectSequence, 0.12);
+    const localVelocity = new THREE.Vector3(
+      -PRESENTATION_EFFECTS.casingBackwardSpeed + variation * 0.35,
+      PRESENTATION_EFFECTS.casingUpSpeed + variation,
+      PRESENTATION_EFFECTS.casingOutwardSpeed + variation * 0.45,
+    );
+    effect.root.position.copy(position);
+    effect.root.quaternion.copy(quaternion).multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(variation, 0, variation * 0.6)),
+    );
+    effect.root.scale.setScalar(Math.max(weaponScale.x, 0.72) * PRESENTATION_EFFECTS.casingScale);
+    effect.velocity.copy(localVelocity.applyQuaternion(quaternion));
+    effect.angularVelocity.set(10.5 + variation * 8, 15.5 - variation * 7, 8.5 + variation * 5);
+    effect.materials.forEach((material) => { material.opacity = 1; });
+    effect.age = 0;
+    effect.active = true;
+    effect.root.visible = true;
+    this.shotEffectSequence += 1;
+  }
+
+  private effectVariation(sequence: number, range: number): number {
+    return Math.sin((sequence + 1) * 12.9898) * range;
+  }
+
+  private updateShotEffects(delta: number): void {
+    for (const effect of this.muzzleSmokePool) {
+      if (!effect.active) continue;
+      effect.age += delta;
+      const progress = Math.min(effect.age / (PRESENTATION_EFFECTS.smokeLifetime / 1000), 1);
+      effect.root.position.addScaledVector(effect.velocity, delta);
+      effect.root.scale.setScalar(effect.baseScale * (1 + PRESENTATION_EFFECTS.smokeExpansion * this.easeInOut(progress)));
+      effect.material.opacity = 0.28 * Math.pow(1 - progress, 1.35);
+      if (progress >= 1) {
+        effect.active = false;
+        effect.root.visible = false;
+      }
+    }
+
+    for (const effect of this.casingPool) {
+      if (!effect.active) continue;
+      effect.age += delta;
+      const progress = Math.min(effect.age / (PRESENTATION_EFFECTS.casingLifetime / 1000), 1);
+      effect.velocity.y -= PRESENTATION_EFFECTS.casingGravity * delta;
+      effect.root.position.addScaledVector(effect.velocity, delta);
+      effect.root.rotateX(effect.angularVelocity.x * delta);
+      effect.root.rotateY(effect.angularVelocity.y * delta);
+      effect.root.rotateZ(effect.angularVelocity.z * delta);
+      const opacity = THREE.MathUtils.clamp((1 - progress) * 5, 0, 1);
+      effect.materials.forEach((material) => { material.opacity = opacity; });
+      if (progress >= 1) {
+        effect.active = false;
+        effect.root.visible = false;
+      }
+    }
   }
 
   private createProjectile(ammoType: AmmoType): THREE.Group {
@@ -481,7 +647,9 @@ export class GamePresentation {
     const height = this.host.clientHeight;
     this.layout = getPresentationLayout(width, height);
     this.pistolModel.root.scale.setScalar(this.layout.pistolScale);
-    this.magazineModel.root.scale.setScalar(this.layout.magazineScale);
+    this.magazineModel.root.scale.setScalar(
+      this.magazineModel.root.parent === this.pistolModel.magazineSocket ? 1 : this.layout.magazineScale,
+    );
     if (!this.animationInProgress) {
       this.pistolModel.root.position.copy(this.layout.weaponRest);
       this.camera.position.copy(this.layout.cameraPosition);
@@ -520,6 +688,7 @@ export class GamePresentation {
       return;
     }
     this.elapsed += delta;
+    this.updateShotEffects(delta);
     if (!this.zombieFallen) {
       this.zombieModel.root.position.y = Math.sin(this.elapsed * 2.35) * 0.032;
       const stride = Math.sin(this.elapsed * 3.1) * 0.16;
