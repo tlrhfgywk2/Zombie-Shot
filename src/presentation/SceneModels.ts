@@ -12,6 +12,7 @@ export interface PistolModel {
 export interface MagazineModel {
   root: THREE.Group;
   roundDisplay: THREE.Group;
+  witnessRounds: THREE.Mesh[];
 }
 
 export interface ZombieModel {
@@ -117,8 +118,10 @@ export const createPistolModel = (): PistolModel => {
 export const createMagazineModel = (): MagazineModel => {
   const root = new THREE.Group();
   const roundDisplay = new THREE.Group();
+  const witnessRounds: THREE.Mesh[] = [];
   const metal = new THREE.MeshStandardMaterial({ color: 0x303936, roughness: 0.42, metalness: 0.7 });
   const edge = new THREE.MeshStandardMaterial({ color: 0x111715, roughness: 0.5, metalness: 0.62 });
+  const witnessFrame = new THREE.MeshStandardMaterial({ color: 0x090d0c, roughness: 0.7, metalness: 0.45 });
   const body = mesh(new THREE.BoxGeometry(0.46, 1.08, 0.34), metal);
   body.position.y = -0.02;
   root.add(body);
@@ -126,10 +129,20 @@ export const createMagazineModel = (): MagazineModel => {
   front.position.set(0, -0.02, 0.18);
   root.add(front);
   for (let index = 0; index < 4; index += 1) {
-    const witness = mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.025, 10), edge, false);
-    witness.rotation.x = Math.PI / 2;
-    witness.position.set(0, 0.28 - index * 0.2, 0.197);
-    roundDisplay.add(witness);
+    const slotY = 0.3 - index * 0.205;
+    const recess = mesh(new THREE.CapsuleGeometry(0.045, 0.09, 4, 8), witnessFrame, false);
+    recess.scale.set(1, 1, 0.22);
+    recess.position.set(0, slotY, 0.205);
+    const round = mesh(
+      new THREE.CapsuleGeometry(0.027, 0.058, 4, 8),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.32, metalness: 0.2, emissive: 0x111111 }),
+      false,
+    );
+    round.scale.set(1, 1, 0.2);
+    round.position.set(0, slotY, 0.224);
+    round.visible = false;
+    witnessRounds.push(round);
+    roundDisplay.add(recess, round);
   }
   const feedLeft = mesh(new THREE.BoxGeometry(0.18, 0.12, 0.36), edge);
   feedLeft.position.set(-0.14, 0.58, 0);
@@ -142,7 +155,7 @@ export const createMagazineModel = (): MagazineModel => {
   const baseAccent = mesh(new THREE.BoxGeometry(0.4, 0.025, 0.32), metal, false);
   baseAccent.position.y = -0.69;
   root.add(roundDisplay, feedLeft, feedRight, base, baseAccent);
-  return { root, roundDisplay };
+  return { root, roundDisplay, witnessRounds };
 };
 
 export const createZombieModel = (): ZombieModel => {
