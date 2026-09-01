@@ -7,6 +7,7 @@ export interface PistolModel {
   slide: THREE.Group;
   muzzle: THREE.Object3D;
   magazineSocket: THREE.Object3D;
+  ejectionPort: THREE.Object3D;
 }
 
 export interface MagazineModel {
@@ -65,6 +66,7 @@ export const createPistolModel = (): PistolModel => {
     }
   }
   const magazineSocket = new THREE.Object3D();
+  magazineSocket.name = 'magazineSocket';
   magazineSocket.position.set(-0.05, -0.93, 0);
   grip.add(magazineSocket);
   root.add(grip);
@@ -84,8 +86,12 @@ export const createPistolModel = (): PistolModel => {
   const top = mesh(new THREE.BoxGeometry(1.28, 0.08, 0.32), slideMaterial);
   top.position.set(0.07, 0.69, 0);
   slide.add(top);
-  const ejectionPort = mesh(new THREE.BoxGeometry(0.34, 0.02, 0.25), darkMetal, false);
-  ejectionPort.position.set(0.23, 0.705, 0.03);
+  const ejectionPortCover = mesh(new THREE.BoxGeometry(0.34, 0.02, 0.25), darkMetal, false);
+  ejectionPortCover.position.set(0.23, 0.705, 0.03);
+  slide.add(ejectionPortCover);
+  const ejectionPort = new THREE.Object3D();
+  ejectionPort.name = 'ejectionPort';
+  ejectionPort.position.set(0.23, 0.67, 0.25);
   slide.add(ejectionPort);
   for (let index = 0; index < 5; index += 1) {
     const serration = mesh(new THREE.BoxGeometry(0.025, 0.24, 0.475), darkMetal, false);
@@ -109,10 +115,11 @@ export const createPistolModel = (): PistolModel => {
   muzzleRing.rotation.y = Math.PI / 2;
   root.add(muzzleRing);
   const muzzle = new THREE.Object3D();
+  muzzle.name = 'muzzle';
   muzzle.position.set(1.13, 0.48, 0);
   root.add(muzzle);
 
-  return { root, slide, muzzle, magazineSocket };
+  return { root, slide, muzzle, magazineSocket, ejectionPort };
 };
 
 export const createMagazineModel = (): MagazineModel => {
