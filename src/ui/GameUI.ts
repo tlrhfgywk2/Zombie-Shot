@@ -1,6 +1,7 @@
-import type { AmmoType, ShotResult } from '../combat/types';
+import type { AmmoType, EnemyActionResult, EnemyState, SequenceResult, ShotResult } from '../combat/types';
 import type { GamePhase } from '../core/GameStateMachine';
-import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE } from '../data/ammoDefinitions';
+import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE, type AmmoStock } from '../data/ammoDefinitions';
+import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
 
 export interface GameUICallbacks {
@@ -16,14 +17,17 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  AMMO_SELECTION: '탄약 선택', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', GAME_OVER: '게임 오버',
+  AMMO_SELECTION: '탄약 선택', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
 export class GameUI {
   private readonly hpFill: HTMLElement;
   private readonly hpText: HTMLElement;
+  private readonly armorText: HTMLElement;
+  private readonly enemyStatus: HTMLElement;
   private readonly distanceText: HTMLElement;
   private readonly levelText: HTMLElement;
+  private readonly waveText: HTMLElement;
   private readonly phaseText: HTMLElement;
   private readonly statusText: HTMLElement;
   private readonly loadButton: HTMLButtonElement;
@@ -35,7 +39,13 @@ export class GameUI {
   private readonly audioMute: HTMLButtonElement;
   private readonly audioState: HTMLElement;
   private readonly audioVolume: HTMLInputElement;
+  private readonly previewChain: HTMLElement;
+  private readonly previewOutcome: HTMLElement;
+  private readonly endEyebrow: HTMLElement;
+  private readonly endTitle: HTMLElement;
+  private readonly endDetail: HTMLElement;
   private rounds: readonly AmmoType[] = [];
+  private stock: AmmoStock = { standard: 0, armorPiercing: 0, hollowPoint: 0, incendiary: 0, stagger: 0, magnum: 0 };
   private locked = false;
   private selectedIndex: number | null = null;
   private suppressClick = false;
@@ -47,27 +57,30 @@ export class GameUI {
         <div id="canvas-host" class="canvas-host"></div>
         <header class="top-hud">
           <div class="brand"><span class="brand-mark"></span><div><small>전술 생존 실험</small><strong>좀비 샷</strong></div></div>
-          <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">감염체 01</span><span id="hp-text">74 / 74</span></div><div class="hp-track"><span id="hp-fill"></span></div></div>
+          <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">72 / 72</span></div><div class="hp-track"><span id="hp-fill"></span></div><div class="enemy-meta"><span id="armor-text">방어 0</span><span id="enemy-status">상태 없음</span></div></div>
           <div class="utility-stack"><div class="distance-card"><small>거리</small><strong id="distance-text">10.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
         </header>
-        <aside class="phase-panel"><span class="eyebrow">현재 단계</span><strong id="phase-text">탄약 선택</strong><p id="status-text">탄약을 누르거나 빈 슬롯으로 끌어 놓으세요.</p><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
+        <aside class="phase-panel"><span id="wave-text" class="eyebrow">웨이브 1/5 · 표적 1/1</span><strong id="phase-text">탄약 선택</strong><p id="status-text">탄약을 누르거나 빈 슬롯으로 끌어 놓으세요.</p><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
         <section class="loadout" aria-label="탄창 장전 영역">
-          <div class="ammo-rack"><div class="section-label"><span>탄약 보급</span><small>무제한</small></div><div class="ammo-options">
-            ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${definition.role}</small></span></button>`; }).join('')}
+          <div class="ammo-rack"><div class="section-label"><span>탄약 보급</span><small>웨이브 단위 제한</small></div><div class="ammo-options">
+            ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${definition.role}</small></span><b class="stock-count" data-stock="${ammo}">0</b></button>`; }).join('')}
           </div></div>
-          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small>1 → 4</small></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
+          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small>1 → 4</small></div><div class="sequence-preview" aria-live="polite"><div id="preview-chain">탄약을 장전하면 순서 프리뷰가 표시됩니다.</div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.magazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div>
           <div id="selection-actions" class="selection-actions" hidden><span id="selection-text"></span><button id="remove-round" type="button">선택 탄 제거</button><button id="cancel-selection" type="button">취소</button></div></div>
         </section>
         <div class="hint"><span></span>탄약 탭: 추가/교체 · 슬롯 선택 후 목적지 탭: 순서 변경 · 드래그도 지원</div>
-        <div id="game-over" class="game-over" hidden><div class="game-over-card"><span>생존 실패</span><h2>감염체가 방어선을 돌파했습니다</h2><p>탄약의 종류보다 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
+        <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
       </div>`;
 
     this.hpFill = this.required(root, '#hp-fill');
     this.hpText = this.required(root, '#hp-text');
+    this.armorText = this.required(root, '#armor-text');
+    this.enemyStatus = this.required(root, '#enemy-status');
     this.distanceText = this.required(root, '#distance-text');
     this.levelText = this.required(root, '#level-text');
+    this.waveText = this.required(root, '#wave-text');
     this.phaseText = this.required(root, '#phase-text');
     this.statusText = this.required(root, '#status-text');
     this.combatLog = this.required(root, '#combat-log');
@@ -78,6 +91,11 @@ export class GameUI {
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
     this.audioState = this.required(root, '#audio-state');
     this.audioVolume = this.required(root, '#audio-volume') as HTMLInputElement;
+    this.previewChain = this.required(root, '#preview-chain');
+    this.previewOutcome = this.required(root, '#preview-outcome');
+    this.endEyebrow = this.required(root, '#end-eyebrow');
+    this.endTitle = this.required(root, '#end-title');
+    this.endDetail = this.required(root, '#end-detail');
     this.slots = [...root.querySelectorAll<HTMLButtonElement>('.mag-slot')];
 
     root.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
@@ -116,8 +134,9 @@ export class GameUI {
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
 
-  renderMagazine(rounds: readonly AmmoType[]): void {
+  renderMagazine(rounds: readonly AmmoType[], stock: AmmoStock = this.stock): void {
     this.rounds = [...rounds];
+    this.stock = { ...stock };
     if (this.selectedIndex !== null && !rounds[this.selectedIndex]) this.selectedIndex = null;
     this.slots.forEach((slot, index) => {
       const ammo = rounds[index];
@@ -128,14 +147,20 @@ export class GameUI {
     });
     this.loadButton.disabled = this.locked || rounds.length === 0;
     this.loadButton.querySelector('small')!.textContent = rounds.length ? `${rounds.length}발로 전투 시작` : '1발 이상 필요';
+    document.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
+      const ammo = button.dataset.ammo as AmmoType;
+      const count = this.stock[ammo];
+      button.disabled = this.locked || count <= 0;
+      button.querySelector<HTMLElement>('.stock-count')!.textContent = String(count);
+      button.setAttribute('aria-label', `${AMMO_DEFINITIONS[ammo].name}: ${AMMO_DEFINITIONS[ammo].role}, 재고 ${count}발`);
+    });
     this.updateSelectionUI();
   }
 
   setLocked(locked: boolean): void {
     this.locked = locked;
     if (locked) this.clearSelection();
-    document.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => { button.disabled = locked; });
-    this.renderMagazine(this.rounds);
+    this.renderMagazine(this.rounds, this.stock);
   }
 
   renderAudioPreferences(preferences: AudioPreferences): void {
@@ -153,15 +178,41 @@ export class GameUI {
     document.body.dataset.phase = phase;
   }
 
-  updateEnemy(hp: number, maxHp: number, distance: number, level: number, burnTicks: number): void {
-    this.hpFill.style.width = `${Math.max(0, hp / maxHp) * 100}%`;
-    this.hpText.textContent = `${hp} / ${maxHp}${burnTicks ? ` · 화상 ${burnTicks}` : ''}`;
-    this.distanceText.textContent = `${distance.toFixed(1)} m`;
-    this.levelText.textContent = `감염체 ${String(level).padStart(2, '0')}`;
+  updateEnemy(enemy: EnemyState, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
+    this.hpFill.style.width = `${Math.max(0, enemy.hp / enemy.maxHp) * 100}%`;
+    this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
+    this.armorText.textContent = `방어 ${enemy.armor} / ${enemy.maxArmor}`;
+    const statuses: string[] = [];
+    if (enemy.statuses.burnTurns) statuses.push(`화상 ${enemy.statuses.burnTurns}턴`);
+    if (enemy.statuses.staggerTurns) statuses.push('이동 억제');
+    if (enemy.statuses.exposedShots) statuses.push('다음 탄 노출');
+    this.enemyStatus.textContent = statuses.join(' · ') || '상태 없음';
+    this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
+    this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
+    this.waveText.textContent = `웨이브 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
+  }
+
+  renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined): void {
+    if (!sequence) {
+      this.previewChain.textContent = '탄약을 장전하면 순서 프리뷰가 표시됩니다.';
+      this.previewOutcome.textContent = '';
+      return;
+    }
+    this.previewChain.innerHTML = sequence.shots.map((shot) => `<span style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName}</span>`).join('<i>→</i>');
+    const final = sequence.finalState;
+    const effects: string[] = [`체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];
+    if (sequence.totalArmorDamage) effects.push(`방어 파괴 ${sequence.totalArmorDamage}`);
+    if (final.statuses.burnTurns) effects.push(`화상 ${final.statuses.burnTurns}턴`);
+    if (sequence.killed) effects.push('처치 예상');
+    else if (action) effects.push(`다음 이동 ${action.movement.toFixed(1)}m`);
+    this.previewOutcome.textContent = effects.join(' · ');
   }
 
   showShot(result: ShotResult): void {
-    this.combatLog.innerHTML = `<span style="--ammo-color:${AMMO_DEFINITIONS[result.ammoType].cssColor}">${result.index + 1}</span><div><strong>${result.description}</strong><small>피해 ${result.damage}${result.burnApplied ? ` · 화상 ${result.burnApplied}단계` : ''}</small></div>`;
+    const damageDetail = [`체력 피해 ${result.hpDamage}`];
+    if (result.armorDamage) damageDetail.push(`방어 파괴 ${result.armorDamage}`);
+    if (result.burnApplied) damageDetail.push(`화상 ${result.burnApplied}턴`);
+    this.combatLog.innerHTML = `<span style="--ammo-color:${AMMO_DEFINITIONS[result.ammoType].cssColor}">${result.index + 1}</span><div><strong>${result.description}</strong><small>${damageDetail.join(' · ')}</small></div>`;
     this.slots.forEach((slot, index) => slot.classList.toggle('is-firing', index === result.index));
   }
 
@@ -171,7 +222,12 @@ export class GameUI {
   }
 
   clearEvent(): void { this.combatLog.innerHTML = ''; this.slots.forEach((slot) => slot.classList.remove('is-firing')); }
-  showGameOver(show: boolean): void { this.overlay.hidden = !show; }
+  showEndState(eyebrow: string, title: string, detail: string, show: boolean): void {
+    this.endEyebrow.textContent = eyebrow;
+    this.endTitle.textContent = title;
+    this.endDetail.textContent = detail;
+    this.overlay.hidden = !show;
+  }
 
   private required(root: HTMLElement, selector: string): HTMLElement {
     const element = root.querySelector<HTMLElement>(selector);

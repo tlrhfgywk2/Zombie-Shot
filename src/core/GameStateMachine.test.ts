@@ -22,4 +22,14 @@ describe('GameStateMachine', () => {
     state.transition('AMMO_SELECTION');
     expect(state.phase).toBe('AMMO_SELECTION');
   });
+
+  it('마지막 웨이브 완료 후 다시 시작할 수 있다', () => {
+    const state = new GameStateMachine();
+    state.transition('LOADING');
+    state.transition('FIRING');
+    state.transition('ENEMY_ACTION');
+    state.transition('VICTORY');
+    state.transition('AMMO_SELECTION');
+    expect(state.phase).toBe('AMMO_SELECTION');
+  });
 });

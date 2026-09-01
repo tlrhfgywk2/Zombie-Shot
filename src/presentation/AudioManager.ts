@@ -34,7 +34,7 @@ export class AudioManager {
   }
 
   insertRound(ammoType: AmmoType, index: number): void {
-    const frequency: Record<AmmoType, number> = { standard: 430, tracer: 540, fragmenting: 360, incendiary: 620 };
+    const frequency: Record<AmmoType, number> = { standard: 430, armorPiercing: 485, hollowPoint: 395, incendiary: 620, stagger: 540, magnum: 330 };
     this.tone(frequency[ammoType] + index * 18, 0.045, 0.045, 'square');
     this.tone(180, 0.028, 0.025, 'triangle', 0.022);
   }
@@ -57,22 +57,22 @@ export class AudioManager {
   }
 
   shot(ammoType: AmmoType): void {
-    const lowFrequency: Record<AmmoType, number> = { standard: 92, tracer: 112, fragmenting: 76, incendiary: 102 };
-    const volume = ammoType === 'fragmenting' ? 0.16 : 0.135;
-    this.noise(ammoType === 'fragmenting' ? 0.16 : 0.12, volume, ammoType === 'tracer' ? 1800 : 1250);
+    const lowFrequency: Record<AmmoType, number> = { standard: 92, armorPiercing: 105, hollowPoint: 82, incendiary: 102, stagger: 112, magnum: 70 };
+    const volume = ammoType === 'magnum' ? 0.16 : 0.135;
+    this.noise(ammoType === 'magnum' ? 0.16 : 0.12, volume, ammoType === 'stagger' ? 1800 : 1250);
     this.tone(lowFrequency[ammoType], 0.11, 0.09, 'sawtooth');
-    if (ammoType === 'tracer') this.tone(880, 0.055, 0.025, 'sine', 0.015);
+    if (ammoType === 'stagger') this.tone(880, 0.055, 0.025, 'sine', 0.015);
     if (ammoType === 'incendiary') this.noise(0.2, 0.028, 2400, 0.055);
   }
 
   impact(ammoType: AmmoType): void {
-    if (ammoType === 'fragmenting') {
+    if (ammoType === 'magnum') {
       this.noise(0.09, 0.065, 2100);
       this.tone(285, 0.06, 0.035, 'square');
     } else if (ammoType === 'incendiary') {
       this.noise(0.16, 0.04, 2800);
       this.tone(460, 0.09, 0.025, 'sawtooth');
-    } else this.tone(ammoType === 'tracer' ? 390 : 310, 0.045, 0.035, 'triangle');
+    } else this.tone(ammoType === 'stagger' ? 390 : 310, 0.045, 0.035, 'triangle');
   }
 
   burn(): void {
