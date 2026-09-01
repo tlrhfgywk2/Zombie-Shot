@@ -3,6 +3,7 @@ import type { GamePhase } from '../core/GameStateMachine';
 import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE, type AmmoStock } from '../data/ammoDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
+import { applyResponsiveLayoutMode } from '../presentation/ResponsiveLayout';
 
 export interface GameUICallbacks {
   onAddAmmo: (ammo: AmmoType) => void;
@@ -50,6 +51,7 @@ export class GameUI {
   private selectedIndex: number | null = null;
   private suppressClick = false;
   private gestureVersion = 0;
+  private readonly shell: HTMLElement;
 
   constructor(root: HTMLElement, private readonly callbacks: GameUICallbacks) {
     root.innerHTML = `
@@ -73,6 +75,9 @@ export class GameUI {
         <div class="hint"><span></span>탄약 탭: 추가/교체 · 슬롯 선택 후 목적지 탭: 순서 변경 · 드래그도 지원</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
       </div>`;
+
+    this.shell = this.required(root, '.game-shell');
+    this.updateResponsiveLayout();
 
     this.hpFill = this.required(root, '#hp-fill');
     this.hpText = this.required(root, '#hp-text');
@@ -129,6 +134,8 @@ export class GameUI {
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
     window.addEventListener('blur', this.resetDragVisuals);
     window.addEventListener('resize', this.resetDragVisuals);
+    window.addEventListener('resize', this.updateResponsiveLayout);
+    window.visualViewport?.addEventListener('resize', this.updateResponsiveLayout);
     document.addEventListener('visibilitychange', this.resetDragVisuals);
   }
 
@@ -275,6 +282,10 @@ export class GameUI {
     this.gestureVersion += 1;
     document.body.classList.remove('ammo-drag-active');
     document.querySelectorAll('.is-dragging, .drop-target').forEach((element) => element.classList.remove('is-dragging', 'drop-target'));
+  };
+
+  private readonly updateResponsiveLayout = (): void => {
+    applyResponsiveLayoutMode(this.shell);
   };
 
   private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined): void {
