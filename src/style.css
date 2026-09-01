@@ -28,6 +28,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-card { justify-self: center; width: 100%; padding: .85rem 1rem .95rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(18, 25, 20, .88), rgba(10, 14, 12, .74)); clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 14px); backdrop-filter: blur(10px); }
 .enemy-heading { display: flex; justify-content: space-between; font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .enemy-heading span:last-child { color: #b7c0b9; letter-spacing: .04em; }
+.enemy-meta { display: flex; justify-content: space-between; gap: .5rem; margin-top: .38rem; color: var(--muted); font-size: .58rem; font-weight: 700; }
 .hp-track { height: 5px; margin-top: .65rem; background: #2e1717; overflow: hidden; }
 .hp-track span { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d37, #ff8769); box-shadow: 0 0 12px rgba(255,70,50,.55); transition: width .25s ease; }
 .utility-stack { justify-self: end; width: 140px; display: grid; gap: .38rem; }
@@ -56,20 +57,28 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .ammo-rack { border-right: 1px solid var(--line); }
 .section-label { display: flex; justify-content: space-between; margin-bottom: .65rem; }
 .section-label small { color: var(--acid); font-size: .58rem; }
-.ammo-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .48rem; }
+.ammo-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .42rem; }
 .ammo-token { position: relative; display: flex; align-items: center; min-width: 0; min-height: 64px; gap: .5rem; padding: .5rem .55rem; text-align: left; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.035); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: transform .16s ease, border-color .16s ease, background .16s ease, opacity .16s ease; }
 .ammo-token:hover, .ammo-token:active { transform: translateY(-2px); border-color: color-mix(in srgb, var(--bullet), transparent 35%); background: rgba(255,255,255,.07); }
 .ammo-token:disabled { opacity: .38; cursor: default; transform: none; }
-.ammo-token > span:last-child { min-width: 0; display: grid; }
+.ammo-token > span:nth-child(2) { min-width: 0; display: grid; }
 .ammo-token strong { font-size: .75rem; white-space: nowrap; }
 .ammo-token small { margin-top: .1rem; color: var(--muted); font-size: .58rem; line-height: 1.2; }
+.stock-count { position: absolute; top: 4px; right: 5px; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; color: #11170c; background: var(--bullet); font-size: .58rem; }
 .round-visual { position: relative; flex: 0 0 18px; width: 18px; height: 46px; border-radius: 9px 9px 2px 2px; background: linear-gradient(90deg, #776231, #d7b65e 48%, #826b35); box-shadow: inset 0 -5px rgba(0,0,0,.28), 0 3px 8px rgba(0,0,0,.35); }
 .round-visual::before { content: ""; position: absolute; left: 2px; right: 2px; top: -7px; height: 14px; border-radius: 50% 50% 2px 2px; background: var(--bullet, #ddd); clip-path: polygon(50% 0, 100% 55%, 100% 100%, 0 100%, 0 55%); }
 .round-visual i { position: absolute; left: 2px; right: 2px; bottom: 4px; height: 1px; background: rgba(0,0,0,.35); }
 .ammo-standard { --bullet: #d8c6a2; }
-.ammo-tracer { --bullet: #ff6b35; }
-.ammo-fragmenting { --bullet: #70d67b; }
+.ammo-armorPiercing { --bullet: #78b7ff; }
+.ammo-hollowPoint { --bullet: #ff8ca1; }
 .ammo-incendiary { --bullet: #ffba3a; }
+.ammo-stagger { --bullet: #70e6d2; }
+.ammo-magnum { --bullet: #c895ff; }
+.sequence-preview { min-height: 48px; margin: -.15rem 0 .55rem; padding: .42rem .5rem; border: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.16); }
+.sequence-preview > div:first-child { display: flex; align-items: center; gap: .35rem; min-height: 18px; color: #aab4ac; font-size: .63rem; }
+.sequence-preview span { color: var(--ammo-color); font-weight: 850; }
+.sequence-preview i { color: #5d685f; font-style: normal; }
+.sequence-preview > div:last-child { margin-top: .24rem; color: #cbd5cd; font-size: .61rem; line-height: 1.35; }
 .magazine-row { display: grid; grid-template-columns: 1fr 152px; gap: .72rem; }
 .magazine-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: .38rem; }
 .mag-slot { position: relative; display: grid; grid-template-rows: auto 1fr auto; place-items: center; min-width: 44px; height: 70px; padding: .28rem; border: 1px dashed rgba(210,230,215,.2); background: rgba(255,255,255,.025); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; transition: border-color .18s, background .18s, transform .18s, box-shadow .18s; }
@@ -116,7 +125,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   .enemy-card { grid-column: 1; padding: .65rem .75rem .7rem; } .utility-stack { grid-column: 2; width: 116px; }
   .phase-panel { top: 14%; width: 52vw; } .phase-panel > p { display: none; } .combat-log { margin-top: .55rem; }
   .loadout { bottom: max(17px, env(safe-area-inset-bottom)); } .ammo-options { gap: .3rem; }
-  .ammo-token { justify-content: center; padding: .38rem .24rem; min-height: 50px; } .ammo-token > span:last-child { display: none; }
+  .ammo-token { justify-content: center; padding: .38rem .24rem; min-height: 50px; } .ammo-token > span:nth-child(2) { display: none; }
   .magazine-row { grid-template-columns: 1fr 112px; gap: .42rem; } .magazine-slots { gap: .25rem; }
   .mag-slot { height: 56px; min-height: 56px; } .mag-slot .round-visual { height: 28px; }
   .load-button { min-height: 56px; font-size: .76rem; } .load-button small { font-size: .48rem; } .hint { display: none; }
@@ -131,6 +140,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   .ammo-rack { border-right: 1px solid var(--line); border-bottom: 0; }
   .section-label { margin-bottom: .4rem; } .ammo-rack, .magazine-panel { padding-block: .5rem; }
   .ammo-token, .mag-slot, .load-button { min-height: 48px; height: 48px; } .round-visual { height: 29px; } .mag-slot .round-visual { height: 25px; } .hint { display: none; }
+  .sequence-preview { min-height: 34px; margin-bottom: .35rem; padding-block: .3rem; } .sequence-preview > div:last-child { display: none; }
   .selection-actions { position: absolute; right: 0; bottom: 100%; width: 58%; margin: 0 0 .35rem; background: rgba(12,18,15,.96); }
   .combat-log { margin-top: .45rem; }
 }

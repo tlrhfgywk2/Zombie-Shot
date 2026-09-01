@@ -154,7 +154,7 @@ export class GamePresentation {
     this.muzzleFlash.color.setHex(definition.color);
     this.muzzleFlash.intensity = ammoType === 'incendiary' ? 10 : 7.5;
     this.audio.shot(ammoType);
-    const slideTravel = PRESENTATION_MOTION.slideTravel * (ammoType === 'fragmenting' ? 1.12 : 1);
+    const slideTravel = PRESENTATION_MOTION.slideTravel * (ammoType === 'magnum' ? 1.12 : 1);
     await this.tween(PRESENTATION_TIMING.shotTravel, (progress) => {
       const projectileProgress = Math.min(progress * 1.55, 1);
       projectile.position.lerpVectors(start, target, projectileProgress * projectileProgress);
@@ -297,11 +297,11 @@ export class GamePresentation {
   private createProjectile(ammoType: AmmoType): THREE.Group {
     const group = new THREE.Group();
     const color = AMMO_DEFINITIONS[ammoType].color;
-    const radius = ammoType === 'fragmenting' ? 0.065 : 0.042;
+    const radius = ammoType === 'magnum' ? 0.065 : 0.042;
     const projectile = new THREE.Mesh(new THREE.SphereGeometry(radius, 7, 7), new THREE.MeshBasicMaterial({ color }));
     group.add(projectile);
-    if (ammoType === 'tracer' || ammoType === 'incendiary') {
-      const trail = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.35, radius, ammoType === 'tracer' ? 0.85 : 0.42, 6), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.68 }));
+    if (ammoType === 'stagger' || ammoType === 'incendiary') {
+      const trail = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.35, radius, ammoType === 'stagger' ? 0.85 : 0.42, 6), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.68 }));
       trail.rotation.x = Math.PI / 2;
       trail.position.z = 0.3;
       group.add(trail);
@@ -313,7 +313,7 @@ export class GamePresentation {
     const effect = new THREE.Group();
     effect.position.copy(position);
     const color = AMMO_DEFINITIONS[ammoType].color;
-    const count = ammoType === 'fragmenting' ? 7 : ammoType === 'incendiary' ? 5 : 3;
+    const count = ammoType === 'magnum' ? 7 : ammoType === 'incendiary' ? 5 : 3;
     const pieces: THREE.Mesh[] = [];
     for (let index = 0; index < count; index += 1) {
       const geometry = ammoType === 'incendiary' ? new THREE.SphereGeometry(0.045, 5, 4) : new THREE.TetrahedronGeometry(0.04);
@@ -327,7 +327,7 @@ export class GamePresentation {
     await this.tween(170, (progress) => {
       for (const piece of pieces) {
         const direction = piece.userData.direction as THREE.Vector3;
-        piece.position.copy(direction).multiplyScalar(progress * (ammoType === 'fragmenting' ? 0.42 : 0.25));
+        piece.position.copy(direction).multiplyScalar(progress * (ammoType === 'magnum' ? 0.42 : 0.25));
         (piece.material as THREE.MeshBasicMaterial).opacity = 1 - progress;
       }
     });
@@ -335,7 +335,7 @@ export class GamePresentation {
   }
 
   private async animateHitReaction(ammoType: AmmoType): Promise<void> {
-    const strength = PRESENTATION_MOTION.hitLean * (ammoType === 'fragmenting' ? 1.5 : 1);
+    const strength = PRESENTATION_MOTION.hitLean * (ammoType === 'magnum' ? 1.5 : 1);
     await this.tween(PRESENTATION_TIMING.hitReaction, (progress) => {
       const impulse = Math.sin(progress * Math.PI);
       this.zombieModel.root.rotation.z = impulse * strength;

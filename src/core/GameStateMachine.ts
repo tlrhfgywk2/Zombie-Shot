@@ -1,11 +1,12 @@
-export type GamePhase = 'AMMO_SELECTION' | 'LOADING' | 'FIRING' | 'ENEMY_ACTION' | 'GAME_OVER';
+export type GamePhase = 'AMMO_SELECTION' | 'LOADING' | 'FIRING' | 'ENEMY_ACTION' | 'GAME_OVER' | 'VICTORY';
 
 const ALLOWED_TRANSITIONS: Record<GamePhase, readonly GamePhase[]> = {
   AMMO_SELECTION: ['LOADING', 'GAME_OVER'],
   LOADING: ['FIRING', 'GAME_OVER'],
   FIRING: ['ENEMY_ACTION', 'GAME_OVER'],
-  ENEMY_ACTION: ['AMMO_SELECTION', 'GAME_OVER'],
+  ENEMY_ACTION: ['AMMO_SELECTION', 'GAME_OVER', 'VICTORY'],
   GAME_OVER: ['AMMO_SELECTION'],
+  VICTORY: ['AMMO_SELECTION'],
 };
 
 export class GameStateMachine {
