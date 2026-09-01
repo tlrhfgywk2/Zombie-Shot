@@ -247,14 +247,18 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] .section-label small { font-size: .5rem; }
 .game-shell[data-layout="portrait"] .ammo-options { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
 .game-shell[data-layout="portrait"] .ammo-token {
-  justify-content: center;
-  min-height: 48px;
-  height: 48px;
-  gap: 0;
-  padding: .28rem .16rem;
+  display: grid;
+  grid-template-rows: 28px 12px;
+  place-items: center;
+  min-height: 52px;
+  height: 52px;
+  gap: 2px;
+  padding: .26rem .12rem .18rem;
 }
-.game-shell[data-layout="portrait"] .ammo-token > span:nth-child(2) { display: none; }
-.game-shell[data-layout="portrait"] .ammo-token .round-visual { width: 12px; height: 31px; }
+.game-shell[data-layout="portrait"] .ammo-token > span:nth-child(2) { display: block; text-align: center; }
+.game-shell[data-layout="portrait"] .ammo-token strong { display: block; font-size: .6rem; line-height: 1; }
+.game-shell[data-layout="portrait"] .ammo-token small { display: none; }
+.game-shell[data-layout="portrait"] .ammo-token .round-visual { width: 10px; height: 26px; }
 .game-shell[data-layout="portrait"] .stock-count { top: 3px; right: 3px; min-width: 17px; height: 17px; font-size: .54rem; }
 .game-shell[data-layout="portrait"] .sequence-preview {
   min-height: 38px;
