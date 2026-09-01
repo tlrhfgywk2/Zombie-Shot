@@ -12,34 +12,45 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: 저장소 체크아웃
         uses: actions/checkout@v4
+
       - name: Node.js 설정
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
+
       - name: 의존성 설치
         run: npm ci
+
       - name: 테스트
         run: npm run test
+
       - name: 프로덕션 빌드
         run: npm run build
+
       - name: Pages 설정
         uses: actions/configure-pages@v5
+
       - name: 빌드 결과 업로드
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: GitHub Pages 배포
         id: deployment
         uses: actions/deploy-pages@v4
