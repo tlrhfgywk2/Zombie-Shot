@@ -19,11 +19,25 @@ describe('프레젠테이션 좌표 계산', () => {
     [1280, 720],
     [768, 1024],
     [390, 844],
+    [360, 800],
+    [412, 915],
+    [430, 932],
     [844, 390],
   ])('%d×%d에서 삽입 포즈를 장전 포즈보다 높게 둔다', (width, height) => {
     const layout = getPresentationLayout(width, height);
     expect(layout.weaponInsertion.y).toBeGreaterThan(layout.weaponRest.y + 0.5);
     expect(layout.magazineLoad.y).toBeGreaterThan(1);
     expect(layout.magazineInspect.y).toBeGreaterThanOrEqual(layout.magazineLoad.y);
+  });
+
+  it('Portrait 전용 좌표와 스케일을 사용한다', () => {
+    const portrait = getPresentationLayout(390, 844);
+    const desktop = getPresentationLayout(1280, 720);
+
+    expect(portrait.mode).toBe('portrait');
+    expect(portrait.weaponAim.y).toBeGreaterThan(desktop.weaponAim.y);
+    expect(portrait.cameraTarget.y).toBeGreaterThan(desktop.cameraTarget.y);
+    expect(portrait.cartridgeScale).toBeLessThan(desktop.cartridgeScale);
+    expect(portrait.insertionScaleFactor).toBeLessThan(desktop.insertionScaleFactor);
   });
 });

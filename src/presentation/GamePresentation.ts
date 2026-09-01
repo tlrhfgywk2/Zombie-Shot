@@ -39,8 +39,8 @@ export class GamePresentation {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.domElement.setAttribute('aria-label', '다가오는 감염체와 장전 동작을 보여 주는 3D 전투 화면');
     this.host.append(this.renderer.domElement);
-    this.camera.position.set(0, 2.15, 7.6);
-    this.camera.lookAt(0, 1.4, -4.4);
+    this.camera.position.copy(this.layout.cameraPosition);
+    this.camera.lookAt(this.layout.cameraTarget);
     this.scene.fog = new THREE.FogExp2(0x0b110e, 0.044);
     this.buildEnvironment();
     this.buildActors();
@@ -109,7 +109,7 @@ export class GamePresentation {
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo) continue;
-      const cartridge = createCartridge(ammo, 1.12);
+      const cartridge = createCartridge(ammo, this.layout.cartridgeScale);
       cartridge.position.copy(this.layout.magazineLoad).add(new THREE.Vector3(0.16, 0.98, 0.02));
       cartridge.rotation.z = -0.04;
       this.scene.add(cartridge);
@@ -119,14 +119,14 @@ export class GamePresentation {
         cartridge.position.y = THREE.MathUtils.lerp(this.layout.magazineLoad.y + 0.98, this.layout.magazineLoad.y + 0.49, eased);
         cartridge.position.x = THREE.MathUtils.lerp(this.layout.magazineLoad.x + 0.16, this.layout.magazineLoad.x + 0.02, eased);
         cartridge.rotation.z = THREE.MathUtils.lerp(-0.04, -0.12, eased);
-        this.camera.position.y = 2.15 - Math.sin(progress * Math.PI) * 0.018;
+        this.camera.position.y = this.layout.cameraPosition.y - Math.sin(progress * Math.PI) * 0.018;
       });
       this.audio.insertRound(ammo, index);
       await this.wait(PRESENTATION_TIMING.roundSettle);
       cartridge.visible = false;
       this.setMagazineRounds(rounds.slice(0, index + 1));
     }
-    this.camera.position.y = 2.15;
+    this.camera.position.y = this.layout.cameraPosition.y;
     const inspectionStart = magazine.position.clone();
     await this.tween(PRESENTATION_TIMING.magazineInspectMove, (progress) => {
       const eased = this.easeInOut(progress);
@@ -148,7 +148,7 @@ export class GamePresentation {
     const pistolStartQuaternion = this.pistolModel.root.quaternion.clone();
     const insertionQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
     const magazineStartScale = magazine.scale.x;
-    const insertionScale = this.layout.pistolScale * (this.layout.cameraFov === 46 ? 0.52 : 0.72);
+    const insertionScale = this.layout.pistolScale * this.layout.insertionScaleFactor;
     await this.tween(PRESENTATION_TIMING.magazineApproach, (progress) => {
       const eased = this.easeInOut(progress);
       this.pistolModel.root.position.lerpVectors(pistolStartPosition, this.layout.weaponInsertion, eased);
@@ -226,7 +226,7 @@ export class GamePresentation {
       this.pistolModel.root.position.lerpVectors(recoilPosition, this.baseWeaponPosition, eased);
       this.pistolModel.root.quaternion.slerpQuaternions(recoilQuaternion, this.baseAimQuaternion, eased);
     });
-    this.camera.position.x = 0;
+    this.camera.position.x = this.layout.cameraPosition.x;
     this.pistolModel.slide.position.x = 0;
     this.muzzleFlash.intensity = 0;
     this.animationInProgress = false;
@@ -482,7 +482,11 @@ export class GamePresentation {
     this.layout = getPresentationLayout(width, height);
     this.pistolModel.root.scale.setScalar(this.layout.pistolScale);
     this.magazineModel.root.scale.setScalar(this.layout.magazineScale);
-    if (!this.animationInProgress) this.pistolModel.root.position.copy(this.layout.weaponRest);
+    if (!this.animationInProgress) {
+      this.pistolModel.root.position.copy(this.layout.weaponRest);
+      this.camera.position.copy(this.layout.cameraPosition);
+      this.camera.lookAt(this.layout.cameraTarget);
+    }
     this.camera.aspect = width / Math.max(height, 1);
     this.camera.fov = this.layout.cameraFov;
     this.camera.updateProjectionMatrix();

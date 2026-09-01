@@ -156,4 +156,159 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   .ammo-rack, .magazine-panel { padding-inline: .55rem; }
   .ammo-token strong { font-size: .68rem; }
 }
+.game-shell[data-layout="portrait"] {
+  min-height: 0;
+  --portrait-edge: 8px;
+  --portrait-top-hud-height: 66px;
+  --portrait-phase-height: 48px;
+  --portrait-loadout-height: 204px;
+}
+.game-shell[data-layout="portrait"]::after {
+  background: linear-gradient(180deg, rgba(4, 7, 5, .48), transparent 24%, transparent 70%, rgba(5, 8, 6, .64));
+}
+.game-shell[data-layout="portrait"] .top-hud {
+  grid-template-columns: minmax(0, 1fr) 104px;
+  gap: 6px;
+  padding: calc(var(--portrait-edge) + env(safe-area-inset-top)) calc(var(--portrait-edge) + env(safe-area-inset-right)) 0 calc(var(--portrait-edge) + env(safe-area-inset-left));
+}
+.game-shell[data-layout="portrait"] .brand { display: none; }
+.game-shell[data-layout="portrait"] .enemy-card {
+  grid-column: 1;
+  min-width: 0;
+  height: 58px;
+  padding: .52rem .62rem .56rem;
+  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 9px);
+}
+.game-shell[data-layout="portrait"] .enemy-heading { font-size: .62rem; letter-spacing: .08em; }
+.game-shell[data-layout="portrait"] .enemy-meta { margin-top: .24rem; font-size: .53rem; }
+.game-shell[data-layout="portrait"] .hp-track { height: 4px; margin-top: .42rem; }
+.game-shell[data-layout="portrait"] .utility-stack {
+  grid-column: 2;
+  width: 104px;
+  height: 58px;
+  grid-template-columns: 54px 44px;
+  align-items: end;
+  gap: 6px;
+}
+.game-shell[data-layout="portrait"] .distance-card {
+  align-self: stretch;
+  display: grid;
+  align-content: center;
+  padding-right: .42rem;
+}
+.game-shell[data-layout="portrait"] .distance-card small { font-size: .5rem; letter-spacing: .1em; }
+.game-shell[data-layout="portrait"] .distance-card strong { margin-top: .08rem; font-size: .94rem; }
+.game-shell[data-layout="portrait"] .audio-controls { display: block; min-height: 44px; }
+.game-shell[data-layout="portrait"] .audio-controls button { width: 100%; min-height: 44px; border-right: 0; }
+.game-shell[data-layout="portrait"] .audio-controls label { display: none; }
+.game-shell[data-layout="portrait"] .phase-panel {
+  top: calc(var(--portrait-edge) + env(safe-area-inset-top) + var(--portrait-top-hud-height));
+  left: calc(var(--portrait-edge) + env(safe-area-inset-left));
+  right: calc(var(--portrait-edge) + env(safe-area-inset-right));
+  width: auto;
+  min-height: var(--portrait-phase-height);
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: .5rem;
+  padding: .35rem .5rem;
+  border: 1px solid rgba(200,255,77,.16);
+  border-left: 2px solid rgba(200,255,77,.7);
+  background: linear-gradient(90deg, rgba(9,14,11,.82), rgba(9,14,11,.28));
+  backdrop-filter: blur(6px);
+}
+.game-shell[data-layout="portrait"] .phase-panel > .eyebrow { font-size: .51rem; letter-spacing: .08em; white-space: nowrap; }
+.game-shell[data-layout="portrait"] .phase-panel > strong { margin: 0; font-size: .82rem; white-space: nowrap; }
+.game-shell[data-layout="portrait"] .phase-panel > p { display: none; }
+.game-shell[data-layout="portrait"] .combat-log {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  gap: .38rem;
+  align-items: center;
+}
+.game-shell[data-layout="portrait"] .combat-log > span { flex-basis: 28px; width: 28px; height: 28px; font-size: .7rem; }
+.game-shell[data-layout="portrait"] .combat-log > div { min-width: 0; }
+.game-shell[data-layout="portrait"] .combat-log strong { display: block; overflow: hidden; font-size: .62rem; text-overflow: ellipsis; white-space: nowrap; }
+.game-shell[data-layout="portrait"] .combat-log small { display: none; }
+.game-shell[data-layout="portrait"] .loadout {
+  left: calc(var(--portrait-edge) + env(safe-area-inset-left));
+  right: calc(var(--portrait-edge) + env(safe-area-inset-right));
+  bottom: calc(var(--portrait-edge) + env(safe-area-inset-bottom));
+  width: auto;
+  height: auto;
+  transform: none;
+  grid-template-columns: 1fr;
+}
+.game-shell[data-layout="portrait"] .ammo-rack,
+.game-shell[data-layout="portrait"] .magazine-panel { padding: .42rem .48rem .48rem; }
+.game-shell[data-layout="portrait"] .ammo-rack { border-right: 0; border-bottom: 1px solid var(--line); }
+.game-shell[data-layout="portrait"] .section-label { min-height: 13px; margin-bottom: .3rem; font-size: .56rem; letter-spacing: .12em; }
+.game-shell[data-layout="portrait"] .section-label small { font-size: .5rem; }
+.game-shell[data-layout="portrait"] .ammo-options { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
+.game-shell[data-layout="portrait"] .ammo-token {
+  justify-content: center;
+  min-height: 48px;
+  height: 48px;
+  gap: 0;
+  padding: .28rem .16rem;
+}
+.game-shell[data-layout="portrait"] .ammo-token > span:nth-child(2) { display: none; }
+.game-shell[data-layout="portrait"] .ammo-token .round-visual { width: 12px; height: 31px; }
+.game-shell[data-layout="portrait"] .stock-count { top: 3px; right: 3px; min-width: 17px; height: 17px; font-size: .54rem; }
+.game-shell[data-layout="portrait"] .sequence-preview {
+  min-height: 38px;
+  margin: -.06rem 0 .34rem;
+  padding: .26rem .4rem;
+  overflow: hidden;
+}
+.game-shell[data-layout="portrait"] .sequence-preview > div:first-child {
+  gap: .22rem;
+  min-height: 14px;
+  overflow: hidden;
+  font-size: .57rem;
+  white-space: nowrap;
+}
+.game-shell[data-layout="portrait"] .sequence-preview > div:last-child {
+  margin-top: .15rem;
+  overflow: hidden;
+  font-size: .53rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.game-shell[data-layout="portrait"] .magazine-row { grid-template-columns: minmax(0, 1fr) 94px; gap: .35rem; }
+.game-shell[data-layout="portrait"] .magazine-slots { gap: 3px; }
+.game-shell[data-layout="portrait"] .mag-slot,
+.game-shell[data-layout="portrait"] .load-button { min-height: 48px; height: 48px; }
+.game-shell[data-layout="portrait"] .mag-slot { min-width: 0; padding: .2rem; }
+.game-shell[data-layout="portrait"] .mag-slot .round-visual { width: 10px; height: 25px; }
+.game-shell[data-layout="portrait"] .mag-slot strong { font-size: .49rem; }
+.game-shell[data-layout="portrait"] .load-button { font-size: .69rem; }
+.game-shell[data-layout="portrait"] .load-button small { margin-top: .08rem; font-size: .46rem; }
+.game-shell[data-layout="portrait"] .selection-actions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 4px);
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  margin: 0;
+  padding: .32rem;
+  background: rgba(12,18,15,.96);
+}
+.game-shell[data-layout="portrait"] .selection-actions span { overflow: hidden; font-size: .55rem; text-overflow: ellipsis; white-space: nowrap; }
+.game-shell[data-layout="portrait"] .selection-actions button { min-height: 42px; padding-inline: .5rem; font-size: .57rem; }
+.game-shell[data-layout="portrait"] .hint { display: none; }
+body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .ammo-rack { display: none; }
+body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .loadout {
+  background: linear-gradient(135deg, rgba(16,22,18,.9), rgba(8,12,10,.78));
+}
+body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .magazine-panel { padding-block: .35rem .42rem; }
+body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .section-label { margin-bottom: .22rem; }
+body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .sequence-preview { min-height: 25px; margin-bottom: .24rem; }
+body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .sequence-preview > div:last-child { display: none; }
+.game-shell[data-layout="portrait"] .game-over {
+  padding: calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left));
+}
+.game-shell[data-layout="portrait"] .game-over-card { padding: 1.35rem 1rem; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
