@@ -32,4 +32,14 @@ describe('GameStateMachine', () => {
     state.transition('AMMO_SELECTION');
     expect(state.phase).toBe('AMMO_SELECTION');
   });
+
+  it('조우 종료 후 경로를 선택해 다음 준비 단계로 이동한다', () => {
+    const state = new GameStateMachine();
+    state.transition('LOADING');
+    state.transition('FIRING');
+    state.transition('ENEMY_ACTION');
+    state.transition('ROUTE_SELECTION');
+    state.transition('AMMO_SELECTION');
+    expect(state.phase).toBe('AMMO_SELECTION');
+  });
 });
