@@ -54,6 +54,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .combat-metrics strong { color: var(--acid); font-size: .78rem; }
 .combat-metrics button { min-height: 34px; padding: .35rem .55rem; border: 1px solid rgba(200,255,77,.34); color: #dfffa0; background: rgba(200,255,77,.08); font-size: .62rem; font-weight: 800; cursor: pointer; }
 .combat-metrics button:disabled { opacity: .4; cursor: default; }
+.combat-metrics button.is-disrupted { border-color: rgba(255,92,69,.7); color: #ffad9f; background: rgba(100,18,12,.3); }
 .attachment-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; margin-top: .4rem; }
 .attachment-strip > span { min-width: 0; padding: .3rem .22rem; border: 1px solid rgba(255,255,255,.08); background: rgba(0,0,0,.2); }
 .attachment-strip small, .attachment-strip strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

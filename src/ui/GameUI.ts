@@ -222,6 +222,11 @@ export class GameUI {
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number): void {
     this.magazineCapacity = capacity;
+    const disruptedSlot = ATTACHMENT_SLOT_ORDER.find((slot) => (playerState.disabledSlots[slot] ?? 0) > 0);
+    const disruptedTurns = disruptedSlot ? playerState.disabledSlots[disruptedSlot] ?? 0 : 0;
+    this.attachmentOpen.textContent = disruptedSlot ? `${ATTACHMENT_SLOT_NAMES[disruptedSlot]} 봉쇄 ${disruptedTurns}턴` : '장착물 구성';
+    this.attachmentOpen.classList.toggle('is-disrupted', Boolean(disruptedSlot));
+    this.attachmentOpen.setAttribute('aria-label', disruptedSlot ? `장착물 구성, ${ATTACHMENT_SLOT_NAMES[disruptedSlot]} 봉쇄 ${disruptedTurns}턴` : '장착물 구성');
     this.attachmentStrip.innerHTML = ATTACHMENT_SLOT_ORDER.map((slot) => {
       const id = loadout[slot];
       const disabledTurns = playerState.disabledSlots[slot] ?? 0;
