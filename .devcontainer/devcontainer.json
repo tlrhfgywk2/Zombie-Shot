@@ -1,0 +1,12 @@
+{
+  "name": "Zombie Shot",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "postCreateCommand": "npm ci",
+  "forwardPorts": [5173],
+  "portsAttributes": {
+    "5173": {
+      "label": "Zombie Shot Preview",
+      "onAutoForward": "notify"
+    }
+  }
+}
