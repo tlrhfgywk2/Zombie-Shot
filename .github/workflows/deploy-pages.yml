@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: pages-branch-publish
@@ -15,6 +17,9 @@ concurrency:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: 저장소 체크아웃
         uses: actions/checkout@v4
@@ -42,6 +47,14 @@ jobs:
       - name: 정적 사이트 준비
         run: touch dist/.nojekyll
 
+      - name: Pages 설정
+        uses: actions/configure-pages@v5
+
+      - name: Pages 아티팩트 업로드
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
       - name: gh-pages 브랜치 게시
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -55,3 +68,7 @@ jobs:
           git commit -m "deploy: ${GITHUB_SHA}"
           git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git push --force origin gh-pages
+
+      - name: GitHub Pages 게시
+        id: deployment
+        uses: actions/deploy-pages@v4
