@@ -34,7 +34,7 @@ export class AudioManager {
   }
 
   insertRound(ammoType: AmmoType, index: number): void {
-    const frequency: Record<AmmoType, number> = { standard: 430, armorPiercing: 485, hollowPoint: 395, incendiary: 620, stagger: 540, magnum: 330 };
+    const frequency: Record<AmmoType, number> = { standard: 430, armorPiercing: 485, hollowPoint: 395, incendiary: 620, stagger: 540, magnum: 330, cryo: 690, arc: 760, sanctified: 820, bloodHex: 275 };
     this.tone(frequency[ammoType] + index * 18, 0.045, 0.045, 'square');
     this.tone(180, 0.028, 0.025, 'triangle', 0.022);
   }
@@ -57,7 +57,7 @@ export class AudioManager {
   }
 
   shot(ammoType: AmmoType): void {
-    const lowFrequency: Record<AmmoType, number> = { standard: 92, armorPiercing: 105, hollowPoint: 82, incendiary: 102, stagger: 112, magnum: 70 };
+    const lowFrequency: Record<AmmoType, number> = { standard: 92, armorPiercing: 105, hollowPoint: 82, incendiary: 102, stagger: 112, magnum: 70, cryo: 118, arc: 128, sanctified: 138, bloodHex: 64 };
     const volume = ammoType === 'magnum' ? 0.16 : 0.135;
     this.noise(ammoType === 'magnum' ? 0.16 : 0.12, volume, ammoType === 'stagger' ? 1800 : 1250);
     this.tone(lowFrequency[ammoType], 0.11, 0.09, 'sawtooth');

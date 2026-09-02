@@ -18,6 +18,18 @@ export class Zombie {
     return this.state.hp <= 0;
   }
 
-  snapshot(): EnemyState { return { ...this.state, statuses: { ...this.state.statuses } }; }
-  applyState(state: EnemyState): void { this.state = { ...state, statuses: { ...state.statuses } }; }
+  snapshot(): EnemyState {
+    return {
+      ...this.state,
+      intent: this.state.intent ? { ...this.state.intent } : undefined,
+      statuses: { ...this.state.statuses, buildup: { ...this.state.statuses.buildup } },
+    };
+  }
+  applyState(state: EnemyState): void {
+    this.state = {
+      ...state,
+      intent: state.intent ? { ...state.intent } : undefined,
+      statuses: { ...state.statuses, buildup: { ...state.statuses.buildup } },
+    };
+  }
 }

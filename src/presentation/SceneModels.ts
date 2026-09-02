@@ -261,7 +261,7 @@ export const createCartridge = (ammoType: AmmoType, scale = 1): THREE.Group => {
   const bullet = mesh(new THREE.ConeGeometry(0.055, 0.14, 10), tipMaterial);
   bullet.position.y = 0.205;
   group.add(casing, rim, bullet);
-  const bandCounts: Record<AmmoType, number> = { standard: 0, armorPiercing: 1, hollowPoint: 2, incendiary: 3, stagger: 4, magnum: 5 };
+  const bandCounts: Record<AmmoType, number> = { standard: 0, armorPiercing: 1, hollowPoint: 2, incendiary: 3, stagger: 4, magnum: 5, cryo: 2, arc: 3, sanctified: 4, bloodHex: 5 };
   for (let index = 0; index < bandCounts[ammoType]; index += 1) {
     const band = mesh(new THREE.TorusGeometry(0.059, 0.008, 5, 10), tipMaterial, false);
     band.rotation.x = Math.PI / 2;

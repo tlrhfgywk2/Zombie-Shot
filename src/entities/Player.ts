@@ -1,13 +1,20 @@
 import { Magazine } from '../combat/Magazine';
-import type { AmmoType } from '../combat/types';
+import { AttachmentLoadout, createPlayerCombatState, getMagazineCapacity } from '../combat/AttachmentLoadout';
+import type { AmmoType, AttachmentSlot, PlayerCombatState } from '../combat/types';
+import type { AttachmentId } from '../data/attachmentDefinitions';
 import { AMMO_ORDER, STARTING_AMMO_STOCK, type AmmoStock } from '../data/ammoDefinitions';
 
 export class Player {
   readonly magazine = new Magazine();
+  readonly loadout = new AttachmentLoadout();
   isAlive = true;
   private stock: AmmoStock = { ...STARTING_AMMO_STOCK };
+  private combatState: PlayerCombatState = createPlayerCombatState();
+
+  constructor() { this.syncMagazineCapacity(); }
 
   getStock(): AmmoStock { return { ...this.stock }; }
+  getCombatState(): PlayerCombatState { return { ...this.combatState, disabledSlots: { ...this.combatState.disabledSlots } }; }
 
   addAmmo(ammo: AmmoType): boolean {
     if (this.stock[ammo] <= 0 || !this.magazine.add(ammo)) return false;
@@ -36,9 +43,41 @@ export class Player {
     for (const ammo of AMMO_ORDER) this.stock[ammo] += supply[ammo];
   }
 
+  returnAmmo(rounds: readonly AmmoType[]): void { for (const ammo of rounds) this.stock[ammo] += 1; }
+
+  equipAttachment(id: AttachmentId): AttachmentId | undefined {
+    const replaced = this.loadout.equip(id);
+    this.syncMagazineCapacity();
+    return replaced;
+  }
+
+  unequipAttachment(slot: AttachmentSlot): AttachmentId | undefined {
+    const removed = this.loadout.unequip(slot);
+    this.syncMagazineCapacity();
+    return removed;
+  }
+
+  applyCombatState(state: PlayerCombatState): void {
+    this.combatState = { ...state, disabledSlots: { ...state.disabledSlots } };
+    this.syncMagazineCapacity();
+  }
+
+  clearCombatDisruptions(): void {
+    this.combatState = createPlayerCombatState();
+    this.syncMagazineCapacity();
+  }
+
   reset(): void {
     this.magazine.clear();
     this.stock = { ...STARTING_AMMO_STOCK };
+    this.loadout.reset();
+    this.combatState = createPlayerCombatState();
+    this.syncMagazineCapacity();
     this.isAlive = true;
+  }
+
+  private syncMagazineCapacity(): void {
+    const overflow = this.magazine.setCapacity(getMagazineCapacity(this.loadout.getSnapshot(), this.combatState));
+    this.returnAmmo(overflow);
   }
 }

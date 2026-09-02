@@ -47,7 +47,7 @@ export class GameUI {
   private readonly endTitle: HTMLElement;
   private readonly endDetail: HTMLElement;
   private rounds: readonly AmmoType[] = [];
-  private stock: AmmoStock = { standard: 0, armorPiercing: 0, hollowPoint: 0, incendiary: 0, stagger: 0, magnum: 0 };
+  private stock: AmmoStock = { standard: 0, armorPiercing: 0, hollowPoint: 0, incendiary: 0, stagger: 0, magnum: 0, cryo: 0, arc: 0, sanctified: 0, bloodHex: 0 };
   private locked = false;
   private selectedIndex: number | null = null;
   private suppressClick = false;

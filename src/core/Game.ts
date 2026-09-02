@@ -76,7 +76,10 @@ export class Game {
     if (this.busy || this.state.phase !== 'AMMO_SELECTION' || this.player.magazine.size === 0) return;
     this.busy = true;
     const rounds = this.player.magazine.getRounds();
-    const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot());
+    const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), {
+      loadout: this.player.loadout.getSnapshot(),
+      playerState: this.player.getCombatState(),
+    });
     this.state.transition('LOADING');
     this.ui.setLocked(true);
     this.ui.setPhase('LOADING', `${rounds.length}발을 탄창에 밀어 넣고 약실을 준비합니다.`);
@@ -92,6 +95,7 @@ export class Game {
       await this.pause(PRESENTATION_TIMING.betweenShots);
     }
     this.player.magazine.clear();
+    this.player.returnAmmo(sequence.returnedRounds);
     this.syncMagazine();
     await this.resolveEnemyAction();
     this.busy = false;
@@ -102,8 +106,9 @@ export class Game {
     this.ui.setPhase('ENEMY_ACTION', '화상과 이동 억제를 처리합니다.');
     if (this.zombie.isDead) { await this.handleZombieDeath(); return; }
 
-    const action = this.resolver.resolveEnemyAction(this.zombie.snapshot());
+    const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), this.player.getCombatState(), this.player.loadout.getSnapshot());
     this.zombie.applyState(action.after);
+    this.player.applyCombatState(action.playerAfter);
     if (action.burnDamage > 0) {
       this.ui.showEvent('화상 피해', `${action.burnDamage} 피해 · 남은 화상 ${action.after.statuses.burnTurns}턴`);
       await this.presentation.animateBurn();
@@ -158,6 +163,7 @@ export class Game {
 
   private async spawnCurrentEnemy(): Promise<void> {
     const type = WAVE_ROSTER[this.waveIndex]?.[this.enemyIndex] ?? 'normal';
+    this.player.clearCombatDisruptions();
     this.zombie = new Zombie(type);
     this.sync();
     await this.presentation.animateSpawn(this.zombie.distance);
@@ -193,8 +199,9 @@ export class Game {
     this.ui.renderMagazine(rounds, this.player.getStock());
     if (rounds.length === 0) this.ui.renderPreview(undefined, undefined);
     else {
-      const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot());
-      const action = sequence.killed ? undefined : this.resolver.resolveEnemyAction(sequence.finalState);
+      const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+      const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context);
+      const action = sequence.killed ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
       this.ui.renderPreview(sequence, action);
     }
   }
