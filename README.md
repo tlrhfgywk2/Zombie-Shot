@@ -74,17 +74,38 @@ npm run build
 
 결과물은 `dist/`에 생성됩니다. Vite 기본 경로가 `/Zombie-Shot/`으로 설정되어 GitHub Pages 프로젝트 하위 경로에서 동작합니다.
 
-`.github/workflows/deploy-pages.yml`은 검증된 `release` 브랜치 푸시 시에만 의존성 설치, 테스트, 빌드 후 `dist/`를 GitHub Pages에 배포합니다. `develop`에서는 자동 배포하지 않습니다. 저장소의 **Settings → Pages → Source**를 **GitHub Actions**로 한 번 설정해야 할 수 있습니다.
+`.github/workflows/deploy-pages.yml`은 `develop`의 정확한 커밋을 검사하고 테스트·린트·빌드를 실행한 뒤 `dist/`를 유일한 공식 Pages 빌드로 배포합니다. CI가 주입한 소스 SHA는 화면의 `BUILD` 표식과 배포 커밋에 함께 기록됩니다. 저장소의 **Settings → Pages → Source**를 **GitHub Actions**로 한 번 설정해야 할 수 있습니다.
 
 ## 브랜치 작업 흐름
 
-기능 및 수정 브랜치는 `develop`에서 분기해 작업하고 검증 후 `develop`에 병합합니다. 실제 기기 확인까지 완료한 배포 후보만 `release`에 반영하며, GitHub Pages는 `release`만 배포합니다.
+기능 및 수정 브랜치는 최신 `develop`에서 분기해 작업하고 검증 후 PR로 `develop`에 병합합니다. 일반 Codex 작업은 자신의 PR을 자동 병합하지 않으며 `release`와 `main`을 변경하지 않습니다.
 
 ```text
-feature/fix → develop → 사용자 검증 → release → GitHub Pages
+develop → task branch → PR checks/review → develop → GitHub Pages
 ```
 
 `main`은 초기 안정 기준선으로 유지합니다.
+
+### Cloud-first 새 작업
+
+1. 최신 `develop`에서 Codex Cloud 작업을 시작하고 전용 task branch를 사용합니다.
+2. 구현 후 `npm test`, `npm run lint`, `npm run build`를 실행하고, 시각 변경은 실제 브라우저에서 데스크톱 `1440x900`과 세로 `390x844`를 확인합니다.
+3. `develop` 대상 PR을 열면 배포 없는 PR checks가 실행됩니다. 리뷰하고 필요하면 Codespaces에서 플레이테스트한 뒤 사람이 병합합니다.
+4. 병합 후 Pages 배포가 끝나면 화면의 BUILD SHA가 병합된 소스 revision과 같은지 확인합니다.
+
+### Codex 계정 간 작업 인계
+
+Account A는 유용한 진행을 task branch에 커밋하고 PR의 `## Codex Handoff`를 현재 상태, 남은 일, 검증 결과, 중요 파일, 정확한 다음 단계로 갱신한 뒤 멈춥니다. Account B는 같은 PR을 열고 `AGENTS.md`와 handoff를 읽은 다음 PR head branch를 checkout하여 커밋과 `develop` 대비 diff를 확인하고 `Exact next step`부터 계속합니다. 이전 Codex 대화나 Windows PC는 필요하지 않습니다.
+
+### Codespaces/태블릿 미리보기
+
+PR head branch로 Codespace를 만든 뒤 다음을 실행합니다.
+
+```bash
+npm run dev -- --host 0.0.0.0
+```
+
+자동 전달된 **Zombie Shot Preview** 포트 5173을 태블릿 브라우저에서 엽니다. 포트는 자동으로 공개되지 않으며 필요할 때 Codespaces의 포트 설정에서 접근 범위를 선택합니다. Task branch는 공식 Pages를 배포하지 않습니다.
 
 ## 실제 휴대전화 확인 목록
 
