@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import type { AmmoType } from '../combat/types';
+import type { AmmoType, AttachmentSlot, EnemyType, PlayerCombatState } from '../combat/types';
+import type { AttachmentId, LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
 import type { AudioPreferences } from './AudioPreferences';
 import { PRESENTATION_EFFECTS, PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
 import { getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
-import { createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
+import { createAttachmentModel, createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
 interface MuzzleSmokeEffect {
   root: THREE.Group;
@@ -39,6 +40,8 @@ export class GamePresentation {
   private readonly cartridges: THREE.Group[] = [];
   private readonly muzzleSmokePool: MuzzleSmokeEffect[] = [];
   private readonly casingPool: CasingEffect[] = [];
+  private readonly attachmentVisuals: Partial<Record<AttachmentSlot, THREE.Group>> = {};
+  private readonly attachmentVisualIds: Partial<Record<AttachmentSlot, AttachmentId>> = {};
   private readonly presentationDebug = new URLSearchParams(window.location.search).get('presentationDebug') === '1';
   private readonly debugBounds = {
     grip: new THREE.Box3(),
@@ -66,6 +69,7 @@ export class GamePresentation {
   private resizeObserver?: ResizeObserver;
   private animationFrame = 0;
   private shotEffectSequence = 0;
+  private specialThreat = false;
 
   constructor(private readonly host: HTMLElement) {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -119,18 +123,60 @@ export class GamePresentation {
     this.audio.setPreferences(preferences);
   }
 
+  setAttachments(loadout: LoadoutSnapshot, playerState: PlayerCombatState): void {
+    for (const slot of Object.keys(this.pistolModel.attachmentSockets) as AttachmentSlot[]) {
+      const id = loadout[slot];
+      const current = this.attachmentVisuals[slot];
+      if (this.attachmentVisualIds[slot] !== id) {
+        if (current) this.disposeObject(current);
+        delete this.attachmentVisuals[slot];
+        delete this.attachmentVisualIds[slot];
+        if (id) {
+          const visual = createAttachmentModel(id);
+          this.pistolModel.attachmentSockets[slot].add(visual);
+          this.attachmentVisuals[slot] = visual;
+          this.attachmentVisualIds[slot] = id;
+        }
+      }
+      const visual = this.attachmentVisuals[slot];
+      if (visual) this.setAttachmentDisabledAppearance(visual, Boolean(playerState.disabledSlots[slot]));
+    }
+    const magazineId = loadout.magazine;
+    this.magazineModel.basePlate.scale.x = magazineId === 'extendedFeed' ? 1.22 : magazineId === 'reserveFeed' ? 0.86 : 1;
+  }
+
   wait(milliseconds: number): Promise<void> {
     return this.tween(milliseconds, () => undefined);
   }
 
-  setZombie(distance: number, hpRatio: number, burning: boolean, level: number): void {
+  setZombie(distance: number, hpRatio: number, burning: boolean, level: number, type: EnemyType = 'normal'): void {
     this.zombieTargetZ = 1.1 - distance * 0.72;
     const scale = 1 + Math.min(level - 1, 10) * 0.025;
     this.zombieModel.root.scale.setScalar(scale);
     const material = this.zombieModel.torso.material as THREE.MeshStandardMaterial;
+    const specialColors: Partial<Record<EnemyType, number>> = { contaminator: 0x67543f, groundshaker: 0x5b4b42, screecher: 0x3d5261 };
+    material.color.setHex(specialColors[type] ?? 0x30443c);
     material.emissive.setHex(burning ? 0x5e1705 : hpRatio < 0.35 ? 0x33110d : 0x08110a);
     material.emissiveIntensity = burning ? 0.82 : 0.32;
     this.burnLight.intensity = burning ? 1.35 : 0;
+    this.specialThreat = type === 'contaminator' || type === 'groundshaker' || type === 'screecher';
+    this.zombieModel.threatHalo.visible = this.specialThreat;
+    const haloMaterial = this.zombieModel.threatHalo.material as THREE.MeshBasicMaterial;
+    haloMaterial.color.setHex(type === 'contaminator' ? 0x9bd24a : type === 'groundshaker' ? 0xff8a4c : 0x69c7ff);
+  }
+
+  private setAttachmentDisabledAppearance(root: THREE.Group, disabled: boolean): void {
+    root.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+      const materials = Array.isArray(child.material) ? child.material : [child.material];
+      for (const material of materials) {
+        if (material.userData.baseOpacity === undefined) material.userData.baseOpacity = material.opacity;
+        if (material.userData.baseColor === undefined && 'color' in material) material.userData.baseColor = (material as THREE.MeshBasicMaterial).color.getHex();
+        material.transparent = disabled || material.userData.baseOpacity < 1;
+        material.opacity = disabled ? 0.42 : material.userData.baseOpacity as number;
+        if ('color' in material && material.userData.baseColor !== undefined) (material as THREE.MeshBasicMaterial).color.setHex(disabled ? 0x8b3328 : material.userData.baseColor as number);
+      }
+    });
   }
 
   async animateLoading(rounds: readonly AmmoType[]): Promise<void> {
@@ -976,6 +1022,11 @@ export class GamePresentation {
       this.zombieModel.leftArm.rotation.z = -0.08 + stride * 0.35;
       this.zombieModel.rightArm.rotation.z = 0.08 - stride * 0.35;
       this.zombieModel.head.rotation.y = Math.sin(this.elapsed * 1.45) * 0.045;
+      if (this.specialThreat) {
+        const pulse = 1 + Math.sin(this.elapsed * 4.2) * 0.055;
+        this.zombieModel.threatHalo.scale.setScalar(pulse);
+        this.zombieModel.threatHalo.rotation.z = this.elapsed * 0.18;
+      }
     }
     this.zombieModel.root.position.z += (this.zombieTargetZ - this.zombieModel.root.position.z) * Math.min(delta * 4, 1);
     this.renderer.render(this.scene, this.camera);

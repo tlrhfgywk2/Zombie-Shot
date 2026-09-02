@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { createMagazineModel, createPistolModel } from './SceneModels';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER } from '../data/attachmentDefinitions';
+import { createAttachmentModel, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
 describe('권총 모델 기준점', () => {
   it('총구는 총열의 +X 전방에 있고 명시적으로 이름 붙어 있다', () => {
@@ -69,5 +70,29 @@ describe('권총 모델 기준점', () => {
     expect(baseBounds.min.y).toBeLessThan(gripBounds.min.y);
     expect(bodyCenterInGrip.x).toBeCloseTo(pistol.gripBody.position.x);
     expect(bodyCenterInGrip.z).toBeCloseTo(pistol.gripBody.position.z);
+  });
+
+  it('다섯 장착물 소켓이 권총 루트에 명시적으로 고정된다', () => {
+    const pistol = createPistolModel();
+    expect(Object.keys(pistol.attachmentSockets)).toEqual(['muzzle', 'magazine', 'optic', 'rail', 'grip']);
+    for (const socket of Object.values(pistol.attachmentSockets)) {
+      expect(socket.name).toMatch(/^attachmentSocket/);
+      expect(socket.parent).toBe(pistol.root);
+    }
+  });
+
+  it.each(ATTACHMENT_ORDER)('%s 장착물은 해당 물리 슬롯에 배치 가능한 모델을 만든다', (id) => {
+    const pistol = createPistolModel();
+    const model = createAttachmentModel(id);
+    pistol.attachmentSockets[ATTACHMENT_DEFINITIONS[id].slot].add(model);
+    expect(model.children.length).toBeGreaterThan(0);
+    expect(model.parent).toBe(pistol.attachmentSockets[ATTACHMENT_DEFINITIONS[id].slot]);
+  });
+
+  it('특수 위협 표식은 일반 상태에서 숨겨진 채 좀비에 부착된다', () => {
+    const zombie = createZombieModel();
+    expect(zombie.threatHalo.name).toBe('specialThreatHalo');
+    expect(zombie.threatHalo.visible).toBe(false);
+    expect(zombie.threatHalo.parent).toBe(zombie.root);
   });
 });

@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run",
+    "test:balance": "vitest run src/simulation/BalanceSimulator.test.ts --reporter=verbose",
     "test:watch": "vitest"
   },
   "dependencies": {

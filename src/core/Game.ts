@@ -1,7 +1,9 @@
 import { CombatResolver } from '../combat/CombatResolver';
-import type { AmmoType } from '../combat/types';
-import { WAVE_AMMO_SUPPLY } from '../data/ammoDefinitions';
-import { ENEMY_DEFINITIONS, WAVE_ROSTER } from '../data/enemyDefinitions';
+import type { AmmoType, AttachmentSlot } from '../combat/types';
+import type { AttachmentId } from '../data/attachmentDefinitions';
+import { NORMAL_AMMO_SUPPLY, SPECIAL_AMMO_SUPPLY } from '../data/ammoDefinitions';
+import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
+import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
@@ -19,7 +21,9 @@ export class Game {
   private audioPreferences: AudioPreferences = loadAudioPreferences();
   private waveIndex = 0;
   private enemyIndex = 0;
-  private zombie = new Zombie(WAVE_ROSTER[0]?.[0] ?? 'normal');
+  private currentRoute: RouteKind = 'normal';
+  private currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
+  private zombie = new Zombie(this.currentRoster[0] ?? 'normal');
   private busy = false;
 
   constructor(root: HTMLElement) {
@@ -29,6 +33,9 @@ export class Game {
       onReplaceAmmo: (index, ammo) => this.replaceAmmo(index, ammo),
       onSwapAmmo: (first, second) => this.swapAmmo(first, second),
       onMoveAmmo: (from, to) => this.moveAmmo(from, to),
+      onEquipAttachment: (id) => this.equipAttachment(id),
+      onUnequipAttachment: (slot) => this.unequipAttachment(slot),
+      onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
       onLoad: () => void this.beginCombat(),
@@ -65,6 +72,19 @@ export class Game {
     if (this.state.phase === 'AMMO_SELECTION') { this.player.magazine.move(from, to); this.syncMagazine(); }
   }
 
+  private equipAttachment(id: AttachmentId): void {
+    if (this.state.phase !== 'AMMO_SELECTION') return;
+    this.player.equipAttachment(id);
+    this.sync();
+    this.ui.showEvent('장착물 교체', '정확도와 탄창 용량을 새 구성으로 다시 계산했습니다.');
+  }
+
+  private unequipAttachment(slot: AttachmentSlot): void {
+    if (this.state.phase !== 'AMMO_SELECTION' || !this.player.unequipAttachment(slot)) return;
+    this.sync();
+    this.ui.showEvent('장착물 해제', '빈 슬롯은 효과와 불이익을 모두 제거합니다.');
+  }
+
   private setAudioPreferences(preferences: AudioPreferences): void {
     this.audioPreferences = preferences;
     saveAudioPreferences(preferences);
@@ -76,7 +96,10 @@ export class Game {
     if (this.busy || this.state.phase !== 'AMMO_SELECTION' || this.player.magazine.size === 0) return;
     this.busy = true;
     const rounds = this.player.magazine.getRounds();
-    const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot());
+    const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), {
+      loadout: this.player.loadout.getSnapshot(),
+      playerState: this.player.getCombatState(),
+    });
     this.state.transition('LOADING');
     this.ui.setLocked(true);
     this.ui.setPhase('LOADING', `${rounds.length}발을 탄창에 밀어 넣고 약실을 준비합니다.`);
@@ -92,6 +115,7 @@ export class Game {
       await this.pause(PRESENTATION_TIMING.betweenShots);
     }
     this.player.magazine.clear();
+    this.player.returnAmmo(sequence.returnedRounds);
     this.syncMagazine();
     await this.resolveEnemyAction();
     this.busy = false;
@@ -102,8 +126,9 @@ export class Game {
     this.ui.setPhase('ENEMY_ACTION', '화상과 이동 억제를 처리합니다.');
     if (this.zombie.isDead) { await this.handleZombieDeath(); return; }
 
-    const action = this.resolver.resolveEnemyAction(this.zombie.snapshot());
+    const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), this.player.getCombatState(), this.player.loadout.getSnapshot());
     this.zombie.applyState(action.after);
+    this.player.applyCombatState(action.playerAfter);
     if (action.burnDamage > 0) {
       this.ui.showEvent('화상 피해', `${action.burnDamage} 피해 · 남은 화상 ${action.after.statuses.burnTurns}턴`);
       await this.presentation.animateBurn();
@@ -111,6 +136,12 @@ export class Game {
       await this.pause(350);
     }
     if (action.killedByBurn) { await this.handleZombieDeath(); return; }
+
+    if (action.intentDetail) {
+      this.ui.showEvent(action.intentDelayed ? '특수 행동 지연' : '특수 행동 발동', action.intentDetail);
+      this.syncEnemy();
+      await this.pause(420);
+    }
 
     const movementNote = action.staggerConsumed ? `충격으로 ${action.movement.toFixed(1)} m만 이동` : `${action.movement.toFixed(1)} m 이동`;
     this.ui.showEvent('감염체 접근', `${movementNote} · 남은 거리 ${this.zombie.distance.toFixed(1)} m`);
@@ -134,30 +165,45 @@ export class Game {
     this.ui.showEvent('감염체 제거', '다음 표적을 확인합니다.');
     await this.presentation.animateDeath();
 
-    const currentWave = WAVE_ROSTER[this.waveIndex] ?? [];
-    if (this.enemyIndex + 1 < currentWave.length) {
+    if (this.enemyIndex + 1 < this.currentRoster.length) {
       this.enemyIndex += 1;
       await this.spawnCurrentEnemy();
       return;
     }
 
-    if (this.waveIndex + 1 < WAVE_ROSTER.length) {
-      this.waveIndex += 1;
-      this.enemyIndex = 0;
-      this.player.resupply(WAVE_AMMO_SUPPLY);
-      this.ui.showEvent(`웨이브 ${this.waveIndex + 1} 보급`, '표준탄 5발과 매그넘을 제외한 특수탄 각 1발을 받았습니다.');
-      await this.pause(450);
-      await this.spawnCurrentEnemy();
+    this.player.resupply(this.currentRoute === 'special' ? SPECIAL_AMMO_SUPPLY : NORMAL_AMMO_SUPPLY);
+    if (this.waveIndex + 1 < ENCOUNTER_STAGES.length) {
+      const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1];
+      if (!nextStage) return;
+      this.state.transition('ROUTE_SELECTION');
+      this.ui.setLocked(true);
+      this.ui.setPhase('ROUTE_SELECTION', `${this.currentRoute === 'special' ? '정예' : '일반'} 보급을 확보했습니다. 다음 위험을 선택하세요.`);
+      this.ui.showRouteChoice(this.waveIndex + 2, nextStage.special ? [nextStage.normal, nextStage.special] : [nextStage.normal]);
       return;
     }
 
     this.state.transition('VICTORY');
-    this.ui.setPhase('VICTORY', '5개 웨이브를 모두 방어했습니다.');
+    this.ui.setPhase('VICTORY', '5개 조우를 모두 방어했습니다.');
     this.ui.showEndState('실험 완료', '탄약 순서 검증 구간 생존', '같은 적에게 다른 순서로 다시 시도해 결과를 비교해 보세요.', true);
   }
 
+  private async chooseRoute(kind: RouteKind): Promise<void> {
+    if (this.state.phase !== 'ROUTE_SELECTION') return;
+    const nextIndex = this.waveIndex + 1;
+    const stage = ENCOUNTER_STAGES[nextIndex];
+    const option = kind === 'special' ? stage?.special : stage?.normal;
+    if (!option) return;
+    this.currentRoute = kind;
+    this.currentRoster = option.roster;
+    this.waveIndex = nextIndex;
+    this.enemyIndex = 0;
+    this.ui.hideRouteChoice();
+    await this.spawnCurrentEnemy();
+  }
+
   private async spawnCurrentEnemy(): Promise<void> {
-    const type = WAVE_ROSTER[this.waveIndex]?.[this.enemyIndex] ?? 'normal';
+    const type = this.currentRoster[this.enemyIndex] ?? 'normal';
+    this.player.clearCombatDisruptions();
     this.zombie = new Zombie(type);
     this.sync();
     await this.presentation.animateSpawn(this.zombie.distance);
@@ -173,12 +219,15 @@ export class Game {
     this.player.reset();
     this.waveIndex = 0;
     this.enemyIndex = 0;
-    this.zombie = new Zombie(WAVE_ROSTER[0]?.[0] ?? 'normal');
+    this.currentRoute = 'normal';
+    this.currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
+    this.zombie = new Zombie(this.currentRoster[0] ?? 'normal');
     this.busy = false;
     this.ui.showEndState('', '', '', false);
+    this.ui.hideRouteChoice();
     this.ui.setLocked(false);
     this.ui.clearEvent();
-    this.presentation.setZombie(this.zombie.distance, 1, false, 1);
+    this.presentation.setZombie(this.zombie.distance, 1, false, 1, this.zombie.type);
     this.sync();
   }
 
@@ -190,19 +239,22 @@ export class Game {
 
   private syncMagazine(): void {
     const rounds = this.player.magazine.getRounds();
-    this.ui.renderMagazine(rounds, this.player.getStock());
+    this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity);
     if (rounds.length === 0) this.ui.renderPreview(undefined, undefined);
     else {
-      const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot());
-      const action = sequence.killed ? undefined : this.resolver.resolveEnemyAction(sequence.finalState);
+      const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+      const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context);
+      const action = sequence.killed ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
       this.ui.renderPreview(sequence, action);
     }
   }
 
   private syncEnemy(): void {
-    const waveSize = WAVE_ROSTER[this.waveIndex]?.length ?? 1;
-    this.ui.updateEnemy(this.zombie.snapshot(), this.waveIndex + 1, WAVE_ROSTER.length, this.enemyIndex + 1, waveSize);
-    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1);
+    const waveSize = this.currentRoster.length || 1;
+    this.ui.updateEnemy(this.zombie.snapshot(), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
+    this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity);
+    this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
+    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1, this.zombie.type);
   }
 
   private pause(milliseconds: number): Promise<void> { return this.presentation.wait(milliseconds); }
