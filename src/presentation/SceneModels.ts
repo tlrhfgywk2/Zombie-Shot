@@ -4,6 +4,8 @@ import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 
 export interface PistolModel {
   root: THREE.Group;
+  grip: THREE.Group;
+  gripBody: THREE.Mesh;
   slide: THREE.Group;
   muzzle: THREE.Object3D;
   magazineSeatAnchor: THREE.Object3D;
@@ -12,6 +14,9 @@ export interface PistolModel {
 
 export interface MagazineModel {
   root: THREE.Group;
+  body: THREE.Mesh;
+  feedEnd: THREE.Group;
+  basePlate: THREE.Mesh;
   magazineInsertAnchor: THREE.Object3D;
   roundDisplay: THREE.Group;
   witnessRounds: THREE.Mesh[];
@@ -35,6 +40,7 @@ const mesh = (geometry: THREE.BufferGeometry, material: THREE.Material, castShad
 
 export const createPistolModel = (): PistolModel => {
   const root = new THREE.Group();
+  root.name = 'pistolRoot';
   const slide = new THREE.Group();
   const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x242c29, roughness: 0.45, metalness: 0.66 });
   const slideMaterial = new THREE.MeshStandardMaterial({ color: 0x59645f, roughness: 0.27, metalness: 0.82 });
@@ -51,10 +57,12 @@ export const createPistolModel = (): PistolModel => {
   root.add(dustCover);
 
   const grip = new THREE.Group();
+  grip.name = 'pistolGrip';
   grip.position.set(-0.28, 0.08, 0);
   grip.rotation.z = -0.18;
   const gripHeight = 0.98;
   const gripBody = mesh(new THREE.BoxGeometry(0.48, gripHeight, 0.49), polymer);
+  gripBody.name = 'pistolGripBody';
   gripBody.position.y = -0.48;
   grip.add(gripBody);
   for (const z of [-0.256, 0.256]) {
@@ -69,7 +77,8 @@ export const createPistolModel = (): PistolModel => {
   }
   const magazineSeatAnchor = new THREE.Object3D();
   magazineSeatAnchor.name = 'magazineSeatAnchor';
-  magazineSeatAnchor.position.set(0, gripBody.position.y - gripHeight / 2, 0);
+  // The magazine seats against an internal stop under the frame, not against the visible grip floor.
+  magazineSeatAnchor.position.set(0, 0.32, 0);
   grip.add(magazineSeatAnchor);
   root.add(grip);
 
@@ -121,11 +130,12 @@ export const createPistolModel = (): PistolModel => {
   muzzle.position.set(1.13, 0.48, 0);
   root.add(muzzle);
 
-  return { root, slide, muzzle, magazineSeatAnchor, ejectionPort };
+  return { root, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort };
 };
 
 export const createMagazineModel = (): MagazineModel => {
   const root = new THREE.Group();
+  root.name = 'magazineRoot';
   const magazineInsertAnchor = new THREE.Object3D();
   const roundDisplay = new THREE.Group();
   const witnessRounds: THREE.Mesh[] = [];
@@ -134,10 +144,12 @@ export const createMagazineModel = (): MagazineModel => {
   const witnessFrame = new THREE.MeshStandardMaterial({ color: 0x090d0c, roughness: 0.7, metalness: 0.45 });
   const bodyHeight = 1.08;
   const body = mesh(new THREE.BoxGeometry(0.46, bodyHeight, 0.34), metal);
+  body.name = 'magazineBody';
   body.position.y = -0.02;
   root.add(body);
   magazineInsertAnchor.name = 'magazineInsertAnchor';
-  magazineInsertAnchor.position.set(0, body.position.y - bodyHeight / 2, 0);
+  // The physical insertion reference is the top of the rotated feed lips.
+  magazineInsertAnchor.position.set(0, 0.655, 0);
   root.add(magazineInsertAnchor);
   const front = mesh(new THREE.BoxGeometry(0.3, 0.89, 0.018), edge, false);
   front.position.set(0, -0.02, 0.18);
@@ -165,11 +177,15 @@ export const createMagazineModel = (): MagazineModel => {
   feedRight.position.x = 0.14;
   feedRight.rotation.z = 0.18;
   const base = mesh(new THREE.BoxGeometry(0.56, 0.13, 0.42), edge);
+  base.name = 'magazineBasePlate';
   base.position.y = -0.61;
   const baseAccent = mesh(new THREE.BoxGeometry(0.4, 0.025, 0.32), metal, false);
   baseAccent.position.y = -0.69;
-  root.add(roundDisplay, feedLeft, feedRight, base, baseAccent);
-  return { root, magazineInsertAnchor, roundDisplay, witnessRounds };
+  const feedEnd = new THREE.Group();
+  feedEnd.name = 'magazineFeedEnd';
+  feedEnd.add(feedLeft, feedRight);
+  root.add(roundDisplay, feedEnd, base, baseAccent);
+  return { root, body, feedEnd, basePlate: base, magazineInsertAnchor, roundDisplay, witnessRounds };
 };
 
 export const createZombieModel = (): ZombieModel => {

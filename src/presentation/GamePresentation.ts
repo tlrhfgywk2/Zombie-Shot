@@ -39,6 +39,21 @@ export class GamePresentation {
   private readonly cartridges: THREE.Group[] = [];
   private readonly muzzleSmokePool: MuzzleSmokeEffect[] = [];
   private readonly casingPool: CasingEffect[] = [];
+  private readonly presentationDebug = new URLSearchParams(window.location.search).get('presentationDebug') === '1';
+  private readonly debugBounds = {
+    grip: new THREE.Box3(),
+    magazineBody: new THREE.Box3(),
+    magazineFull: new THREE.Box3(),
+    magazineBase: new THREE.Box3(),
+    magazineFeed: new THREE.Box3(),
+  };
+  private readonly debugSmokeMarkers: THREE.Mesh[] = [];
+  private debugOverlay?: HTMLPreElement;
+  private presentationState = '대기';
+  private lastMagazineDiagnostic = '아직 착좌하지 않음';
+  private lastSmokeDiagnostic = '아직 발사하지 않음';
+  private magazineParentingDiagnostic = '부모 전환 전';
+  private seatedMagazineLocalMatrix?: THREE.Matrix4;
   private layout: PresentationLayout = getPresentationLayout(1280, 720);
   private readonly baseAimQuaternion = new THREE.Quaternion();
   private readonly baseWeaponPosition = new THREE.Vector3();
@@ -66,6 +81,7 @@ export class GamePresentation {
     this.buildEnvironment();
     this.buildActors();
     this.buildShotEffectPools();
+    if (this.presentationDebug) this.buildPresentationDebug();
     this.resize();
     window.addEventListener('resize', this.resize);
     window.visualViewport?.addEventListener('resize', this.resize);
@@ -88,6 +104,7 @@ export class GamePresentation {
     window.removeEventListener('blur', this.handleBlur);
     window.removeEventListener('focus', this.handleFocus);
     this.resizeObserver?.disconnect();
+    this.debugOverlay?.remove();
     this.audio.setActive(false);
     this.scene.traverse((object) => {
       if (!(object instanceof THREE.Mesh)) return;
@@ -117,6 +134,7 @@ export class GamePresentation {
   }
 
   async animateLoading(rounds: readonly AmmoType[]): Promise<void> {
+    this.presentationState = '탄약 삽입';
     this.animationInProgress = true;
     this.audio.prepare();
     this.resetWeaponPose();
@@ -160,6 +178,7 @@ export class GamePresentation {
       );
     });
     await this.tween(PRESENTATION_TIMING.magazineInspectHold, (progress) => {
+      this.presentationState = '탄창 확인';
       magazine.rotation.y = -0.08 + Math.sin(progress * Math.PI) * 0.11;
       magazine.position.y = this.layout.magazineInspect.y + Math.sin(progress * Math.PI) * 0.025;
     });
@@ -172,6 +191,7 @@ export class GamePresentation {
     const magazineStartScale = magazine.scale.x;
     const insertionScale = this.layout.pistolScale * this.layout.insertionScaleFactor;
     await this.tween(PRESENTATION_TIMING.magazineApproach, (progress) => {
+      this.presentationState = '탄창 접근';
       const eased = this.easeInOut(progress);
       this.pistolModel.root.position.lerpVectors(pistolStartPosition, this.layout.weaponInsertion, eased);
       this.pistolModel.root.quaternion.slerpQuaternions(pistolStartQuaternion, insertionQuaternion, eased);
@@ -186,6 +206,9 @@ export class GamePresentation {
       magazine.scale.setScalar(THREE.MathUtils.lerp(magazineStartScale, insertionScale, eased));
     });
     await this.tween(PRESENTATION_TIMING.magazineSeat, (progress) => {
+      this.presentationState = '탄창 착좌';
+      this.pistolModel.root.position.y = this.layout.weaponInsertion.y + Math.sin(progress * Math.PI) * 0.035;
+      this.pistolModel.root.updateMatrixWorld(true);
       const pose = this.getMagazineInsertionPose(THREE.MathUtils.lerp(
         PRESENTATION_MOTION.magazineApproachDistance,
         0,
@@ -193,13 +216,17 @@ export class GamePresentation {
       ), insertionScale);
       magazine.position.copy(pose.position);
       magazine.quaternion.copy(pose.quaternion);
-      this.pistolModel.root.position.y = this.layout.weaponInsertion.y + Math.sin(progress * Math.PI) * 0.035;
     });
     this.attachMagazineAtSeat();
     if (!this.isMagazineSeated()) throw new Error('탄창이 실제 착좌 기준점에 도달하지 못했습니다.');
+    this.presentationState = '탄창 착좌 완료';
+    this.captureMagazineDiagnostic();
     this.audio.magazineSeat();
+    if (this.presentationDebug) await this.wait(800);
     await this.wait(PRESENTATION_TIMING.magazineSeatingPause);
     await this.animateChamber();
+    this.captureMagazineDiagnostic();
+    this.presentationState = '조준 준비';
     const readyPosition = this.pistolModel.root.position.clone();
     const readyQuaternion = this.pistolModel.root.quaternion.clone();
     const target = this.getZombieTarget();
@@ -213,9 +240,11 @@ export class GamePresentation {
     this.aimPistolAtTarget(target);
     this.clearCartridges();
     this.animationInProgress = false;
+    this.presentationState = '사격 준비';
   }
 
   async animateShot(ammoType: AmmoType): Promise<void> {
+    this.presentationState = `발사 · ${AMMO_DEFINITIONS[ammoType].name}`;
     this.animationInProgress = true;
     const definition = AMMO_DEFINITIONS[ammoType];
     const target = this.getZombieTarget();
@@ -258,6 +287,7 @@ export class GamePresentation {
     this.pistolModel.slide.position.x = 0;
     this.muzzleFlash.intensity = 0;
     this.animationInProgress = false;
+    this.presentationState = '발사 후 연기 잔류';
   }
 
   async animateBurn(): Promise<void> {
@@ -366,12 +396,15 @@ export class GamePresentation {
 
   private async animateChamber(): Promise<void> {
     const slide = this.pistolModel.slide;
+    this.presentationState = '슬라이드 후퇴';
     this.audio.slidePull();
     await this.tween(PRESENTATION_TIMING.slidePull, (progress) => {
       slide.position.x = THREE.MathUtils.lerp(0, -PRESENTATION_MOTION.slideTravel, this.easeInOut(progress));
     });
     await this.wait(PRESENTATION_TIMING.slideHold);
+    this.presentationState = '슬라이드 후방 정지';
     this.audio.slideRelease();
+    this.presentationState = '슬라이드 전진';
     await this.tween(PRESENTATION_TIMING.slideRelease, (progress) => {
       slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel, 0, this.easeOutBack(progress));
     });
@@ -381,11 +414,13 @@ export class GamePresentation {
   private buildShotEffectPools(): void {
     for (let index = 0; index < PRESENTATION_EFFECTS.smokePoolSize; index += 1) {
       const root = new THREE.Group();
+      root.name = `muzzleSmoke${index}`;
       const geometry = new THREE.SphereGeometry(1, 6, 5);
       const material = new THREE.MeshBasicMaterial({
-        color: 0xd7ddd9,
+        color: 0xe2e8e4,
         transparent: true,
         opacity: 0,
+        depthTest: false,
         depthWrite: false,
       });
       const puffOffsets = [
@@ -395,6 +430,7 @@ export class GamePresentation {
       ];
       for (let puffIndex = 0; puffIndex < puffOffsets.length; puffIndex += 1) {
         const puff = new THREE.Mesh(geometry, material);
+        puff.renderOrder = 20;
         puff.position.copy(puffOffsets[puffIndex] ?? new THREE.Vector3());
         puff.scale.setScalar(1 - puffIndex * 0.18);
         root.add(puff);
@@ -429,6 +465,188 @@ export class GamePresentation {
     }
   }
 
+  private buildPresentationDebug(): void {
+    const overlay = document.createElement('pre');
+    overlay.className = 'presentation-debug';
+    overlay.dataset.testid = 'presentation-debug';
+    overlay.setAttribute('aria-label', '프레젠테이션 진단 정보');
+    this.host.append(overlay);
+    this.debugOverlay = overlay;
+
+    const addMarker = (target: THREE.Object3D, geometry: THREE.BufferGeometry, color: number): void => {
+      const material = new THREE.MeshBasicMaterial({ color, depthTest: false, toneMapped: false });
+      const marker = new THREE.Mesh(geometry, material);
+      marker.userData.presentationDebug = true;
+      marker.renderOrder = 1000;
+      target.add(marker);
+    };
+    addMarker(this.pistolModel.magazineSeatAnchor, new THREE.TorusGeometry(0.085, 0.018, 8, 20), 0x00ff55);
+    addMarker(this.magazineModel.magazineInsertAnchor, new THREE.OctahedronGeometry(0.055), 0xff2035);
+    addMarker(this.pistolModel.muzzle, new THREE.SphereGeometry(0.052, 10, 8), 0x00ffff);
+    addMarker(this.pistolModel.ejectionPort, new THREE.BoxGeometry(0.085, 0.085, 0.085), 0xffff00);
+    addMarker(this.pistolModel.root, new THREE.AxesHelper(0.25).geometry, 0xffffff);
+    addMarker(this.magazineModel.root, new THREE.IcosahedronGeometry(0.048, 0), 0xff7aff);
+
+    const helperColors = [0x00ff55, 0xff2035, 0xff7aff, 0x5599ff, 0xff9900];
+    Object.values(this.debugBounds).forEach((box, index) => {
+      const helper = new THREE.Box3Helper(box, helperColors[index] ?? 0xffffff);
+      helper.userData.presentationDebug = true;
+      helper.renderOrder = 999;
+      const material = helper.material as THREE.LineBasicMaterial;
+      material.depthTest = false;
+      material.transparent = true;
+      material.opacity = 0.82;
+      this.scene.add(helper);
+    });
+
+    for (let index = 0; index < this.muzzleSmokePool.length; index += 1) {
+      const marker = new THREE.Mesh(
+        new THREE.SphereGeometry(0.07, 8, 6),
+        new THREE.MeshBasicMaterial({ color: 0xff00ff, depthTest: false, toneMapped: false }),
+      );
+      marker.name = `smokeDebugMarker${index}`;
+      marker.userData.presentationDebug = true;
+      marker.visible = false;
+      marker.renderOrder = 1001;
+      this.scene.add(marker);
+      this.debugSmokeMarkers.push(marker);
+    }
+  }
+
+  private isEffectivelyVisible(object: THREE.Object3D): boolean {
+    let current: THREE.Object3D | null = object;
+    while (current) {
+      if (!current.visible) return false;
+      current = current.parent;
+    }
+    return true;
+  }
+
+  private isDescendantOf(object: THREE.Object3D, ancestor: THREE.Object3D): boolean {
+    let current: THREE.Object3D | null = object;
+    while (current) {
+      if (current === ancestor) return true;
+      current = current.parent;
+    }
+    return false;
+  }
+
+  private measureVisibleBounds(object: THREE.Object3D, reference?: THREE.Object3D): THREE.Box3 {
+    this.scene.updateMatrixWorld(true);
+    const bounds = new THREE.Box3().makeEmpty();
+    const inverseReference = reference ? reference.matrixWorld.clone().invert() : undefined;
+    object.traverse((child) => {
+      if (!(child instanceof THREE.Mesh) || child.userData.presentationDebug || !this.isEffectivelyVisible(child)) return;
+      child.geometry.computeBoundingBox();
+      const localBounds = child.geometry.boundingBox;
+      if (!localBounds) return;
+      for (const x of [localBounds.min.x, localBounds.max.x]) {
+        for (const y of [localBounds.min.y, localBounds.max.y]) {
+          for (const z of [localBounds.min.z, localBounds.max.z]) {
+            const point = new THREE.Vector3(x, y, z).applyMatrix4(child.matrixWorld);
+            if (inverseReference) point.applyMatrix4(inverseReference);
+            bounds.expandByPoint(point);
+          }
+        }
+      }
+    });
+    return bounds;
+  }
+
+  private formatVector(vector: THREE.Vector3): string {
+    return `${vector.x.toFixed(3)}, ${vector.y.toFixed(3)}, ${vector.z.toFixed(3)}`;
+  }
+
+  private formatBounds(bounds: THREE.Box3): string {
+    if (bounds.isEmpty()) return '표시 안 됨';
+    return `X[${bounds.min.x.toFixed(3)}, ${bounds.max.x.toFixed(3)}] Y[${bounds.min.y.toFixed(3)}, ${bounds.max.y.toFixed(3)}] Z[${bounds.min.z.toFixed(3)}, ${bounds.max.z.toFixed(3)}]`;
+  }
+
+  private captureMagazineDiagnostic(): void {
+    const gripBounds = this.measureVisibleBounds(this.pistolModel.gripBody, this.pistolModel.grip);
+    const bodyBounds = this.measureVisibleBounds(this.magazineModel.body, this.pistolModel.grip);
+    const fullBounds = this.measureVisibleBounds(this.magazineModel.root, this.pistolModel.grip);
+    const baseBounds = this.measureVisibleBounds(this.magazineModel.basePlate, this.pistolModel.grip);
+    const feedBounds = this.measureVisibleBounds(this.magazineModel.feedEnd, this.pistolModel.grip);
+    const bodyBelowGrip = Math.max(0, gripBounds.min.y - bodyBounds.min.y);
+    const centerOffsetX = bodyBounds.getCenter(new THREE.Vector3()).x - gripBounds.getCenter(new THREE.Vector3()).x;
+    const centerOffsetZ = bodyBounds.getCenter(new THREE.Vector3()).z - gripBounds.getCenter(new THREE.Vector3()).z;
+    const magazineCopies: THREE.Object3D[] = [];
+    this.scene.traverse((child) => { if (child.name === 'magazineRoot') magazineCopies.push(child); });
+    this.lastMagazineDiagnostic = [
+      `손잡이 축 손잡이 ${this.formatBounds(gripBounds)}`,
+      `손잡이 축 탄창 몸체 ${this.formatBounds(bodyBounds)}`,
+      `손잡이 축 탄창 전체 ${this.formatBounds(fullBounds)}`,
+      `손잡이 축 바닥판 ${this.formatBounds(baseBounds)}`,
+      `손잡이 축 급탄부 ${this.formatBounds(feedBounds)}`,
+      `몸체 하단 돌출 ${bodyBelowGrip.toFixed(4)} · 중심 X/Z 오차 ${centerOffsetX.toFixed(4)}/${centerOffsetZ.toFixed(4)}`,
+      `${this.magazineParentingDiagnostic} · 슬라이드 중 상대 변형 ${this.getSeatedMagazineLocalDrift()}`,
+      `월드 손잡이 ${this.formatBounds(this.measureVisibleBounds(this.pistolModel.gripBody))}`,
+      `월드 탄창 몸체 ${this.formatBounds(this.measureVisibleBounds(this.magazineModel.body))}`,
+      `탄창 UUID ${this.magazineModel.root.uuid} · 장면 내 magazineRoot ${magazineCopies.length}개`,
+    ].join('\n');
+  }
+
+  private captureSmokeDiagnostic(effect: MuzzleSmokeEffect): void {
+    this.scene.updateMatrixWorld(true);
+    const world = effect.root.getWorldPosition(new THREE.Vector3());
+    const projected = world.clone().project(this.camera);
+    const width = this.renderer.domElement.clientWidth;
+    const height = this.renderer.domElement.clientHeight;
+    const screenX = (projected.x * 0.5 + 0.5) * width;
+    const screenY = (-projected.y * 0.5 + 0.5) * height;
+    const distance = this.camera.position.distanceTo(world);
+    const pixelsPerWorldUnit = height / (2 * Math.tan(THREE.MathUtils.degToRad(this.camera.fov) / 2) * Math.max(distance, 0.001));
+    const diameterPixels = effect.root.scale.x * 2 * pixelsPerWorldUnit;
+    this.lastSmokeDiagnostic = [
+      `월드 ${this.formatVector(world)}`,
+      `NDC ${this.formatVector(projected)} · 화면 ${screenX.toFixed(1)}, ${screenY.toFixed(1)} px`,
+      `추정 지름 ${diameterPixels.toFixed(1)} px · 불투명도 ${effect.material.opacity.toFixed(3)} · 나이 ${(effect.age * 1000).toFixed(0)} ms`,
+      `활성 장면 하위 ${this.isDescendantOf(effect.root, this.scene)} · 유효 표시 ${this.isEffectivelyVisible(effect.root)} · 카메라 레이어 ${Boolean(effect.root.layers.mask & this.camera.layers.mask)}`,
+    ].join('\n');
+  }
+
+  private updatePresentationDebug(): void {
+    if (!this.presentationDebug || !this.debugOverlay) return;
+    this.debugBounds.grip.copy(this.measureVisibleBounds(this.pistolModel.gripBody));
+    this.debugBounds.magazineBody.copy(this.measureVisibleBounds(this.magazineModel.body));
+    this.debugBounds.magazineFull.copy(this.measureVisibleBounds(this.magazineModel.root));
+    this.debugBounds.magazineBase.copy(this.measureVisibleBounds(this.magazineModel.basePlate));
+    this.debugBounds.magazineFeed.copy(this.measureVisibleBounds(this.magazineModel.feedEnd));
+
+    const seatPosition = this.pistolModel.magazineSeatAnchor.getWorldPosition(new THREE.Vector3());
+    const insertPosition = this.magazineModel.magazineInsertAnchor.getWorldPosition(new THREE.Vector3());
+    const seatRotation = this.pistolModel.magazineSeatAnchor.getWorldQuaternion(new THREE.Quaternion());
+    const insertRotation = this.magazineModel.magazineInsertAnchor.getWorldQuaternion(new THREE.Quaternion());
+    let activeSmoke = 0;
+    let firstActive: MuzzleSmokeEffect | undefined;
+    this.muzzleSmokePool.forEach((effect, index) => {
+      const marker = this.debugSmokeMarkers[index];
+      if (marker) {
+        marker.visible = effect.active;
+        if (effect.active) marker.position.copy(effect.root.position);
+      }
+      if (effect.active) {
+        activeSmoke += 1;
+        firstActive ??= effect;
+      }
+    });
+    if (firstActive && firstActive.age < 0.08) this.captureSmokeDiagnostic(firstActive);
+    this.debugOverlay.textContent = [
+      '프레젠테이션 진단 모드',
+      '초록 고리=착좌 · 빨강 팔면체=삽입 · 청록=총구 · 노랑=배출구 · 자홍=연기',
+      `상태 ${this.presentationState}`,
+      `앵커 거리 ${seatPosition.distanceTo(insertPosition).toFixed(5)} · 회전차 ${THREE.MathUtils.radToDeg(seatRotation.angleTo(insertRotation)).toFixed(3)}°`,
+      `탄창 부모 ${this.magazineModel.root.parent?.name || '(이름 없음)'} · 활성 연기 ${activeSmoke}`,
+      '',
+      '[최근 착좌 측정]',
+      this.lastMagazineDiagnostic,
+      '',
+      '[최근 연기 측정]',
+      this.lastSmokeDiagnostic,
+    ].join('\n');
+  }
+
   private spawnMuzzleSmoke(): void {
     const effect = this.muzzleSmokePool.find((candidate) => !candidate.active) ?? this.muzzleSmokePool[0];
     if (!effect) return;
@@ -441,7 +659,7 @@ export class GamePresentation {
     const variation = this.effectVariation(this.shotEffectSequence, 0.07);
     const forward = new THREE.Vector3(1, 0, 0).applyQuaternion(quaternion).normalize();
     const outward = new THREE.Vector3(0, 0, 1).applyQuaternion(quaternion).normalize();
-    effect.root.position.copy(position).addScaledVector(forward, 0.08 * weaponScale.x);
+    effect.root.position.copy(position).addScaledVector(forward, PRESENTATION_EFFECTS.smokeMuzzleOffset * weaponScale.x);
     effect.root.quaternion.copy(quaternion);
     effect.velocity.copy(forward).multiplyScalar(PRESENTATION_EFFECTS.smokeForwardSpeed)
       .addScaledVector(new THREE.Vector3(0, 1, 0), PRESENTATION_EFFECTS.smokeUpSpeed)
@@ -622,11 +840,31 @@ export class GamePresentation {
   private attachMagazineAtSeat(): void {
     const magazine = this.magazineModel.root;
     this.pistolModel.root.updateMatrixWorld(true);
+    const beforePosition = magazine.getWorldPosition(new THREE.Vector3());
+    const beforeQuaternion = magazine.getWorldQuaternion(new THREE.Quaternion());
     this.pistolModel.magazineSeatAnchor.attach(magazine);
     this.magazineModel.magazineInsertAnchor.updateMatrix();
     const localMatrix = this.magazineModel.magazineInsertAnchor.matrix.clone().invert();
     localMatrix.decompose(magazine.position, magazine.quaternion, magazine.scale);
     this.pistolModel.root.updateMatrixWorld(true);
+    const afterPosition = magazine.getWorldPosition(new THREE.Vector3());
+    const afterQuaternion = magazine.getWorldQuaternion(new THREE.Quaternion());
+    this.magazineParentingDiagnostic = `부모 전환 위치 점프 ${beforePosition.distanceTo(afterPosition).toFixed(6)} · 회전 점프 ${THREE.MathUtils.radToDeg(beforeQuaternion.angleTo(afterQuaternion)).toFixed(6)}°`;
+    this.seatedMagazineLocalMatrix = magazine.matrix.clone();
+  }
+
+  private getSeatedMagazineLocalDrift(): string {
+    if (!this.seatedMagazineLocalMatrix) return '측정 전';
+    this.magazineModel.root.updateMatrix();
+    const currentPosition = new THREE.Vector3();
+    const currentQuaternion = new THREE.Quaternion();
+    const currentScale = new THREE.Vector3();
+    const seatedPosition = new THREE.Vector3();
+    const seatedQuaternion = new THREE.Quaternion();
+    const seatedScale = new THREE.Vector3();
+    this.magazineModel.root.matrix.decompose(currentPosition, currentQuaternion, currentScale);
+    this.seatedMagazineLocalMatrix.decompose(seatedPosition, seatedQuaternion, seatedScale);
+    return `${currentPosition.distanceTo(seatedPosition).toFixed(6)} / ${THREE.MathUtils.radToDeg(currentQuaternion.angleTo(seatedQuaternion)).toFixed(6)}° / ${currentScale.distanceTo(seatedScale).toFixed(6)}`;
   }
 
   private isMagazineSeated(): boolean {
@@ -729,6 +967,7 @@ export class GamePresentation {
     }
     this.elapsed += delta;
     this.updateShotEffects(delta);
+    this.updatePresentationDebug();
     if (!this.zombieFallen) {
       this.zombieModel.root.position.y = Math.sin(this.elapsed * 2.35) * 0.032;
       const stride = Math.sin(this.elapsed * 3.1) * 0.16;
