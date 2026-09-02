@@ -102,6 +102,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .selection-actions button:first-of-type { border-color: rgba(255,98,76,.5); color: #ff998a; }
 .hint { position: absolute; z-index: 3; left: 50%; bottom: 4px; transform: translateX(-50%); color: #6f7b72; font-size: .6rem; letter-spacing: .06em; white-space: nowrap; }
 .hint span { display: inline-block; width: 4px; height: 4px; margin: 0 .35rem .08rem 0; border-radius: 50%; background: var(--acid); }
+.build-id { position: fixed; z-index: 20; right: max(6px, env(safe-area-inset-right)); bottom: max(4px, env(safe-area-inset-bottom)); color: rgba(211, 222, 214, .58); font: 700 .52rem/1.2 ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .06em; text-shadow: 0 1px 3px #000; pointer-events: none; user-select: none; }
+.presentation-debug { position: absolute; z-index: 30; top: max(76px, calc(env(safe-area-inset-top) + 70px)); right: max(8px, env(safe-area-inset-right)); width: min(370px, calc(100% - 16px)); max-height: 46vh; overflow: auto; margin: 0; padding: .55rem .65rem; border: 1px solid rgba(255, 0, 255, .65); color: #f4fff6; background: rgba(2, 6, 4, .86); font: 600 .59rem/1.42 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; pointer-events: none; }
 .game-over { position: absolute; z-index: 10; inset: 0; display: grid; place-items: center; padding: max(1.2rem, env(safe-area-inset-top)) max(1.2rem, env(safe-area-inset-right)) max(1.2rem, env(safe-area-inset-bottom)) max(1.2rem, env(safe-area-inset-left)); background: rgba(5,7,6,.82); backdrop-filter: blur(8px); }
 .game-over-card { width: min(500px, 100%); padding: 2rem; border: 1px solid rgba(255,84,58,.45); text-align: center; background: #101412; box-shadow: 0 30px 100px rgba(0,0,0,.75); }
 .game-over-card > span { color: #ff624c; font-size: .68rem; font-weight: 900; letter-spacing: .22em; text-transform: uppercase; }
@@ -303,6 +305,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] .selection-actions span { overflow: hidden; font-size: .55rem; text-overflow: ellipsis; white-space: nowrap; }
 .game-shell[data-layout="portrait"] .selection-actions button { min-height: 42px; padding-inline: .5rem; font-size: .57rem; }
 .game-shell[data-layout="portrait"] .hint { display: none; }
+.game-shell[data-layout="portrait"] .build-id { right: max(5px, env(safe-area-inset-right)); bottom: max(2px, env(safe-area-inset-bottom)); font-size: .46rem; }
+.game-shell[data-layout="portrait"] .presentation-debug { top: calc(var(--portrait-edge) + env(safe-area-inset-top) + var(--portrait-top-hud-height) + var(--portrait-phase-height) + 6px); right: max(6px, env(safe-area-inset-right)); width: min(330px, calc(100% - 12px)); max-height: 34vh; font-size: .5rem; }
 body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .ammo-rack { display: none; }
 body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .loadout {
   background: linear-gradient(135deg, rgba(16,22,18,.9), rgba(8,12,10,.78));

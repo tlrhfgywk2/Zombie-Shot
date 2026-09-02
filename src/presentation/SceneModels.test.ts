@@ -11,26 +11,26 @@ describe('권총 모델 기준점', () => {
     expect(pistol.muzzle.parent).toBe(pistol.root);
   });
 
-  it('탄창 착좌 기준면은 손잡이 바닥에 있고 탄피 배출구는 슬라이드의 보이는 측면에 있다', () => {
+  it('탄창 착좌 기준점은 프레임 아래 내부 스톱에 있고 탄피 배출구는 슬라이드의 보이는 측면에 있다', () => {
     const pistol = createPistolModel();
 
     expect(pistol.magazineSeatAnchor.name).toBe('magazineSeatAnchor');
     expect(pistol.magazineSeatAnchor.parent?.parent).toBe(pistol.root);
     expect(pistol.magazineSeatAnchor.position.x).toBe(0);
-    expect(pistol.magazineSeatAnchor.position.y).toBeCloseTo(-0.97);
+    expect(pistol.magazineSeatAnchor.position.y).toBeCloseTo(0.32);
     expect(pistol.ejectionPort.name).toBe('ejectionPort');
     expect(pistol.ejectionPort.parent).toBe(pistol.slide);
     expect(pistol.ejectionPort.position.y).toBeGreaterThan(0.6);
     expect(pistol.ejectionPort.position.z).toBeGreaterThan(0.2);
   });
 
-  it('탄창 삽입 기준면은 몸체 하단과 바닥판이 만나는 위치에 있다', () => {
+  it('탄창 삽입 기준점은 회전된 급탄부의 실제 상단에 있다', () => {
     const magazine = createMagazineModel();
 
     expect(magazine.magazineInsertAnchor.name).toBe('magazineInsertAnchor');
     expect(magazine.magazineInsertAnchor.parent).toBe(magazine.root);
     expect(magazine.magazineInsertAnchor.position.x).toBe(0);
-    expect(magazine.magazineInsertAnchor.position.y).toBeCloseTo(-0.56);
+    expect(magazine.magazineInsertAnchor.position.y).toBeCloseTo(0.655);
     expect(magazine.magazineInsertAnchor.position.z).toBe(0);
   });
 
@@ -52,5 +52,22 @@ describe('권총 모델 기준점', () => {
     expect(insert.distanceTo(seat)).toBeLessThan(0.000001);
     expect(magazine.root.quaternion.equals(new THREE.Quaternion())).toBe(true);
     expect(magazine.root.scale.equals(new THREE.Vector3(1, 1, 1))).toBe(true);
+  });
+
+  it('착좌 시 몸체는 손잡이 안에 있고 바닥판만 아래로 남는다', () => {
+    const pistol = createPistolModel();
+    const magazine = createMagazineModel();
+    pistol.magazineSeatAnchor.add(magazine.root);
+    magazine.root.position.copy(magazine.magazineInsertAnchor.position).multiplyScalar(-1);
+    pistol.root.updateMatrixWorld(true);
+    const gripBounds = new THREE.Box3().setFromObject(pistol.gripBody);
+    const bodyBounds = new THREE.Box3().setFromObject(magazine.body);
+    const baseBounds = new THREE.Box3().setFromObject(magazine.basePlate);
+    const bodyCenterInGrip = pistol.grip.worldToLocal(magazine.body.getWorldPosition(new THREE.Vector3()));
+
+    expect(bodyBounds.min.y).toBeGreaterThan(gripBounds.min.y);
+    expect(baseBounds.min.y).toBeLessThan(gripBounds.min.y);
+    expect(bodyCenterInGrip.x).toBeCloseTo(pistol.gripBody.position.x);
+    expect(bodyCenterInGrip.z).toBeCloseTo(pistol.gripBody.position.z);
   });
 });

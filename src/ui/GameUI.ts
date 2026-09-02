@@ -1,4 +1,5 @@
 import type { AmmoType, EnemyActionResult, EnemyState, SequenceResult, ShotResult } from '../combat/types';
+import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
 import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE, type AmmoStock } from '../data/ammoDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
@@ -73,6 +74,7 @@ export class GameUI {
           <div id="selection-actions" class="selection-actions" hidden><span id="selection-text"></span><button id="remove-round" type="button">선택 탄 제거</button><button id="cancel-selection" type="button">취소</button></div></div>
         </section>
         <div class="hint"><span></span>탄약 탭: 추가/교체 · 슬롯 선택 후 목적지 탭: 순서 변경 · 드래그도 지원</div>
+        <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
       </div>`;
 
