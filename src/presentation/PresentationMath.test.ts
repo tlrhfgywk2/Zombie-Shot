@@ -36,7 +36,8 @@ describe('프레젠테이션 좌표 계산', () => {
 
     expect(portrait.mode).toBe('portrait');
     expect(portrait.weaponAim.y).toBeGreaterThan(desktop.weaponAim.y);
-    expect(portrait.weaponAim.x).toBeLessThan(desktop.weaponAim.x);
+    expect(portrait.weaponAim.x).toBeGreaterThan(desktop.weaponAim.x);
+    expect(portrait.pistolScale).toBeLessThan(desktop.pistolScale);
     expect(portrait.cameraTarget.y).toBeGreaterThan(desktop.cameraTarget.y);
     expect(portrait.cartridgeScale).toBeLessThan(desktop.cartridgeScale);
     expect(portrait.insertionScaleFactor).toBeLessThan(desktop.insertionScaleFactor);

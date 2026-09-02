@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import type { AmmoType } from '../combat/types';
+import type { AmmoType, AttachmentSlot } from '../combat/types';
+import type { AttachmentId } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 
 export interface PistolModel {
@@ -10,6 +11,7 @@ export interface PistolModel {
   muzzle: THREE.Object3D;
   magazineSeatAnchor: THREE.Object3D;
   ejectionPort: THREE.Object3D;
+  attachmentSockets: Record<AttachmentSlot, THREE.Group>;
 }
 
 export interface MagazineModel {
@@ -30,6 +32,7 @@ export interface ZombieModel {
   rightArm: THREE.Group;
   leftLeg: THREE.Group;
   rightLeg: THREE.Group;
+  threatHalo: THREE.Mesh;
 }
 
 const mesh = (geometry: THREE.BufferGeometry, material: THREE.Material, castShadow = true): THREE.Mesh => {
@@ -130,7 +133,103 @@ export const createPistolModel = (): PistolModel => {
   muzzle.position.set(1.13, 0.48, 0);
   root.add(muzzle);
 
-  return { root, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort };
+  const attachmentSockets = {
+    muzzle: new THREE.Group(), magazine: new THREE.Group(), optic: new THREE.Group(), rail: new THREE.Group(), grip: new THREE.Group(),
+  } satisfies Record<AttachmentSlot, THREE.Group>;
+  attachmentSockets.muzzle.name = 'attachmentSocketMuzzle';
+  attachmentSockets.muzzle.position.set(1.08, 0.48, 0);
+  attachmentSockets.magazine.name = 'attachmentSocketMagazine';
+  attachmentSockets.magazine.position.set(-0.18, -0.98, 0);
+  attachmentSockets.optic.name = 'attachmentSocketOptic';
+  attachmentSockets.optic.position.set(0.12, 0.77, 0);
+  attachmentSockets.rail.name = 'attachmentSocketRail';
+  attachmentSockets.rail.position.set(0.63, -0.03, 0.27);
+  attachmentSockets.grip.name = 'attachmentSocketGrip';
+  attachmentSockets.grip.position.set(-0.35, -0.43, 0.27);
+  for (const socket of Object.values(attachmentSockets)) root.add(socket);
+
+  return { root, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, attachmentSockets };
+};
+
+export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
+  const root = new THREE.Group();
+  root.name = `attachment-${id}`;
+  const dark = new THREE.MeshStandardMaterial({ color: 0x17201d, roughness: 0.36, metalness: 0.72 });
+  const metal = new THREE.MeshStandardMaterial({ color: 0x64716c, roughness: 0.28, metalness: 0.82 });
+  const lime = new THREE.MeshStandardMaterial({ color: 0xbfe94b, emissive: 0x263607, emissiveIntensity: 0.5, roughness: 0.44, metalness: 0.35 });
+  const cyan = new THREE.MeshStandardMaterial({ color: 0x72d9dc, emissive: 0x0d3434, emissiveIntensity: 0.72, roughness: 0.35, metalness: 0.4 });
+  const red = new THREE.MeshStandardMaterial({ color: 0xc9465f, emissive: 0x3b0711, emissiveIntensity: 0.6, roughness: 0.5, metalness: 0.26 });
+
+  if (id === 'returnBrake' || id === 'quietBore' || id === 'elementCatalyst') {
+    const length = id === 'quietBore' ? 0.72 : id === 'elementCatalyst' ? 0.48 : 0.34;
+    const body = mesh(new THREE.CylinderGeometry(id === 'quietBore' ? 0.13 : 0.145, 0.12, length, 14), id === 'elementCatalyst' ? cyan : dark);
+    body.rotation.z = Math.PI / 2;
+    body.position.x = length / 2;
+    root.add(body);
+    const ringMaterial = id === 'elementCatalyst' ? cyan : metal;
+    for (const x of [0.05, length - 0.05]) {
+      const ring = mesh(new THREE.TorusGeometry(0.135, 0.018, 6, 14), ringMaterial, false);
+      ring.rotation.y = Math.PI / 2;
+      ring.position.x = x;
+      root.add(ring);
+    }
+    if (id === 'returnBrake') {
+      for (const x of [0.13, 0.23]) {
+        const vent = mesh(new THREE.BoxGeometry(0.045, 0.08, 0.31), metal, false);
+        vent.position.set(x, 0.1, 0);
+        root.add(vent);
+      }
+    }
+  } else if (id === 'reflexSight' || id === 'rangeSight') {
+    const base = mesh(new THREE.BoxGeometry(id === 'rangeSight' ? 0.62 : 0.36, 0.08, 0.3), dark);
+    base.position.y = 0.04;
+    root.add(base);
+    if (id === 'reflexSight') {
+      const frame = mesh(new THREE.TorusGeometry(0.16, 0.035, 7, 14, Math.PI), metal);
+      frame.rotation.set(Math.PI / 2, 0, Math.PI / 2);
+      frame.position.set(0.02, 0.19, 0);
+      root.add(frame);
+      const lens = mesh(new THREE.CircleGeometry(0.125, 14), new THREE.MeshBasicMaterial({ color: 0x7cffd3, transparent: true, opacity: 0.34, side: THREE.DoubleSide }), false);
+      lens.rotation.y = Math.PI / 2;
+      lens.position.set(0.02, 0.19, 0);
+      root.add(lens);
+    } else {
+      const scope = mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.55, 14), metal);
+      scope.rotation.z = Math.PI / 2;
+      scope.position.y = 0.18;
+      root.add(scope);
+      const lens = mesh(new THREE.CircleGeometry(0.1, 14), new THREE.MeshBasicMaterial({ color: 0x7abfff, side: THREE.DoubleSide }), false);
+      lens.rotation.y = Math.PI / 2;
+      lens.position.set(0.285, 0.18, 0);
+      root.add(lens);
+    }
+  } else if (id === 'closeLaser' || id === 'responseScanner') {
+    const body = mesh(new THREE.BoxGeometry(id === 'closeLaser' ? 0.48 : 0.38, 0.16, 0.18), dark);
+    root.add(body);
+    const signal = id === 'closeLaser'
+      ? mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.5, 10), red)
+      : mesh(new THREE.BoxGeometry(0.22, 0.08, 0.2), cyan);
+    if (id === 'closeLaser') signal.rotation.z = Math.PI / 2;
+    signal.position.y = -0.02;
+    root.add(signal);
+  } else if (id === 'extendedFeed' || id === 'reserveFeed' || id === 'crossFeed') {
+    const height = id === 'extendedFeed' ? 0.22 : 0.14;
+    const plate = mesh(new THREE.BoxGeometry(0.53, height, 0.48), id === 'reserveFeed' ? cyan : id === 'crossFeed' ? lime : dark);
+    plate.position.y = -height / 2;
+    root.add(plate);
+  } else {
+    const panelMaterial = id === 'etchedGrip' ? red : id === 'vowGrip' ? lime : metal;
+    const panel = mesh(new THREE.BoxGeometry(0.48, 0.7, 0.035), panelMaterial, false);
+    panel.rotation.z = -0.18;
+    root.add(panel);
+    for (let y = -0.25; y <= 0.25; y += 0.125) {
+      const groove = mesh(new THREE.BoxGeometry(0.34, 0.018, 0.018), dark, false);
+      groove.position.set(0, y, 0.025);
+      groove.rotation.z = -0.18;
+      root.add(groove);
+    }
+  }
+  return root;
 };
 
 export const createMagazineModel = (): MagazineModel => {
@@ -246,7 +345,12 @@ export const createZombieModel = (): ZombieModel => {
   const leftLeg = createLimb(-1, false);
   const rightLeg = createLimb(1, false);
   root.add(leftArm, rightArm, leftLeg, rightLeg);
-  return { root, torso, head, leftArm, rightArm, leftLeg, rightLeg };
+  const threatHalo = mesh(new THREE.TorusGeometry(0.58, 0.035, 7, 28), new THREE.MeshBasicMaterial({ color: 0xff6948, transparent: true, opacity: 0.82 }), false);
+  threatHalo.name = 'specialThreatHalo';
+  threatHalo.position.set(0.08, 1.72, -0.18);
+  threatHalo.visible = false;
+  root.add(threatHalo);
+  return { root, torso, head, leftArm, rightArm, leftLeg, rightLeg, threatHalo };
 };
 
 export const createCartridge = (ammoType: AmmoType, scale = 1): THREE.Group => {

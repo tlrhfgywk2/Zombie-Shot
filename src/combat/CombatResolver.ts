@@ -77,7 +77,7 @@ export class CombatResolver {
       .flatMap((id) => ATTACHMENT_DEFINITIONS[id].modifiers)
       .filter((modifier) => !('condition' in modifier) || conditionMatches(modifier.condition, rangeBand, ammoType, index, context.previousAmmo, before.special));
 
-    const recoilStep = Math.max(0, COMBAT_BALANCE.recoilPerShot + definition.recoil + this.sumModifiers(activeModifiers, 'recoilStep'));
+    const recoilStep = Math.max(2, COMBAT_BALANCE.recoilPerShot + definition.recoil + this.sumModifiers(activeModifiers, 'recoilStep'));
     const accuracy = Math.max(COMBAT_BALANCE.minimumAccuracy, COMBAT_BALANCE.baseAccuracy + playerState.accuracyPenalty + definition.accuracy + this.sumModifiers(activeModifiers, 'accuracy') - recoilStep * index);
     const attachmentMultiplier = Math.max(0.4, 1 + this.sumModifiers(activeModifiers, 'damageMultiplier'));
     let statusMultiplier = definition.specialEnemyMultiplier && before.special ? definition.specialEnemyMultiplier : 1;

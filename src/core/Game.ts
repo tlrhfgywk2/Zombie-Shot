@@ -227,7 +227,7 @@ export class Game {
     this.ui.hideRouteChoice();
     this.ui.setLocked(false);
     this.ui.clearEvent();
-    this.presentation.setZombie(this.zombie.distance, 1, false, 1);
+    this.presentation.setZombie(this.zombie.distance, 1, false, 1, this.zombie.type);
     this.sync();
   }
 
@@ -253,7 +253,8 @@ export class Game {
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(this.zombie.snapshot(), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
     this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity);
-    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1);
+    this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
+    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1, this.zombie.type);
   }
 
   private pause(milliseconds: number): Promise<void> { return this.presentation.wait(milliseconds); }

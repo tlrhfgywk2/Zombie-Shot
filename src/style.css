@@ -25,7 +25,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .brand div { display: grid; }
 .brand small, .distance-card small { color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .18em; }
 .brand strong { font-size: 1.18rem; letter-spacing: .06em; }
-.enemy-card { position: relative; justify-self: center; width: 100%; padding: .85rem 1rem .95rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(18, 25, 20, .88), rgba(10, 14, 12, .74)); clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 14px); backdrop-filter: blur(10px); }
+.enemy-card { position: relative; justify-self: center; width: 100%; padding: .85rem 1rem .95rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(18, 25, 20, .88), rgba(10, 14, 12, .74)); backdrop-filter: blur(10px); }
 .enemy-heading { display: flex; justify-content: space-between; font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .enemy-heading span:last-child { color: #b7c0b9; letter-spacing: .04em; }
 .enemy-meta { display: flex; justify-content: space-between; gap: .5rem; margin-top: .38rem; color: var(--muted); font-size: .58rem; font-weight: 700; }
@@ -232,7 +232,6 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   min-width: 0;
   height: 58px;
   padding: .52rem .62rem .56rem;
-  clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 9px);
 }
 .game-shell[data-layout="portrait"] .enemy-intent { top: calc(100% + 56px); width: calc(100vw - 16px); padding: .4rem .5rem; }
 .game-shell[data-layout="portrait"] .enemy-intent strong { font-size: .57rem; }
@@ -319,8 +318,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   display: grid;
   grid-template-rows: 23px 10px;
   place-items: center;
-  min-height: 43px;
-  height: 43px;
+  min-height: 44px;
+  height: 44px;
   gap: 2px;
   padding: .26rem .12rem .18rem;
 }
