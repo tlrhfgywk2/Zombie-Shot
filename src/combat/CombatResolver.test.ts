@@ -17,12 +17,12 @@ describe('CombatResolver', () => {
   });
 
   it('정확도는 100%를 넘을 수 있고 해당 비율로 피해에 기여한다', () => {
-    const enemy = createEnemyState('screecher');
+    const enemy = createEnemyState('tough');
     const result = resolver.resolveSequence(['standard'], enemy, { loadout: { optic: 'rangeSight' } });
     const baseline = resolver.resolveSequence(['standard'], enemy);
     const shot = result.shots[0];
 
-    expect(shot?.breakdown.accuracy).toBe(122);
+    expect(shot?.breakdown.accuracy).toBe(118);
     expect(shot?.breakdown.finalDamage).toBeGreaterThan(baseline.shots[0]!.breakdown.finalDamage);
   });
 
@@ -32,7 +32,7 @@ describe('CombatResolver', () => {
     const stable = resolver.resolveSequence(['standard', 'standard', 'standard'], enemy, { loadout: { muzzle: 'returnBrake' } });
 
     expect(bare.shots.map((shot) => shot.breakdown.accuracy)).toEqual([100, 93, 86]);
-    expect(stable.shots[2]!.breakdown.accuracy - stable.shots[0]!.breakdown.accuracy).toBe(-6);
+    expect(stable.shots[2]!.breakdown.accuracy - stable.shots[0]!.breakdown.accuracy).toBe(-8);
   });
 
   it('거리 단계와 초음파 불이익을 피해 내역에 분리해 표시한다', () => {
@@ -82,7 +82,7 @@ describe('CombatResolver', () => {
   });
 
   it('회수 급탄기는 110% 이상인 첫 희귀탄만 보존한다', () => {
-    const result = resolver.resolveSequence(['sanctified', 'cryo'], createEnemyState('screecher'), { loadout: { magazine: 'reserveFeed', optic: 'rangeSight' } });
+    const result = resolver.resolveSequence(['sanctified', 'cryo'], createEnemyState('tough'), { loadout: { magazine: 'reserveFeed', optic: 'rangeSight' } });
 
     expect(result.shots[0]?.breakdown.accuracy).toBeGreaterThanOrEqual(110);
     expect(result.conservedRounds).toEqual(['sanctified']);

@@ -50,8 +50,8 @@ export const ATTACHMENT_SLOT_NAMES: Record<AttachmentSlot, string> = {
 
 export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> = {
   returnBrake: {
-    id: 'returnBrake', name: '회귀 제동기', slot: 'muzzle', summary: '연속 사격 반동 감소', tradeoff: '원거리 정확도 -8%',
-    modifiers: [{ kind: 'recoilStep', value: -4 }, { kind: 'accuracy', value: -8, condition: { range: 'far' } }],
+    id: 'returnBrake', name: '회귀 제동기', slot: 'muzzle', summary: '탄당 반동 손실 -3%', tradeoff: '원거리 정확도 -10%',
+    modifiers: [{ kind: 'recoilStep', value: -3 }, { kind: 'accuracy', value: -10, condition: { range: 'far' } }],
   },
   quietBore: {
     id: 'quietBore', name: '정적 소음기', slot: 'muzzle', summary: '첫 탄 정확도 +18%', tradeoff: '첫 탄 이후 피해 -8%',
@@ -74,12 +74,12 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
     modifiers: [{ kind: 'accuracy', value: 12, condition: { afterAmmoSwitch: true } }, { kind: 'accuracy', value: -4, condition: { afterAmmoSwitch: false, firstShot: false } }],
   },
   reflexSight: {
-    id: 'reflexSight', name: '반사 조준기', slot: 'optic', summary: '근·중거리 정확도 +12%', tradeoff: '원거리 정확도 -6%',
-    modifiers: [{ kind: 'accuracy', value: 12, condition: { range: 'near' } }, { kind: 'accuracy', value: 12, condition: { range: 'mid' } }, { kind: 'accuracy', value: -6, condition: { range: 'far' } }],
+    id: 'reflexSight', name: '반사 조준기', slot: 'optic', summary: '근거리 +8% · 중거리 +3%', tradeoff: '원거리 정확도 -10%',
+    modifiers: [{ kind: 'accuracy', value: 8, condition: { range: 'near' } }, { kind: 'accuracy', value: 3, condition: { range: 'mid' } }, { kind: 'accuracy', value: -10, condition: { range: 'far' } }],
   },
   rangeSight: {
-    id: 'rangeSight', name: '거리계 조준경', slot: 'optic', summary: '원거리 정확도 +22%', tradeoff: '근거리 정확도 -8%',
-    modifiers: [{ kind: 'accuracy', value: 22, condition: { range: 'far' } }, { kind: 'accuracy', value: -8, condition: { range: 'near' } }],
+    id: 'rangeSight', name: '거리계 조준경', slot: 'optic', summary: '원거리 정확도 +18%', tradeoff: '중거리 -2% · 근거리 -14%',
+    modifiers: [{ kind: 'accuracy', value: 18, condition: { range: 'far' } }, { kind: 'accuracy', value: -2, condition: { range: 'mid' } }, { kind: 'accuracy', value: -14, condition: { range: 'near' } }],
   },
   closeLaser: {
     id: 'closeLaser', name: '근접 유도기', slot: 'rail', summary: '근거리 +18%, 중거리 +6% 정확도', tradeoff: '원거리 보너스 없음 · 전자식', electronic: true,
@@ -90,8 +90,8 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
     modifiers: [{ kind: 'accuracy', value: 10, condition: { specialEnemy: true } }, { kind: 'buildupMultiplier', value: 0.25, condition: { ammoTag: 'elemental' } }],
   },
   weightedGrip: {
-    id: 'weightedGrip', name: '중량 손잡이', slot: 'grip', summary: '탄당 반동 손실 -5%', tradeoff: '첫 탄 정확도 -6%',
-    modifiers: [{ kind: 'recoilStep', value: -5 }, { kind: 'accuracy', value: -6, condition: { firstShot: true } }],
+    id: 'weightedGrip', name: '중량 손잡이', slot: 'grip', summary: '탄당 반동 손실 -4%', tradeoff: '첫 탄 정확도 -6%',
+    modifiers: [{ kind: 'recoilStep', value: -4 }, { kind: 'accuracy', value: -6, condition: { firstShot: true } }],
   },
   etchedGrip: {
     id: 'etchedGrip', name: '심연 각인 손잡이', slot: 'grip', summary: '오컬트 피해 +22%', tradeoff: '탄도탄 정확도 -10%',
