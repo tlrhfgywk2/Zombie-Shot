@@ -67,10 +67,10 @@ npm run build
 
 ## 브랜치 작업 흐름
 
-기능 및 수정 브랜치는 최신 `develop`에서 분기해 작업하고 검증 후 PR로 `develop`에 병합합니다. `release`와 `main`은 일반 기능 개발에서 변경하지 않습니다.
+기능 및 수정 브랜치는 최신 `develop`에서 분기해 작업하고 검증 후 PR로 `develop`에 병합합니다. `develop` 대상 PR은 필수 검사가 모두 통과하고 병합 가능한 상태이면 Codex 에이전트가 사용자 확인을 기다리지 않고 직접 병합한 뒤 Pages 배포 성공까지 확인합니다. 따라서 일반적인 개발 작업은 에이전트 완료 보고 후 바로 배포된 게임을 플레이할 수 있는 상태를 목표로 합니다. `release`와 `main`은 자동 병합하지 않으며 일반 기능 개발에서 변경하지 않습니다.
 
 ```text
-develop → task branch → PR checks/review → develop → GitHub Pages
+develop → task branch → PR checks → agent merge → develop → GitHub Pages
 ```
 
 계정 간 인계 시에는 task branch의 커밋과 PR의 `## Codex Handoff`를 기준으로 이어서 작업합니다. 대화 기록이나 원래 개발 PC가 없어도 현재 상태, 검증 결과, 남은 일을 복구할 수 있어야 합니다.
