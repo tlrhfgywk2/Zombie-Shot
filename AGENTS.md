@@ -11,7 +11,10 @@ Preserve presentation diagnostics. Markers, anchors, bounds, effect diagnostics,
 - `develop` is the authoritative integration branch and the target for normal feature/fix PRs.
 - `release` is the validated promotion branch; do not modify it during normal development.
 - `main` is the stable baseline; do not modify it during normal development.
-- Use `develop -> task branch -> PR -> develop`. Never merge your own task PR unless explicitly instructed.
+- Use `develop -> task branch -> PR -> develop` for normal feature/fix work.
+- For PRs whose base is `develop`, the agent is explicitly authorized and expected to complete integration without waiting for manual user approval: push the task branch, open or update the PR, wait for all required PR checks, and when every required check passes and the PR is mergeable with no unresolved blocking issue, merge the PR into `develop` itself.
+- After merging into `develop`, verify that the new `develop` head contains the merged work and that the GitHub Pages deployment for that exact integration revision completes successfully. If deployment fails because of the submitted change or repository workflow, investigate and fix it before reporting the task complete.
+- Do not auto-merge into `release` or `main`. Promotion to those branches remains a separate explicit user decision unless the user specifically instructs otherwise.
 - Exactly one workflow may publish `develop` to `gh-pages`. Task branches must not overwrite public Pages.
 - The deployed game must retain its subtle visible `BUILD <short-sha>` marker. The marker and deployment must identify the same source revision; never hard-code or remove it. Local previews may show `BUILD LOCAL`.
 
