@@ -17,12 +17,12 @@ export interface EncounterStage {
 }
 
 const normal = (title: string, roster: readonly EnemyType[]): RouteOption => ({
-  kind: 'normal', title, subtitle: '예측 가능한 감염체 무리', roster, reward: '표준탄 6 · 일반 특수탄 보급',
+  kind: 'normal', title, subtitle: '예측 가능한 감염체 무리', roster, reward: '표준탄 6 · 관통/확장/열화/압력탄 각 1',
 });
 
 const special = (enemy: EnemyType): RouteOption => ({
   kind: 'special', title: ENEMY_DEFINITIONS[enemy].name, subtitle: ENEMY_DEFINITIONS[enemy].role,
-  roster: [enemy], reward: '희귀·신화 탄약을 포함한 정예 보급',
+  roster: [enemy], reward: '표준탄 4 · 관통/확장/열화/압력/중량/빙결/전도/서약/각인탄 각 1',
 });
 
 export const ENCOUNTER_STAGES: readonly EncounterStage[] = [

@@ -172,6 +172,10 @@ export class Game {
     }
 
     this.player.resupply(this.currentRoute === 'special' ? SPECIAL_AMMO_SUPPLY : NORMAL_AMMO_SUPPLY);
+    const supplyDetail = this.currentRoute === 'special'
+      ? '표준탄 4발 · 관통/확장/열화/압력/중량/빙결/전도/서약/각인탄 각 1발'
+      : '표준탄 6발 · 관통/확장/열화/압력탄 각 1발';
+    this.ui.showEvent('조우 완료 · 탄약 보급', supplyDetail);
     if (this.waveIndex + 1 < ENCOUNTER_STAGES.length) {
       const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1];
       if (!nextStage) return;

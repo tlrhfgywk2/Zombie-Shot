@@ -77,6 +77,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .ammo-token { position: relative; display: flex; align-items: center; min-width: 0; min-height: 64px; gap: .5rem; padding: .5rem .55rem; text-align: left; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.035); cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; transition: transform .16s ease, border-color .16s ease, background .16s ease, opacity .16s ease; }
 .ammo-token:hover, .ammo-token:active { transform: translateY(-2px); border-color: color-mix(in srgb, var(--bullet), transparent 35%); background: rgba(255,255,255,.07); }
 .ammo-token:disabled { opacity: .38; cursor: default; transform: none; }
+.ammo-token[aria-disabled="true"] { opacity: .5; }
 .ammo-token > span:nth-child(2) { min-width: 0; display: grid; }
 .ammo-token strong { font-size: .75rem; white-space: nowrap; }
 .ammo-token small { margin-top: .1rem; color: var(--muted); font-size: .58rem; line-height: 1.2; }
@@ -122,6 +123,15 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .selection-actions button:first-of-type { border-color: rgba(255,98,76,.5); color: #ff998a; }
 .hint { position: absolute; z-index: 3; left: 50%; bottom: 4px; transform: translateX(-50%); color: #6f7b72; font-size: .6rem; letter-spacing: .06em; white-space: nowrap; }
 .hint span { display: inline-block; width: 4px; height: 4px; margin: 0 .35rem .08rem 0; border-radius: 50%; background: var(--acid); }
+.ammo-tooltip { position: absolute; z-index: 8; left: 50%; bottom: min(244px, 31vh); width: min(520px, calc(100% - 24px)); padding: .85rem 1rem; transform: translateX(-50%); border: 1px solid color-mix(in srgb, var(--tooltip-color), transparent 45%); background: rgba(8,13,10,.97); box-shadow: 0 18px 60px rgba(0,0,0,.65); pointer-events: none; }
+.ammo-tooltip header { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.ammo-tooltip header span { color: var(--tooltip-color); font-size: .58rem; font-weight: 850; letter-spacing: .1em; }
+.ammo-tooltip header strong { font-size: 1rem; }
+.ammo-tooltip p { margin: .3rem 0 .65rem; color: #cbd5cd; font-size: .72rem; }
+.ammo-tooltip > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.ammo-tooltip > div span { padding: .38rem .45rem; color: var(--muted); background: rgba(255,255,255,.04); font-size: .61rem; }
+.ammo-tooltip > div b { display: block; margin-top: .08rem; color: #edf3ee; font-size: .68rem; }
+.ammo-tooltip > small { display: block; margin-top: .55rem; color: #aeb9b0; font-size: .61rem; line-height: 1.45; }
 .attachment-drawer { position: absolute; z-index: 9; inset: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) auto; width: min(520px, calc(100% - 28px)); overflow: auto; padding: 1rem; border: 1px solid rgba(200,255,77,.3); background: rgba(8,13,10,.97); box-shadow: -24px 0 90px rgba(0,0,0,.6); backdrop-filter: blur(18px); }
 .attachment-drawer > header { position: sticky; top: -1rem; z-index: 1; display: flex; justify-content: space-between; align-items: center; margin: -1rem -1rem .75rem; padding: 1rem; border-bottom: 1px solid var(--line); background: rgba(8,13,10,.98); }
 .attachment-drawer header div { display: grid; }
@@ -383,6 +393,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] .route-options { grid-template-columns: 1fr; }
 .game-shell[data-layout="portrait"] .route-option { min-height: 150px; padding: .75rem; }
 .game-shell[data-layout="portrait"] .hint { display: none; }
+.game-shell[data-layout="portrait"] .ammo-tooltip { bottom: calc(var(--portrait-edge) + env(safe-area-inset-bottom) + var(--portrait-loadout-height) + 8px); padding: .65rem .7rem; }
+.game-shell[data-layout="portrait"] .ammo-tooltip > div { grid-template-columns: repeat(3, 1fr); }
+.game-shell[data-layout="portrait"] .ammo-tooltip p { margin-bottom: .45rem; }
 .game-shell[data-layout="portrait"] .build-id { right: max(5px, env(safe-area-inset-right)); bottom: max(2px, env(safe-area-inset-bottom)); font-size: .46rem; }
 .game-shell[data-layout="portrait"] .presentation-debug { top: calc(var(--portrait-edge) + env(safe-area-inset-top) + var(--portrait-top-hud-height) + var(--portrait-phase-height) + 6px); right: max(6px, env(safe-area-inset-right)); width: min(330px, calc(100% - 12px)); max-height: 34vh; font-size: .5rem; }
 body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION"]) .game-shell[data-layout="portrait"] .ammo-rack { display: none; }
