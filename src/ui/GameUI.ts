@@ -60,6 +60,7 @@ export class GameUI {
   private readonly endEyebrow: HTMLElement;
   private readonly endTitle: HTMLElement;
   private readonly endDetail: HTMLElement;
+  private readonly ammoTooltip: HTMLElement;
   private rounds: readonly AmmoType[] = [];
   private stock: AmmoStock = { standard: 0, armorPiercing: 0, hollowPoint: 0, incendiary: 0, stagger: 0, magnum: 0, cryo: 0, arc: 0, sanctified: 0, bloodHex: 0 };
   private locked = false;
@@ -88,11 +89,12 @@ export class GameUI {
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div>
           <div id="selection-actions" class="selection-actions" hidden><span id="selection-text"></span><button id="remove-round" type="button">선택 탄 제거</button><button id="cancel-selection" type="button">취소</button></div></div>
         </section>
-        <div class="hint"><span></span>탄약 탭: 추가/교체 · 슬롯 선택 후 목적지 탭: 순서 변경 · 드래그도 지원</div>
+        <div class="hint"><span></span>탄약 탭: 추가/교체 · 길게 누르기: 탄약 정보 · 드래그: 순서 변경</div>
+        <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         <section id="attachment-drawer" class="attachment-drawer" hidden aria-label="장착물 구성"><header><div><span>5슬롯 무기 구성</span><strong>장착물 작업대</strong></div><button id="attachment-close" type="button" aria-label="장착물 작업대 닫기">닫기</button></header><div class="attachment-groups">
           ${ATTACHMENT_SLOT_ORDER.map((slot) => `<section class="attachment-group" data-attachment-group="${slot}"><div><strong>${ATTACHMENT_SLOT_NAMES[slot]}</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em>${item.tradeoff}</em></button>`; }).join('')}</section>`).join('')}
         </div></section>
-        <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>안전한 보급과 위험한 희귀 보급 중 하나를 고릅니다.</p><div id="route-options" class="route-options"></div></div></section>
+        <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>조우의 마지막 좀비를 처치하면 선택한 경로의 탄약을 보급받습니다.</p><div id="route-options" class="route-options"></div></div></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
       </div>`;
@@ -130,6 +132,7 @@ export class GameUI {
     this.endEyebrow = this.required(root, '#end-eyebrow');
     this.endTitle = this.required(root, '#end-title');
     this.endDetail = this.required(root, '#end-detail');
+    this.ammoTooltip = this.required(root, '#ammo-tooltip');
     this.slots = [...root.querySelectorAll<HTMLButtonElement>('.mag-slot')];
 
     root.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
@@ -141,7 +144,7 @@ export class GameUI {
           this.clearSelection();
         } else this.callbacks.onAddAmmo(ammo);
       });
-      this.bindPointerDrag(button, () => ({ ammo }));
+      this.bindPointerDrag(button, () => ({ ammo }), () => this.showAmmoTooltip(ammo, button));
     });
 
     this.slots.forEach((slot, index) => {
@@ -180,6 +183,10 @@ export class GameUI {
     window.addEventListener('resize', this.updateResponsiveLayout);
     window.visualViewport?.addEventListener('resize', this.updateResponsiveLayout);
     document.addEventListener('visibilitychange', this.resetDragVisuals);
+    document.addEventListener('pointerdown', (event) => {
+      if (!(event.target as Element).closest('.ammo-token')) this.hideAmmoTooltip();
+    });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') this.hideAmmoTooltip(); });
   }
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
@@ -205,7 +212,8 @@ export class GameUI {
     document.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
       const ammo = button.dataset.ammo as AmmoType;
       const count = this.stock[ammo];
-      button.disabled = this.locked || count <= 0;
+      button.disabled = this.locked;
+      button.setAttribute('aria-disabled', String(count <= 0));
       button.querySelector<HTMLElement>('.stock-count')!.textContent = String(count);
       const definition = AMMO_DEFINITIONS[ammo];
       button.setAttribute('aria-label', `${definition.name}: ${RARITY_NAMES[definition.rarity]} ${BUILD_TAG_NAMES[definition.tags[0]!]}, ${definition.role}, 재고 ${count}발`);
@@ -218,6 +226,13 @@ export class GameUI {
     this.attachmentOpen.disabled = locked;
     if (locked) { this.clearSelection(); this.attachmentDrawer.hidden = true; }
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
+    this.attachmentDrawer.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
+      button.disabled = locked || button.classList.contains('is-equipped');
+    });
+    this.attachmentDrawer.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
+      const group = button.closest('.attachment-group');
+      button.disabled = locked || !group?.querySelector('.attachment-option.is-equipped');
+    });
   }
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number): void {
@@ -382,13 +397,34 @@ export class GameUI {
     this.gestureVersion += 1;
     document.body.classList.remove('ammo-drag-active');
     document.querySelectorAll('.is-dragging, .drop-target').forEach((element) => element.classList.remove('is-dragging', 'drop-target'));
+    this.hideAmmoTooltip();
   };
 
   private readonly updateResponsiveLayout = (): void => {
     applyResponsiveLayoutMode(this.shell);
   };
 
-  private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined): void {
+  private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement): void {
+    const definition = AMMO_DEFINITIONS[ammo];
+    const accuracy = definition.accuracy === 0 ? '보정 없음' : `${definition.accuracy > 0 ? '+' : ''}${definition.accuracy}%`;
+    const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
+    const armorDamage = definition.armoredDirectDamage === undefined ? '' : ` (장갑 보유 시 ${definition.armoredDirectDamage})`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>기본 피해 <b>${definition.directDamage}${armorDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>관통 <b>${definition.penetration}</b></span><span>방어 파괴 <b>${definition.armorShred}</b></span><span>충격 <b>${definition.impact}</b></span></div><small>반동은 발사 순서가 뒤로 갈수록 다음 탄의 정확도를 낮춥니다.${buildup}</small>`;
+    this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
+    this.ammoTooltip.hidden = false;
+    anchor.setAttribute('aria-describedby', 'ammo-tooltip');
+  }
+
+  private hideAmmoTooltip(): void {
+    this.ammoTooltip.hidden = true;
+    document.querySelectorAll('[aria-describedby="ammo-tooltip"]').forEach((element) => element.removeAttribute('aria-describedby'));
+  }
+
+  private statusLabel(status: string): string {
+    return ({ burn: '열기', chill: '냉기', shock: '전하', corruption: '침식' } as Record<string, string>)[status] ?? status;
+  }
+
+  private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined, onLongPress?: () => void): void {
     element.addEventListener('pointerdown', (event) => {
       if (this.locked || event.button !== 0) return;
       const payload = getPayload();
@@ -397,10 +433,18 @@ export class GameUI {
       const startY = event.clientY;
       const gestureVersion = this.gestureVersion;
       let dragging = false;
+      let longPressed = false;
+      const longPressTimer = onLongPress ? window.setTimeout(() => {
+        if (gestureVersion !== this.gestureVersion) return;
+        longPressed = true;
+        onLongPress();
+      }, 520) : undefined;
       element.setPointerCapture(event.pointerId);
       const move = (moveEvent: PointerEvent): void => {
         if (gestureVersion !== this.gestureVersion) return;
         if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) >= 8) {
+          if (longPressTimer !== undefined) window.clearTimeout(longPressTimer);
+          this.hideAmmoTooltip();
           dragging = true;
           element.classList.add('is-dragging');
           document.body.classList.add('ammo-drag-active');
@@ -411,6 +455,7 @@ export class GameUI {
         this.slots.forEach((slot) => slot.classList.toggle('drop-target', slot === target));
       };
       const cleanup = (pointerId: number): void => {
+        if (longPressTimer !== undefined) window.clearTimeout(longPressTimer);
         element.removeEventListener('pointermove', move);
         element.removeEventListener('pointerup', end);
         element.removeEventListener('pointercancel', cancel);
@@ -422,6 +467,11 @@ export class GameUI {
       };
       const end = (endEvent: PointerEvent): void => {
         cleanup(endEvent.pointerId);
+        if (longPressed) {
+          this.suppressClick = true;
+          window.setTimeout(() => { this.suppressClick = false; }, 0);
+          return;
+        }
         if (dragging && gestureVersion === this.gestureVersion) {
           const target = document.elementFromPoint(endEvent.clientX, endEvent.clientY)?.closest<HTMLButtonElement>('.mag-slot');
           const destination = target ? Number(target.dataset.slot) : Number.NaN;
