@@ -13,6 +13,8 @@
 
 ## Deployment impact
 
+For normal PRs targeting `develop`, the agent may merge after required checks pass and must verify the resulting Pages deployment. `release` and `main` promotions remain manual unless explicitly requested.
+
 ## Codex Handoff
 
 ### Goal
