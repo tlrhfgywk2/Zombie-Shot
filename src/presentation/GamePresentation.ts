@@ -125,7 +125,7 @@ export class GamePresentation {
 
   setAttachments(loadout: LoadoutSnapshot, playerState: PlayerCombatState): void {
     for (const slot of Object.keys(this.pistolModel.attachmentSockets) as AttachmentSlot[]) {
-      const id = loadout[slot];
+      const id = playerState.disabledSlots[slot] ? undefined : loadout[slot];
       const current = this.attachmentVisuals[slot];
       if (this.attachmentVisualIds[slot] !== id) {
         if (current) this.disposeObject(current);
@@ -138,10 +138,8 @@ export class GamePresentation {
           this.attachmentVisualIds[slot] = id;
         }
       }
-      const visual = this.attachmentVisuals[slot];
-      if (visual) this.setAttachmentDisabledAppearance(visual, Boolean(playerState.disabledSlots[slot]));
     }
-    const magazineId = loadout.magazine;
+    const magazineId = playerState.disabledSlots.magazine ? undefined : loadout.magazine;
     this.magazineModel.basePlate.scale.x = magazineId === 'extendedFeed' ? 1.22 : magazineId === 'reserveFeed' ? 0.86 : 1;
   }
 
@@ -163,20 +161,6 @@ export class GamePresentation {
     this.zombieModel.threatHalo.visible = this.specialThreat;
     const haloMaterial = this.zombieModel.threatHalo.material as THREE.MeshBasicMaterial;
     haloMaterial.color.setHex(type === 'contaminator' ? 0x9bd24a : type === 'groundshaker' ? 0xff8a4c : 0x69c7ff);
-  }
-
-  private setAttachmentDisabledAppearance(root: THREE.Group, disabled: boolean): void {
-    root.traverse((child) => {
-      if (!(child instanceof THREE.Mesh)) return;
-      const materials = Array.isArray(child.material) ? child.material : [child.material];
-      for (const material of materials) {
-        if (material.userData.baseOpacity === undefined) material.userData.baseOpacity = material.opacity;
-        if (material.userData.baseColor === undefined && 'color' in material) material.userData.baseColor = (material as THREE.MeshBasicMaterial).color.getHex();
-        material.transparent = disabled || material.userData.baseOpacity < 1;
-        material.opacity = disabled ? 0.42 : material.userData.baseOpacity as number;
-        if ('color' in material && material.userData.baseColor !== undefined) (material as THREE.MeshBasicMaterial).color.setHex(disabled ? 0x8b3328 : material.userData.baseColor as number);
-      }
-    });
   }
 
   async animateLoading(rounds: readonly AmmoType[]): Promise<void> {
