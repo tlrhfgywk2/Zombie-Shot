@@ -52,9 +52,8 @@ export class GameUI {
   private readonly previewChain: HTMLElement;
   private readonly previewOutcome: HTMLElement;
   private readonly intentCard: HTMLElement;
-  private readonly attachmentStrip: HTMLElement;
-  private readonly attachmentDrawer: HTMLElement;
-  private readonly attachmentOpen: HTMLButtonElement;
+  private readonly attachmentBay: HTMLElement;
+  private readonly attachmentTabs: HTMLButtonElement[];
   private readonly routeChoice: HTMLElement;
   private readonly magazineOrderLabel: HTMLElement;
   private readonly endEyebrow: HTMLElement;
@@ -68,19 +67,24 @@ export class GameUI {
   private selectedIndex: number | null = null;
   private suppressClick = false;
   private gestureVersion = 0;
+  private activeAttachmentSlot: AttachmentSlot = 'muzzle';
   private readonly shell: HTMLElement;
 
   constructor(root: HTMLElement, private readonly callbacks: GameUICallbacks) {
     root.innerHTML = `
       <div class="game-shell">
-        <div id="canvas-host" class="canvas-host"></div>
-        <header class="top-hud">
-          <div class="brand"><span class="brand-mark"></span><div><small>전술 생존 실험</small><strong>좀비 샷</strong></div></div>
-          <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">76 / 76</span></div><div class="hp-track"><span id="hp-fill"></span></div><div class="enemy-meta"><span id="armor-text">방어 0</span><span id="enemy-status">상태 없음</span></div><div id="intent-card" class="enemy-intent" hidden></div></div>
-          <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
-        </header>
-        <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><p id="status-text">탄약과 장착물을 조합하세요.</p><div class="combat-metrics"><span>예상 정확도 <strong id="accuracy-text">100%</strong></span><button id="attachment-open" type="button">장착물 구성</button></div><div id="attachment-strip" class="attachment-strip"></div><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
-        <section class="loadout" aria-label="탄창 장전 영역">
+        <main class="game-stage" aria-label="전투 화면">
+          <div id="canvas-host" class="canvas-host"></div>
+          <header class="top-hud">
+            <div class="brand"><span class="brand-mark"></span><div><small>전술 생존 실험</small><strong>좀비 샷</strong></div></div>
+            <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">76 / 76</span></div><div class="hp-track"><span id="hp-fill"></span></div><div class="enemy-meta"><span id="armor-text">방어 0</span><span id="enemy-status">상태 없음</span></div><div id="intent-card" class="enemy-intent" hidden></div></div>
+            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
+          </header>
+          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><p id="status-text">탄약과 장착물을 조합하세요.</p><div class="combat-metrics"><span>예상 정확도 <strong id="accuracy-text">100%</strong></span></div><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
+        </main>
+        <section class="tactical-console" aria-label="전술 준비 패널">
+          <header class="console-header"><strong>전술 준비 패널</strong><span><i></i>탄약 선택 · 발사 순서 · 부착물 구성을 한곳에서 조정합니다.</span></header>
+          <div class="loadout" aria-label="탄창과 부착물 구성 영역">
           <div class="ammo-rack"><div class="section-label"><span>탄약 보급</span><small>특수탄은 소모품</small></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}">0</b></button>`; }).join('')}
           </div></div>
@@ -88,12 +92,12 @@ export class GameUI {
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div>
           <div id="selection-actions" class="selection-actions" hidden><span id="selection-text"></span><button id="remove-round" type="button">선택 탄 제거</button><button id="cancel-selection" type="button">취소</button></div></div>
-        </section>
-        <div class="hint"><span></span>탄약 탭: 추가/교체 · 길게 누르기: 탄약 정보 · 드래그: 순서 변경</div>
-        <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
-        <section id="attachment-drawer" class="attachment-drawer" hidden aria-label="장착물 구성"><header><div><span>5슬롯 무기 구성</span><strong>장착물 작업대</strong></div><button id="attachment-close" type="button" aria-label="장착물 작업대 닫기">닫기</button></header><div class="attachment-groups">
-          ${ATTACHMENT_SLOT_ORDER.map((slot) => `<section class="attachment-group" data-attachment-group="${slot}"><div><strong>${ATTACHMENT_SLOT_NAMES[slot]}</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em>${item.tradeoff}</em></button>`; }).join('')}</section>`).join('')}
+          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물 구성</span><small>슬롯을 눌러 즉시 교체</small></div><div class="attachment-workspace">
+            <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
+            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em>${item.tradeoff}</em></button>`; }).join('')}</section>`).join('')}</div>
+          </div></section>
         </div></section>
+        <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>조우의 마지막 좀비를 처치하면 선택한 경로의 탄약을 보급받습니다.</p><div id="route-options" class="route-options"></div></div></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
@@ -124,9 +128,8 @@ export class GameUI {
     this.previewChain = this.required(root, '#preview-chain');
     this.previewOutcome = this.required(root, '#preview-outcome');
     this.intentCard = this.required(root, '#intent-card');
-    this.attachmentStrip = this.required(root, '#attachment-strip');
-    this.attachmentDrawer = this.required(root, '#attachment-drawer');
-    this.attachmentOpen = this.required(root, '#attachment-open') as HTMLButtonElement;
+    this.attachmentBay = this.required(root, '#attachment-bay');
+    this.attachmentTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-attachment-slot]')];
     this.routeChoice = this.required(root, '#route-choice');
     this.magazineOrderLabel = this.required(root, '#magazine-order-label');
     this.endEyebrow = this.required(root, '#end-eyebrow');
@@ -160,8 +163,26 @@ export class GameUI {
       this.clearSelection();
     });
     this.required(root, '#cancel-selection').addEventListener('click', () => this.clearSelection());
-    this.attachmentOpen.addEventListener('click', () => { if (!this.locked) this.attachmentDrawer.hidden = false; });
-    this.required(root, '#attachment-close').addEventListener('click', () => { this.attachmentDrawer.hidden = true; });
+    this.attachmentTabs.forEach((button, index) => {
+      button.addEventListener('click', () => {
+        this.activeAttachmentSlot = button.dataset.attachmentSlot as AttachmentSlot;
+        this.updateAttachmentPanel();
+      });
+      button.addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const lastIndex = this.attachmentTabs.length - 1;
+        const nextIndex = event.key === 'Home' ? 0
+          : event.key === 'End' ? lastIndex
+            : event.key === 'ArrowLeft' ? (index - 1 + this.attachmentTabs.length) % this.attachmentTabs.length
+              : (index + 1) % this.attachmentTabs.length;
+        const next = this.attachmentTabs[nextIndex];
+        if (!next) return;
+        this.activeAttachmentSlot = next.dataset.attachmentSlot as AttachmentSlot;
+        this.updateAttachmentPanel();
+        next.focus();
+      });
+    });
     root.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
       button.addEventListener('click', () => {
         const id = button.dataset.attachment as AttachmentId;
@@ -223,42 +244,41 @@ export class GameUI {
 
   setLocked(locked: boolean): void {
     this.locked = locked;
-    this.attachmentOpen.disabled = locked;
-    if (locked) { this.clearSelection(); this.attachmentDrawer.hidden = true; }
+    if (locked) this.clearSelection();
+    this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
+      button.disabled = locked || button.getAttribute('aria-pressed') === 'true';
+    });
+    this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
+      button.disabled = locked || button.dataset.equipped !== 'true';
+    });
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
-    this.attachmentDrawer.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
-      button.disabled = locked || button.classList.contains('is-equipped');
-    });
-    this.attachmentDrawer.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
-      const group = button.closest('.attachment-group');
-      button.disabled = locked || !group?.querySelector('.attachment-option.is-equipped');
-    });
   }
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number): void {
     this.magazineCapacity = capacity;
-    const disruptedSlot = ATTACHMENT_SLOT_ORDER.find((slot) => (playerState.disabledSlots[slot] ?? 0) > 0);
-    const disruptedTurns = disruptedSlot ? playerState.disabledSlots[disruptedSlot] ?? 0 : 0;
-    this.attachmentOpen.textContent = disruptedSlot ? `${ATTACHMENT_SLOT_NAMES[disruptedSlot]} 봉쇄 ${disruptedTurns}턴` : '장착물 구성';
-    this.attachmentOpen.classList.toggle('is-disrupted', Boolean(disruptedSlot));
-    this.attachmentOpen.setAttribute('aria-label', disruptedSlot ? `장착물 구성, ${ATTACHMENT_SLOT_NAMES[disruptedSlot]} 봉쇄 ${disruptedTurns}턴` : '장착물 구성');
-    this.attachmentStrip.innerHTML = ATTACHMENT_SLOT_ORDER.map((slot) => {
+    ATTACHMENT_SLOT_ORDER.forEach((slot) => {
       const id = loadout[slot];
       const disabledTurns = playerState.disabledSlots[slot] ?? 0;
       const label = id ? ATTACHMENT_DEFINITIONS[id].name : '비어 있음';
-      return `<span class="${disabledTurns ? 'is-disabled' : ''}" title="${ATTACHMENT_SLOT_NAMES[slot]}: ${label}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong>${disabledTurns ? `봉쇄 ${disabledTurns}턴` : label}</strong></span>`;
-    }).join('');
-    this.attachmentDrawer.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
+      const tab = this.attachmentBay.querySelector<HTMLButtonElement>(`[data-attachment-slot="${slot}"]`);
+      const current = tab?.querySelector<HTMLElement>(`[data-current-attachment="${slot}"]`);
+      if (current) current.textContent = disabledTurns ? `봉쇄 ${disabledTurns}턴` : label;
+      tab?.classList.toggle('is-disrupted', disabledTurns > 0);
+      tab?.setAttribute('aria-label', `${ATTACHMENT_SLOT_NAMES[slot]}: ${disabledTurns ? `${disabledTurns}턴 봉쇄` : label}`);
+    });
+    this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
       const id = button.dataset.attachment as AttachmentId;
       const selected = loadout[ATTACHMENT_DEFINITIONS[id].slot] === id;
       button.classList.toggle('is-equipped', selected);
       button.setAttribute('aria-pressed', String(selected));
       button.disabled = this.locked || selected;
     });
-    this.attachmentDrawer.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
+    this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
       const slot = button.dataset.unequip as AttachmentSlot;
+      button.dataset.equipped = String(Boolean(loadout[slot]));
       button.disabled = this.locked || !loadout[slot];
     });
+    this.updateAttachmentPanel();
   }
 
   showRouteChoice(stageNumber: number, options: readonly RouteOption[]): void {
@@ -422,6 +442,17 @@ export class GameUI {
 
   private statusLabel(status: string): string {
     return ({ burn: '열기', chill: '냉기', shock: '전하', corruption: '침식' } as Record<string, string>)[status] ?? status;
+  }
+
+  private updateAttachmentPanel(): void {
+    this.attachmentTabs.forEach((button) => {
+      const selected = button.dataset.attachmentSlot === this.activeAttachmentSlot;
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
+    this.attachmentBay.querySelectorAll<HTMLElement>('[data-attachment-group]').forEach((group) => {
+      group.hidden = group.dataset.attachmentGroup !== this.activeAttachmentSlot;
+    });
   }
 
   private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined, onLongPress?: () => void): void {
