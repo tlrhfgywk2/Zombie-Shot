@@ -44,8 +44,6 @@ export class GameUI {
   private readonly slots: HTMLButtonElement[];
   private readonly overlay: HTMLElement;
   private readonly combatLog: HTMLElement;
-  private readonly selectionActions: HTMLElement;
-  private readonly selectionText: HTMLElement;
   private readonly audioMute: HTMLButtonElement;
   private readonly audioState: HTMLElement;
   private readonly audioVolume: HTMLInputElement;
@@ -90,8 +88,7 @@ export class GameUI {
           </div></div>
           <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small id="magazine-order-label">1 → 4</small></div><div class="sequence-preview" aria-live="polite"><div id="preview-chain">탄약을 장전하면 순서 프리뷰가 표시됩니다.</div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
-          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div>
-          <div id="selection-actions" class="selection-actions" hidden><span id="selection-text"></span><button id="remove-round" type="button">선택 탄 제거</button><button id="cancel-selection" type="button">취소</button></div></div>
+          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div></div>
           <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물 구성</span><small>슬롯을 눌러 즉시 교체</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
             <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em>${item.tradeoff}</em></button>`; }).join('')}</section>`).join('')}</div>
@@ -120,8 +117,6 @@ export class GameUI {
     this.combatLog = this.required(root, '#combat-log');
     this.loadButton = this.required(root, '#load-button') as HTMLButtonElement;
     this.overlay = this.required(root, '#game-over');
-    this.selectionActions = this.required(root, '#selection-actions');
-    this.selectionText = this.required(root, '#selection-text');
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
     this.audioState = this.required(root, '#audio-state');
     this.audioVolume = this.required(root, '#audio-volume') as HTMLInputElement;
@@ -148,6 +143,7 @@ export class GameUI {
         } else this.callbacks.onAddAmmo(ammo);
       });
       this.bindPointerDrag(button, () => ({ ammo }), () => this.showAmmoTooltip(ammo, button));
+      this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button));
     });
 
     this.slots.forEach((slot, index) => {
@@ -157,12 +153,6 @@ export class GameUI {
       });
       this.bindPointerDrag(slot, () => this.rounds[index] ? ({ sourceIndex: index }) : undefined);
     });
-    this.required(root, '#remove-round').addEventListener('click', () => {
-      if (this.selectedIndex === null || this.locked) return;
-      this.callbacks.onRemoveAmmo(this.selectedIndex);
-      this.clearSelection();
-    });
-    this.required(root, '#cancel-selection').addEventListener('click', () => this.clearSelection());
     this.attachmentTabs.forEach((button, index) => {
       button.addEventListener('click', () => {
         this.activeAttachmentSlot = button.dataset.attachmentSlot as AttachmentSlot;
@@ -185,9 +175,16 @@ export class GameUI {
     });
     root.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
       button.addEventListener('click', () => {
+        if (this.consumeSuppressedClick()) return;
         const id = button.dataset.attachment as AttachmentId;
-        if (!this.locked) this.callbacks.onEquipAttachment(id);
+        if (!this.locked) {
+          this.hideTooltip();
+          this.callbacks.onEquipAttachment(id);
+        }
       });
+      const id = button.dataset.attachment as AttachmentId;
+      this.bindHoverTooltip(button, () => this.showAttachmentTooltip(id, button));
+      this.bindTouchTooltip(button, () => this.showAttachmentTooltip(id, button));
     });
     root.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -197,7 +194,16 @@ export class GameUI {
     });
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
-    this.loadButton.addEventListener('click', this.callbacks.onLoad);
+    this.loadButton.addEventListener('click', () => {
+      if (this.locked) return;
+      if (this.selectedIndex === null) {
+        this.callbacks.onLoad();
+        return;
+      }
+      const selectedIndex = this.selectedIndex;
+      this.callbacks.onRemoveAmmo(selectedIndex);
+      this.clearSelection();
+    });
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
     window.addEventListener('blur', this.resetDragVisuals);
     window.addEventListener('resize', this.resetDragVisuals);
@@ -205,9 +211,9 @@ export class GameUI {
     window.visualViewport?.addEventListener('resize', this.updateResponsiveLayout);
     document.addEventListener('visibilitychange', this.resetDragVisuals);
     document.addEventListener('pointerdown', (event) => {
-      if (!(event.target as Element).closest('.ammo-token')) this.hideAmmoTooltip();
+      if (!(event.target as Element).closest('.ammo-token, .attachment-option')) this.hideTooltip();
     });
-    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') this.hideAmmoTooltip(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') this.hideTooltip(); });
   }
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
@@ -245,11 +251,14 @@ export class GameUI {
   setLocked(locked: boolean): void {
     this.locked = locked;
     if (locked) this.clearSelection();
+    this.attachmentTabs.forEach((button) => {
+      button.disabled = locked || button.dataset.sealed === 'true';
+    });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
-      button.disabled = locked || button.getAttribute('aria-pressed') === 'true';
+      button.disabled = locked || button.dataset.sealed === 'true' || button.getAttribute('aria-pressed') === 'true';
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
-      button.disabled = locked || button.dataset.equipped !== 'true';
+      button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.equipped !== 'true';
     });
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
   }
@@ -265,18 +274,27 @@ export class GameUI {
       if (current) current.textContent = disabledTurns ? `봉쇄 ${disabledTurns}턴` : label;
       tab?.classList.toggle('is-disrupted', disabledTurns > 0);
       tab?.setAttribute('aria-label', `${ATTACHMENT_SLOT_NAMES[slot]}: ${disabledTurns ? `${disabledTurns}턴 봉쇄` : label}`);
+      if (tab) {
+        tab.dataset.sealed = String(disabledTurns > 0);
+        tab.disabled = this.locked || disabledTurns > 0;
+      }
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
       const id = button.dataset.attachment as AttachmentId;
-      const selected = loadout[ATTACHMENT_DEFINITIONS[id].slot] === id;
+      const slot = ATTACHMENT_DEFINITIONS[id].slot;
+      const selected = loadout[slot] === id;
+      const sealed = Boolean(playerState.disabledSlots[slot]);
       button.classList.toggle('is-equipped', selected);
       button.setAttribute('aria-pressed', String(selected));
-      button.disabled = this.locked || selected;
+      button.dataset.sealed = String(sealed);
+      button.disabled = this.locked || sealed || selected;
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
       const slot = button.dataset.unequip as AttachmentSlot;
+      const sealed = Boolean(playerState.disabledSlots[slot]);
       button.dataset.equipped = String(Boolean(loadout[slot]));
-      button.disabled = this.locked || !loadout[slot];
+      button.dataset.sealed = String(sealed);
+      button.disabled = this.locked || sealed || !loadout[slot];
     });
     this.updateAttachmentPanel();
   }
@@ -403,8 +421,21 @@ export class GameUI {
 
   private updateSelectionUI(): void {
     const ammo = this.selectedIndex === null ? undefined : this.rounds[this.selectedIndex];
-    this.selectionActions.hidden = !ammo || this.locked;
-    if (ammo && this.selectedIndex !== null) this.selectionText.textContent = `${this.selectedIndex + 1}번 ${AMMO_DEFINITIONS[ammo].name} 선택됨 · 목적 슬롯이나 교체할 탄약을 누르세요.`;
+    const label = this.loadButton.querySelector<HTMLElement>('span')!;
+    const detail = this.loadButton.querySelector<HTMLElement>('small')!;
+    const removeMode = Boolean(ammo && this.selectedIndex !== null && !this.locked);
+    this.loadButton.classList.toggle('is-remove-mode', removeMode);
+    if (removeMode && ammo && this.selectedIndex !== null) {
+      label.textContent = '선택 탄 제거';
+      detail.textContent = `${this.selectedIndex + 1}번 ${AMMO_DEFINITIONS[ammo].shortName} · 재선택 시 취소`;
+      this.loadButton.disabled = false;
+      this.loadButton.setAttribute('aria-label', `${this.selectedIndex + 1}번 ${AMMO_DEFINITIONS[ammo].name} 제거`);
+      return;
+    }
+    label.textContent = '탄창 장전';
+    detail.textContent = this.rounds.length ? `${this.rounds.length}발로 전투 시작` : '1발 이상 필요';
+    this.loadButton.disabled = this.locked || this.rounds.length === 0;
+    this.loadButton.setAttribute('aria-label', this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '탄창 장전, 탄약 1발 이상 필요');
   }
 
   private consumeSuppressedClick(): boolean {
@@ -417,7 +448,7 @@ export class GameUI {
     this.gestureVersion += 1;
     document.body.classList.remove('ammo-drag-active');
     document.querySelectorAll('.is-dragging, .drop-target').forEach((element) => element.classList.remove('is-dragging', 'drop-target'));
-    this.hideAmmoTooltip();
+    this.hideTooltip();
   };
 
   private readonly updateResponsiveLayout = (): void => {
@@ -425,17 +456,29 @@ export class GameUI {
   };
 
   private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement): void {
+    this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
     const accuracy = definition.accuracy === 0 ? '보정 없음' : `${definition.accuracy > 0 ? '+' : ''}${definition.accuracy}%`;
     const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
     const armorDamage = definition.armoredDirectDamage === undefined ? '' : ` (장갑 보유 시 ${definition.armoredDirectDamage})`;
     this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>기본 피해 <b>${definition.directDamage}${armorDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>관통 <b>${definition.penetration}</b></span><span>방어 파괴 <b>${definition.armorShred}</b></span><span>충격 <b>${definition.impact}</b></span></div><small>반동은 발사 순서가 뒤로 갈수록 다음 탄의 정확도를 낮춥니다.${buildup}</small>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
+    this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
     anchor.setAttribute('aria-describedby', 'ammo-tooltip');
   }
 
-  private hideAmmoTooltip(): void {
+  private showAttachmentTooltip(id: AttachmentId, anchor: HTMLElement): void {
+    this.hideTooltip();
+    const definition = ATTACHMENT_DEFINITIONS[id];
+    this.ammoTooltip.innerHTML = `<header><span>${ATTACHMENT_SLOT_NAMES[definition.slot]} · 부착물</span><strong>${definition.name}</strong></header><p>${definition.summary}</p><div><span>전술 효과 <b>${definition.summary}</b></span><span>운용 대가 <b>${definition.tradeoff}</b></span></div><small>같은 부위의 다른 부착물과 교체해 사용할 수 있습니다.</small>`;
+    this.ammoTooltip.style.setProperty('--tooltip-color', '#c8ff4d');
+    this.ammoTooltip.classList.add('is-attachment');
+    this.ammoTooltip.hidden = false;
+    anchor.setAttribute('aria-describedby', 'ammo-tooltip');
+  }
+
+  private hideTooltip(): void {
     this.ammoTooltip.hidden = true;
     document.querySelectorAll('[aria-describedby="ammo-tooltip"]').forEach((element) => element.removeAttribute('aria-describedby'));
   }
@@ -455,6 +498,65 @@ export class GameUI {
     });
   }
 
+  private bindHoverTooltip(element: HTMLButtonElement, show: () => void): void {
+    let timer: number | undefined;
+    const clear = (): void => {
+      if (timer !== undefined) window.clearTimeout(timer);
+      timer = undefined;
+    };
+    element.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'mouse' || element.disabled) return;
+      clear();
+      timer = window.setTimeout(show, 1000);
+    });
+    element.addEventListener('pointerleave', () => {
+      clear();
+      this.hideTooltip();
+    });
+    element.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse') {
+        clear();
+        this.hideTooltip();
+      }
+    });
+    element.addEventListener('blur', () => {
+      clear();
+      this.hideTooltip();
+    });
+  }
+
+  private bindTouchTooltip(element: HTMLButtonElement, show: () => void): void {
+    element.addEventListener('pointerdown', (event) => {
+      if (event.pointerType === 'mouse' || event.button !== 0 || element.disabled || this.locked) return;
+      const startX = event.clientX;
+      const startY = event.clientY;
+      let longPressed = false;
+      const timer = window.setTimeout(() => {
+        longPressed = true;
+        show();
+      }, 520);
+      const move = (moveEvent: PointerEvent): void => {
+        if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) >= 8) window.clearTimeout(timer);
+      };
+      const cleanup = (): void => {
+        window.clearTimeout(timer);
+        element.removeEventListener('pointermove', move);
+        element.removeEventListener('pointerup', end);
+        element.removeEventListener('pointercancel', cancel);
+      };
+      const end = (): void => {
+        cleanup();
+        if (!longPressed) return;
+        this.suppressClick = true;
+        window.setTimeout(() => { this.suppressClick = false; }, 0);
+      };
+      const cancel = (): void => cleanup();
+      element.addEventListener('pointermove', move);
+      element.addEventListener('pointerup', end);
+      element.addEventListener('pointercancel', cancel);
+    });
+  }
+
   private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined, onLongPress?: () => void): void {
     element.addEventListener('pointerdown', (event) => {
       if (this.locked || event.button !== 0) return;
@@ -465,7 +567,7 @@ export class GameUI {
       const gestureVersion = this.gestureVersion;
       let dragging = false;
       let longPressed = false;
-      const longPressTimer = onLongPress ? window.setTimeout(() => {
+      const longPressTimer = onLongPress && event.pointerType !== 'mouse' ? window.setTimeout(() => {
         if (gestureVersion !== this.gestureVersion) return;
         longPressed = true;
         onLongPress();
@@ -475,7 +577,7 @@ export class GameUI {
         if (gestureVersion !== this.gestureVersion) return;
         if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) >= 8) {
           if (longPressTimer !== undefined) window.clearTimeout(longPressTimer);
-          this.hideAmmoTooltip();
+          this.hideTooltip();
           dragging = true;
           element.classList.add('is-dragging');
           document.body.classList.add('ammo-drag-active');

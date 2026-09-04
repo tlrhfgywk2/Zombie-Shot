@@ -23,6 +23,7 @@ describe('프레젠테이션 좌표 계산', () => {
     [412, 915],
     [430, 932],
     [844, 390],
+    [1180, 524],
   ])('%d×%d에서 삽입 포즈를 장전 포즈보다 높게 둔다', (width, height) => {
     const layout = getPresentationLayout(width, height);
     expect(layout.weaponInsertion.y).toBeGreaterThan(layout.weaponRest.y + 0.5);
@@ -36,10 +37,20 @@ describe('프레젠테이션 좌표 계산', () => {
 
     expect(portrait.mode).toBe('portrait');
     expect(portrait.weaponAim.y).toBeGreaterThan(desktop.weaponAim.y);
-    expect(portrait.weaponAim.x).toBeGreaterThan(desktop.weaponAim.x);
+    expect(portrait.weaponAim.x).toBeGreaterThan(0.75);
+    expect(desktop.weaponAim.x).toBeGreaterThan(1);
     expect(portrait.pistolScale).toBeLessThan(desktop.pistolScale);
     expect(portrait.cameraTarget.y).toBeGreaterThan(desktop.cameraTarget.y);
     expect(portrait.cartridgeScale).toBeLessThan(desktop.cartridgeScale);
     expect(portrait.insertionScaleFactor).toBeLessThan(desktop.insertionScaleFactor);
+  });
+
+  it('아이패드 가로 게임 영역에서는 낮고 비스듬한 전용 포즈를 사용한다', () => {
+    const layout = getPresentationLayout(1180, 524);
+
+    expect(layout.mode).toBe('tablet-landscape');
+    expect(layout.weaponAim.x).toBeGreaterThan(1);
+    expect(layout.weaponInsertion.y).toBeLessThan(1.8);
+    expect(layout.pistolScale).toBeLessThan(0.9);
   });
 });
