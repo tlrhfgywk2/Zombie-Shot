@@ -1,9 +1,10 @@
+import { ammoStatsMarkup } from './AmmoView';
 import { getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
-import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
-import { AMMO_DEFINITIONS, AMMO_ORDER, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
+import { ATTACHMENT_DEFINITIONS, ACTIVE_ATTACHMENT_ORDER as ATTACHMENT_ORDER, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
+import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, countAllocations, rewardAmount, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
@@ -17,6 +18,9 @@ export interface GameUICallbacks {
   onMoveAmmo: (from: number, to: number) => void;
   onEquipAttachment: (id: AttachmentId) => void;
   onUnequipAttachment: (slot: AttachmentSlot) => void;
+  onChooseAmmoReward: (ammo: SpecialAmmoType) => void;
+  onReplaceReward: (ammo: SpecialAmmoType) => void;
+  onCancelReward: () => void;
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
@@ -25,7 +29,7 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
+  AMMO_REWARD: '탄약 배분', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
 export class GameUI {
@@ -59,7 +63,9 @@ export class GameUI {
   private readonly endDetail: HTMLElement;
   private readonly ammoTooltip: HTMLElement;
   private rounds: readonly AmmoType[] = [];
-  private stock: AmmoStock = { standard: 0, armorPiercing: 0, hollowPoint: 0, incendiary: 0, stagger: 0, magnum: 0, cryo: 0, arc: 0, sanctified: 0, bloodHex: 0 };
+  private build = createAmmoBuild();
+  private stock: AmmoStock = createStageStock(this.build);
+  private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
   private locked = false;
   private magazineCapacity: number = COMBAT_BALANCE.baseMagazineCapacity;
   private selectedIndex: number | null = null;
@@ -83,8 +89,8 @@ export class GameUI {
         <section class="tactical-console" aria-label="전술 준비 패널">
           <header class="console-header"><strong>전술 준비 패널</strong><span><i></i>탄약 선택 · 발사 순서 · 부착물 구성을 한곳에서 조정합니다.</span></header>
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
-          <div class="ammo-rack"><div class="section-label"><span>탄약 보급</span><small>특수탄은 소모품</small></div><div class="ammo-options">
-            ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}">0</b></button>`; }).join('')}
+          <div class="ammo-rack"><div class="section-label"><span>스테이지 탄약</span><small id="ammo-capacity"></small></div><div class="ammo-options">
+            ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="ammo-heading"><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]}</small></span><b class="stock-count" data-stock="${ammo}"></b>${ammoStatsMarkup(ammo)}<small class="ammo-reserved"></small></button>`; }).join('')}
           </div></div>
           <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small id="magazine-order-label">1 → 4</small></div><div class="sequence-preview" aria-live="polite"><div id="preview-chain">탄약을 장전하면 순서 프리뷰가 표시됩니다.</div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
@@ -95,7 +101,8 @@ export class GameUI {
           </div></section>
         </div></section>
         <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
-        <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>조우의 마지막 좀비를 처치하면 선택한 경로의 탄약을 보급받습니다.</p><div id="route-options" class="route-options"></div></div></section>
+        <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>구간에 진입하면 확정한 배분만큼 특수탄 잔량을 채웁니다. 표준탄은 항상 무한입니다.</p><div id="route-options" class="route-options"></div></div></section>
+        <section id="ammo-reward" class="route-choice" hidden aria-label="탄약 배분 보상"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
       </div>`;
@@ -218,7 +225,7 @@ export class GameUI {
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
 
-  renderMagazine(rounds: readonly AmmoType[], stock: AmmoStock = this.stock, capacity: number = this.magazineCapacity): void {
+  renderMagazine(rounds: readonly AmmoType[], stock: AmmoStock = this.stock, capacity: number = this.magazineCapacity, build: AmmoBuild = this.build, specialCapacity: number = this.specialCapacity): void {
     this.rounds = [...rounds];
     this.stock = { ...stock };
     this.magazineCapacity = capacity;
@@ -236,17 +243,47 @@ export class GameUI {
     });
     this.loadButton.disabled = this.locked || rounds.length === 0;
     this.loadButton.querySelector('small')!.textContent = rounds.length ? `${rounds.length}발로 전투 시작` : '1발 이상 필요';
-    document.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
-      const ammo = button.dataset.ammo as AmmoType;
-      const count = this.stock[ammo];
-      button.disabled = this.locked;
-      button.setAttribute('aria-disabled', String(count <= 0));
-      button.querySelector<HTMLElement>('.stock-count')!.textContent = String(count);
-      const definition = AMMO_DEFINITIONS[ammo];
-      button.setAttribute('aria-label', `${definition.name}: ${RARITY_NAMES[definition.rarity]} ${BUILD_TAG_NAMES[definition.tags[0]!]}, ${definition.role}, 재고 ${count}발`);
-    });
+    this.renderAmmoStock(stock, build, specialCapacity, rounds);
     this.updateSelectionUI();
   }
+
+  renderAmmoStock(stock: AmmoStock, build: AmmoBuild, capacity: number, reserved: readonly AmmoType[]): void {
+    this.stock = { ...stock };
+    this.build = { ...build };
+    this.specialCapacity = capacity;
+    this.required(this.shell, '#ammo-capacity').textContent = '배분 ' + countAllocations(build) + '/' + capacity + ' · 다음 구간 회복';
+    this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach(button => {
+      const ammo = button.dataset.ammo as AmmoType;
+      const count = stock[ammo];
+      const loaded = reserved.filter(value => value === ammo).length;
+      button.hidden = ammo !== 'standard' && build[ammo] === 0;
+      button.disabled = this.locked || (count !== 'infinite' && count - loaded <= 0);
+      button.setAttribute('aria-disabled', String(button.disabled));
+      const label = ammo === 'standard' ? '∞' : count + ' / ' + build[ammo];
+      button.querySelector<HTMLElement>('.stock-count')!.textContent = label;
+      button.querySelector<HTMLElement>('.ammo-reserved')!.textContent = loaded ? '장전 예약 ' + loaded + '발' : ammo === 'standard' ? '항상 사용 가능' : '잔량 / 런 배분';
+      button.setAttribute('aria-label', AMMO_DEFINITIONS[ammo].name + ' · ' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · ' + label + ' · 장전 예약 ' + loaded + '발');
+    });
+  }
+
+  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
+    this.hideTooltip();
+    const host = this.required(this.shell, '#ammo-reward');
+    const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
+    const buildText = current.map(ammo => AMMO_DEFINITIONS[ammo].name + ' ×' + build[ammo]).join(' · ');
+    const needed = selected ? Math.max(0, countAllocations(build) + rewardAmount(selected) - capacity) : 0;
+    const title = selected ? AMMO_DEFINITIONS[selected].name + ' +' + rewardAmount(selected) + ' · 교체할 배분 선택' : '다음 구간의 탄약을 고르세요';
+    const description = selected ? '현재 배분 중 ' + needed + '발을 직접 선택하세요. 남은 선택 ' + (needed - replacements.length) + '발.' : '3종 중 하나를 선택해 런 배분을 늘립니다. 용량이 가득 차면 기존 배분과 교체합니다.';
+    const choices = selected ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => '<button type="button" class="route-option" data-replace-reward="' + ammo + '"><strong>' + AMMO_DEFINITIONS[ammo].name + ' 1발 교체</strong><small>현재 배분 ' + build[ammo] + ' → ' + (build[ammo] - replacements.filter(value => value === ammo).length - 1) + '</small></button>').join('') : options.map(ammo => '<button type="button" class="route-option ammo-reward-option" data-ammo-reward="' + ammo + '"><span>' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · 배분 +' + rewardAmount(ammo) + '</span><strong>' + AMMO_DEFINITIONS[ammo].name + '</strong><small>' + AMMO_DEFINITIONS[ammo].role + '</small>' + ammoStatsMarkup(ammo) + '<em>현재 배분 ' + build[ammo] + '발</em></button>').join('');
+    host.innerHTML = '<div class="route-card reward-card"><span>구간 완료 · 특수탄 배분 ' + countAllocations(build) + '/' + capacity + '</span><h2>' + title + '</h2><p>' + description + '</p><p>표준탄 ∞ · ' + buildText + '</p><div class="reward-options">' + choices + '</div>' + (selected ? '<button class="reward-back" type="button" data-cancel-reward>보상 다시 고르기</button>' : '') + '<p>배분 확정 후 다음 구간에 들어갈 때 잔량이 회복됩니다.</p></div>';
+    host.querySelectorAll<HTMLButtonElement>('[data-ammo-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseAmmoReward(button.dataset.ammoReward as SpecialAmmoType)));
+    host.querySelectorAll<HTMLButtonElement>('[data-replace-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onReplaceReward(button.dataset.replaceReward as SpecialAmmoType)));
+    host.querySelector('[data-cancel-reward]')?.addEventListener('click', () => this.callbacks.onCancelReward());
+    host.hidden = false;
+    host.querySelector<HTMLButtonElement>('button')?.focus();
+  }
+
+  hideAmmoRewards(): void { this.required(this.shell, '#ammo-reward').hidden = true; }
 
   setLocked(locked: boolean): void {
     this.locked = locked;
@@ -338,7 +375,7 @@ export class GameUI {
     if (enemy.statuses.shockTurns) statuses.push('전하 교란');
     if (enemy.statuses.exposedShots) statuses.push('다음 탄 노출');
     if (enemy.statuses.corruptedShots) statuses.push(`침식 ${enemy.statuses.corruptedShots}발`);
-    if (enemy.statuses.impact) statuses.push(`충격 ${enemy.statuses.impact}/${enemy.staggerThreshold}`);
+    statuses.push(`충격 ${enemy.statuses.impact}/${enemy.staggerThreshold}`);
     this.enemyStatus.textContent = statuses.join(' · ') || '상태 없음';
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
     this.rangeBandText.textContent = RANGE_NAMES[getRangeBand(enemy.distance)];
@@ -352,12 +389,13 @@ export class GameUI {
     if (!sequence) {
       this.previewChain.textContent = '탄약을 장전하면 순서 프리뷰가 표시됩니다.';
       this.previewOutcome.textContent = '';
+      this.accuracyText.textContent = '—';
       return;
     }
-    this.previewChain.innerHTML = sequence.shots.map((shot) => `<span title="정확도 ${Math.round(shot.breakdown.accuracy)}% · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} ×${shot.breakdown.rangeMultiplier.toFixed(2)}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${Math.round(shot.breakdown.accuracy)}%</b></span>`).join('<i>→</i>');
+    this.previewChain.innerHTML = sequence.shots.map((shot) => `<span title="정확도 ${Math.round(shot.breakdown.accuracy)}% · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} ×${shot.breakdown.rangeMultiplier.toFixed(2)}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${Math.round(shot.breakdown.accuracy)}%</b></span>`).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
     const final = sequence.finalState;
     const effects: string[] = [`예상 정확도 ${Math.round(sequence.averageAccuracy)}%`, `체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];
-    if (sequence.totalArmorDamage) effects.push(`방어 파괴 ${sequence.totalArmorDamage}`);
+    if (sequence.totalArmorDamage) effects.push(`방어 감소 ${sequence.totalArmorDamage}`);
     if (final.statuses.burnTurns) effects.push(`화상 ${final.statuses.burnTurns}턴`);
     if (sequence.killed) effects.push('처치 예상');
     else if (action) effects.push(`다음 이동 ${action.movement.toFixed(1)}m`);
@@ -368,9 +406,9 @@ export class GameUI {
 
   showShot(result: ShotResult): void {
     const damageDetail = [`기본 ${result.breakdown.baseDamage}`, `정확도 ${Math.round(result.breakdown.accuracy)}%`, `${RANGE_NAMES[result.breakdown.effectiveRangeBand]} ×${result.breakdown.rangeMultiplier.toFixed(2)}`, `체력 피해 ${result.hpDamage}`];
-    if (result.armorDamage) damageDetail.push(`방어 파괴 ${result.armorDamage}`);
+    if (result.breakdown.armorBroken) damageDetail.push(`방어 파괴 ${result.breakdown.armorBroken}`);
     if (result.burnApplied) damageDetail.push(`화상 ${result.burnApplied}턴`);
-    if (result.breakdown.armorBlocked) damageDetail.push(`장갑 저항 ${result.breakdown.armorBlocked}`);
+    if (result.breakdown.armorBlocked) damageDetail.push(`방어 흡수 ${result.breakdown.armorBlocked}`);
     if (result.conserved) damageDetail.push('탄환 보존');
     this.combatLog.innerHTML = `<span style="--ammo-color:${AMMO_DEFINITIONS[result.ammoType].cssColor}">${result.index + 1}</span><div><strong>${result.description}</strong><small>${damageDetail.join(' · ')}</small></div>`;
     this.slots.forEach((slot, index) => slot.classList.toggle('is-firing', index === result.index));
@@ -458,10 +496,9 @@ export class GameUI {
   private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement): void {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
-    const accuracy = definition.accuracy === 0 ? '보정 없음' : `${definition.accuracy > 0 ? '+' : ''}${definition.accuracy}%`;
+    const accuracy = `${definition.accuracy > 0 ? '+' : ''}${definition.accuracy}%`;
     const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
-    const armorDamage = definition.armoredDirectDamage === undefined ? '' : ` (장갑 보유 시 ${definition.armoredDirectDamage})`;
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>기본 피해 <b>${definition.directDamage}${armorDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>관통 <b>${definition.penetration}</b></span><span>방어 파괴 <b>${definition.armorShred}</b></span><span>충격 <b>${definition.impact}</b></span></div><small>반동은 발사 순서가 뒤로 갈수록 다음 탄의 정확도를 낮춥니다.${buildup}</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.directDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.impact}</b></span></div><small>이 탄이 만든 반동은 다음 탄부터 누적 적용됩니다.${buildup}</small>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
