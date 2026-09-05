@@ -66,6 +66,7 @@ export function runBalanceSimulation() {
     const player = new Player();
     configure(player, loadout);
     // 탄종 역할 비교에는 해당 전략의 6발 배분을 구성한다.
+    player.setSpecialCapacity(countAllocations(player.getBuild()));
     const special = plan.priority.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard');
     if (special.length) for (let i = 0; i < 6; i += 1) {
       const removed = i < 3 ? 'armorPiercing' : 'hollowPoint';

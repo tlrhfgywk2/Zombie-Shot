@@ -14,6 +14,10 @@ describe('런 배분과 스테이지 잔량', () => {
     expect(player.getSpecialCapacity()).toBe(14);
     expect(player.addAmmo('match')).toBe(false);
     expect(player.addAmmo('incendiary')).toBe(false);
+    for (let i = 0; i < 8; i += 1) expect(player.applyAmmoReward('match')).toBe(true);
+    expect(countAllocations(player.getBuild())).toBe(14);
+    expect(player.applyAmmoReward('match')).toBe(false);
+    expect(player.applyAmmoReward('match', ['armorPiercing'])).toBe(true);
   });
   it('장전/제거/교체는 예약만 변경하고 발사 시에만 잔량을 차감한다', () => {
     const player = new Player();
@@ -80,6 +84,7 @@ describe('런 배분과 스테이지 잔량', () => {
   });
   it('가득 찬 배분은 명시적인 교체를 요구하고 실패 시 그대로 유지한다', () => {
     const player = new Player();
+    player.setSpecialCapacity(countAllocations(player.getBuild()));
     const before = player.getBuild();
     expect(player.applyAmmoReward('match')).toBe(false);
     expect(player.applyAmmoReward('match', ['subsonic'])).toBe(false);
@@ -94,6 +99,7 @@ describe('런 배분과 스테이지 잔량', () => {
   });
   it('소유 탄종 집중과 용량 증가 후 추가 배분이 가능하다', () => {
     const player = new Player();
+    player.setSpecialCapacity(countAllocations(player.getBuild()));
     expect(player.applyAmmoReward('hollowPoint', ['armorPiercing'])).toBe(true);
     expect(player.getBuild().hollowPoint).toBe(4);
     expect(player.setSpecialCapacity(7)).toBe(true);
@@ -103,6 +109,7 @@ describe('런 배분과 스테이지 잔량', () => {
   });
   it('탄종별 보상량을 변경해도 필요한 교체 수를 원자적으로 검증한다', () => {
     const player = new Player();
+    player.setSpecialCapacity(countAllocations(player.getBuild()));
     AMMO_BUILD_BALANCE.rewardAmounts.match = 2;
     try {
       expect(player.applyAmmoReward('match', ['armorPiercing'])).toBe(false);
@@ -113,10 +120,11 @@ describe('런 배분과 스테이지 잔량', () => {
   });
   it('초기화는 새로운 런 배분과 잔량을 복원한다', () => {
     const player = new Player();
-    player.applyAmmoReward('match', ['armorPiercing']); player.startStage(); player.addAmmo('match');
+    player.applyAmmoReward('match'); player.startStage(); player.addAmmo('match');
     player.reset();
     expect(player.getBuild().match).toBe(0);
     expect(player.getStock().armorPiercing).toBe(3);
     expect(player.magazine.size).toBe(0);
+    expect(player.getSpecialCapacity()).toBe(14);
   });
 });
