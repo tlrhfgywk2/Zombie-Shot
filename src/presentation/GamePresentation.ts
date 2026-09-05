@@ -382,7 +382,7 @@ export class GamePresentation {
     this.scene.add(this.zombieModel.root);
     this.pistolModel.root.position.copy(this.layout.weaponRest);
     this.pistolModel.root.rotation.set(-0.02, -0.04, -0.08);
-    const weaponFill = new THREE.PointLight(0xc9ffe0, 0.72, 4.5);
+    const weaponFill = new THREE.PointLight(0xe0eee7, 2.2, 4.5);
     weaponFill.position.set(0.2, 1.25, 1.2);
     this.pistolModel.root.add(weaponFill);
     this.muzzleFlash.position.set(0, 0, 0);

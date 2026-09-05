@@ -19,12 +19,12 @@ export interface PresentationLayout {
 
 export const getPresentationLayout = (width: number, height: number): PresentationLayout => {
   const tabletLandscapeStage = width >= 900 && width <= 1220 && height >= 420 && height <= 620;
-  const mode: ResponsiveLayoutMode = tabletLandscapeStage ? 'tablet-landscape' : getResponsiveLayoutMode(width, height);
+  const mode: ResponsiveLayoutMode = width <= 600 ? 'portrait' : tabletLandscapeStage ? 'tablet-landscape' : getResponsiveLayoutMode(width, height);
 
   if (mode === 'portrait') {
     return {
       mode,
-      weaponRest: new THREE.Vector3(0.82, 1.55, 3.72),
+      weaponRest: new THREE.Vector3(0.50, 1.65, 3.72),
       weaponInsertion: new THREE.Vector3(0.28, 2.5, 2.4),
       weaponAim: new THREE.Vector3(0.82, 1.55, 3.62),
       magazineLoad: new THREE.Vector3(-0.56, 2.08, 4.04),
@@ -77,12 +77,12 @@ export const getPresentationLayout = (width: number, height: number): Presentati
 
   return {
     mode,
-    weaponRest: new THREE.Vector3(1.05, 0.95, 3.62),
+    weaponRest: new THREE.Vector3(1.05, 1.55, 3.62),
     weaponInsertion: new THREE.Vector3(0.78, 2.3, 2.6),
     weaponAim: new THREE.Vector3(1.15, 0.95, 3.56),
     magazineLoad: new THREE.Vector3(-1.08, 1.5, 4.04),
     magazineInspect: new THREE.Vector3(-0.88, 1.62, 3.98),
-    pistolScale: 0.92,
+    pistolScale: 0.78,
     magazineScale: 1,
     cartridgeScale: 1.12,
     insertionScaleFactor: 0.72,

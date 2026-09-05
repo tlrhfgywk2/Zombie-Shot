@@ -633,3 +633,10 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .attachment-option small,
 .game-shell[data-layout="portrait"] .attachment-option em { display: block; font-size: 9px; white-space: normal; }
 .game-shell[data-layout="portrait"] .attachment-reward-card { max-height: 90dvh; overflow-y: auto; }
+
+.game-shell[data-layout="desktop"] { --console-height: 350px; }
+.game-shell[data-layout="desktop"] .attachment-group { grid-template-columns: 90px repeat(2, minmax(0, 1fr)); }
+.game-shell[data-layout="desktop"] .attachment-option small { white-space: normal; }
+.game-shell[data-layout="desktop"] .attachment-option { height: auto; min-height: 58px; }
+
+.game-shell[data-layout="portrait"] .console-header { display: none; }
