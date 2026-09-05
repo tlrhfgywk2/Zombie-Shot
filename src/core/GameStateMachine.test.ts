@@ -28,6 +28,7 @@ describe('GameStateMachine', () => {
     state.transition('LOADING');
     state.transition('FIRING');
     state.transition('ENEMY_ACTION');
+    state.transition('AMMO_REWARD');
     state.transition('VICTORY');
     state.transition('AMMO_SELECTION');
     expect(state.phase).toBe('AMMO_SELECTION');
@@ -38,6 +39,8 @@ describe('GameStateMachine', () => {
     state.transition('LOADING');
     state.transition('FIRING');
     state.transition('ENEMY_ACTION');
+    expect(state.canTransition('ROUTE_SELECTION')).toBe(false);
+    state.transition('AMMO_REWARD');
     state.transition('ROUTE_SELECTION');
     state.transition('AMMO_SELECTION');
     expect(state.phase).toBe('AMMO_SELECTION');

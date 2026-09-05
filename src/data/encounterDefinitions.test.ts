@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { SPECIAL_AMMO_SUPPLY, NORMAL_AMMO_SUPPLY } from './ammoDefinitions';
 import { ENCOUNTER_STAGES } from './encounterDefinitions';
 import { ENEMY_DEFINITIONS } from './enemyDefinitions';
 
@@ -19,8 +18,14 @@ describe('조우 경로 정의', () => {
     expect(intents).toEqual(new Set(['contaminate', 'groundShock', 'sonicPulse']));
   });
 
-  it('특수 경로 보급은 신화 탄약을 주지만 일반 경로 보급은 주지 않는다', () => {
-    expect(NORMAL_AMMO_SUPPLY.sanctified + NORMAL_AMMO_SUPPLY.bloodHex).toBe(0);
-    expect(SPECIAL_AMMO_SUPPLY.sanctified + SPECIAL_AMMO_SUPPLY.bloodHex).toBeGreaterThan(0);
+  it('초반은 무장갑 중심이며 후반에도 화력 경로와 혼합 경로를 유지한다', () => {
+    expect(ENCOUNTER_STAGES[0]!.normal.roster.every(type => ENEMY_DEFINITIONS[type].armor === 0)).toBe(true);
+    expect(ENCOUNTER_STAGES[1]!.special!.roster.some(type => ENEMY_DEFINITIONS[type].armor > 0)).toBe(true);
+    for (const stage of ENCOUNTER_STAGES.slice(2)) {
+      expect(stage.normal.roster.some(type => ENEMY_DEFINITIONS[type].armor === 0)).toBe(true);
+      expect(stage.normal.roster.some(type => ENEMY_DEFINITIONS[type].armor > 0)).toBe(true);
+    }
+    expect(ENEMY_DEFINITIONS.tough.armor).toBe(0);
+    expect(ENEMY_DEFINITIONS.screecher.armor).toBe(0);
   });
 });

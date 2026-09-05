@@ -1,3 +1,4 @@
+import { DORMANT_AMMO_DEFINITIONS } from './dormantAmmoDefinitions';
 import type { AmmoRarity, AmmoType, BuildTag, RangeBand, StatusType } from '../combat/types';
 
 export interface AmmoDefinition {
@@ -9,12 +10,11 @@ export interface AmmoDefinition {
   tags: readonly BuildTag[];
   color: number;
   cssColor: string;
+  supply?: 'infinite';
   directDamage: number;
-  armoredDirectDamage?: number;
   accuracy: number;
   recoil: number;
-  penetration: number;
-  armorShred: number;
+  armorBreak: number;
   impact: number;
   buildup?: { type: StatusType; amount: number };
   specialEnemyMultiplier?: number;
@@ -22,25 +22,36 @@ export interface AmmoDefinition {
 }
 
 export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
-  standard: { id: 'standard', name: '표준탄', shortName: '표준', role: '안정적인 기준 탄약', rarity: 'common', tags: ['ballistic'], color: 0xd8c6a2, cssColor: '#d8c6a2', directDamage: 22, accuracy: 0, recoil: 0, penetration: 0, armorShred: 0, impact: 12 },
-  armorPiercing: { id: 'armorPiercing', name: '관통탄', shortName: '관통', role: '장갑 파괴와 관통', rarity: 'uncommon', tags: ['ballistic'], color: 0x78b7ff, cssColor: '#78b7ff', directDamage: 15, accuracy: -3, recoil: 1, penetration: 12, armorShred: 30, impact: 16 },
-  hollowPoint: { id: 'hollowPoint', name: '확장탄', shortName: '확장', role: '무장갑 표적 고피해', rarity: 'uncommon', tags: ['ballistic'], color: 0xff8ca1, cssColor: '#ff8ca1', directDamage: 30, armoredDirectDamage: 13, accuracy: 2, recoil: 1, penetration: 0, armorShred: 0, impact: 18 },
-  incendiary: { id: 'incendiary', name: '열화탄', shortName: '열화', role: '열기 축적 후 화상', rarity: 'rare', tags: ['elemental'], color: 0xffba3a, cssColor: '#ffba3a', directDamage: 12, accuracy: 0, recoil: 0, penetration: 2, armorShred: 0, impact: 8, buildup: { type: 'burn', amount: 60 } },
-  stagger: { id: 'stagger', name: '압력탄', shortName: '압력', role: '충격 축적과 이동 차단', rarity: 'uncommon', tags: ['ballistic'], color: 0x70e6d2, cssColor: '#70e6d2', directDamage: 10, accuracy: -2, recoil: 3, penetration: 3, armorShred: 0, impact: 66 },
-  magnum: { id: 'magnum', name: '중량탄', shortName: '중량', role: '강한 피해와 충격, 큰 반동', rarity: 'rare', tags: ['ballistic'], color: 0xc895ff, cssColor: '#c895ff', directDamage: 34, accuracy: -5, recoil: 7, penetration: 5, armorShred: 0, impact: 38 },
-  cryo: { id: 'cryo', name: '빙결탄', shortName: '빙결', role: '냉기 축적 후 접근 둔화', rarity: 'rare', tags: ['elemental'], color: 0x80e8ff, cssColor: '#80e8ff', directDamage: 11, accuracy: 4, recoil: 0, penetration: 1, armorShred: 0, impact: 10, buildup: { type: 'chill', amount: 60 } },
-  arc: { id: 'arc', name: '전도탄', shortName: '전도', role: '전하 축적 후 특수 의도 지연', rarity: 'rare', tags: ['elemental'], color: 0x9fa8ff, cssColor: '#9fa8ff', directDamage: 13, accuracy: -1, recoil: 1, penetration: 4, armorShred: 0, impact: 8, buildup: { type: 'shock', amount: 60 } },
-  sanctified: { id: 'sanctified', name: '새벽서약탄', shortName: '서약', role: '특수 감염체 심판', rarity: 'mythic', tags: ['sacred'], color: 0xfff2a8, cssColor: '#fff2a8', directDamage: 25, accuracy: 8, recoil: 2, penetration: 8, armorShred: 0, impact: 20, specialEnemyMultiplier: 1.35 },
-  bloodHex: { id: 'bloodHex', name: '핏빛각인탄', shortName: '각인', role: '침식 축적 · 처치 시 회수', rarity: 'mythic', tags: ['occult'], color: 0xff5d83, cssColor: '#ff5d83', directDamage: 9, accuracy: 5, recoil: 0, penetration: 3, armorShred: 0, impact: 8, buildup: { type: 'corruption', amount: 60 }, recoverOnKill: true },
+  ...DORMANT_AMMO_DEFINITIONS,
+  wadcutter: { id: 'wadcutter', name: '와드커터탄', shortName: '와드', role: '정확도와 후속 탄 안정성', rarity: 'common', tags: ['ballistic'], color: 0xa9d9ae, cssColor: '#a9d9ae', directDamage: 16, accuracy: 12, recoil: 1, armorBreak: 0, impact: 0 },
+  flatPoint: { id: 'flatPoint', name: '평두탄', shortName: '평두', role: '충격 임계와 다음 탄 노출', rarity: 'common', tags: ['ballistic'], color: 0x70e6d2, cssColor: '#70e6d2', directDamage: 20, accuracy: 0, recoil: 7, armorBreak: 0, impact: 70 },
+  overpressure: { id: 'overpressure', name: '고압탄', shortName: '고압', role: '강한 화력 · 후속 탄 반동 주의', rarity: 'uncommon', tags: ['ballistic'], color: 0xe9a065, cssColor: '#e9a065', directDamage: 40, accuracy: -4, recoil: 22, armorBreak: 0, impact: 0 },
+  subsonic: { id: 'subsonic', name: '저소음탄', shortName: '저소음', role: '반동 없는 연속 사격', rarity: 'uncommon', tags: ['ballistic'], color: 0xa3c6ce, cssColor: '#a3c6ce', directDamage: 19, accuracy: 3, recoil: 0, armorBreak: 0, impact: 0 },
+  bonded: { id: 'bonded', name: '본디드탄', shortName: '본디드', role: '강화된 방어 제거와 화력', rarity: 'uncommon', tags: ['ballistic'], color: 0x7eb5df, cssColor: '#7eb5df', directDamage: 24, accuracy: 1, recoil: 8, armorBreak: 18, impact: 0 },
+  match: { id: 'match', name: '매치탄', shortName: '매치', role: '높은 명중 보정과 낮은 반동', rarity: 'uncommon', tags: ['ballistic'], color: 0xcfb9ee, cssColor: '#cfb9ee', directDamage: 22, accuracy: 16, recoil: 3, armorBreak: 0, impact: 0 },
+  standard: { id: 'standard', name: '표준탄', shortName: '표준', role: '안정적인 기준 탄약', rarity: 'common', tags: ['ballistic'], color: 0xd8c6a2, cssColor: '#d8c6a2', directDamage: 22, accuracy: 0, recoil: 7, armorBreak: 0, impact: 0, supply: 'infinite' },
+  armorPiercing: { id: 'armorPiercing', name: '철갑탄', shortName: '철갑', role: '방어를 먼저 제거하는 준비탄', rarity: 'common', tags: ['ballistic'], color: 0x78b7ff, cssColor: '#78b7ff', directDamage: 18, accuracy: 0, recoil: 7, armorBreak: 12, impact: 0 },
+  hollowPoint: { id: 'hollowPoint', name: '확장탄', shortName: '확장', role: '무장갑 표적 고화력', rarity: 'common', tags: ['ballistic'], color: 0xff8ca1, cssColor: '#ff8ca1', directDamage: 30, accuracy: 0, recoil: 9, armorBreak: 0, impact: 0 },
 };
 
-export const AMMO_ORDER: AmmoType[] = ['standard', 'armorPiercing', 'hollowPoint', 'stagger', 'incendiary', 'cryo', 'arc', 'magnum', 'sanctified', 'bloodHex'];
-export type AmmoStock = Record<AmmoType, number>;
-
-export const STARTING_AMMO_STOCK: AmmoStock = { standard: 10, armorPiercing: 3, hollowPoint: 3, incendiary: 2, stagger: 3, magnum: 1, cryo: 2, arc: 2, sanctified: 1, bloodHex: 1 };
-export const NORMAL_AMMO_SUPPLY: AmmoStock = { standard: 6, armorPiercing: 1, hollowPoint: 1, incendiary: 1, stagger: 1, magnum: 0, cryo: 0, arc: 0, sanctified: 0, bloodHex: 0 };
-export const SPECIAL_AMMO_SUPPLY: AmmoStock = { standard: 4, armorPiercing: 1, hollowPoint: 1, incendiary: 1, stagger: 1, magnum: 1, cryo: 1, arc: 1, sanctified: 1, bloodHex: 1 };
-export const WAVE_AMMO_SUPPLY = NORMAL_AMMO_SUPPLY;
+// 이 목록만 일반 플레이와 보상에 노출한다. 기존 원소/신화 정의는 실험용으로만 보존한다.
+export const AMMO_ORDER: AmmoType[] = ['standard', 'hollowPoint', 'armorPiercing', 'wadcutter', 'flatPoint', 'overpressure', 'subsonic', 'bonded', 'match'];
+export type SpecialAmmoType = Exclude<AmmoType, 'standard'>;
+export type AmmoBuild = Record<SpecialAmmoType, number>;
+export type AmmoStock = AmmoBuild & { standard: 'infinite' };
+export const AMMO_BUILD_BALANCE = {
+  specialCapacity: 6,
+  initialAllocations: { hollowPoint: 3, armorPiercing: 3 } as Partial<AmmoBuild>,
+  rewardAmount: 1,
+  rewardAmounts: {} as Partial<AmmoBuild>,
+  rewardChoices: 3,
+  rarityWeights: { common: 75, uncommon: 25 },
+};
+export const createAmmoBuild = (allocations: Partial<AmmoBuild> = AMMO_BUILD_BALANCE.initialAllocations): AmmoBuild =>
+  Object.fromEntries(Object.keys(AMMO_DEFINITIONS).filter(id => id !== 'standard').map(id => [id, allocations[id as SpecialAmmoType] ?? 0])) as AmmoBuild;
+export const createStageStock = (build: AmmoBuild): AmmoStock => ({ ...build, standard: 'infinite' });
+export const countAllocations = (build: AmmoBuild): number => Object.values(build).reduce((sum, value) => sum + value, 0);
+export const rewardAmount = (ammo: SpecialAmmoType): number => AMMO_BUILD_BALANCE.rewardAmounts[ammo] ?? AMMO_BUILD_BALANCE.rewardAmount;
 
 export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', uncommon: '고급', rare: '희귀', mythic: '신화' };
 export const BUILD_TAG_NAMES: Record<BuildTag, string> = { ballistic: '탄도', elemental: '원소', sacred: '신성', occult: '오컬트' };
@@ -52,7 +63,8 @@ export const COMBAT_BALANCE = {
   minimumMagazineCapacity: 3,
   maximumMagazineCapacity: 5,
   baseAccuracy: 100,
-  recoilPerShot: 7,
+  weaponRecoil: 0,
+  minimumRecoil: 0,
   minimumAccuracy: 25,
   exposedDamageMultiplier: 1.4,
   corruptedSpecialMultiplier: 1.25,

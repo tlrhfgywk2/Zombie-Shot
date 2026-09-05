@@ -1,7 +1,8 @@
 import { CombatResolver } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
-import { NORMAL_AMMO_SUPPLY, SPECIAL_AMMO_SUPPLY } from '../data/ammoDefinitions';
+import { countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
+import { generateAmmoRewards } from '../progression/AmmoRewards';
 import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import { Player } from '../entities/Player';
@@ -21,10 +22,12 @@ export class Game {
   private audioPreferences: AudioPreferences = loadAudioPreferences();
   private waveIndex = 0;
   private enemyIndex = 0;
-  private currentRoute: RouteKind = 'normal';
   private currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
   private zombie = new Zombie(this.currentRoster[0] ?? 'normal');
   private busy = false;
+  private rewardOptions: SpecialAmmoType[] = [];
+  private pendingReward?: SpecialAmmoType;
+  private rewardReplacements: SpecialAmmoType[] = [];
 
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
@@ -35,6 +38,14 @@ export class Game {
       onMoveAmmo: (from, to) => this.moveAmmo(from, to),
       onEquipAttachment: (id) => this.equipAttachment(id),
       onUnequipAttachment: (slot) => this.unequipAttachment(slot),
+      onChooseAmmoReward: (ammo) => this.chooseAmmoReward(ammo),
+      onReplaceReward: (ammo) => this.replaceReward(ammo),
+      onCancelReward: () => {
+        if (this.state.phase !== 'AMMO_REWARD') return;
+        this.pendingReward = undefined;
+        this.rewardReplacements = [];
+        this.showAmmoRewards();
+      },
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
@@ -110,12 +121,13 @@ export class Game {
     for (const shot of sequence.shots) {
       this.ui.showShot(shot);
       await this.presentation.animateShot(shot.ammoType);
+      this.player.fireRound(shot);
       this.zombie.applyState(shot.after);
+      this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
       this.syncEnemy();
       await this.pause(PRESENTATION_TIMING.betweenShots);
     }
     this.player.magazine.clear();
-    this.player.returnAmmo(sequence.returnedRounds);
     this.syncMagazine();
     await this.resolveEnemyAction();
     this.busy = false;
@@ -123,7 +135,7 @@ export class Game {
 
   private async resolveEnemyAction(): Promise<void> {
     this.state.transition('ENEMY_ACTION');
-    this.ui.setPhase('ENEMY_ACTION', '화상과 이동 억제를 처리합니다.');
+    this.ui.setPhase('ENEMY_ACTION', '충격과 예고 행동, 이동을 처리합니다.');
     if (this.zombie.isDead) { await this.handleZombieDeath(); return; }
 
     const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), this.player.getCombatState(), this.player.loadout.getSnapshot());
@@ -171,17 +183,45 @@ export class Game {
       return;
     }
 
-    this.player.resupply(this.currentRoute === 'special' ? SPECIAL_AMMO_SUPPLY : NORMAL_AMMO_SUPPLY);
-    const supplyDetail = this.currentRoute === 'special'
-      ? '표준탄 4발 · 관통/확장/열화/압력/중량/빙결/전도/서약/각인탄 각 1발'
-      : '표준탄 6발 · 관통/확장/열화/압력탄 각 1발';
-    this.ui.showEvent('조우 완료 · 탄약 보급', supplyDetail);
+    this.state.transition('AMMO_REWARD');
+    this.rewardOptions = generateAmmoRewards();
+    this.pendingReward = undefined;
+    this.rewardReplacements = [];
+    this.ui.setLocked(true);
+    this.ui.setPhase('AMMO_REWARD', '이번 구간을 완료했습니다. 다음 구간의 탄약 배분을 고르세요.');
+    this.ui.clearEvent();
+    this.showAmmoRewards();
+  }
+
+  private showAmmoRewards(): void {
+    this.ui.showAmmoRewards(this.rewardOptions, this.player.getBuild(), this.player.getSpecialCapacity(), this.pendingReward, this.rewardReplacements);
+  }
+
+  private chooseAmmoReward(ammo: SpecialAmmoType): void {
+    if (this.state.phase !== 'AMMO_REWARD' || !this.rewardOptions.includes(ammo) || this.pendingReward) return;
+    this.pendingReward = ammo;
+    if (countAllocations(this.player.getBuild()) + rewardAmount(ammo) > this.player.getSpecialCapacity()) this.showAmmoRewards();
+    else this.finishAmmoReward();
+  }
+
+  private replaceReward(ammo: SpecialAmmoType): void {
+    if (this.state.phase !== 'AMMO_REWARD' || !this.pendingReward) return;
+    const used = this.rewardReplacements.filter(value => value === ammo).length;
+    if (this.player.getBuild()[ammo] <= used) return;
+    this.rewardReplacements.push(ammo);
+    const required = countAllocations(this.player.getBuild()) + rewardAmount(this.pendingReward) - this.player.getSpecialCapacity();
+    if (this.rewardReplacements.length === required) this.finishAmmoReward();
+    else this.showAmmoRewards();
+  }
+
+  private finishAmmoReward(): void {
+    if (!this.pendingReward || !this.player.applyAmmoReward(this.pendingReward, this.rewardReplacements)) return;
+    this.ui.hideAmmoRewards();
+    this.pendingReward = undefined;
     if (this.waveIndex + 1 < ENCOUNTER_STAGES.length) {
-      const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1];
-      if (!nextStage) return;
+      const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1]!;
       this.state.transition('ROUTE_SELECTION');
-      this.ui.setLocked(true);
-      this.ui.setPhase('ROUTE_SELECTION', `${this.currentRoute === 'special' ? '정예' : '일반'} 보급을 확보했습니다. 다음 위험을 선택하세요.`);
+      this.ui.setPhase('ROUTE_SELECTION', '탄약 배분을 확정했습니다. 다음 구간 진입 시 잔량을 채웁니다.');
       this.ui.showRouteChoice(this.waveIndex + 2, nextStage.special ? [nextStage.normal, nextStage.special] : [nextStage.normal]);
       return;
     }
@@ -192,17 +232,19 @@ export class Game {
   }
 
   private async chooseRoute(kind: RouteKind): Promise<void> {
-    if (this.state.phase !== 'ROUTE_SELECTION') return;
+    if (this.busy || this.state.phase !== 'ROUTE_SELECTION') return;
     const nextIndex = this.waveIndex + 1;
     const stage = ENCOUNTER_STAGES[nextIndex];
     const option = kind === 'special' ? stage?.special : stage?.normal;
     if (!option) return;
-    this.currentRoute = kind;
+    this.busy = true;
     this.currentRoster = option.roster;
     this.waveIndex = nextIndex;
     this.enemyIndex = 0;
     this.ui.hideRouteChoice();
+    this.player.startStage();
     await this.spawnCurrentEnemy();
+    this.busy = false;
   }
 
   private async spawnCurrentEnemy(): Promise<void> {
@@ -223,7 +265,6 @@ export class Game {
     this.player.reset();
     this.waveIndex = 0;
     this.enemyIndex = 0;
-    this.currentRoute = 'normal';
     this.currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
     this.zombie = new Zombie(this.currentRoster[0] ?? 'normal');
     this.busy = false;
@@ -243,7 +284,7 @@ export class Game {
 
   private syncMagazine(): void {
     const rounds = this.player.magazine.getRounds();
-    this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity);
+    this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity, this.player.getBuild(), this.player.getSpecialCapacity());
     if (rounds.length === 0) this.ui.renderPreview(undefined, undefined);
     else {
       const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };

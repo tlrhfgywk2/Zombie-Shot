@@ -9,6 +9,7 @@ export interface CombatContext {
 }
 
 interface ShotContext extends CombatContext {
+  cumulativeRecoil?: number;
   previousAmmo?: AmmoType;
   totalRounds?: number;
   rareConservationUsed?: boolean;
@@ -77,8 +78,9 @@ export class CombatResolver {
       .flatMap((id) => ATTACHMENT_DEFINITIONS[id].modifiers)
       .filter((modifier) => !('condition' in modifier) || conditionMatches(modifier.condition, rangeBand, ammoType, index, context.previousAmmo, before.special));
 
-    const recoilStep = Math.max(2, COMBAT_BALANCE.recoilPerShot + definition.recoil + this.sumModifiers(activeModifiers, 'recoilStep'));
-    const accuracy = Math.max(COMBAT_BALANCE.minimumAccuracy, COMBAT_BALANCE.baseAccuracy + playerState.accuracyPenalty + definition.accuracy + this.sumModifiers(activeModifiers, 'accuracy') - recoilStep * index);
+    const recoilGenerated = Math.max(COMBAT_BALANCE.minimumRecoil, COMBAT_BALANCE.weaponRecoil + definition.recoil + this.sumModifiers(activeModifiers, 'recoilStep'));
+    const cumulativeRecoil = context.cumulativeRecoil ?? 0;
+    const accuracy = Math.max(COMBAT_BALANCE.minimumAccuracy, COMBAT_BALANCE.baseAccuracy + playerState.accuracyPenalty + definition.accuracy + this.sumModifiers(activeModifiers, 'accuracy') - cumulativeRecoil);
     const attachmentMultiplier = Math.max(0.4, 1 + this.sumModifiers(activeModifiers, 'damageMultiplier'));
     let statusMultiplier = definition.specialEnemyMultiplier && before.special ? definition.specialEnemyMultiplier : 1;
     if (after.statuses.exposedShots > 0) {
@@ -91,21 +93,16 @@ export class CombatResolver {
       after.statuses.corruptedShots -= 1;
     }
 
-    const baseDamage = definition.armoredDirectDamage !== undefined && before.armor > 0 ? definition.armoredDirectDamage : definition.directDamage;
+    const baseDamage = definition.directDamage;
     const sonicMultiplier = Math.max(0.55, 1 - playerState.rangePenaltySteps * 0.12);
     const rangeMultiplier = COMBAT_BALANCE.handgunRangeMultiplier[effectiveRangeBand] * sonicMultiplier;
     const scaledDamage = Math.max(0, Math.round(baseDamage * (accuracy / 100) * rangeMultiplier * attachmentMultiplier * statusMultiplier));
 
-    let armorDamage = 0;
-    if (definition.armorShred > 0) {
-      const shredded = Math.min(after.armor, definition.armorShred);
-      after.armor -= shredded;
-      armorDamage += shredded;
-    }
-    const blockableDamage = Math.max(0, scaledDamage - definition.penetration);
-    const armorBlocked = Math.min(after.armor, blockableDamage);
+    const armorBroken = Math.min(after.armor, definition.armorBreak);
+    after.armor -= armorBroken;
+    const armorBlocked = Math.min(after.armor, scaledDamage);
     after.armor -= armorBlocked;
-    armorDamage += armorBlocked;
+    const armorDamage = armorBroken + armorBlocked;
     const hpDamage = Math.min(after.hp, scaledDamage - armorBlocked);
     after.hp -= hpDamage;
 
@@ -145,7 +142,8 @@ export class CombatResolver {
       || (preservation && !context.rareConservationUsed && isSpecialAmmo && accuracy >= preservation.minimumAccuracy),
     );
     const parts = [`${definition.name} 명중`, `정확도 ${Math.round(accuracy)}%`, `${RANGE_NAMES[effectiveRangeBand]} ×${rangeMultiplier.toFixed(2)}`];
-    if (definition.armorShred && armorDamage) parts.push(`장갑 ${armorDamage} 파괴`);
+    if (armorBroken) parts.push(`방어 파괴 ${armorBroken}`);
+    if (armorBlocked) parts.push(`방어 흡수 ${armorBlocked}`);
     if (statusTriggered) parts.push(`${this.statusName(statusTriggered)} 발동`);
     if (staggerApplied) parts.push('충격 임계 · 의도/이동 지연');
     if (conserved) parts.push('탄환 보존');
@@ -153,7 +151,7 @@ export class CombatResolver {
     return {
       ammoType, index, damage: hpDamage + armorDamage, hpDamage, armorDamage, burnApplied, staggerApplied, impactApplied,
       statusTriggered, vulnerabilityMultiplier: statusMultiplier, conserved, killed: after.hp <= 0, description: parts.join(' · '),
-      breakdown: { baseDamage, accuracy, rangeBand, effectiveRangeBand, rangeMultiplier, attachmentMultiplier, statusMultiplier, armorBlocked, penetration: definition.penetration, finalDamage: hpDamage },
+      breakdown: { baseDamage, accuracy, rangeBand, effectiveRangeBand, rangeMultiplier, attachmentMultiplier, statusMultiplier, armorBlocked, armorBroken, cumulativeRecoil, recoilGenerated, finalDamage: hpDamage },
       before, after,
     };
   }
@@ -162,11 +160,13 @@ export class CombatResolver {
     let current = cloneState(enemyState);
     const shots: ShotResult[] = [];
     let rareConservationUsed = false;
+    let cumulativeRecoil = 0;
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo || current.hp <= 0) break;
-      const shot = this.resolveShot(ammo, index, current, { ...context, previousAmmo: rounds[index - 1], totalRounds: rounds.length, rareConservationUsed });
+      const shot = this.resolveShot(ammo, index, current, { ...context, previousAmmo: rounds[index - 1], totalRounds: rounds.length, rareConservationUsed, cumulativeRecoil });
       shots.push(shot);
+      cumulativeRecoil += shot.breakdown.recoilGenerated;
       current = cloneState(shot.after);
       if (shot.conserved && rarityRank[AMMO_DEFINITIONS[ammo].rarity] >= rarityRank.rare) rareConservationUsed = true;
     }
