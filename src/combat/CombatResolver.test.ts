@@ -18,21 +18,21 @@ describe('CombatResolver', () => {
 
   it('정확도는 100%를 넘을 수 있고 해당 비율로 피해에 기여한다', () => {
     const enemy = createEnemyState('tough');
-    const result = resolver.resolveSequence(['standard'], enemy, { loadout: { optic: 'rangeSight' } });
+    const result = resolver.resolveSequence(['standard'], enemy, { loadout: { optic: 'compactReflexSight' } });
     const baseline = resolver.resolveSequence(['standard'], enemy);
     const shot = result.shots[0];
 
-    expect(shot?.breakdown.accuracy).toBe(118);
+    expect(shot?.breakdown.accuracy).toBe(105);
     expect(shot?.breakdown.finalDamage).toBeGreaterThan(baseline.shots[0]!.breakdown.finalDamage);
   });
 
   it('반동은 후속 탄 정확도를 낮추고 안정 장착물은 손실을 줄인다', () => {
     const enemy = createEnemyState('normal');
     const bare = resolver.resolveSequence(['standard', 'standard', 'standard'], enemy);
-    const stable = resolver.resolveSequence(['standard', 'standard', 'standard'], enemy, { loadout: { muzzle: 'returnBrake' } });
+    const stable = resolver.resolveSequence(['standard', 'standard', 'standard'], enemy, { loadout: { muzzle: 'dualPortCompensator' } });
 
     expect(bare.shots.map((shot) => shot.breakdown.accuracy)).toEqual([100, 93, 86]);
-    expect(stable.shots[2]!.breakdown.accuracy - stable.shots[0]!.breakdown.accuracy).toBe(-8);
+    expect(stable.shots[2]!.breakdown.accuracy - stable.shots[0]!.breakdown.accuracy).toBeCloseTo(-9.8);
   });
 
   it('거리 단계와 초음파 불이익을 피해 내역에 분리해 표시한다', () => {
@@ -48,7 +48,7 @@ describe('CombatResolver', () => {
 
   it('충격 누적이 임계치에 도달하면 이동과 특수 의도를 함께 지연한다', () => {
     const sequence = resolver.resolveSequence(['stagger', 'stagger'], createEnemyState('contaminator'));
-    const action = resolver.resolveEnemyAction(sequence.finalState, createPlayerCombatState(), { optic: 'rangeSight' });
+    const action = resolver.resolveEnemyAction(sequence.finalState, createPlayerCombatState(), { optic: 'compactReflexSight' });
 
     expect(sequence.finalState.statuses.staggerTurns).toBe(1);
     expect(action.staggerConsumed).toBe(true);
@@ -58,10 +58,10 @@ describe('CombatResolver', () => {
 
   it('공유 축적 임계치가 화상·냉기·전하·침식을 서로 다른 효과로 바꾼다', () => {
     const enemy = createEnemyState('tough');
-    const context = { loadout: { muzzle: 'elementCatalyst', rail: 'responseScanner' } } as const;
-    const burn = resolver.resolveSequence(['incendiary'], enemy, context).finalState.statuses;
-    const chill = resolver.resolveSequence(['cryo'], enemy, context).finalState.statuses;
-    const shock = resolver.resolveSequence(['arc'], enemy, context).finalState.statuses;
+    const context = {};
+    const burn = resolver.resolveSequence(['incendiary', 'incendiary'], enemy, context).finalState.statuses;
+    const chill = resolver.resolveSequence(['cryo', 'cryo'], enemy, context).finalState.statuses;
+    const shock = resolver.resolveSequence(['arc', 'arc'], enemy, context).finalState.statuses;
     const corruption = resolver.resolveSequence(['bloodHex', 'bloodHex'], enemy).finalState.statuses;
 
     expect(burn.burnTurns).toBe(2);
@@ -79,13 +79,6 @@ describe('CombatResolver', () => {
     expect(sequence.shots[1]?.breakdown.statusMultiplier).toBe(1.25);
     expect(sequence.shots[2]?.breakdown.statusMultiplier).toBe(1.25);
     expect(sequence.finalState.statuses.corruptedShots).toBe(0);
-  });
-
-  it('회수 급탄기는 110% 이상인 첫 희귀탄만 보존한다', () => {
-    const result = resolver.resolveSequence(['sanctified', 'cryo'], createEnemyState('tough'), { loadout: { magazine: 'reserveFeed', optic: 'rangeSight' } });
-
-    expect(result.shots[0]?.breakdown.accuracy).toBeGreaterThanOrEqual(110);
-    expect(result.conservedRounds).toEqual(['sanctified']);
   });
 
   it('사망 후 발사하지 않은 탄환과 조건부 회수탄을 반환 목록에 남긴다', () => {
@@ -112,7 +105,7 @@ describe('CombatResolver', () => {
     ['groundshaker', 'groundShock'],
     ['screecher', 'sonicPulse'],
   ] as const)('%s의 예고 의도 %s를 다음 행동에 해결한다', (enemyType, intentType) => {
-    const action = resolver.resolveEnemyAction(createEnemyState(enemyType), createPlayerCombatState(), { muzzle: 'quietBore', optic: 'rangeSight' });
+    const action = resolver.resolveEnemyAction(createEnemyState(enemyType), createPlayerCombatState(), { muzzle: 'compactCompensator', optic: 'compactReflexSight' });
     expect(action.intentResolved).toBe(intentType);
     expect(action.intentDetail).toBeTruthy();
   });
@@ -120,7 +113,7 @@ describe('CombatResolver', () => {
   it('같은 상태·탄약·장착물 조합은 완전히 결정론적이다', () => {
     const enemy = createEnemyState('groundshaker');
     const rounds = ['arc', 'stagger', 'sanctified', 'standard'] as const;
-    const context = { loadout: { optic: 'rangeSight', rail: 'responseScanner' } } as const;
+    const context = { loadout: { optic: 'compactReflexSight', rail: 'laserLightModule' } } as const;
     expect(resolver.resolveSequence(rounds, enemy, context)).toEqual(resolver.resolveSequence(rounds, enemy, context));
   });
 });

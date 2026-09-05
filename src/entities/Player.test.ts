@@ -74,11 +74,12 @@ describe('런 배분과 스테이지 잔량', () => {
   });
   it('용량 축소 시 초과 장전 예약을 풀고 잔량을 보존한다', () => {
     const player = new Player();
-    player.equipAttachment('extendedFeed');
-    for (let i = 0; i < 3; i += 1) player.addAmmo('standard');
+    player.claimAttachment('extendedMagazine');
+    player.equipAttachment('extendedMagazine');
+    for (let i = 0; i < 4; i += 1) player.addAmmo('standard');
     player.addAmmo('hollowPoint'); player.addAmmo('armorPiercing');
-    player.equipAttachment('reserveFeed');
-    expect(player.magazine.size).toBe(3);
+    player.unequipAttachment('magazine');
+    expect(player.magazine.size).toBe(4);
     expect(player.getAvailable('hollowPoint')).toBe(3);
     expect(player.getAvailable('armorPiercing')).toBe(3);
   });

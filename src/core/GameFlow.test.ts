@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GameUICallbacks } from '../ui/GameUI';
+import { Zombie } from '../entities/Zombie';
+import { ATTACHMENT_ORDER } from '../data/attachmentDefinitions';
 import type { Player } from '../entities/Player';
 import { Game } from './Game';
 import type { GameStateMachine } from './GameStateMachine';
@@ -35,10 +37,12 @@ describe('실제 게임의 구간/보상 연결', () => {
     harness.callbacks.onLoad();
     await vi.waitFor(() => expect(internals.busy).toBe(false));
     expect(internals.player.getStock().hollowPoint).toBe(0);
-    expect(internals.player.getStock().armorPiercing).toBe(3);
+    expect(internals.player.getStock().armorPiercing).toBe(2);
     expect(harness.ui.showAmmoRewards).not.toHaveBeenCalled();
     for (let i = 0; i < 4; i += 1) harness.callbacks.onAddAmmo('standard');
     harness.callbacks.onLoad();
+    await vi.waitFor(() => expect(internals.busy).toBe(false));
+    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
     await vi.waitFor(() => expect(internals.state.phase).toBe('AMMO_REWARD'));
     expect(internals.player.getStock().hollowPoint).toBe(0);
     harness.callbacks.onChooseAmmoReward('match');
@@ -74,4 +78,52 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(player.applyAmmoReward('standard' as SpecialAmmoType, ['armorPiercing'])).toBe(false);
     expect(player.getBuild()).toEqual(before);
   });
+  it.each(['contaminator', 'groundshaker', 'screecher'] as const)('%s 처치 후 수령 전 소유하지 않고 받기 한 번만 처리한다', async type => {
+    const game = new Game({} as HTMLElement);
+    const state = game as unknown as { player: Player; zombie: Zombie; currentRoster: string[]; enemyIndex: number; state: GameStateMachine; busy: boolean };
+    state.zombie = new Zombie(type); state.zombie.applyState({ ...state.zombie.snapshot(), hp: 1, armor: 0 });
+    state.currentRoster = [type, 'normal']; state.enemyIndex = 0;
+    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
+    await vi.waitFor(() => { expect(state.state.phase).toBe('ATTACHMENT_REWARD'); expect(state.busy).toBe(false); });
+    expect(state.player.magazine.size).toBe(0); // 1발만 장전해도 발사된다.
+    expect(state.player.getOwnedAttachments()).toEqual([]);
+    expect(harness.ui.showAttachmentReward).toHaveBeenCalledTimes(1);
+    const reward = harness.ui.showAttachmentReward.mock.calls[0][0];
+    expect(ATTACHMENT_ORDER).toContain(reward);
+    harness.callbacks.onAddAmmo('standard');
+    expect(state.player.magazine.size).toBe(0);
+    harness.callbacks.onClaimAttachment(true); harness.callbacks.onClaimAttachment(true);
+    await vi.waitFor(() => expect(state.state.phase).toBe('AMMO_SELECTION'));
+    expect(state.player.getOwnedAttachments()).toEqual([reward]);
+    expect(Object.values(state.player.loadout.getSnapshot())).toEqual([reward]);
+    expect(state.enemyIndex).toBe(1);
+  });
+  it('화상 처치도 보상하며 마지막 표적의 보관 수령 후 탄약 배분으로 진행한다', async () => {
+    const game = new Game({} as HTMLElement);
+    const state = game as unknown as { player: Player; zombie: Zombie; currentRoster: string[]; enemyIndex: number; state: GameStateMachine; busy: boolean };
+    state.zombie = new Zombie('contaminator');
+    const zombie = state.zombie.snapshot();
+    state.zombie.applyState({ ...zombie, hp: 1, armor: 100, statuses: { ...zombie.statuses, burnTurns: 1 } });
+    state.currentRoster = ['contaminator']; state.enemyIndex = 0;
+    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
+    await vi.waitFor(() => { expect(state.state.phase).toBe('ATTACHMENT_REWARD'); expect(state.busy).toBe(false); });
+    harness.callbacks.onClaimAttachment(false);
+    await vi.waitFor(() => expect(state.state.phase).toBe('AMMO_REWARD'));
+    expect(state.player.getOwnedAttachments()).toHaveLength(1);
+    expect(state.player.loadout.getSnapshot()).toEqual({});
+    expect(harness.ui.showAmmoRewards).toHaveBeenCalled();
+  });
+  it('카탈로그 소진 뒤에도 중복 없이 보상 화면에서 정상 진행한다', async () => {
+    const game = new Game({} as HTMLElement);
+    const state = game as unknown as { player: Player; zombie: Zombie; currentRoster: string[]; state: GameStateMachine; busy: boolean };
+    ATTACHMENT_ORDER.forEach(id => state.player.claimAttachment(id));
+    state.zombie = new Zombie('screecher'); state.zombie.applyState({ ...state.zombie.snapshot(), hp: 1 }); state.currentRoster = ['screecher'];
+    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
+    await vi.waitFor(() => { expect(state.state.phase).toBe('ATTACHMENT_REWARD'); expect(state.busy).toBe(false); });
+    expect(harness.ui.showAttachmentReward.mock.calls[0][0]).toBeUndefined();
+    harness.callbacks.onClaimAttachment(false);
+    await vi.waitFor(() => expect(state.state.phase).toBe('AMMO_REWARD'));
+    expect(state.player.getOwnedAttachments()).toHaveLength(10);
+  });
+
 });

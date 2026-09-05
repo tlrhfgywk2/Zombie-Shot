@@ -72,12 +72,12 @@ describe('권총 모델 기준점', () => {
     expect(bodyCenterInGrip.z).toBeCloseTo(pistol.gripBody.position.z);
   });
 
-  it('다섯 장착물 소켓이 권총 루트에 명시적으로 고정된다', () => {
+  it('다섯 소켓이 움직이는 물리 부위에 고정된다', () => {
     const pistol = createPistolModel();
     expect(Object.keys(pistol.attachmentSockets)).toEqual(['muzzle', 'magazine', 'optic', 'rail', 'grip']);
     for (const socket of Object.values(pistol.attachmentSockets)) {
       expect(socket.name).toMatch(/^attachmentSocket/);
-      expect(socket.parent).toBe(pistol.root);
+      expect(socket.parent).toBe(socket === pistol.attachmentSockets.optic ? pistol.slide : [pistol.attachmentSockets.magazine, pistol.attachmentSockets.grip].includes(socket) ? pistol.grip : pistol.root);
     }
   });
 

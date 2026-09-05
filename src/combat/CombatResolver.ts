@@ -6,13 +6,14 @@ import type { AmmoType, EnemyActionResult, EnemyState, PlayerCombatState, RangeB
 export interface CombatContext {
   loadout?: LoadoutSnapshot;
   playerState?: PlayerCombatState;
+  /** 현재 동시 활성 표적. 생략하면 단일 표적 전투이다. */
+  targets?: readonly EnemyState[];
 }
 
 interface ShotContext extends CombatContext {
   cumulativeRecoil?: number;
   previousAmmo?: AmmoType;
   totalRounds?: number;
-  rareConservationUsed?: boolean;
 }
 
 const cloneState = (state: EnemyState): EnemyState => ({
@@ -34,23 +35,11 @@ export const getRangeBand = (distance: number): RangeBand => {
 
 const getEffectiveRangeBand = (band: RangeBand, penaltySteps: number): RangeBand => rangeOrder[Math.min(rangeOrder.length - 1, rangeOrder.indexOf(band) + penaltySteps)] ?? 'far';
 
-const conditionMatches = (
-  condition: ModifierCondition | undefined,
-  range: RangeBand,
-  ammoType: AmmoType,
-  index: number,
-  previousAmmo: AmmoType | undefined,
-  specialEnemy: boolean,
-): boolean => {
-  if (!condition) return true;
-  const definition = AMMO_DEFINITIONS[ammoType];
-  if (condition.range && condition.range !== range) return false;
-  if (condition.ammoTag && !definition.tags.includes(condition.ammoTag)) return false;
-  if (condition.firstShot !== undefined && condition.firstShot !== (index === 0)) return false;
-  if (condition.afterAmmoSwitch !== undefined && condition.afterAmmoSwitch !== (previousAmmo !== undefined && previousAmmo !== ammoType)) return false;
-  if (condition.specialEnemy !== undefined && condition.specialEnemy !== specialEnemy) return false;
-  return true;
-};
+export const isNearestValidTarget = (target: EnemyState, targets: readonly EnemyState[] = [target]): boolean =>
+  target.hp > 0 && target.distance >= 0 && !targets.some(other => other.hp > 0 && other.distance >= 0 && other.distance < target.distance);
+
+const conditionMatches = (condition: ModifierCondition | undefined, range: RangeBand, nearest: boolean): boolean =>
+  !condition || ((!condition.range || condition.range === range) && (condition.nearestTarget === undefined || condition.nearestTarget === nearest));
 
 const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
   const next = clonePlayerState(state);
@@ -76,12 +65,15 @@ export class CombatResolver {
     const effectiveRangeBand = getEffectiveRangeBand(rangeBand, playerState.rangePenaltySteps);
     const activeModifiers = getEnabledAttachmentIds(context.loadout ?? {}, playerState)
       .flatMap((id) => ATTACHMENT_DEFINITIONS[id].modifiers)
-      .filter((modifier) => !('condition' in modifier) || conditionMatches(modifier.condition, rangeBand, ammoType, index, context.previousAmmo, before.special));
+      .filter((modifier) => !('condition' in modifier) || conditionMatches(modifier.condition, rangeBand, isNearestValidTarget(before, context.targets)));
 
-    const recoilGenerated = Math.max(COMBAT_BALANCE.minimumRecoil, COMBAT_BALANCE.weaponRecoil + definition.recoil + this.sumModifiers(activeModifiers, 'recoilStep'));
+    const ammoPenaltyMultiplier = this.multiplyModifiers(activeModifiers, 'ammoPenaltyMultiplier');
+    const ammoAccuracy = definition.accuracy < 0 ? definition.accuracy * ammoPenaltyMultiplier : definition.accuracy;
+    // 탄약에서 발생한 반동만 경감한다. 무기 반동과 적의 정확도 방해는 원래 값이다.
+    const recoilGenerated = Math.max(COMBAT_BALANCE.minimumRecoil, COMBAT_BALANCE.weaponRecoil + Math.max(0, definition.recoil) * ammoPenaltyMultiplier + Math.min(0, definition.recoil));
     const cumulativeRecoil = context.cumulativeRecoil ?? 0;
-    const accuracy = Math.max(COMBAT_BALANCE.minimumAccuracy, COMBAT_BALANCE.baseAccuracy + playerState.accuracyPenalty + definition.accuracy + this.sumModifiers(activeModifiers, 'accuracy') - cumulativeRecoil);
-    const attachmentMultiplier = Math.max(0.4, 1 + this.sumModifiers(activeModifiers, 'damageMultiplier'));
+    const accuracy = Math.max(COMBAT_BALANCE.minimumAccuracy, COMBAT_BALANCE.baseAccuracy + playerState.accuracyPenalty + ammoAccuracy + this.sumModifiers(activeModifiers, 'accuracy') - cumulativeRecoil);
+    const attachmentMultiplier = 1;
     let statusMultiplier = definition.specialEnemyMultiplier && before.special ? definition.specialEnemyMultiplier : 1;
     if (after.statuses.exposedShots > 0) {
       statusMultiplier *= COMBAT_BALANCE.exposedDamageMultiplier;
@@ -95,7 +87,10 @@ export class CombatResolver {
 
     const baseDamage = definition.directDamage;
     const sonicMultiplier = Math.max(0.55, 1 - playerState.rangePenaltySteps * 0.12);
-    const rangeMultiplier = COMBAT_BALANCE.handgunRangeMultiplier[effectiveRangeBand] * sonicMultiplier;
+    // 기존 거리 피해 효율을 유지하면서 실제 중거리의 손실분(10%p)만 절반으로 줄인다.
+    const rangeRecovery = rangeBand === 'mid'
+      ? (1 - COMBAT_BALANCE.handgunRangeMultiplier.mid) * (1 - this.multiplyModifiers(activeModifiers, 'midRangePenaltyMultiplier')) : 0;
+    const rangeMultiplier = (COMBAT_BALANCE.handgunRangeMultiplier[effectiveRangeBand] + rangeRecovery) * sonicMultiplier;
     const scaledDamage = Math.max(0, Math.round(baseDamage * (accuracy / 100) * rangeMultiplier * attachmentMultiplier * statusMultiplier));
 
     const armorBroken = Math.min(after.armor, definition.armorBreak);
@@ -109,10 +104,9 @@ export class CombatResolver {
     let burnApplied = 0;
     let staggerApplied = 0;
     let statusTriggered: StatusType | undefined;
-    const buildupMultiplier = Math.max(0.25, 1 + this.sumModifiers(activeModifiers, 'buildupMultiplier'));
     if (after.hp > 0 && definition.buildup) {
       const buildup = definition.buildup;
-      after.statuses.buildup[buildup.type] += Math.round(buildup.amount * buildupMultiplier);
+      after.statuses.buildup[buildup.type] += buildup.amount;
       if (after.statuses.buildup[buildup.type] >= COMBAT_BALANCE.statusThreshold) {
         after.statuses.buildup[buildup.type] -= COMBAT_BALANCE.statusThreshold;
         statusTriggered = buildup.type;
@@ -125,7 +119,7 @@ export class CombatResolver {
       }
     }
 
-    const impactApplied = Math.max(0, definition.impact + this.sumModifiers(activeModifiers, 'impact'));
+    const impactApplied = Math.max(0, definition.impact);
     if (after.hp > 0) {
       after.statuses.impact += impactApplied;
       if (after.statuses.impact >= after.staggerThreshold) {
@@ -136,11 +130,7 @@ export class CombatResolver {
       }
     }
 
-    const preservation = activeModifiers.find((modifier): modifier is Extract<AttachmentModifier, { kind: 'preserveFirstRare' }> => modifier.kind === 'preserveFirstRare');
-    const conserved = Boolean(
-      (definition.recoverOnKill && after.hp <= 0)
-      || (preservation && !context.rareConservationUsed && isSpecialAmmo && accuracy >= preservation.minimumAccuracy),
-    );
+    const conserved = Boolean(definition.recoverOnKill && after.hp <= 0);
     const parts = [`${definition.name} 명중`, `정확도 ${Math.round(accuracy)}%`, `${RANGE_NAMES[effectiveRangeBand]} ×${rangeMultiplier.toFixed(2)}`];
     if (armorBroken) parts.push(`방어 파괴 ${armorBroken}`);
     if (armorBlocked) parts.push(`방어 흡수 ${armorBlocked}`);
@@ -159,16 +149,14 @@ export class CombatResolver {
   resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
     let current = cloneState(enemyState);
     const shots: ShotResult[] = [];
-    let rareConservationUsed = false;
     let cumulativeRecoil = 0;
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo || current.hp <= 0) break;
-      const shot = this.resolveShot(ammo, index, current, { ...context, previousAmmo: rounds[index - 1], totalRounds: rounds.length, rareConservationUsed, cumulativeRecoil });
+      const shot = this.resolveShot(ammo, index, current, { ...context, previousAmmo: rounds[index - 1], totalRounds: rounds.length, cumulativeRecoil });
       shots.push(shot);
       cumulativeRecoil += shot.breakdown.recoilGenerated;
       current = cloneState(shot.after);
-      if (shot.conserved && rarityRank[AMMO_DEFINITIONS[ammo].rarity] >= rarityRank.rare) rareConservationUsed = true;
     }
     const conservedRounds = shots.filter((shot) => shot.conserved).map((shot) => shot.ammoType);
     const unfiredRounds = rounds.slice(shots.length);
@@ -245,7 +233,11 @@ export class CombatResolver {
     return `오염 투척: ${ATTACHMENT_SLOT_NAMES[slot]} 슬롯이 2턴 봉쇄됩니다.`;
   }
 
-  private sumModifiers(modifiers: readonly AttachmentModifier[], kind: 'accuracy' | 'recoilStep' | 'damageMultiplier' | 'buildupMultiplier' | 'impact'): number {
+  private multiplyModifiers(modifiers: readonly AttachmentModifier[], kind: 'ammoPenaltyMultiplier' | 'midRangePenaltyMultiplier'): number {
+    return modifiers.filter(modifier => modifier.kind === kind).reduce((product, modifier) => product * modifier.value, 1);
+  }
+
+  private sumModifiers(modifiers: readonly AttachmentModifier[], kind: 'accuracy'): number {
     return modifiers.filter((modifier): modifier is Extract<AttachmentModifier, { kind: typeof kind }> => modifier.kind === kind).reduce((sum, modifier) => sum + modifier.value, 0);
   }
 
