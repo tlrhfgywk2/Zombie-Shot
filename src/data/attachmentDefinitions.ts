@@ -86,7 +86,7 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
     modifiers: [{ kind: 'accuracy', value: 18, condition: { range: 'near' } }, { kind: 'accuracy', value: 6, condition: { range: 'mid' } }],
   },
   responseScanner: {
-    id: 'responseScanner', name: '반응 분석기', slot: 'rail', summary: '특수 적 정확도 +10% · 원소 축적 +25%', tradeoff: '일반 적 탄도전에는 효과 없음 · 전자식', electronic: true,
+    id: 'responseScanner', name: '반응 분석기', slot: 'rail', summary: '특수 적 정확도 +10%', tradeoff: '일반 적 탄도전에는 효과 없음 · 전자식', electronic: true,
     modifiers: [{ kind: 'accuracy', value: 10, condition: { specialEnemy: true } }, { kind: 'buildupMultiplier', value: 0.25, condition: { ammoTag: 'elemental' } }],
   },
   weightedGrip: {
@@ -104,5 +104,7 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
 };
 
 export const ATTACHMENT_ORDER = Object.keys(ATTACHMENT_DEFINITIONS) as AttachmentId[];
+// 비활성 탄약 전용 장착물은 정의와 회귀 검증만 보존한다.
+export const ACTIVE_ATTACHMENT_ORDER = ATTACHMENT_ORDER.filter(id => !['elementCatalyst', 'reserveFeed', 'etchedGrip', 'vowGrip'].includes(id));
 export type LoadoutSnapshot = Partial<Record<AttachmentSlot, AttachmentId>>;
 export const DEFAULT_LOADOUT: LoadoutSnapshot = { muzzle: 'returnBrake', magazine: 'crossFeed', optic: 'reflexSight', rail: 'closeLaser', grip: 'weightedGrip' };

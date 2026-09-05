@@ -6,7 +6,7 @@ import { CombatResolver } from './CombatResolver';
 describe('CombatResolver', () => {
   const resolver = new CombatResolver();
 
-  it('관통탄 → 확장탄은 역순보다 장갑 적에게 큰 체력 피해를 준다', () => {
+  it('철갑탄 → 확장탄은 역순보다 장갑 적에게 큰 체력 피해를 준다', () => {
     const enemy = createEnemyState('armored');
     const setupFirst = resolver.resolveSequence(['armorPiercing', 'hollowPoint'], enemy);
     const payoffFirst = resolver.resolveSequence(['hollowPoint', 'armorPiercing'], enemy);

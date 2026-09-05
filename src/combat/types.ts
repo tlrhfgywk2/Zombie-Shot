@@ -1,4 +1,10 @@
 export type AmmoType =
+  | 'wadcutter'
+  | 'flatPoint'
+  | 'overpressure'
+  | 'subsonic'
+  | 'bonded'
+  | 'match'
   | 'standard'
   | 'armorPiercing'
   | 'hollowPoint'
@@ -70,7 +76,9 @@ export interface ShotBreakdown {
   attachmentMultiplier: number;
   statusMultiplier: number;
   armorBlocked: number;
-  penetration: number;
+  armorBroken: number;
+  cumulativeRecoil: number;
+  recoilGenerated: number;
   finalDamage: number;
 }
 
