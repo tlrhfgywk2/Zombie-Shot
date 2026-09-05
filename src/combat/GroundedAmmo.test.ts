@@ -26,13 +26,14 @@ describe('누적 반동', () => {
     expect(sequence(['standard', 'standard', 'overpressure']).shots.map(shot => shot.breakdown.accuracy)).toEqual([100, 93, 82]);
   });
   it('장착물 반동은 발생량에 한 번 적용하고 봉쇄 시 제외한다', () => {
-    const loadout = { muzzle: 'returnBrake', grip: 'weightedGrip' } as const;
+    const loadout = { muzzle: 'dualPortCompensator', grip: 'g10Grip' } as const;
     const stable = resolver.resolveSequence(['overpressure', 'standard'], target(), { loadout });
-    expect(stable.shots.map(shot => shot.breakdown.accuracy)).toEqual([90, 85]);
-    expect(stable.shots[0]!.breakdown.recoilGenerated).toBe(15);
+    expect(stable.shots[0]!.breakdown.accuracy).toBeCloseTo(102.76);
+    expect(stable.shots[1]!.breakdown.accuracy).toBeCloseTo(92.68);
+    expect(stable.shots[0]!.breakdown.recoilGenerated).toBeCloseTo(12.32);
     const state = createPlayerCombatState(); state.disabledSlots.muzzle = 2;
     const disrupted = resolver.resolveSequence(['overpressure', 'standard'], target(), { loadout, playerState: state });
-    expect(disrupted.shots[1]!.breakdown.accuracy).toBe(82);
+    expect(disrupted.shots[1]!.breakdown.accuracy).toBeCloseTo(82.4);
   });
   it('최소 정확도와 100% 초과 피해 계수를 보존하며 탄창마다 누적을 초기화한다', () => {
     const result = sequence(Array<AmmoType>(8).fill('overpressure'));
@@ -100,7 +101,7 @@ describe('탄종 역할과 프리뷰의 공통 계산', () => {
     const enemy = createEnemyState('groundshaker');
     const rounds: AmmoType[] = ['flatPoint', 'armorPiercing', 'hollowPoint', 'overpressure'];
     const playerState = createPlayerCombatState(); playerState.accuracyPenalty = -22;
-    const context = { playerState, loadout: { magazine: 'crossFeed', muzzle: 'returnBrake' } } as const;
+    const context = { playerState, loadout: { magazine: 'extendedMagazine', muzzle: 'dualPortCompensator' } } as const;
     const preview = resolver.resolveSequence(rounds, enemy, context);
     let state = enemy, recoil = 0;
     const actual = rounds.map((ammo, index) => {

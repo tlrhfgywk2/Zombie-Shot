@@ -616,3 +616,27 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .reward-options .ammo-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 15px; }
 .game-shell[data-layout="portrait"] .reward-card h2 { font-size: 18px; }
 .game-shell[data-layout="portrait"] .reward-card p { font-size: 11px; }
+
+/* 부착물 등급과 런 획득 상태 */
+.attachment-rarity[data-rarity="common"] { color: #c7d2c6; }
+.attachment-rarity[data-rarity="advanced"] { color: #75d9ec; }
+.attachment-rarity[data-rarity="rare"] { color: #a8a0ff; }
+.attachment-rarity[data-rarity="epic"] { color: #efb660; }
+.attachment-option[data-owned="false"] { opacity: .56; }
+.attachment-reward-card { max-width: 600px; border-top: 3px solid #bce34e; }
+.attachment-reward-effect { padding: 24px 16px; border: 1px solid #53653a; border-radius: 10px; color: #e0f2c8; background: #19251c; line-height: 1.7; }
+.attachment-reward-card .reward-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.attachment-reward-card .route-option { min-height: 90px; }
+
+.game-shell[data-layout="portrait"] .attachment-group { grid-template-columns: 54px repeat(2, minmax(0, 1fr)); }
+.game-shell[data-layout="portrait"] .attachment-option { height: auto; min-height: 76px; }
+.game-shell[data-layout="portrait"] .attachment-option small,
+.game-shell[data-layout="portrait"] .attachment-option em { display: block; font-size: 9px; white-space: normal; }
+.game-shell[data-layout="portrait"] .attachment-reward-card { max-height: 90dvh; overflow-y: auto; }
+
+.game-shell[data-layout="desktop"] { --console-height: 350px; }
+.game-shell[data-layout="desktop"] .attachment-group { grid-template-columns: 90px repeat(2, minmax(0, 1fr)); }
+.game-shell[data-layout="desktop"] .attachment-option small { white-space: normal; }
+.game-shell[data-layout="desktop"] .attachment-option { height: auto; min-height: 58px; }
+
+.game-shell[data-layout="portrait"] .console-header { display: none; }

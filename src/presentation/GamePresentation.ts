@@ -125,7 +125,7 @@ export class GamePresentation {
 
   setAttachments(loadout: LoadoutSnapshot, playerState: PlayerCombatState): void {
     for (const slot of Object.keys(this.pistolModel.attachmentSockets) as AttachmentSlot[]) {
-      const id = playerState.disabledSlots[slot] ? undefined : loadout[slot];
+      const id = loadout[slot];
       const current = this.attachmentVisuals[slot];
       if (this.attachmentVisualIds[slot] !== id) {
         if (current) this.disposeObject(current);
@@ -133,14 +133,19 @@ export class GamePresentation {
         delete this.attachmentVisualIds[slot];
         if (id) {
           const visual = createAttachmentModel(id);
-          this.pistolModel.attachmentSockets[slot].add(visual);
+          if (slot === 'magazine') {
+            visual.position.y = -0.675;
+            this.magazineModel.root.add(visual);
+          } else this.pistolModel.attachmentSockets[slot].add(visual);
           this.attachmentVisuals[slot] = visual;
           this.attachmentVisualIds[slot] = id;
         }
       }
     }
-    const magazineId = playerState.disabledSlots.magazine ? undefined : loadout.magazine;
-    this.magazineModel.basePlate.scale.x = magazineId === 'extendedFeed' ? 1.22 : magazineId === 'reserveFeed' ? 0.86 : 1;
+    // 봉쇄는 기능만 막으며 물리 부품은 그대로 남긴다.
+    void playerState;
+    const muzzleId = loadout.muzzle;
+    this.pistolModel.muzzle.position.x = 1.13 + (muzzleId === 'dualPortCompensator' ? 0.38 : muzzleId === 'compactCompensator' ? 0.23 : 0);
   }
 
   wait(milliseconds: number): Promise<void> {
@@ -377,14 +382,14 @@ export class GamePresentation {
     this.scene.add(this.zombieModel.root);
     this.pistolModel.root.position.copy(this.layout.weaponRest);
     this.pistolModel.root.rotation.set(-0.02, -0.04, -0.08);
-    const weaponFill = new THREE.PointLight(0xc9ffe0, 0.72, 4.5);
+    const weaponFill = new THREE.PointLight(0xe0eee7, 2.2, 4.5);
     weaponFill.position.set(0.2, 1.25, 1.2);
     this.pistolModel.root.add(weaponFill);
     this.muzzleFlash.position.set(0, 0, 0);
     this.pistolModel.muzzle.add(this.muzzleFlash);
     this.scene.add(this.pistolModel.root);
-    this.magazineModel.root.visible = false;
     this.scene.add(this.magazineModel.root);
+    this.attachMagazineAtSeat();
   }
 
   private buildEnvironment(): void {

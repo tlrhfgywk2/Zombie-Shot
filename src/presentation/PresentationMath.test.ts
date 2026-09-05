@@ -19,6 +19,7 @@ describe('프레젠테이션 좌표 계산', () => {
     [1280, 720],
     [768, 1024],
     [390, 844],
+    [390, 397],
     [360, 800],
     [412, 915],
     [430, 932],
@@ -43,6 +44,11 @@ describe('프레젠테이션 좌표 계산', () => {
     expect(portrait.cameraTarget.y).toBeGreaterThan(desktop.cameraTarget.y);
     expect(portrait.cartridgeScale).toBeLessThan(desktop.cartridgeScale);
     expect(portrait.insertionScaleFactor).toBeLessThan(desktop.insertionScaleFactor);
+  });
+
+  it('세로 화면에서 준비 패널을 제외한 짧은 전투 영역도 세로 구도를 유지한다', () => {
+    expect(getPresentationLayout(390, 397).mode).toBe('portrait');
+    expect(getPresentationLayout(390, 397).pistolScale).toBe(0.5);
   });
 
   it('아이패드 가로 게임 영역에서는 낮고 비스듬한 전용 포즈를 사용한다', () => {

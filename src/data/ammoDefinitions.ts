@@ -1,3 +1,4 @@
+import { SERVICE_45 } from './attachmentDefinitions';
 import { DORMANT_AMMO_DEFINITIONS } from './dormantAmmoDefinitions';
 import type { AmmoRarity, AmmoType, BuildTag, RangeBand, StatusType } from '../combat/types';
 
@@ -58,10 +59,10 @@ export const BUILD_TAG_NAMES: Record<BuildTag, string> = { ballistic: '탄도', 
 export const RANGE_NAMES: Record<RangeBand, string> = { near: '근거리', mid: '중거리', far: '원거리' };
 
 export const COMBAT_BALANCE = {
-  baseMagazineCapacity: 4,
+  baseMagazineCapacity: SERVICE_45.baseMagazineCapacity,
   magazineCapacity: 4,
-  minimumMagazineCapacity: 3,
-  maximumMagazineCapacity: 5,
+  minimumMagazineCapacity: 4,
+  maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
   baseAccuracy: 100,
   weaponRecoil: 0,
   minimumRecoil: 0,

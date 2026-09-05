@@ -3,7 +3,7 @@ import { getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
-import { ATTACHMENT_DEFINITIONS, ACTIVE_ATTACHMENT_ORDER as ATTACHMENT_ORDER, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, SERVICE_45, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, countAllocations, rewardAmount, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
@@ -18,6 +18,7 @@ export interface GameUICallbacks {
   onMoveAmmo: (from: number, to: number) => void;
   onEquipAttachment: (id: AttachmentId) => void;
   onUnequipAttachment: (slot: AttachmentSlot) => void;
+  onClaimAttachment: (equip: boolean) => void;
   onChooseAmmoReward: (ammo: SpecialAmmoType) => void;
   onReplaceReward: (ammo: SpecialAmmoType) => void;
   onCancelReward: () => void;
@@ -29,7 +30,7 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  AMMO_REWARD: '탄약 배분', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
+  ATTACHMENT_REWARD: '부착물 획득', AMMO_REWARD: '탄약 배분', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
 export class GameUI {
@@ -95,13 +96,14 @@ export class GameUI {
           <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small id="magazine-order-label">1 → 4</small></div><div class="sequence-preview" aria-live="polite"><div id="preview-chain">탄약을 장전하면 순서 프리뷰가 표시됩니다.</div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div></div>
-          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물 구성</span><small>슬롯을 눌러 즉시 교체</small></div><div class="attachment-workspace">
+          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>${SERVICE_45.name} · 부착물</span><small id="attachment-count">보유 0/10 · 특수 감염체 처치 시 획득</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
-            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em>${item.tradeoff}</em></button>`; }).join('')}</section>`).join('')}</div>
+            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
         </div></section>
         <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>구간에 진입하면 확정한 배분만큼 특수탄 잔량을 채웁니다. 표준탄은 항상 무한입니다.</p><div id="route-options" class="route-options"></div></div></section>
+        <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
         <section id="ammo-reward" class="route-choice" hidden aria-label="탄약 배분 보상"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
@@ -283,6 +285,35 @@ export class GameUI {
     host.querySelector<HTMLButtonElement>('button')?.focus();
   }
 
+  showAttachmentReward(id: AttachmentId | undefined, loadout: LoadoutSnapshot): void {
+    this.hideTooltip();
+    const host = this.required(this.shell, '#attachment-reward');
+    const item = id ? ATTACHMENT_DEFINITIONS[id] : undefined;
+    const replaced = item ? loadout[item.slot] : undefined;
+    host.innerHTML = `<div class="route-card attachment-reward-card">
+      <span>특수 감염체 처치 · 부착물 확정 보상</span>
+      <h2 id="attachment-reward-title">${item ? item.name : '모든 부착물을 수집했습니다'}</h2>
+      ${item ? `<p class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]} · ${ATTACHMENT_SLOT_NAMES[item.slot]} · ${SERVICE_45.name}</p>
+      <div class="attachment-reward-effect">${item.summary}</div>
+      <p>${replaced ? `${ATTACHMENT_DEFINITIONS[replaced].name} 대신 장착합니다. 교체한 부착물은 보관함에 남습니다.` : '지금 장착하거나 보관한 뒤 전투 준비 중 장착할 수 있습니다.'}</p>
+      <div class="reward-options"><button type="button" class="route-option" data-claim-attachment="equip"><strong>받고 장착</strong><small>다음 전투부터 적용</small></button><button type="button" class="route-option" data-claim-attachment="store"><strong>받고 보관</strong><small>현재 장비 유지</small></button></div>`
+      : '<p>이번 런의 호환 부착물 10종을 모두 보유하고 있어 중복 보상을 지급하지 않습니다.</p><button type="button" class="route-option" data-claim-attachment="store">계속</button>'}
+      <p>이번 런 동안 유지 · 재시작 시 초기화</p>
+    </div>`;
+    host.querySelectorAll<HTMLButtonElement>('[data-claim-attachment]').forEach(button => button.addEventListener('click', () => this.callbacks.onClaimAttachment(button.dataset.claimAttachment === 'equip')));
+    host.onkeydown = event => {
+      if (event.key !== 'Tab') return;
+      const buttons = [...host.querySelectorAll<HTMLButtonElement>('button')];
+      const first = buttons[0], last = buttons.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    host.hidden = false;
+    host.querySelector<HTMLButtonElement>('button')?.focus();
+  }
+
+  hideAttachmentReward(): void { this.required(this.shell, '#attachment-reward').hidden = true; }
+
   hideAmmoRewards(): void { this.required(this.shell, '#ammo-reward').hidden = true; }
 
   setLocked(locked: boolean): void {
@@ -292,7 +323,7 @@ export class GameUI {
       button.disabled = locked || button.dataset.sealed === 'true';
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
-      button.disabled = locked || button.dataset.sealed === 'true' || button.getAttribute('aria-pressed') === 'true';
+      button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.owned !== 'true' || button.getAttribute('aria-pressed') === 'true';
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
       button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.equipped !== 'true';
@@ -300,7 +331,8 @@ export class GameUI {
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
   }
 
-  renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number): void {
+  renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number, owned: readonly AttachmentId[] = []): void {
+    this.required(this.shell, '#attachment-count').textContent = `보유 ${owned.length}/${ATTACHMENT_ORDER.length} · 특수 감염체 처치 시 획득`;
     this.magazineCapacity = capacity;
     ATTACHMENT_SLOT_ORDER.forEach((slot) => {
       const id = loadout[slot];
@@ -324,7 +356,10 @@ export class GameUI {
       button.classList.toggle('is-equipped', selected);
       button.setAttribute('aria-pressed', String(selected));
       button.dataset.sealed = String(sealed);
-      button.disabled = this.locked || sealed || selected;
+      button.dataset.owned = String(owned.includes(id));
+      const ownership = button.querySelector('[data-ownership]');
+      if (ownership) ownership.textContent = selected ? '장착 중' : owned.includes(id) ? '보유' : '미획득';
+      button.disabled = this.locked || sealed || selected || !owned.includes(id);
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
       const slot = button.dataset.unequip as AttachmentSlot;
@@ -508,7 +543,7 @@ export class GameUI {
   private showAttachmentTooltip(id: AttachmentId, anchor: HTMLElement): void {
     this.hideTooltip();
     const definition = ATTACHMENT_DEFINITIONS[id];
-    this.ammoTooltip.innerHTML = `<header><span>${ATTACHMENT_SLOT_NAMES[definition.slot]} · 부착물</span><strong>${definition.name}</strong></header><p>${definition.summary}</p><div><span>전술 효과 <b>${definition.summary}</b></span><span>운용 대가 <b>${definition.tradeoff}</b></span></div><small>같은 부위의 다른 부착물과 교체해 사용할 수 있습니다.</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${ATTACHMENT_SLOT_NAMES[definition.slot]} · ${ATTACHMENT_RARITY_NAMES[definition.rarity]}</span><strong>${definition.name}</strong></header><p>${definition.summary}</p><small>정확도는 최종 피해 효율입니다. 탄약 페널티 감소는 탄약의 정확도 손실과 누적 반동에 적용됩니다. 같은 슬롯은 하나만 장착하며 교체한 부착물은 보관됩니다.</small>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', '#c8ff4d');
     this.ammoTooltip.classList.add('is-attachment');
     this.ammoTooltip.hidden = false;

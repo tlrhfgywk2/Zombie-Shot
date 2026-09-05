@@ -11,6 +11,7 @@ export class Player {
   private build = createAmmoBuild();
   private stock = createStageStock(this.build);
   private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
+  private ownedAttachments = new Set<AttachmentId>();
   private combatState: PlayerCombatState = createPlayerCombatState();
 
   constructor() { this.syncMagazineCapacity(); }
@@ -65,7 +66,14 @@ export class Player {
     return true;
   }
   equipAttachment(id: AttachmentId): AttachmentId | undefined {
+    if (!this.ownedAttachments.has(id)) return undefined;
     const replaced = this.loadout.equip(id); this.syncMagazineCapacity(); return replaced;
+  }
+  getOwnedAttachments(): AttachmentId[] { return [...this.ownedAttachments]; }
+  claimAttachment(id: AttachmentId): boolean {
+    if (this.ownedAttachments.has(id)) return false;
+    this.ownedAttachments.add(id);
+    return true;
   }
   unequipAttachment(slot: AttachmentSlot): AttachmentId | undefined {
     const removed = this.loadout.unequip(slot); this.syncMagazineCapacity(); return removed;
@@ -76,7 +84,7 @@ export class Player {
   clearCombatDisruptions(): void { this.combatState = createPlayerCombatState(); this.syncMagazineCapacity(); }
   reset(): void {
     this.build = createAmmoBuild(); this.specialCapacity = AMMO_BUILD_BALANCE.specialCapacity;
-    this.loadout.reset(); this.startStage(); this.isAlive = true;
+    this.ownedAttachments.clear(); this.loadout.reset(); this.startStage(); this.isAlive = true;
   }
   private syncMagazineCapacity(): void { this.magazine.setCapacity(getMagazineCapacity(this.loadout.getSnapshot(), this.combatState)); }
 }

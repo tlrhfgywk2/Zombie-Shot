@@ -2,6 +2,7 @@ import { CombatResolver } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
 import { countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
+import { generateAttachmentReward } from '../progression/AttachmentRewards';
 import { generateAmmoRewards } from '../progression/AmmoRewards';
 import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
@@ -27,6 +28,7 @@ export class Game {
   private busy = false;
   private rewardOptions: SpecialAmmoType[] = [];
   private pendingReward?: SpecialAmmoType;
+  private pendingAttachment?: AttachmentId;
   private rewardReplacements: SpecialAmmoType[] = [];
 
   constructor(root: HTMLElement) {
@@ -38,6 +40,7 @@ export class Game {
       onMoveAmmo: (from, to) => this.moveAmmo(from, to),
       onEquipAttachment: (id) => this.equipAttachment(id),
       onUnequipAttachment: (slot) => this.unequipAttachment(slot),
+      onClaimAttachment: (equip) => void this.claimAttachmentReward(equip),
       onChooseAmmoReward: (ammo) => this.chooseAmmoReward(ammo),
       onReplaceReward: (ammo) => this.replaceReward(ammo),
       onCancelReward: () => {
@@ -84,7 +87,7 @@ export class Game {
   }
 
   private equipAttachment(id: AttachmentId): void {
-    if (this.state.phase !== 'AMMO_SELECTION') return;
+    if (this.state.phase !== 'AMMO_SELECTION' || !this.player.getOwnedAttachments().includes(id)) return;
     this.player.equipAttachment(id);
     this.sync();
     this.ui.showEvent('장착물 교체', '정확도와 탄창 용량을 새 구성으로 다시 계산했습니다.');
@@ -93,7 +96,7 @@ export class Game {
   private unequipAttachment(slot: AttachmentSlot): void {
     if (this.state.phase !== 'AMMO_SELECTION' || !this.player.unequipAttachment(slot)) return;
     this.sync();
-    this.ui.showEvent('장착물 해제', '빈 슬롯은 효과와 불이익을 모두 제거합니다.');
+    this.ui.showEvent('장착물 해제', '부착물은 런 보관함에 남아 다시 장착할 수 있습니다.');
   }
 
   private setAudioPreferences(preferences: AudioPreferences): void {
@@ -177,6 +180,30 @@ export class Game {
     this.ui.showEvent('감염체 제거', '다음 표적을 확인합니다.');
     await this.presentation.animateDeath();
 
+    if (this.zombie.snapshot().special) {
+      this.pendingAttachment = generateAttachmentReward(this.player.getOwnedAttachments(), this.player.loadout.weapon);
+      this.state.transition('ATTACHMENT_REWARD');
+      this.ui.setLocked(true);
+      this.ui.setPhase('ATTACHMENT_REWARD', '특수 감염체 처치 보상을 확인하세요.');
+      this.ui.showAttachmentReward(this.pendingAttachment, this.player.loadout.getSnapshot());
+      return;
+    }
+    await this.continueAfterDeath();
+  }
+
+  private async claimAttachmentReward(equip: boolean): Promise<void> {
+    if (this.busy || this.state.phase !== 'ATTACHMENT_REWARD') return;
+    this.busy = true;
+    const id = this.pendingAttachment;
+    this.pendingAttachment = undefined;
+    if (id && this.player.claimAttachment(id) && equip) this.player.equipAttachment(id);
+    this.ui.hideAttachmentReward();
+    this.sync();
+    await this.continueAfterDeath();
+    this.busy = false;
+  }
+
+  private async continueAfterDeath(): Promise<void> {
     if (this.enemyIndex + 1 < this.currentRoster.length) {
       this.enemyIndex += 1;
       await this.spawnCurrentEnemy();
@@ -263,6 +290,8 @@ export class Game {
     if (this.state.phase !== 'GAME_OVER' && this.state.phase !== 'VICTORY') return;
     this.state.transition('AMMO_SELECTION');
     this.player.reset();
+    this.pendingAttachment = undefined;
+    this.ui.hideAttachmentReward();
     this.waveIndex = 0;
     this.enemyIndex = 0;
     this.currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
@@ -297,7 +326,7 @@ export class Game {
   private syncEnemy(): void {
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(this.zombie.snapshot(), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
-    this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity);
+    this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
     this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1, this.zombie.type);
   }

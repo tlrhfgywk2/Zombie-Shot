@@ -16,9 +16,9 @@ export const SIMULATION_PLANS: readonly { name: string; priority: readonly AmmoT
   { name: '충격 연계', priority: ['flatPoint', 'flatPoint', 'hollowPoint', 'standard'] },
 ];
 export const createAllLoadouts = (): LoadoutSnapshot[] => [
-  {}, DEFAULT_LOADOUT,
-  { optic: 'rangeSight', magazine: 'crossFeed', rail: 'responseScanner' },
-  { muzzle: 'returnBrake', grip: 'weightedGrip', magazine: 'extendedFeed', optic: 'reflexSight', rail: 'closeLaser' },
+  DEFAULT_LOADOUT, { muzzle: 'compactCompensator', magazine: 'extendedBasePad', optic: 'highVisibilitySight', rail: 'compactLaserSight', grip: 'rubberGrip' },
+  { optic: 'compactReflexSight', magazine: 'extendedMagazine', rail: 'laserLightModule' },
+  { muzzle: 'dualPortCompensator', grip: 'g10Grip', magazine: 'extendedBasePad', optic: 'highVisibilitySight', rail: 'compactLaserSight' },
 ];
 export const seededRandom = (seed: number): (() => number) => () => {
   seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
@@ -26,7 +26,7 @@ export const seededRandom = (seed: number): (() => number) => () => {
 };
 const configure = (player: Player, loadout: LoadoutSnapshot): void => {
   for (const slot of ATTACHMENT_SLOT_ORDER) player.unequipAttachment(slot);
-  for (const id of Object.values(loadout)) if (id) player.equipAttachment(id);
+  for (const id of Object.values(loadout)) if (id) { player.claimAttachment(id); player.equipAttachment(id); }
 };
 export function simulateEncounter(priority: readonly AmmoType[], type: EnemyType, player: Player) {
   const resolver = new CombatResolver();

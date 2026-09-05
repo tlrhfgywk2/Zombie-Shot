@@ -22,7 +22,7 @@ const normal = (title: string, roster: readonly EnemyType[]): RouteOption => ({
 
 const special = (enemy: EnemyType): RouteOption => ({
   kind: 'special', title: ENEMY_DEFINITIONS[enemy].name, subtitle: ENEMY_DEFINITIONS[enemy].role,
-  roster: [enemy], reward: '탄약 배분 선택 +1 · 다음 구간에서 잔량 회복',
+  roster: [enemy], reward: '미소유 부착물 1개 확정 · 탄약 배분 선택 +1',
 });
 
 export const ENCOUNTER_STAGES: readonly EncounterStage[] = [
