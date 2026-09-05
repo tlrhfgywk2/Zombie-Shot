@@ -10,7 +10,8 @@ describe('런 배분과 스테이지 잔량', () => {
     expect(player.getStock().standard).toBe('infinite');
     expect(player.getBuild().hollowPoint).toBe(3);
     expect(player.getBuild().armorPiercing).toBe(3);
-    expect(countAllocations(player.getBuild())).toBe(player.getSpecialCapacity());
+    expect(countAllocations(player.getBuild())).toBe(6);
+    expect(player.getSpecialCapacity()).toBe(14);
     expect(player.addAmmo('match')).toBe(false);
     expect(player.addAmmo('incendiary')).toBe(false);
   });

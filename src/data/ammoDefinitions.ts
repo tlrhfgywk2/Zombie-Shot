@@ -40,7 +40,7 @@ export type SpecialAmmoType = Exclude<AmmoType, 'standard'>;
 export type AmmoBuild = Record<SpecialAmmoType, number>;
 export type AmmoStock = AmmoBuild & { standard: 'infinite' };
 export const AMMO_BUILD_BALANCE = {
-  specialCapacity: 6,
+  specialCapacity: 14,
   initialAllocations: { hollowPoint: 3, armorPiercing: 3 } as Partial<AmmoBuild>,
   rewardAmount: 1,
   rewardAmounts: {} as Partial<AmmoBuild>,

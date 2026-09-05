@@ -28,6 +28,8 @@ describe('실제 게임의 구간/보상 연결', () => {
   it('적 사이 소비를 유지하고 보상 교체 후 구간 진입에서만 회복한다', async () => {
     const game = new Game({} as HTMLElement);
     const internals = game as unknown as { player: Player; state: GameStateMachine; busy: boolean };
+    // 기존 교체 경로 회귀 검증은 시작 배분으로 용량을 채운 상태에서 수행한다.
+    internals.player.setSpecialCapacity(6);
     for (let i = 0; i < 3; i += 1) harness.callbacks.onAddAmmo('hollowPoint');
     harness.callbacks.onAddAmmo('armorPiercing');
     harness.callbacks.onLoad();

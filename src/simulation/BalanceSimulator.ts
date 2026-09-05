@@ -1,7 +1,7 @@
 import { CombatResolver } from '../combat/CombatResolver';
 import type { AmmoType, EnemyType } from '../combat/types';
 import { DEFAULT_LOADOUT, ATTACHMENT_SLOT_ORDER, type LoadoutSnapshot } from '../data/attachmentDefinitions';
-import { AMMO_ORDER, type SpecialAmmoType } from '../data/ammoDefinitions';
+import { AMMO_ORDER, countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
 import { ENCOUNTER_STAGES } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS, createEnemyState } from '../data/enemyDefinitions';
 import { Player } from '../entities/Player';
@@ -93,7 +93,8 @@ export function runBalanceSimulation() {
       const selected = options.find(ammo => plan.priority.includes(ammo)) ?? options[0]!;
       const replace = AMMO_ORDER.find((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && player.getBuild()[ammo] > 0 && !plan.priority.includes(ammo))
         ?? AMMO_ORDER.find((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && player.getBuild()[ammo] > 0)!;
-      player.applyAmmoReward(selected, [replace]);
+      const needsReplacement = countAllocations(player.getBuild()) + rewardAmount(selected) > player.getSpecialCapacity();
+      player.applyAmmoReward(selected, needsReplacement ? [replace] : []);
     }
     return { plan: plan.name, mask, cleared, shots, completed: true };
   })));
