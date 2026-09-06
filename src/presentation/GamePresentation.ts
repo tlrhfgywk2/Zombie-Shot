@@ -5,7 +5,8 @@ import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
 import type { AudioPreferences } from './AudioPreferences';
 import { PRESENTATION_EFFECTS, PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
-import { getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
+import { constrainWeaponPosition, getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
+import { getResponsiveLayoutMode, getViewportSize } from './ResponsiveLayout';
 import { createAttachmentModel, createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
 interface MuzzleSmokeEffect {
@@ -229,6 +230,7 @@ export class GamePresentation {
       this.presentationState = '탄창 접근';
       const eased = this.easeInOut(progress);
       this.pistolModel.root.position.lerpVectors(pistolStartPosition, this.layout.weaponInsertion, eased);
+      constrainWeaponPosition(this.pistolModel.root.position, this.layout);
       this.pistolModel.root.quaternion.slerpQuaternions(pistolStartQuaternion, insertionQuaternion, eased);
       this.pistolModel.root.scale.setScalar(THREE.MathUtils.lerp(this.layout.pistolScale, insertionScale, eased));
       this.pistolModel.root.updateMatrixWorld(true);
@@ -243,6 +245,7 @@ export class GamePresentation {
     await this.tween(PRESENTATION_TIMING.magazineSeat, (progress) => {
       this.presentationState = '탄창 착좌';
       this.pistolModel.root.position.y = this.layout.weaponInsertion.y + Math.sin(progress * Math.PI) * 0.035;
+      constrainWeaponPosition(this.pistolModel.root.position, this.layout);
       this.pistolModel.root.updateMatrixWorld(true);
       const pose = this.getMagazineInsertionPose(THREE.MathUtils.lerp(
         PRESENTATION_MOTION.magazineApproachDistance,
@@ -269,6 +272,7 @@ export class GamePresentation {
     await this.tween(PRESENTATION_TIMING.readySettle, (progress) => {
       const eased = this.easeInOut(progress);
       this.pistolModel.root.position.lerpVectors(readyPosition, this.layout.weaponAim, eased);
+      constrainWeaponPosition(this.pistolModel.root.position, this.layout);
       this.pistolModel.root.quaternion.slerpQuaternions(readyQuaternion, aimQuaternion, eased);
       this.pistolModel.root.scale.setScalar(THREE.MathUtils.lerp(insertionScale, this.layout.pistolScale, eased));
     });
@@ -305,6 +309,7 @@ export class GamePresentation {
       const forward = new THREE.Vector3(1, 0, 0).applyQuaternion(this.baseAimQuaternion);
       this.pistolModel.root.quaternion.copy(this.baseAimQuaternion).multiply(recoilRotation);
       this.pistolModel.root.position.copy(this.baseWeaponPosition).addScaledVector(forward, -0.075 * recoil);
+      constrainWeaponPosition(this.pistolModel.root.position, this.layout);
       this.camera.position.x = Math.sin(progress * Math.PI * 7) * PRESENTATION_MOTION.cameraShake * (1 - progress);
       this.muzzleFlash.intensity = 8 * Math.max(0, 1 - progress * 4);
     });
@@ -316,6 +321,7 @@ export class GamePresentation {
     await this.tween(PRESENTATION_TIMING.shotSettle, (progress) => {
       const eased = this.easeInOut(progress);
       this.pistolModel.root.position.lerpVectors(recoilPosition, this.baseWeaponPosition, eased);
+      constrainWeaponPosition(this.pistolModel.root.position, this.layout);
       this.pistolModel.root.quaternion.slerpQuaternions(recoilQuaternion, this.baseAimQuaternion, eased);
     });
     this.camera.position.x = this.layout.cameraPosition.x;
@@ -924,6 +930,7 @@ export class GamePresentation {
   private aimPistolAtTarget(target: THREE.Vector3): void {
     const pistol = this.pistolModel.root;
     pistol.position.copy(this.layout.weaponAim);
+    constrainWeaponPosition(pistol.position, this.layout);
     pistol.quaternion.copy(getAimQuaternion(pistol.position, target));
     for (let iteration = 0; iteration < 4; iteration += 1) {
       pistol.updateMatrixWorld(true);
@@ -951,6 +958,7 @@ export class GamePresentation {
 
   private resetWeaponPose(): void {
     this.pistolModel.root.position.copy(this.layout.weaponRest);
+    constrainWeaponPosition(this.pistolModel.root.position, this.layout);
     this.pistolModel.root.quaternion.setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
     this.pistolModel.slide.position.set(0, 0, 0);
   }
@@ -958,16 +966,17 @@ export class GamePresentation {
   private readonly resize = (): void => {
     const width = this.host.clientWidth;
     const height = this.host.clientHeight;
-    this.layout = getPresentationLayout(width, height);
+    const viewport = getViewportSize();
+    const viewportMode = getResponsiveLayoutMode(viewport.width, viewport.height);
+    this.layout = getPresentationLayout(width, height, viewportMode);
     this.pistolModel.root.scale.setScalar(this.layout.pistolScale);
     this.magazineModel.root.scale.setScalar(
       this.magazineModel.root.parent === this.pistolModel.magazineSeatAnchor ? 1 : this.layout.magazineScale,
     );
-    if (!this.animationInProgress) {
-      this.pistolModel.root.position.copy(this.layout.weaponRest);
-      this.camera.position.copy(this.layout.cameraPosition);
-      this.camera.lookAt(this.layout.cameraTarget);
-    }
+    if (!this.animationInProgress) this.pistolModel.root.position.copy(this.layout.weaponRest);
+    constrainWeaponPosition(this.pistolModel.root.position, this.layout);
+    this.camera.position.copy(this.layout.cameraPosition);
+    this.camera.lookAt(this.layout.cameraTarget);
     this.camera.aspect = width / Math.max(height, 1);
     this.camera.fov = this.layout.cameraFov;
     this.camera.updateProjectionMatrix();

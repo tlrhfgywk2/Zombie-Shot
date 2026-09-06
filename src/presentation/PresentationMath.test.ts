@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { getAimQuaternion, getPresentationLayout } from './PresentationMath';
+import { constrainWeaponPosition, getAimQuaternion, getPresentationLayout } from './PresentationMath';
+import { getResponsiveLayoutMode } from './ResponsiveLayout';
 
 describe('프레젠테이션 좌표 계산', () => {
   it('권총의 실제 +X 총열 축을 표적 중심으로 정렬한다', () => {
@@ -25,9 +26,10 @@ describe('프레젠테이션 좌표 계산', () => {
     [430, 932],
     [844, 390],
     [1180, 524],
-  ])('%d×%d에서 삽입 포즈를 장전 포즈보다 높게 둔다', (width, height) => {
+  ])('%d×%d에서 장전 중 권총을 조준·대기 위치의 안전 범위에 유지한다', (width, height) => {
     const layout = getPresentationLayout(width, height);
-    expect(layout.weaponInsertion.y).toBeGreaterThan(layout.weaponRest.y + 0.5);
+    expect(layout.weaponInsertion.distanceTo(layout.weaponRest)).toBeLessThan(0.75);
+    expect(layout.weaponInsertion.y).toBeLessThanOrEqual(Math.max(layout.weaponRest.y, layout.weaponAim.y) + 0.3);
     expect(layout.magazineLoad.y).toBeGreaterThan(1);
     expect(layout.magazineInspect.y).toBeGreaterThanOrEqual(layout.magazineLoad.y);
   });
@@ -43,7 +45,7 @@ describe('프레젠테이션 좌표 계산', () => {
     expect(portrait.pistolScale).toBeLessThan(desktop.pistolScale);
     expect(portrait.cameraTarget.y).toBeGreaterThan(desktop.cameraTarget.y);
     expect(portrait.cartridgeScale).toBeLessThan(desktop.cartridgeScale);
-    expect(portrait.insertionScaleFactor).toBeLessThan(desktop.insertionScaleFactor);
+    expect(portrait.insertionScaleFactor).toBeLessThanOrEqual(desktop.insertionScaleFactor);
   });
 
   it('세로 화면에서 준비 패널을 제외한 짧은 전투 영역도 세로 구도를 유지한다', () => {
@@ -58,5 +60,23 @@ describe('프레젠테이션 좌표 계산', () => {
     expect(layout.weaponAim.x).toBeGreaterThan(1);
     expect(layout.weaponInsertion.y).toBeLessThan(1.8);
     expect(layout.pistolScale).toBeLessThan(0.9);
+  });
+
+  it('세로 태블릿은 전투 영역의 가로 비율과 무관하게 태블릿 세로 포즈를 사용한다', () => {
+    const viewportMode = getResponsiveLayoutMode(709, 1536);
+    const layout = getPresentationLayout(709, 602, viewportMode);
+
+    expect(viewportMode).toBe('tablet-portrait');
+    expect(layout.mode).toBe('tablet-portrait');
+    expect(layout.weaponInsertion.y).toBeLessThan(1.7);
+  });
+
+  it('예상 밖 좌표도 현재 레이아웃의 권총 모션 범위로 제한한다', () => {
+    const layout = getPresentationLayout(709, 602, 'tablet-portrait');
+    const constrained = constrainWeaponPosition(new THREE.Vector3(-9, 12, -4), layout);
+
+    expect(constrained.x).toBeGreaterThan(0.5);
+    expect(constrained.y).toBeLessThanOrEqual(Math.max(layout.weaponRest.y, layout.weaponAim.y) + 0.3);
+    expect(constrained.z).toBeGreaterThan(3);
   });
 });

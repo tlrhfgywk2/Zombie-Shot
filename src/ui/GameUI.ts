@@ -69,7 +69,6 @@ export class GameUI {
   private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
   private locked = false;
   private magazineCapacity: number = COMBAT_BALANCE.baseMagazineCapacity;
-  private selectedIndex: number | null = null;
   private suppressClick = false;
   private gestureVersion = 0;
   private activeAttachmentSlot: AttachmentSlot = 'muzzle';
@@ -146,10 +145,7 @@ export class GameUI {
       const ammo = button.dataset.ammo as AmmoType;
       button.addEventListener('click', () => {
         if (this.consumeSuppressedClick() || this.locked) return;
-        if (this.selectedIndex !== null && this.rounds[this.selectedIndex]) {
-          this.callbacks.onReplaceAmmo(this.selectedIndex, ammo);
-          this.clearSelection();
-        } else this.callbacks.onAddAmmo(ammo);
+        this.callbacks.onAddAmmo(ammo);
       });
       this.bindPointerDrag(button, () => ({ ammo }), () => this.showAmmoTooltip(ammo, button));
       this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button));
@@ -203,16 +199,7 @@ export class GameUI {
     });
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
-    this.loadButton.addEventListener('click', () => {
-      if (this.locked) return;
-      if (this.selectedIndex === null) {
-        this.callbacks.onLoad();
-        return;
-      }
-      const selectedIndex = this.selectedIndex;
-      this.callbacks.onRemoveAmmo(selectedIndex);
-      this.clearSelection();
-    });
+    this.loadButton.addEventListener('click', () => { if (!this.locked) this.callbacks.onLoad(); });
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
     window.addEventListener('blur', this.resetDragVisuals);
     window.addEventListener('resize', this.resetDragVisuals);
@@ -234,25 +221,28 @@ export class GameUI {
     this.magazineOrderLabel.textContent = `1 → ${capacity}`;
     const slotHost = this.slots[0]?.parentElement;
     slotHost?.style.setProperty('--mag-capacity', String(capacity));
-    if (this.selectedIndex !== null && !rounds[this.selectedIndex]) this.selectedIndex = null;
     this.slots.forEach((slot, index) => {
       slot.hidden = index >= capacity;
       const ammo = rounds[index];
-      slot.className = `mag-slot${ammo ? ` filled ammo-${ammo}` : ''}${this.selectedIndex === index ? ' is-selected' : ''}`;
+      slot.className = `mag-slot${ammo ? ` filled ammo-${ammo}` : ''}`;
       slot.innerHTML = ammo ? `<span class="slot-index">0${index + 1}</span><span class="round-visual"><i></i></span><strong>${AMMO_DEFINITIONS[ammo].shortName}</strong>` : `<span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span>`;
-      slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}, 탭하여 선택` : `${index + 1}번 빈 슬롯${this.selectedIndex !== null ? ', 탭하여 선택 탄 이동' : ''}`);
-      slot.setAttribute('aria-pressed', String(this.selectedIndex === index));
+      slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}, 탭하여 즉시 제거` : `${index + 1}번 빈 슬롯`);
+      slot.setAttribute('aria-pressed', 'false');
     });
     this.loadButton.disabled = this.locked || rounds.length === 0;
     this.loadButton.querySelector('small')!.textContent = rounds.length ? `${rounds.length}발로 전투 시작` : '1발 이상 필요';
     this.renderAmmoStock(stock, build, specialCapacity, rounds);
-    this.updateSelectionUI();
+    this.updateLoadButton();
   }
 
   renderAmmoStock(stock: AmmoStock, build: AmmoBuild, capacity: number, reserved: readonly AmmoType[]): void {
     this.stock = { ...stock };
     this.build = { ...build };
     this.specialCapacity = capacity;
+    const visibleCount = AMMO_ORDER.filter(ammo => ammo === 'standard' || build[ammo] > 0).length;
+    const options = this.required(this.shell, '.ammo-options');
+    options.style.setProperty('--ammo-columns', String(Math.max(1, Math.min(5, visibleCount))));
+    options.dataset.density = visibleCount > 5 ? 'dense' : 'regular';
     this.required(this.shell, '#ammo-capacity').textContent = '배분 ' + countAllocations(build) + '/' + capacity + ' · 다음 구간 회복';
     this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach(button => {
       const ammo = button.dataset.ammo as AmmoType;
@@ -318,7 +308,6 @@ export class GameUI {
 
   setLocked(locked: boolean): void {
     this.locked = locked;
-    if (locked) this.clearSelection();
     this.attachmentTabs.forEach((button) => {
       button.disabled = locked || button.dataset.sealed === 'true';
     });
@@ -469,42 +458,12 @@ export class GameUI {
   }
 
   private handleSlotTap(index: number): void {
-    if (this.selectedIndex === null) {
-      if (this.rounds[index]) this.selectSlot(index);
-      return;
-    }
-    if (this.selectedIndex === index) {
-      this.clearSelection();
-      return;
-    }
-    this.callbacks.onMoveAmmo(this.selectedIndex, index);
-    this.clearSelection();
+    if (this.rounds[index]) this.callbacks.onRemoveAmmo(index);
   }
 
-  private selectSlot(index: number): void {
-    this.selectedIndex = index;
-    this.renderMagazine(this.rounds);
-  }
-
-  private clearSelection(): void {
-    this.selectedIndex = null;
-    this.slots.forEach((slot) => slot.classList.remove('is-selected', 'drop-target'));
-    this.updateSelectionUI();
-  }
-
-  private updateSelectionUI(): void {
-    const ammo = this.selectedIndex === null ? undefined : this.rounds[this.selectedIndex];
+  private updateLoadButton(): void {
     const label = this.loadButton.querySelector<HTMLElement>('span')!;
     const detail = this.loadButton.querySelector<HTMLElement>('small')!;
-    const removeMode = Boolean(ammo && this.selectedIndex !== null && !this.locked);
-    this.loadButton.classList.toggle('is-remove-mode', removeMode);
-    if (removeMode && ammo && this.selectedIndex !== null) {
-      label.textContent = '선택 탄 제거';
-      detail.textContent = `${this.selectedIndex + 1}번 ${AMMO_DEFINITIONS[ammo].shortName} · 재선택 시 취소`;
-      this.loadButton.disabled = false;
-      this.loadButton.setAttribute('aria-label', `${this.selectedIndex + 1}번 ${AMMO_DEFINITIONS[ammo].name} 제거`);
-      return;
-    }
     label.textContent = '탄창 장전';
     detail.textContent = this.rounds.length ? `${this.rounds.length}발로 전투 시작` : '1발 이상 필요';
     this.loadButton.disabled = this.locked || this.rounds.length === 0;
