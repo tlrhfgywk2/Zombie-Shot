@@ -584,24 +584,12 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="compact-landscape"] .attachment-option small,
 .game-shell[data-layout="compact-landscape"] .attachment-option em { display: none; }
 
-/* 잔량과 다섯 수치를 모든 입력 방식에서 직접 읽을 수 있는 탄약 카드. */
+/* 보유 탄약은 간결하게 표시하고 상세 수치는 지연 호버/길게 누르기 툴팁으로 제공한다. */
 .game-shell .tactical-console .ammo-options { display: grid; grid-template-columns: repeat(var(--ammo-columns, 5), minmax(0, 1fr)); overflow: visible; gap: 6px; padding-bottom: 0; }
-.game-shell .tactical-console .ammo-token { display: flex; flex-direction: column; align-items: stretch; min-width: 0; height: auto; min-height: 142px; gap: 3px; padding: 7px; touch-action: none; }
 .game-shell .tactical-console .ammo-token[hidden] { display: none; }
-.game-shell .tactical-console .ammo-heading { display: flex; align-items: center; justify-content: space-between; gap: 3px; }
-.game-shell .tactical-console .ammo-token strong { font-size: 11px; }
-.game-shell .tactical-console .ammo-token small { display: block; font-size: 10px; }
-.game-shell .tactical-console .stock-count { position: static; align-self: flex-start; min-height: 18px; font-size: 12px; }
 .ammo-stats { display: grid; gap: 2px; color: #b7c4bb; font-size: 11px; font-weight: 400; }
 .ammo-stats > span { display: flex; justify-content: space-between; gap: 12px; }
 .ammo-stats b { color: #f0f6ef; font-variant-numeric: tabular-nums; }
-.game-shell .tactical-console .ammo-reserved { min-height: 12px; color: #b4c89e; }
-.game-shell .tactical-console .ammo-token:disabled { opacity: .65; }
-.game-shell .tactical-console .ammo-options[data-density="dense"] .ammo-token { min-height: 96px; padding: 5px; }
-.game-shell .tactical-console .ammo-options[data-density="dense"] .ammo-heading small,
-.game-shell .tactical-console .ammo-options[data-density="dense"] .ammo-reserved { display: none; }
-.game-shell .tactical-console .ammo-options[data-density="dense"] .ammo-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px 5px; font-size: 9px; }
-.game-shell .tactical-console .ammo-options[data-density="dense"] .ammo-stats > span { gap: 3px; }
 .game-shell .sequence-preview > div:first-child { flex-wrap: wrap; white-space: normal; }
 .game-shell .tactical-console .sequence-preview span b { display: inline; }
 .game-shell .tactical-console .sequence-preview > div:last-child { white-space: normal; overflow: visible; line-height: 1.4; }
@@ -614,12 +602,6 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell { --console-height: 330px; }
 .game-shell[data-layout="portrait"] { --console-height: min(450px, 53dvh); }
 .game-shell[data-layout="portrait"] .tactical-console { overflow-y: auto; }
-.game-shell[data-layout="portrait"] .tactical-console .ammo-token { min-height: 142px; }
-.game-shell[data-layout="tablet-portrait"] .tactical-console .ammo-options[data-density="dense"] .ammo-token { min-height: 82px; }
-.game-shell[data-layout="portrait"] .tactical-console .ammo-options[data-density="dense"] .ammo-token { min-height: 64px; padding: 4px 2px; }
-.game-shell[data-layout="portrait"] .tactical-console .ammo-options[data-density="dense"] .ammo-stats,
-.game-shell[data-layout="portrait"] .tactical-console .ammo-options[data-density="dense"] .ammo-reserved { display: none; }
-.game-shell[data-layout="portrait"] .tactical-console .ammo-options[data-density="dense"] .stock-count { min-height: 14px; font-size: 10px; }
 .game-shell[data-layout="portrait"] .reward-options { grid-template-columns: 1fr; gap: 6px; }
 .game-shell[data-layout="portrait"] .reward-options .route-option { min-height: 0; padding: 10px; }
 .game-shell[data-layout="portrait"] .reward-options .ammo-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px 15px; }
