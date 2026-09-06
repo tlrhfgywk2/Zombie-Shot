@@ -90,7 +90,7 @@ export class GameUI {
           <header class="console-header"><strong>전술 준비 패널</strong><span><i></i>탄약 선택 · 발사 순서 · 부착물 구성을 한곳에서 조정합니다.</span></header>
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
           <div class="ammo-rack"><div class="section-label"><span>스테이지 탄약</span><small id="ammo-capacity"></small></div><div class="ammo-options">
-            ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="ammo-heading"><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]}</small></span><b class="stock-count" data-stock="${ammo}"></b>${ammoStatsMarkup(ammo)}<small class="ammo-reserved"></small></button>`; }).join('')}
+            ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
           <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small id="magazine-order-label">1 → 4</small></div><div class="sequence-preview" aria-live="polite"><div id="preview-chain">탄약을 장전하면 순서 프리뷰가 표시됩니다.</div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
@@ -242,7 +242,6 @@ export class GameUI {
     const visibleCount = AMMO_ORDER.filter(ammo => ammo === 'standard' || build[ammo] > 0).length;
     const options = this.required(this.shell, '.ammo-options');
     options.style.setProperty('--ammo-columns', String(Math.max(1, Math.min(5, visibleCount))));
-    options.dataset.density = visibleCount > 5 ? 'dense' : 'regular';
     this.required(this.shell, '#ammo-capacity').textContent = '배분 ' + countAllocations(build) + '/' + capacity + ' · 다음 구간 회복';
     this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach(button => {
       const ammo = button.dataset.ammo as AmmoType;
@@ -253,7 +252,6 @@ export class GameUI {
       button.setAttribute('aria-disabled', String(button.disabled));
       const label = ammo === 'standard' ? '∞' : count + ' / ' + build[ammo];
       button.querySelector<HTMLElement>('.stock-count')!.textContent = label;
-      button.querySelector<HTMLElement>('.ammo-reserved')!.textContent = loaded ? '장전 예약 ' + loaded + '발' : ammo === 'standard' ? '항상 사용 가능' : '잔량 / 런 배분';
       button.setAttribute('aria-label', AMMO_DEFINITIONS[ammo].name + ' · ' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · ' + label + ' · 장전 예약 ' + loaded + '발');
     });
   }
