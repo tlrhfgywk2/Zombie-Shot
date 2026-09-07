@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE } from '../data/ammoDefinitions';
 import { ATTACHMENT_DEFINITIONS, SERVICE_45 } from '../data/attachmentDefinitions';
 import { createEnemyState, ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
-import { CombatResolver } from './CombatResolver';
+import { CombatResolver, formatRangePenalty } from './CombatResolver';
 
 const resolver = new CombatResolver();
 const unarmoredTarget = (distance: number) => ({
@@ -48,6 +48,7 @@ describe('정수 전투 수치 스케일', () => {
     const shots = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, unarmoredTarget(distance)));
     expect(shots.map(shot => shot.breakdown.rangePenalty)).toEqual([0, 1, 2]);
     expect(shots.map(shot => shot.breakdown.finalFirepower)).toEqual([6, 5, 4]);
+    expect([0, 1, 2].map(formatRangePenalty)).toEqual(['화력 0', '화력 -1', '화력 -2']);
   });
 
   it('대표 탄약과 장착 빌드는 4~12 화력 안에서 역할 차이를 만든다', () => {

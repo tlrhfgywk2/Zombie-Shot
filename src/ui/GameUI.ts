@@ -1,5 +1,5 @@
 import { ammoStatsMarkup } from './AmmoView';
-import { getRangeBand } from '../combat/CombatResolver';
+import { formatRangePenalty, getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
@@ -400,7 +400,7 @@ export class GameUI {
     this.enemyStatus.hidden = statuses.length === 0;
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
     const rangeBand = getRangeBand(enemy.distance);
-    this.rangeBandText.textContent = `${RANGE_NAMES[rangeBand]} · 화력 -${SERVICE_45.rangePenalties[rangeBand]}`;
+    this.rangeBandText.textContent = `${RANGE_NAMES[rangeBand]} · ${formatRangePenalty(SERVICE_45.rangePenalties[rangeBand])}`;
     this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
     this.intentCard.hidden = !enemy.intent;
@@ -426,7 +426,7 @@ export class GameUI {
     preview.hidden = false;
     this.previewChain.innerHTML = sequence.shots.map((shot) => {
       const accuracy = `${shot.breakdown.accuracyModifier >= 0 ? '+' : ''}${shot.breakdown.accuracyModifier}`;
-      return `<span title="정확도 ${accuracy} · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} 화력 -${shot.breakdown.rangePenalty} · 최종 화력 ${shot.breakdown.finalFirepower}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${accuracy}</b></span>`;
+      return `<span title="정확도 ${accuracy} · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} ${formatRangePenalty(shot.breakdown.rangePenalty)} · 최종 화력 ${shot.breakdown.finalFirepower}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${accuracy}</b></span>`;
     }).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
     const final = sequence.finalState;
     const effects: string[] = [`체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];

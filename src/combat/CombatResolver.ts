@@ -48,6 +48,8 @@ export const getRangeBand = (distance: number): RangeBand => {
   return 'far';
 };
 
+export const formatRangePenalty = (penalty: number): string => `화력 ${penalty === 0 ? '0' : `-${penalty}`}`;
+
 export const getEffectiveRangeBand = (band: RangeBand, penaltySteps: number): RangeBand => rangeOrder[Math.min(rangeOrder.length - 1, rangeOrder.indexOf(band) + penaltySteps)] ?? 'far';
 
 export const isNearestValidTarget = (target: EnemyState, targets: readonly EnemyState[] = [target]): boolean =>
@@ -158,7 +160,7 @@ export class CombatResolver {
 
     const conserved = Boolean(definition.recoverOnKill && after.hp <= 0);
     const signedAccuracy = `${accuracyModifier >= 0 ? '+' : ''}${accuracyModifier}`;
-    const parts = [`${definition.name} 명중`, `정확도 ${signedAccuracy}`, `${RANGE_NAMES[effectiveRangeBand]} 화력 -${rangePenalty}`, `최종 화력 ${finalFirepower}`];
+    const parts = [`${definition.name} 명중`, `정확도 ${signedAccuracy}`, `${RANGE_NAMES[effectiveRangeBand]} ${formatRangePenalty(rangePenalty)}`, `최종 화력 ${finalFirepower}`];
     if (armorBroken) parts.push(`방어 파괴 ${armorBroken}`);
     if (armorBlocked) parts.push(`방어 흡수 ${armorBlocked}`);
     if (statusTriggered) parts.push(`${this.statusName(statusTriggered)} 발동`);
