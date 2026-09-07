@@ -44,6 +44,15 @@ describe('누적 반동', () => {
 });
 
 describe('수치 방어층과 방어 파괴', () => {
+  it('중거리 오염 투척체의 방어를 먼저 파괴하고 거리 보정된 체력 피해 16을 적용한다', () => {
+    const shot = resolver.resolveSequence(['armorPiercing'], createEnemyState('contaminator')).shots[0]!;
+    expect(shot.breakdown.rangeBand).toBe('mid');
+    expect(shot.breakdown.rangeMultiplier).toBeCloseTo(0.9);
+    expect(shot.breakdown.armorBroken).toBe(8);
+    expect(shot.breakdown.armorBlocked).toBe(0);
+    expect(shot.after.armor).toBe(0);
+    expect(shot.hpDamage).toBe(16);
+  });
   it('방어 24 표적은 방어 파괴 12 철갑탄 한 발에 방어가 12만 감소한다', () => {
     const shot = resolver.resolveSequence(['armorPiercing'], createEnemyState('groundshaker')).shots[0]!;
     expect(shot.breakdown.armorBroken).toBe(12);

@@ -1,4 +1,5 @@
 export const PRESENTATION_TIMING = {
+  weaponReloadTransition: 280,
   roundInsert: 210,
   roundSettle: 55,
   magazineInspectMove: 240,

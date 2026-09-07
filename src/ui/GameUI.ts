@@ -30,7 +30,7 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  ATTACHMENT_REWARD: '부착물 획득', AMMO_REWARD: '탄약 배분', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
+  ATTACHMENT_REWARD: '부착물 획득', AMMO_REWARD: '탄약 보급', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
 export class GameUI {
@@ -62,6 +62,10 @@ export class GameUI {
   private readonly routeChoice: HTMLElement;
   private readonly endTitle: HTMLElement;
   private readonly ammoTooltip: HTMLElement;
+  private readonly ammoInventory: HTMLElement;
+  private readonly inventoryBackgroundInert = new Map<HTMLElement, boolean>();
+  private inventoryOpener?: HTMLButtonElement;
+  private inspectedAmmoButton?: HTMLButtonElement;
   private rounds: readonly AmmoType[] = [];
   private build = createAmmoBuild();
   private stock: AmmoStock = createStageStock(this.build);
@@ -86,7 +90,7 @@ export class GameUI {
               <div class="enemy-stat enemy-advance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 7 7-7 7M10 5l7 7-7 7M17 5l4 7-4 7"/></svg><span><small>다음 접근</small><strong id="next-move-text">2.0 m</strong></span></div>
               <div id="intent-card" class="enemy-intent" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.2v.2"/></svg><span><small id="intent-timing">다음 행동</small><strong id="intent-name">특수 행동</strong></span></div>
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
-            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
+            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong></aside>
         </main>
@@ -106,7 +110,8 @@ export class GameUI {
         <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
-        <section id="ammo-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-label="탄약 배분 보상"></section>
+        <section id="ammo-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-reward-title"></section>
+        <section id="ammo-inventory" class="route-choice ammo-inventory-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-inventory-title"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><button id="restart-button">다시 시작</button></div></div>
       </div>`;
@@ -141,6 +146,7 @@ export class GameUI {
     this.routeChoice = this.required(root, '#route-choice');
     this.endTitle = this.required(root, '#end-title');
     this.ammoTooltip = this.required(root, '#ammo-tooltip');
+    this.ammoInventory = this.required(root, '#ammo-inventory');
     this.slots = [...root.querySelectorAll<HTMLButtonElement>('.mag-slot')];
 
     root.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
@@ -197,6 +203,7 @@ export class GameUI {
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
     this.loadButton.addEventListener('click', () => { if (!this.locked) this.callbacks.onLoad(); });
+    this.required(root, '#inventory-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
     window.addEventListener('blur', this.resetDragVisuals);
     window.addEventListener('resize', this.resetDragVisuals);
@@ -254,54 +261,18 @@ export class GameUI {
     this.hideTooltip();
     const host = this.required(this.shell, '#ammo-reward');
     const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
-    const owned = AMMO_ORDER.filter(ammo => ammo === 'standard' || build[ammo] > 0);
-    const rarity = (ammo: AmmoType) => `<span class="ammo-rarity" data-rarity="${AMMO_DEFINITIONS[ammo].rarity}">${RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity]}</span>`;
-    const quantity = (ammo: AmmoType) => ammo === 'standard' ? '∞' : `×${build[ammo]}`;
     const choices = selected
-      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${rarity(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>교체 ×1</em></button>`).join('')
-      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${rarity(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>+${rewardAmount(ammo)}</em></button>`).join('');
-    const inventory = owned.map(ammo => `<button type="button" class="ammo-inventory-card" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-inspect-ammo="${ammo}" aria-label="${AMMO_DEFINITIONS[ammo].name} ${quantity(ammo)} 상세 보기"><span class="inventory-card-head">${rarity(ammo)}<b>${quantity(ammo)}</b></span><strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}</button>`).join('');
+      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>교체 ×1</em></button>`).join('')
+      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>+${rewardAmount(ammo)}</em></button>`).join('');
     host.innerHTML = `<div class="route-card reward-card">
-      <div class="reward-options" data-reward-options>${choices}</div>
-      <div class="ammo-inventory-panel" data-ammo-inventory hidden><div class="ammo-inventory-grid">${inventory}</div></div>
-      <div class="reward-actions"><button type="button" data-toggle-inventory aria-pressed="false">소지 탄약</button><button type="button" data-skip-ammo-reward>넘기기</button></div>
-      <button type="button" class="ammo-inspect-layer" data-ammo-inspect hidden aria-label="탄약 상세 닫기"></button>
+      <header class="ammo-screen-header"><h2 id="ammo-reward-title">탄약 보급</h2><button type="button" data-open-ammo-inventory aria-haspopup="dialog">보유 탄약</button></header>
+      <div class="reward-options">${choices}</div>
+      <div class="reward-actions"><button type="button" data-skip-ammo-reward>넘기기</button></div>
     </div>`;
     host.querySelectorAll<HTMLButtonElement>('[data-ammo-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseAmmoReward(button.dataset.ammoReward as SpecialAmmoType)));
     host.querySelectorAll<HTMLButtonElement>('[data-replace-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onReplaceReward(button.dataset.replaceReward as SpecialAmmoType)));
-    const rewardPanel = this.required(host, '[data-reward-options]');
-    const inventoryPanel = this.required(host, '[data-ammo-inventory]');
-    const inventoryToggle = this.required(host, '[data-toggle-inventory]') as HTMLButtonElement;
-    const inspectLayer = this.required(host, '[data-ammo-inspect]') as HTMLButtonElement;
-    let inspectedButton: HTMLButtonElement | undefined;
-    inventoryToggle.addEventListener('click', () => {
-      const showInventory = inventoryPanel.hidden;
-      inventoryPanel.hidden = !showInventory;
-      rewardPanel.hidden = showInventory;
-      inventoryToggle.textContent = showInventory ? '배급 선택' : '소지 탄약';
-      inventoryToggle.setAttribute('aria-pressed', String(showInventory));
-      (showInventory ? inventoryPanel : rewardPanel).querySelector<HTMLButtonElement>('button')?.focus();
-    });
+    host.querySelector<HTMLButtonElement>('[data-open-ammo-inventory]')?.addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
     host.querySelector<HTMLButtonElement>('[data-skip-ammo-reward]')?.addEventListener('click', this.callbacks.onSkipAmmoReward);
-    host.querySelectorAll<HTMLButtonElement>('[data-inspect-ammo]').forEach(button => button.addEventListener('click', () => {
-      inspectedButton = button;
-      const ammo = button.dataset.inspectAmmo as AmmoType;
-      const definition = AMMO_DEFINITIONS[ammo];
-      inspectLayer.style.setProperty('--bullet', definition.cssColor);
-      inspectLayer.innerHTML = `<span class="ammo-inspect-card"><span class="inventory-card-head">${rarity(ammo)}<b>${quantity(ammo)}</b></span><span class="inspect-round"><span class="round-visual"><i></i></span></span><strong>${definition.name}</strong>${ammoStatsMarkup(ammo)}</span>`;
-      inspectLayer.hidden = false;
-      inspectLayer.focus();
-    }));
-    inspectLayer.addEventListener('click', () => {
-      inspectLayer.hidden = true;
-      inspectedButton?.focus();
-    });
-    host.onkeydown = event => {
-      if (event.key === 'Escape' && !inspectLayer.hidden) {
-        event.preventDefault();
-        inspectLayer.click();
-      }
-    };
     host.hidden = false;
     host.querySelector<HTMLButtonElement>('button')?.focus();
   }
@@ -335,7 +306,6 @@ export class GameUI {
   hideAmmoRewards(): void {
     const host = this.required(this.shell, '#ammo-reward');
     host.hidden = true;
-    host.onkeydown = null;
   }
 
   setLocked(locked: boolean): void {
@@ -469,6 +439,80 @@ export class GameUI {
   showEndState(title: string, show: boolean): void {
     this.endTitle.textContent = title;
     this.overlay.hidden = !show;
+  }
+
+  private ammoRarityMarkup(ammo: AmmoType): string {
+    const definition = AMMO_DEFINITIONS[ammo];
+    return `<span class="ammo-rarity" data-rarity="${definition.rarity}">${RARITY_NAMES[definition.rarity]}</span>`;
+  }
+
+  private ammoQuantity(ammo: AmmoType): string {
+    return ammo === 'standard' ? '∞' : `×${this.build[ammo]}`;
+  }
+
+  private openAmmoInventory(opener: HTMLButtonElement): void {
+    this.hideTooltip();
+    this.inventoryOpener = opener;
+    this.inventoryBackgroundInert.clear();
+    for (const sibling of this.ammoInventory.parentElement?.children ?? []) {
+      if (!(sibling instanceof HTMLElement) || sibling === this.ammoInventory) continue;
+      this.inventoryBackgroundInert.set(sibling, sibling.inert);
+      sibling.inert = true;
+    }
+    const owned = AMMO_ORDER.filter(ammo => ammo === 'standard' || this.build[ammo] > 0);
+    const inventory = owned.map(ammo => `<button type="button" class="ammo-inventory-card" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-inspect-ammo="${ammo}" aria-label="${AMMO_DEFINITIONS[ammo].name} ${this.ammoQuantity(ammo)} 상세 보기"><span class="inventory-card-head">${this.ammoRarityMarkup(ammo)}<b>${this.ammoQuantity(ammo)}</b></span><strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}</button>`).join('');
+    this.ammoInventory.innerHTML = `<div class="route-card ammo-inventory-dialog">
+      <header class="ammo-screen-header"><h2 id="ammo-inventory-title">보유 탄약</h2><button type="button" class="ammo-screen-close" data-close-ammo-inventory aria-label="보유 탄약 닫기">×</button></header>
+      <div class="ammo-inventory-panel"><div class="ammo-inventory-grid">${inventory}</div></div>
+      <button type="button" class="ammo-inspect-layer" data-ammo-inspect hidden aria-label="탄약 상세 닫기"></button>
+    </div>`;
+    const inspectLayer = this.required(this.ammoInventory, '[data-ammo-inspect]') as HTMLButtonElement;
+    this.ammoInventory.querySelector<HTMLButtonElement>('[data-close-ammo-inventory]')?.addEventListener('click', () => this.closeAmmoInventory());
+    this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-inspect-ammo]').forEach(button => button.addEventListener('click', () => {
+      this.inspectedAmmoButton = button;
+      const ammo = button.dataset.inspectAmmo as AmmoType;
+      const definition = AMMO_DEFINITIONS[ammo];
+      inspectLayer.style.setProperty('--bullet', definition.cssColor);
+      inspectLayer.innerHTML = `<span class="ammo-inspect-card"><span class="inventory-card-head">${this.ammoRarityMarkup(ammo)}<b>${this.ammoQuantity(ammo)}</b></span><span class="inspect-round"><span class="round-visual"><i></i></span></span><strong>${definition.name}</strong>${ammoStatsMarkup(ammo)}</span>`;
+      inspectLayer.hidden = false;
+      inspectLayer.focus();
+    }));
+    inspectLayer.addEventListener('click', () => {
+      inspectLayer.hidden = true;
+      this.inspectedAmmoButton?.focus();
+    });
+    this.ammoInventory.onkeydown = event => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        if (!inspectLayer.hidden) inspectLayer.click();
+        else this.closeAmmoInventory();
+        return;
+      }
+      if (event.key !== 'Tab' || !inspectLayer.hidden) return;
+      const focusable = [...this.ammoInventory.querySelectorAll<HTMLButtonElement>('button:not([hidden]):not([disabled])')];
+      if (!focusable.length) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    this.ammoInventory.hidden = false;
+    this.ammoInventory.querySelector<HTMLButtonElement>('[data-inspect-ammo]')?.focus();
+  }
+
+  private closeAmmoInventory(): void {
+    this.ammoInventory.hidden = true;
+    this.ammoInventory.onkeydown = null;
+    for (const [element, wasInert] of this.inventoryBackgroundInert) element.inert = wasInert;
+    this.inventoryBackgroundInert.clear();
+    this.inventoryOpener?.focus();
+    this.inventoryOpener = undefined;
+    this.inspectedAmmoButton = undefined;
   }
 
   private required(root: HTMLElement, selector: string): HTMLElement {
