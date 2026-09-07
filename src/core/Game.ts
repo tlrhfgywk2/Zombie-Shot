@@ -5,7 +5,6 @@ import { countAllocations, rewardAmount, type SpecialAmmoType } from '../data/am
 import { generateAttachmentReward } from '../progression/AttachmentRewards';
 import { generateAmmoRewards } from '../progression/AmmoRewards';
 import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
-import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
@@ -282,7 +281,7 @@ export class Game {
     await this.presentation.animateSpawn(this.zombie.distance);
     this.state.transition('AMMO_SELECTION');
     this.ui.setLocked(false);
-    this.ui.setPhase('AMMO_SELECTION', `${ENEMY_DEFINITIONS[type].name} 출현 · 재고와 순서를 확인하세요.`);
+    this.ui.setPhase('AMMO_SELECTION', '');
     this.ui.clearEvent();
   }
 
@@ -314,9 +313,11 @@ export class Game {
   private syncMagazine(): void {
     const rounds = this.player.magazine.getRounds();
     this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity, this.player.getBuild(), this.player.getSpecialCapacity());
-    if (rounds.length === 0) this.ui.renderPreview(undefined, undefined);
-    else {
-      const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+    const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+    if (rounds.length === 0) {
+      const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), context.playerState, context.loadout);
+      this.ui.renderPreview(undefined, action);
+    } else {
       const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context);
       const action = sequence.killed ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
       this.ui.renderPreview(sequence, action);

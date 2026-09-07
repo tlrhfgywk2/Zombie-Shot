@@ -25,15 +25,41 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .brand div { display: grid; }
 .brand small, .distance-card small { color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .18em; }
 .brand strong { font-size: 1.18rem; letter-spacing: .06em; }
-.enemy-card { position: relative; justify-self: center; width: 100%; padding: .85rem 1rem .95rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(18, 25, 20, .88), rgba(10, 14, 12, .74)); backdrop-filter: blur(10px); }
+.enemy-card { position: relative; justify-self: center; width: 100%; padding: .72rem .8rem .78rem; border: 1px solid var(--line); background: linear-gradient(180deg, rgba(18, 25, 20, .92), rgba(10, 14, 12, .82)); backdrop-filter: blur(10px); pointer-events: auto; }
+.enemy-card:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-heading { display: flex; justify-content: space-between; font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
 .enemy-heading span:last-child { color: #b7c0b9; letter-spacing: .04em; }
-.enemy-meta { display: flex; justify-content: space-between; gap: .5rem; margin-top: .38rem; color: var(--muted); font-size: .58rem; font-weight: 700; }
 .hp-track { height: 5px; margin-top: .65rem; background: #2e1717; overflow: hidden; }
 .hp-track span { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d37, #ff8769); box-shadow: 0 0 12px rgba(255,70,50,.55); transition: width .25s ease; }
-.enemy-intent { position: absolute; top: calc(100% + 7px); left: 0; right: 0; display: flex; justify-content: space-between; gap: .6rem; padding: .52rem .7rem; border: 1px solid rgba(255,174,58,.42); color: #ffd68f; background: rgba(38,23,10,.9); box-shadow: 0 8px 28px rgba(0,0,0,.34); }
-.enemy-intent strong { font-size: .65rem; white-space: nowrap; }
-.enemy-intent span { color: #d6b98b; font-size: .59rem; text-align: right; }
+.enemy-vitals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: .48rem; }
+.enemy-vitals:has(.enemy-intent:not([hidden])) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.enemy-stat { position: relative; display: flex; align-items: center; min-width: 0; min-height: 46px; gap: .42rem; padding: .35rem .42rem; border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.035); }
+.enemy-stat > svg, .enemy-intent > svg { flex: 0 0 25px; width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px currentColor); }
+.enemy-stat > span, .enemy-intent > span { display: grid; min-width: 0; }
+.enemy-stat small, .enemy-intent small { color: #8f9a91; font-size: .48rem; font-weight: 850; letter-spacing: .06em; white-space: nowrap; }
+.enemy-stat strong, .enemy-intent strong { margin-top: .05rem; font-size: .92rem; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+.enemy-stat[data-empty] { opacity: .62; }
+.enemy-armor { color: #84bcff; }
+.enemy-impact { color: #70e6d2; }
+.enemy-impact strong b { color: inherit; font-size: inherit; }
+.enemy-impact strong em { color: #78938e; font-size: .5rem; font-style: normal; font-weight: 700; }
+.enemy-impact > i { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 2px; overflow: hidden; background: rgba(112,230,210,.13); }
+.enemy-impact > i b { display: block; width: 0; height: 100%; background: #70e6d2; box-shadow: 0 0 8px #70e6d2; transition: width .25s ease; }
+.enemy-advance { color: #ffbd66; }
+.enemy-advance[data-delayed] { border-color: rgba(112,230,210,.5); color: #70e6d2; background: rgba(112,230,210,.08); }
+.enemy-intent { display: flex; align-items: center; min-width: 0; min-height: 46px; gap: .38rem; padding: .35rem .42rem; border: 1px solid rgba(255,174,58,.42); color: #ffd68f; background: rgba(67,39,13,.48); }
+.enemy-intent > svg { flex-basis: 23px; width: 23px; height: 23px; }
+.enemy-intent strong { overflow: hidden; font-size: .7rem; text-overflow: ellipsis; }
+.enemy-status-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
+.enemy-status-list span { padding: .18rem .35rem; border: 1px solid rgba(255,255,255,.13); color: #dce5de; background: rgba(0,0,0,.28); font-size: .56rem; font-weight: 800; }
+.enemy-status-list [data-status="burn"] { border-color: rgba(255,133,53,.45); color: #ffb15f; }
+.enemy-status-list [data-status="slow"] { border-color: rgba(111,220,255,.45); color: #8fe5ff; }
+.enemy-status-list [data-status="stagger"], .enemy-status-list [data-status="exposed"] { border-color: rgba(112,230,210,.45); color: #90f3e3; }
+.enemy-context { position: absolute; z-index: 6; top: calc(100% + 7px); left: 0; right: 0; display: grid; gap: .28rem; padding: .6rem .7rem; border: 1px solid rgba(200,255,77,.3); color: #b9c4bb; background: rgba(7,12,9,.96); box-shadow: 0 12px 36px rgba(0,0,0,.5); font-size: .61rem; line-height: 1.4; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .14s ease, transform .14s ease, visibility .14s; pointer-events: none; }
+.enemy-context b { color: #e6ffb0; }
+.enemy-context .intent-detail { padding-top: .28rem; border-top: 1px solid rgba(255,174,58,.25); color: #e2c291; }
+.enemy-context .intent-detail b { color: #ffd68f; }
+.enemy-card:hover .enemy-context, .enemy-card:focus .enemy-context, .enemy-card:focus-within .enemy-context { opacity: 1; visibility: visible; transform: translateY(0); }
 .utility-stack { justify-self: end; width: 140px; display: grid; gap: .38rem; }
 .distance-card { width: 100%; text-align: right; padding-right: .8rem; border-right: 2px solid var(--acid); }
 .distance-card strong { display: block; margin-top: .15rem; font-family: "Arial Narrow", sans-serif; font-size: 1.25rem; }
@@ -49,6 +75,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .eyebrow, .section-label { color: var(--muted); font-size: .64rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
 .phase-panel > strong { display: block; margin-top: .25rem; font-size: clamp(1.15rem, 2vw, 1.65rem); }
 .phase-panel > p { margin: .35rem 0 0; color: #aab4ac; font-size: .76rem; line-height: 1.55; }
+.phase-panel > p:empty { display: none; }
 .combat-metrics { display: flex; align-items: center; gap: .5rem; margin-top: .55rem; pointer-events: auto; }
 .combat-metrics span { color: var(--muted); font-size: .62rem; }
 .combat-metrics strong { color: var(--acid); font-size: .78rem; }
@@ -146,7 +173,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .attachment-option small { margin-top: .12rem; color: #a7b2a9; font-size: .59rem; }
 .attachment-option em { max-width: 160px; color: #cf937e; font-size: .56rem; font-style: normal; text-align: right; }
 .attachment-option.is-equipped { border-color: rgba(200,255,77,.55); background: rgba(200,255,77,.09); }
-.attachment-option.is-equipped::after { content: "장착 중"; grid-column: 2; color: var(--acid); font-size: .52rem; font-weight: 900; }
+.attachment-option.is-equipped::after { content: "다시 눌러 해제"; grid-column: 2; color: var(--acid); font-size: .52rem; font-weight: 900; }
+.attachment-option.is-equipped:hover { border-color: rgba(255,154,141,.72); background: rgba(255,92,69,.09); }
 .attachment-option:disabled { cursor: not-allowed; opacity: .46; }
 .route-choice { position: absolute; z-index: 11; inset: 0; display: grid; place-items: center; padding: 1rem; background: rgba(5,8,6,.84); backdrop-filter: blur(9px); }
 .route-card { width: min(780px, 100%); padding: 1.35rem; border: 1px solid rgba(200,255,77,.28); background: #101612; box-shadow: 0 28px 100px rgba(0,0,0,.72); }
@@ -218,7 +246,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] {
   min-height: 0;
   --portrait-edge: 8px;
-  --portrait-top-hud-height: 66px;
+  --portrait-top-hud-height: 94px;
   --portrait-phase-height: 48px;
   --portrait-loadout-height: 204px;
 }
@@ -226,7 +254,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   background: linear-gradient(180deg, rgba(4, 7, 5, .48), transparent 24%, transparent 70%, rgba(5, 8, 6, .64));
 }
 .game-shell[data-layout="portrait"] .top-hud {
-  grid-template-columns: minmax(0, 1fr) 104px;
+  grid-template-columns: minmax(0, 1fr) 84px;
   gap: 6px;
   padding: calc(var(--portrait-edge) + env(safe-area-inset-top)) calc(var(--portrait-edge) + env(safe-area-inset-right)) 0 calc(var(--portrait-edge) + env(safe-area-inset-left));
 }
@@ -234,20 +262,26 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] .enemy-card {
   grid-column: 1;
   min-width: 0;
-  height: 58px;
-  padding: .52rem .62rem .56rem;
+  min-height: 84px;
+  height: auto;
+  padding: .42rem .48rem .46rem;
 }
-.game-shell[data-layout="portrait"] .enemy-intent { top: calc(100% + 56px); width: calc(100vw - 16px); padding: .4rem .5rem; }
-.game-shell[data-layout="portrait"] .enemy-intent strong { font-size: .57rem; }
-.game-shell[data-layout="portrait"] .enemy-intent span { overflow: hidden; font-size: .52rem; text-overflow: ellipsis; white-space: nowrap; }
+.game-shell[data-layout="portrait"] .enemy-vitals { gap: 2px; margin-top: .3rem; }
+.game-shell[data-layout="portrait"] .enemy-stat, .game-shell[data-layout="portrait"] .enemy-intent { min-height: 38px; gap: .24rem; padding: .22rem .25rem; }
+.game-shell[data-layout="portrait"] .enemy-stat > svg, .game-shell[data-layout="portrait"] .enemy-intent > svg { flex-basis: 18px; width: 18px; height: 18px; }
+.game-shell[data-layout="portrait"] .enemy-stat small, .game-shell[data-layout="portrait"] .enemy-intent small { font-size: .42rem; letter-spacing: 0; }
+.game-shell[data-layout="portrait"] .enemy-stat strong, .game-shell[data-layout="portrait"] .enemy-intent strong { font-size: .68rem; }
+.game-shell[data-layout="portrait"] .enemy-impact strong em { display: none; }
+.game-shell[data-layout="portrait"] .enemy-intent { position: static; width: auto; }
+.game-shell[data-layout="portrait"] .enemy-intent strong { max-width: 43px; font-size: .57rem; }
+.game-shell[data-layout="portrait"] .enemy-context { left: 0; right: auto; width: calc(100vw - 16px); font-size: .58rem; }
 .game-shell[data-layout="portrait"] .enemy-heading { font-size: .62rem; letter-spacing: .08em; }
-.game-shell[data-layout="portrait"] .enemy-meta { margin-top: .24rem; font-size: .53rem; }
-.game-shell[data-layout="portrait"] .hp-track { height: 4px; margin-top: .42rem; }
+.game-shell[data-layout="portrait"] .hp-track { height: 4px; margin-top: .3rem; }
 .game-shell[data-layout="portrait"] .utility-stack {
   grid-column: 2;
-  width: 104px;
-  height: 58px;
-  grid-template-columns: 54px 44px;
+  width: 84px;
+  height: 84px;
+  grid-template-columns: 40px 38px;
   align-items: end;
   gap: 6px;
 }
@@ -269,7 +303,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   width: auto;
   min-height: var(--portrait-phase-height);
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: .5rem;
   padding: .35rem .5rem;
@@ -599,7 +633,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .reward-options .ammo-stats { display: grid; width: 100%; font-size: 13px; margin: 8px 0; }
 .reward-options .ammo-stats > span { color: #b7c4bb; font-size: inherit; }
 .reward-back { min-height: 44px; margin-top: 12px; padding: 8px 16px; border: 1px solid var(--line); background: #202b23; cursor: pointer; }
-.game-shell { --console-height: 330px; }
+.game-shell { --console-height: 270px; }
 .game-shell[data-layout="portrait"] { --console-height: min(450px, 53dvh); }
 .game-shell[data-layout="portrait"] .tactical-console { overflow-y: auto; }
 .game-shell[data-layout="portrait"] .reward-options { grid-template-columns: 1fr; gap: 6px; }
@@ -625,7 +659,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .attachment-option em { display: block; font-size: 9px; white-space: normal; }
 .game-shell[data-layout="portrait"] .attachment-reward-card { max-height: 90dvh; overflow-y: auto; }
 
-.game-shell[data-layout="desktop"] { --console-height: 350px; }
+.game-shell[data-layout="desktop"] { --console-height: 270px; }
 .game-shell[data-layout="desktop"] .attachment-group { grid-template-columns: 90px repeat(2, minmax(0, 1fr)); }
 .game-shell[data-layout="desktop"] .attachment-option small { white-space: normal; }
 .game-shell[data-layout="desktop"] .attachment-option { height: auto; min-height: 58px; }
