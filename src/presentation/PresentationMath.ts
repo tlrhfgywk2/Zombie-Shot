@@ -17,6 +17,79 @@ export interface PresentationLayout {
   cameraTarget: THREE.Vector3;
 }
 
+// 화면 좌표는 전투 영역 좌상단 0,0 / 우하단 1,1 기준이다.
+// 총의 그립 하단과 탄창 바닥판을 하단 전술 패널 바로 위의 동일한 선에 맞춘다.
+export const PRESENTATION_STAGE_ANCHORS = {
+  weaponRest: { x: 0.66, y: 0.92 },
+  weaponInsertion: { x: 0.65, y: 0.92 },
+  weaponAim: { x: 0.66, y: 0.92 },
+  magazineLoad: { x: 0.32, y: 0.92 },
+  magazineInspect: { x: 0.35, y: 0.92 },
+} as const;
+
+type StageAnchor = { x: number; y: number };
+
+export const anchorWorldPositionToStage = (
+  position: THREE.Vector3,
+  camera: THREE.PerspectiveCamera,
+  anchor: StageAnchor,
+): THREE.Vector3 => {
+  const targetX = anchor.x * 2 - 1;
+  const targetY = 1 - anchor.y * 2;
+  const elements = new THREE.Matrix4()
+    .multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+    .elements;
+  const xCoefficientX = elements[0] - targetX * elements[3];
+  const xCoefficientY = elements[4] - targetX * elements[7];
+  const xConstant = (elements[8] - targetX * elements[11]) * position.z
+    + elements[12] - targetX * elements[15];
+  const yCoefficientX = elements[1] - targetY * elements[3];
+  const yCoefficientY = elements[5] - targetY * elements[7];
+  const yConstant = (elements[9] - targetY * elements[11]) * position.z
+    + elements[13] - targetY * elements[15];
+  const determinant = xCoefficientX * yCoefficientY - yCoefficientX * xCoefficientY;
+  if (Math.abs(determinant) < Number.EPSILON) return position;
+
+  position.x = (-xConstant * yCoefficientY + xCoefficientY * yConstant) / determinant;
+  position.y = (-xCoefficientX * yConstant + xConstant * yCoefficientX) / determinant;
+  return position;
+};
+
+export const anchorPresentationLayoutToStage = (
+  layout: PresentationLayout,
+  camera: THREE.PerspectiveCamera,
+  weaponAnchor: THREE.Vector3,
+  magazineAnchor: THREE.Vector3,
+  aimTarget: THREE.Vector3,
+): PresentationLayout => {
+  const anchorPose = (
+    position: THREE.Vector3,
+    quaternion: THREE.Quaternion,
+    scale: number,
+    localAnchor: THREE.Vector3,
+    screenAnchor: StageAnchor,
+  ): void => {
+    const worldAnchor = localAnchor.clone().multiplyScalar(scale).applyQuaternion(quaternion).add(position);
+    const target = anchorWorldPositionToStage(worldAnchor.clone(), camera, screenAnchor);
+    position.add(target.sub(worldAnchor));
+  };
+  const resting = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
+  const insertion = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
+  const magazineLoad = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.04, 0.02, -0.12));
+  const magazineInspect = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.015, -0.08, 0.035));
+  const insertionScale = layout.pistolScale * layout.insertionScaleFactor;
+
+  anchorPose(layout.weaponRest, resting, layout.pistolScale, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponRest);
+  anchorPose(layout.weaponInsertion, insertion, insertionScale, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponInsertion);
+  let aim = getAimQuaternion(layout.weaponAim, aimTarget);
+  anchorPose(layout.weaponAim, aim, layout.pistolScale, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponAim);
+  aim = getAimQuaternion(layout.weaponAim, aimTarget);
+  anchorPose(layout.weaponAim, aim, layout.pistolScale, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponAim);
+  anchorPose(layout.magazineLoad, magazineLoad, layout.magazineScale, magazineAnchor, PRESENTATION_STAGE_ANCHORS.magazineLoad);
+  anchorPose(layout.magazineInspect, magazineInspect, layout.magazineScale, magazineAnchor, PRESENTATION_STAGE_ANCHORS.magazineInspect);
+  return layout;
+};
+
 export const getPresentationLayout = (width: number, height: number, modeOverride?: ResponsiveLayoutMode): PresentationLayout => {
   const tabletLandscapeStage = width >= 900 && width <= 1220 && height >= 420 && height <= 620;
   const mode: ResponsiveLayoutMode = modeOverride

@@ -1,7 +1,13 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
-import { constrainWeaponPosition, getAimQuaternion, getPresentationLayout } from './PresentationMath';
+import { anchorPresentationLayoutToStage, constrainWeaponPosition, getAimQuaternion, getPresentationLayout, PRESENTATION_STAGE_ANCHORS } from './PresentationMath';
 import { getResponsiveLayoutMode } from './ResponsiveLayout';
+
+const expectScreenAnchor = (position: THREE.Vector3, camera: THREE.PerspectiveCamera, anchor: { x: number; y: number }): void => {
+  const projected = position.project(camera);
+  expect(projected.x * 0.5 + 0.5).toBeCloseTo(anchor.x, 3);
+  expect(-projected.y * 0.5 + 0.5).toBeCloseTo(anchor.y, 3);
+};
 
 describe('프레젠테이션 좌표 계산', () => {
   it('권총의 실제 +X 총열 축을 표적 중심으로 정렬한다', () => {
@@ -78,5 +84,38 @@ describe('프레젠테이션 좌표 계산', () => {
     expect(constrained.x).toBeGreaterThan(0.5);
     expect(constrained.y).toBeLessThanOrEqual(Math.max(layout.weaponRest.y, layout.weaponAim.y) + 0.3);
     expect(constrained.z).toBeGreaterThan(3);
+  });
+
+  it.each([
+    [360, 380, 'portrait'],
+    [709, 602, 'tablet-portrait'],
+    [1180, 524, 'tablet-landscape'],
+    [844, 260, 'compact-landscape'],
+    [1440, 570, 'desktop'],
+  ] as const)('%d×%d 전투 영역에서 총과 탄창을 하단 패널 기준 화면 앵커에 고정한다', (width, height, mode) => {
+    const layout = getPresentationLayout(width, height, mode);
+    const camera = new THREE.PerspectiveCamera(layout.cameraFov, width / height, 0.1, 100);
+    camera.position.copy(layout.cameraPosition);
+    camera.lookAt(layout.cameraTarget);
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld(true);
+    const weaponAnchor = new THREE.Vector3(-0.46, -0.92, 0);
+    const magazineAnchor = new THREE.Vector3(0, -0.7, 0);
+    const aimTarget = new THREE.Vector3(0, 1.05, -5.8);
+    anchorPresentationLayoutToStage(layout, camera, weaponAnchor, magazineAnchor, aimTarget);
+
+    const expectPoseAnchor = (position: THREE.Vector3, quaternion: THREE.Quaternion, scale: number, localAnchor: THREE.Vector3, anchor: { x: number; y: number }): void => {
+      expectScreenAnchor(localAnchor.clone().multiplyScalar(scale).applyQuaternion(quaternion).add(position), camera, anchor);
+    };
+    const resting = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
+    const magazineLoad = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.04, 0.02, -0.12));
+    const magazineInspect = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.015, -0.08, 0.035));
+
+    expectPoseAnchor(layout.weaponRest, resting, layout.pistolScale, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponRest);
+    expectPoseAnchor(layout.weaponInsertion, resting, layout.pistolScale * layout.insertionScaleFactor, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponInsertion);
+    expectPoseAnchor(layout.weaponAim, getAimQuaternion(layout.weaponAim, aimTarget), layout.pistolScale, weaponAnchor, PRESENTATION_STAGE_ANCHORS.weaponAim);
+    expectPoseAnchor(layout.magazineLoad, magazineLoad, layout.magazineScale, magazineAnchor, PRESENTATION_STAGE_ANCHORS.magazineLoad);
+    expectPoseAnchor(layout.magazineInspect, magazineInspect, layout.magazineScale, magazineAnchor, PRESENTATION_STAGE_ANCHORS.magazineInspect);
+    expect(layout.weaponInsertion.distanceTo(layout.weaponRest)).toBeLessThan(0.5);
   });
 });

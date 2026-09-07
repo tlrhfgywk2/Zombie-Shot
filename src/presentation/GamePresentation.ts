@@ -5,7 +5,7 @@ import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
 import type { AudioPreferences } from './AudioPreferences';
 import { PRESENTATION_EFFECTS, PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
-import { constrainWeaponPosition, getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
+import { anchorPresentationLayoutToStage, constrainWeaponPosition, getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
 import { getResponsiveLayoutMode, getViewportSize } from './ResponsiveLayout';
 import { createAttachmentModel, createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
@@ -969,17 +969,25 @@ export class GamePresentation {
     const viewport = getViewportSize();
     const viewportMode = getResponsiveLayoutMode(viewport.width, viewport.height);
     this.layout = getPresentationLayout(width, height, viewportMode);
+    this.camera.position.copy(this.layout.cameraPosition);
+    this.camera.lookAt(this.layout.cameraTarget);
+    this.camera.aspect = Math.max(width, 1) / Math.max(height, 1);
+    this.camera.fov = this.layout.cameraFov;
+    this.camera.updateProjectionMatrix();
+    this.camera.updateMatrixWorld(true);
+    anchorPresentationLayoutToStage(
+      this.layout,
+      this.camera,
+      this.pistolModel.stageAnchor.position,
+      this.magazineModel.stageAnchor.position,
+      this.getZombieTarget(),
+    );
     this.pistolModel.root.scale.setScalar(this.layout.pistolScale);
     this.magazineModel.root.scale.setScalar(
       this.magazineModel.root.parent === this.pistolModel.magazineSeatAnchor ? 1 : this.layout.magazineScale,
     );
     if (!this.animationInProgress) this.pistolModel.root.position.copy(this.layout.weaponRest);
     constrainWeaponPosition(this.pistolModel.root.position, this.layout);
-    this.camera.position.copy(this.layout.cameraPosition);
-    this.camera.lookAt(this.layout.cameraTarget);
-    this.camera.aspect = width / Math.max(height, 1);
-    this.camera.fov = this.layout.cameraFov;
-    this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
   };
 
