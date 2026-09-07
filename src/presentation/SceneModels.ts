@@ -5,6 +5,7 @@ import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 
 export interface PistolModel {
   root: THREE.Group;
+  stageAnchor: THREE.Object3D;
   grip: THREE.Group;
   gripBody: THREE.Mesh;
   slide: THREE.Group;
@@ -16,6 +17,7 @@ export interface PistolModel {
 
 export interface MagazineModel {
   root: THREE.Group;
+  stageAnchor: THREE.Object3D;
   body: THREE.Mesh;
   feedEnd: THREE.Group;
   basePlate: THREE.Mesh;
@@ -45,6 +47,10 @@ export const createPistolModel = (): PistolModel => {
   const root = new THREE.Group();
   root.name = 'pistolRoot';
   root.userData.weapon = SERVICE_45.internalName;
+  const stageAnchor = new THREE.Object3D();
+  stageAnchor.name = 'pistolStageAnchor';
+  stageAnchor.position.set(-0.46, -0.92, 0);
+  root.add(stageAnchor);
   const slide = new THREE.Group();
   const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x303637, roughness: 0.45, metalness: 0.66 });
   const slideMaterial = new THREE.MeshStandardMaterial({ color: 0x84908e, roughness: 0.27, metalness: 0.82 });
@@ -167,7 +173,7 @@ export const createPistolModel = (): PistolModel => {
   slide.add(attachmentSockets.optic);
   grip.add(attachmentSockets.magazine, attachmentSockets.grip);
 
-  return { root, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, attachmentSockets };
+  return { root, stageAnchor, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, attachmentSockets };
 };
 
 export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
@@ -242,6 +248,10 @@ export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
 export const createMagazineModel = (): MagazineModel => {
   const root = new THREE.Group();
   root.name = 'magazineRoot';
+  const stageAnchor = new THREE.Object3D();
+  stageAnchor.name = 'magazineStageAnchor';
+  stageAnchor.position.set(0, -0.7, 0);
+  root.add(stageAnchor);
   const magazineInsertAnchor = new THREE.Object3D();
   const roundDisplay = new THREE.Group();
   const witnessRounds: THREE.Mesh[] = [];
@@ -291,7 +301,7 @@ export const createMagazineModel = (): MagazineModel => {
   feedEnd.name = 'magazineFeedEnd';
   feedEnd.add(feedLeft, feedRight);
   root.add(roundDisplay, feedEnd, base, baseAccent);
-  return { root, body, feedEnd, basePlate: base, magazineInsertAnchor, roundDisplay, witnessRounds };
+  return { root, stageAnchor, body, feedEnd, basePlate: base, magazineInsertAnchor, roundDisplay, witnessRounds };
 };
 
 export const createZombieModel = (): ZombieModel => {

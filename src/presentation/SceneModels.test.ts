@@ -10,6 +10,9 @@ describe('권총 모델 기준점', () => {
     expect(pistol.muzzle.name).toBe('muzzle');
     expect(pistol.muzzle.position.x).toBeGreaterThan(1);
     expect(pistol.muzzle.parent).toBe(pistol.root);
+    expect(pistol.stageAnchor.name).toBe('pistolStageAnchor');
+    expect(pistol.stageAnchor.parent).toBe(pistol.root);
+    expect(pistol.stageAnchor.position.y).toBeLessThan(-0.8);
   });
 
   it('탄창 착좌 기준점은 프레임 아래 내부 스톱에 있고 탄피 배출구는 슬라이드의 보이는 측면에 있다', () => {
@@ -33,6 +36,9 @@ describe('권총 모델 기준점', () => {
     expect(magazine.magazineInsertAnchor.position.x).toBe(0);
     expect(magazine.magazineInsertAnchor.position.y).toBeCloseTo(0.655);
     expect(magazine.magazineInsertAnchor.position.z).toBe(0);
+    expect(magazine.stageAnchor.name).toBe('magazineStageAnchor');
+    expect(magazine.stageAnchor.parent).toBe(magazine.root);
+    expect(magazine.stageAnchor.position.y).toBeCloseTo(-0.7);
   });
 
   it('회전·스케일된 권총에서도 두 착좌 기준면을 정확히 일치시킨다', () => {
