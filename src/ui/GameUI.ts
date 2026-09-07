@@ -37,10 +37,14 @@ export class GameUI {
   private readonly hpFill: HTMLElement;
   private readonly hpText: HTMLElement;
   private readonly armorText: HTMLElement;
+  private readonly impactText: HTMLElement;
+  private readonly impactThreshold: HTMLElement;
+  private readonly impactFill: HTMLElement;
   private readonly enemyStatus: HTMLElement;
+  private readonly enemyContext: HTMLElement;
+  private readonly nextMoveText: HTMLElement;
   private readonly distanceText: HTMLElement;
   private readonly rangeBandText: HTMLElement;
-  private readonly accuracyText: HTMLElement;
   private readonly levelText: HTMLElement;
   private readonly waveText: HTMLElement;
   private readonly phaseText: HTMLElement;
@@ -58,7 +62,6 @@ export class GameUI {
   private readonly attachmentBay: HTMLElement;
   private readonly attachmentTabs: HTMLButtonElement[];
   private readonly routeChoice: HTMLElement;
-  private readonly magazineOrderLabel: HTMLElement;
   private readonly endEyebrow: HTMLElement;
   private readonly endTitle: HTMLElement;
   private readonly endDetail: HTMLElement;
@@ -81,23 +84,27 @@ export class GameUI {
           <div id="canvas-host" class="canvas-host"></div>
           <header class="top-hud">
             <div class="brand"><span class="brand-mark"></span><div><small>전술 생존 실험</small><strong>좀비 샷</strong></div></div>
-            <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">76 / 76</span></div><div class="hp-track"><span id="hp-fill"></span></div><div class="enemy-meta"><span id="armor-text">방어 0</span><span id="enemy-status">상태 없음</span></div><div id="intent-card" class="enemy-intent" hidden></div></div>
+            <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">76 / 76</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
+              <div class="enemy-stat enemy-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong id="armor-text">0</strong></span></div>
+              <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/100</em></strong></span><i><b id="impact-fill"></b></i></div>
+              <div class="enemy-stat enemy-advance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 7 7-7 7M10 5l7 7-7 7M17 5l4 7-4 7"/></svg><span><small>다음 접근</small><strong id="next-move-text">2.0 m</strong></span></div>
+              <div id="intent-card" class="enemy-intent" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.2v.2"/></svg><span><small id="intent-timing">다음 행동</small><strong id="intent-name">특수 행동</strong></span></div>
+            </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
             <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
           </header>
-          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><p id="status-text">탄약과 장착물을 조합하세요.</p><div class="combat-metrics"><span>예상 정확도 <strong id="accuracy-text">100%</strong></span></div><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
+          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><p id="status-text">탄약과 장착물을 조합하세요.</p><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
         </main>
-        <section class="tactical-console" aria-label="전술 준비 패널">
-          <header class="console-header"><strong>전술 준비 패널</strong><span><i></i>탄약 선택 · 발사 순서 · 부착물 구성을 한곳에서 조정합니다.</span></header>
+        <section class="tactical-console" aria-label="전투 준비">
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
-          <div class="ammo-rack"><div class="section-label"><span>스테이지 탄약</span><small id="ammo-capacity"></small></div><div class="ammo-options">
+          <div class="ammo-rack"><div class="section-label"><span>탄약</span></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
-          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span><small id="magazine-order-label">1 → 4</small></div><div class="sequence-preview" aria-live="polite"><div id="preview-chain">탄약을 장전하면 순서 프리뷰가 표시됩니다.</div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
+          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="sequence-preview" aria-live="polite" hidden><div id="preview-chain"></div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
-          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span><small>1발 이상 필요</small></button></div></div>
-          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>${SERVICE_45.name} · 부착물</span><small id="attachment-count">보유 0/10 · 특수 감염체 처치 시 획득</small></div><div class="attachment-workspace">
+          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div></div>
+          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/10</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
-            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong><button type="button" data-unequip="${slot}">해제</button></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
+            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
         </div></section>
         <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
@@ -114,10 +121,14 @@ export class GameUI {
     this.hpFill = this.required(root, '#hp-fill');
     this.hpText = this.required(root, '#hp-text');
     this.armorText = this.required(root, '#armor-text');
+    this.impactText = this.required(root, '#impact-text');
+    this.impactThreshold = this.required(root, '#impact-threshold');
+    this.impactFill = this.required(root, '#impact-fill');
     this.enemyStatus = this.required(root, '#enemy-status');
+    this.enemyContext = this.required(root, '#enemy-context');
+    this.nextMoveText = this.required(root, '#next-move-text');
     this.distanceText = this.required(root, '#distance-text');
     this.rangeBandText = this.required(root, '#range-band-text');
-    this.accuracyText = this.required(root, '#accuracy-text');
     this.levelText = this.required(root, '#level-text');
     this.waveText = this.required(root, '#wave-text');
     this.phaseText = this.required(root, '#phase-text');
@@ -134,7 +145,6 @@ export class GameUI {
     this.attachmentBay = this.required(root, '#attachment-bay');
     this.attachmentTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-attachment-slot]')];
     this.routeChoice = this.required(root, '#route-choice');
-    this.magazineOrderLabel = this.required(root, '#magazine-order-label');
     this.endEyebrow = this.required(root, '#end-eyebrow');
     this.endTitle = this.required(root, '#end-title');
     this.endDetail = this.required(root, '#end-detail');
@@ -184,18 +194,13 @@ export class GameUI {
         const id = button.dataset.attachment as AttachmentId;
         if (!this.locked) {
           this.hideTooltip();
-          this.callbacks.onEquipAttachment(id);
+          if (button.getAttribute('aria-pressed') === 'true') this.callbacks.onUnequipAttachment(ATTACHMENT_DEFINITIONS[id].slot);
+          else this.callbacks.onEquipAttachment(id);
         }
       });
       const id = button.dataset.attachment as AttachmentId;
       this.bindHoverTooltip(button, () => this.showAttachmentTooltip(id, button));
       this.bindTouchTooltip(button, () => this.showAttachmentTooltip(id, button));
-    });
-    root.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const slot = button.dataset.unequip as AttachmentSlot;
-        if (!this.locked) this.callbacks.onUnequipAttachment(slot);
-      });
     });
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
@@ -218,7 +223,6 @@ export class GameUI {
     this.rounds = [...rounds];
     this.stock = { ...stock };
     this.magazineCapacity = capacity;
-    this.magazineOrderLabel.textContent = `1 → ${capacity}`;
     const slotHost = this.slots[0]?.parentElement;
     slotHost?.style.setProperty('--mag-capacity', String(capacity));
     this.slots.forEach((slot, index) => {
@@ -230,7 +234,6 @@ export class GameUI {
       slot.setAttribute('aria-pressed', 'false');
     });
     this.loadButton.disabled = this.locked || rounds.length === 0;
-    this.loadButton.querySelector('small')!.textContent = rounds.length ? `${rounds.length}발로 전투 시작` : '1발 이상 필요';
     this.renderAmmoStock(stock, build, specialCapacity, rounds);
     this.updateLoadButton();
   }
@@ -242,7 +245,6 @@ export class GameUI {
     const visibleCount = AMMO_ORDER.filter(ammo => ammo === 'standard' || build[ammo] > 0).length;
     const options = this.required(this.shell, '.ammo-options');
     options.style.setProperty('--ammo-columns', String(Math.max(1, Math.min(5, visibleCount))));
-    this.required(this.shell, '#ammo-capacity').textContent = '배분 ' + countAllocations(build) + '/' + capacity + ' · 다음 구간 회복';
     this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach(button => {
       const ammo = button.dataset.ammo as AmmoType;
       const count = stock[ammo];
@@ -310,16 +312,13 @@ export class GameUI {
       button.disabled = locked || button.dataset.sealed === 'true';
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
-      button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.owned !== 'true' || button.getAttribute('aria-pressed') === 'true';
-    });
-    this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
-      button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.equipped !== 'true';
+      button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.owned !== 'true';
     });
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
   }
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number, owned: readonly AttachmentId[] = []): void {
-    this.required(this.shell, '#attachment-count').textContent = `보유 ${owned.length}/${ATTACHMENT_ORDER.length} · 특수 감염체 처치 시 획득`;
+    this.required(this.shell, '#attachment-count').textContent = `보유 ${owned.length}/${ATTACHMENT_ORDER.length}`;
     this.magazineCapacity = capacity;
     ATTACHMENT_SLOT_ORDER.forEach((slot) => {
       const id = loadout[slot];
@@ -345,15 +344,9 @@ export class GameUI {
       button.dataset.sealed = String(sealed);
       button.dataset.owned = String(owned.includes(id));
       const ownership = button.querySelector('[data-ownership]');
-      if (ownership) ownership.textContent = selected ? '장착 중' : owned.includes(id) ? '보유' : '미획득';
-      button.disabled = this.locked || sealed || selected || !owned.includes(id);
-    });
-    this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-unequip]').forEach((button) => {
-      const slot = button.dataset.unequip as AttachmentSlot;
-      const sealed = Boolean(playerState.disabledSlots[slot]);
-      button.dataset.equipped = String(Boolean(loadout[slot]));
-      button.dataset.sealed = String(sealed);
-      button.disabled = this.locked || sealed || !loadout[slot];
+      if (ownership) ownership.textContent = selected ? '장착 중 · 다시 눌러 해제' : owned.includes(id) ? '보유' : '미획득';
+      button.setAttribute('aria-label', `${ATTACHMENT_DEFINITIONS[id].name}: ${selected ? '장착 중, 다시 눌러 해제' : ATTACHMENT_DEFINITIONS[id].summary}`);
+      button.disabled = this.locked || sealed || !owned.includes(id);
     });
     this.updateAttachmentPanel();
   }
@@ -389,41 +382,54 @@ export class GameUI {
   updateEnemy(enemy: EnemyState, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
     this.hpFill.style.width = `${Math.max(0, enemy.hp / enemy.maxHp) * 100}%`;
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
-    this.armorText.textContent = `방어 ${enemy.armor} / ${enemy.maxArmor}`;
+    this.armorText.textContent = String(enemy.armor);
+    this.armorText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.armor === 0);
+    this.impactText.textContent = String(enemy.statuses.impact);
+    this.impactThreshold.textContent = `/${enemy.staggerThreshold}`;
+    this.impactFill.style.width = `${Math.min(100, enemy.statuses.impact / enemy.staggerThreshold * 100)}%`;
+    this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.statuses.impact === 0);
     const statuses: string[] = [];
-    if (enemy.statuses.burnTurns) statuses.push(`화상 ${enemy.statuses.burnTurns}턴`);
-    if (enemy.statuses.slowTurns) statuses.push(`빙결 둔화 ${enemy.statuses.slowTurns}턴`);
-    if (enemy.statuses.staggerTurns) statuses.push('이동 억제');
-    if (enemy.statuses.shockTurns) statuses.push('전하 교란');
-    if (enemy.statuses.exposedShots) statuses.push('다음 탄 노출');
-    if (enemy.statuses.corruptedShots) statuses.push(`침식 ${enemy.statuses.corruptedShots}발`);
-    statuses.push(`충격 ${enemy.statuses.impact}/${enemy.staggerThreshold}`);
-    this.enemyStatus.textContent = statuses.join(' · ') || '상태 없음';
+    if (enemy.statuses.burnTurns) statuses.push(`<span data-status="burn">화상 ${enemy.statuses.burnTurns}</span>`);
+    if (enemy.statuses.slowTurns) statuses.push(`<span data-status="slow">둔화 ${enemy.statuses.slowTurns}</span>`);
+    if (enemy.statuses.staggerTurns) statuses.push('<span data-status="stagger">이동 억제</span>');
+    if (enemy.statuses.shockTurns) statuses.push('<span data-status="shock">전하 교란</span>');
+    if (enemy.statuses.exposedShots) statuses.push('<span data-status="exposed">노출</span>');
+    if (enemy.statuses.corruptedShots) statuses.push(`<span data-status="corruption">침식 ${enemy.statuses.corruptedShots}</span>`);
+    this.enemyStatus.innerHTML = statuses.join('');
+    this.enemyStatus.hidden = statuses.length === 0;
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
     this.rangeBandText.textContent = RANGE_NAMES[getRangeBand(enemy.distance)];
     this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
     this.intentCard.hidden = !enemy.intent;
-    if (enemy.intent) this.intentCard.innerHTML = `<strong>${enemy.intent.countdown <= 1 ? '다음 행동' : `${enemy.intent.countdown}행동 후`} · ${enemy.intent.name}</strong><span>${enemy.intent.description.replace('다음 행동: ', '')}</span>`;
+    const intentDetail = enemy.intent?.description.replace('다음 행동: ', '');
+    if (enemy.intent) {
+      this.required(this.intentCard, '#intent-timing').textContent = enemy.intent.countdown <= 1 ? '다음 행동' : `${enemy.intent.countdown}행동 후`;
+      this.required(this.intentCard, '#intent-name').textContent = enemy.intent.name;
+    }
+    this.enemyContext.innerHTML = `<span><b>방어</b> 피해를 먼저 흡수합니다.</span><span><b>충격</b> 가득 차면 다음 접근과 특수 행동이 지연됩니다.</span><span><b>다음 접근</b> 이번 사격 뒤 이동할 예상 거리입니다.</span>${intentDetail ? `<span class="intent-detail"><b>${enemy.intent!.name}</b> ${intentDetail}</span>` : ''}`;
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.statuses.impact}/${enemy.staggerThreshold}${enemy.intent ? `, ${enemy.intent.name} ${enemy.intent.countdown}행동 후` : ''}`);
   }
 
   renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined): void {
+    this.nextMoveText.textContent = action ? `${action.movement.toFixed(1)} m` : '—';
+    this.nextMoveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-delayed', Boolean(action?.staggerConsumed));
+    const preview = this.previewChain.parentElement!;
     if (!sequence) {
-      this.previewChain.textContent = '탄약을 장전하면 순서 프리뷰가 표시됩니다.';
+      preview.hidden = true;
+      this.previewChain.textContent = '';
       this.previewOutcome.textContent = '';
-      this.accuracyText.textContent = '—';
       return;
     }
+    preview.hidden = false;
     this.previewChain.innerHTML = sequence.shots.map((shot) => `<span title="정확도 ${Math.round(shot.breakdown.accuracy)}% · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} ×${shot.breakdown.rangeMultiplier.toFixed(2)}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${Math.round(shot.breakdown.accuracy)}%</b></span>`).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
     const final = sequence.finalState;
-    const effects: string[] = [`예상 정확도 ${Math.round(sequence.averageAccuracy)}%`, `체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];
+    const effects: string[] = [`체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];
     if (sequence.totalArmorDamage) effects.push(`방어 감소 ${sequence.totalArmorDamage}`);
     if (final.statuses.burnTurns) effects.push(`화상 ${final.statuses.burnTurns}턴`);
     if (sequence.killed) effects.push('처치 예상');
-    else if (action) effects.push(`다음 이동 ${action.movement.toFixed(1)}m`);
     if (sequence.returnedRounds.length) effects.push(`반환 ${sequence.returnedRounds.length}발`);
     this.previewOutcome.textContent = effects.join(' · ');
-    this.accuracyText.textContent = `${Math.round(sequence.shots[0]?.breakdown.accuracy ?? 100)}%`;
   }
 
   showShot(result: ShotResult): void {
@@ -461,9 +467,7 @@ export class GameUI {
 
   private updateLoadButton(): void {
     const label = this.loadButton.querySelector<HTMLElement>('span')!;
-    const detail = this.loadButton.querySelector<HTMLElement>('small')!;
     label.textContent = '탄창 장전';
-    detail.textContent = this.rounds.length ? `${this.rounds.length}발로 전투 시작` : '1발 이상 필요';
     this.loadButton.disabled = this.locked || this.rounds.length === 0;
     this.loadButton.setAttribute('aria-label', this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '탄창 장전, 탄약 1발 이상 필요');
   }
@@ -490,7 +494,7 @@ export class GameUI {
     const definition = AMMO_DEFINITIONS[ammo];
     const accuracy = `${definition.accuracy > 0 ? '+' : ''}${definition.accuracy}%`;
     const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.directDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.impact}</b></span></div><small>이 탄이 만든 반동은 다음 탄부터 누적 적용됩니다.${buildup}</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.directDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.impact}</b></span></div>${buildup ? `<small>${buildup.slice(3)}</small>` : ''}`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
@@ -536,7 +540,7 @@ export class GameUI {
     element.addEventListener('pointerenter', (event) => {
       if (event.pointerType !== 'mouse' || element.disabled) return;
       clear();
-      timer = window.setTimeout(show, 1000);
+      timer = window.setTimeout(show, 500);
     });
     element.addEventListener('pointerleave', () => {
       clear();
