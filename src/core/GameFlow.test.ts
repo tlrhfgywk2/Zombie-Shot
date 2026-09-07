@@ -73,6 +73,20 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(player.applyAmmoReward('standard' as SpecialAmmoType, ['armorPiercing'])).toBe(false);
     expect(player.getBuild()).toEqual(before);
   });
+  it('탄약 배급을 넘기면 보유 배분을 바꾸지 않고 경로 선택으로 진행한다', () => {
+    const game = new Game({} as HTMLElement);
+    const internals = game as unknown as { player: Player; state: GameStateMachine };
+    const before = internals.player.getBuild();
+    internals.state.transition('LOADING');
+    internals.state.transition('FIRING');
+    internals.state.transition('ENEMY_ACTION');
+    internals.state.transition('AMMO_REWARD');
+    harness.callbacks.onSkipAmmoReward();
+    expect(internals.state.phase).toBe('ROUTE_SELECTION');
+    expect(internals.player.getBuild()).toEqual(before);
+    expect(harness.ui.hideAmmoRewards).toHaveBeenCalled();
+    expect(harness.ui.showRouteChoice).toHaveBeenCalled();
+  });
   it.each(['contaminator', 'groundshaker', 'screecher'] as const)('%s 처치 후 수령 전 소유하지 않고 받기 한 번만 처리한다', async type => {
     const game = new Game({} as HTMLElement);
     const state = game as unknown as { player: Player; zombie: Zombie; currentRoster: string[]; enemyIndex: number; state: GameStateMachine; busy: boolean };

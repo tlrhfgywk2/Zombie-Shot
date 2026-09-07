@@ -42,6 +42,7 @@ export class Game {
       onClaimAttachment: (equip) => void this.claimAttachmentReward(equip),
       onChooseAmmoReward: (ammo) => this.chooseAmmoReward(ammo),
       onReplaceReward: (ammo) => this.replaceReward(ammo),
+      onSkipAmmoReward: () => this.skipAmmoReward(),
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
@@ -224,8 +225,18 @@ export class Game {
 
   private finishAmmoReward(): void {
     if (!this.pendingReward || !this.player.applyAmmoReward(this.pendingReward, this.rewardReplacements)) return;
+    this.advanceAfterAmmoReward();
+  }
+
+  private skipAmmoReward(): void {
+    if (this.state.phase !== 'AMMO_REWARD') return;
+    this.advanceAfterAmmoReward();
+  }
+
+  private advanceAfterAmmoReward(): void {
     this.ui.hideAmmoRewards();
     this.pendingReward = undefined;
+    this.rewardReplacements = [];
     if (this.waveIndex + 1 < ENCOUNTER_STAGES.length) {
       const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1]!;
       this.state.transition('ROUTE_SELECTION');

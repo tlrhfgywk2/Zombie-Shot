@@ -21,6 +21,7 @@ export interface GameUICallbacks {
   onClaimAttachment: (equip: boolean) => void;
   onChooseAmmoReward: (ammo: SpecialAmmoType) => void;
   onReplaceReward: (ammo: SpecialAmmoType) => void;
+  onSkipAmmoReward: () => void;
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
@@ -105,7 +106,7 @@ export class GameUI {
         <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
-        <section id="ammo-reward" class="route-choice" hidden aria-label="탄약 배분 보상"></section>
+        <section id="ammo-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-label="탄약 배분 보상"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><button id="restart-button">다시 시작</button></div></div>
       </div>`;
@@ -253,12 +254,54 @@ export class GameUI {
     this.hideTooltip();
     const host = this.required(this.shell, '#ammo-reward');
     const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
+    const owned = AMMO_ORDER.filter(ammo => ammo === 'standard' || build[ammo] > 0);
+    const rarity = (ammo: AmmoType) => `<span class="ammo-rarity" data-rarity="${AMMO_DEFINITIONS[ammo].rarity}">${RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity]}</span>`;
+    const quantity = (ammo: AmmoType) => ammo === 'standard' ? '∞' : `×${build[ammo]}`;
     const choices = selected
-      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => '<button type="button" class="route-option ammo-reward-option" data-replace-reward="' + ammo + '"><strong>' + AMMO_DEFINITIONS[ammo].name + '</strong><em>교체 ×1</em></button>').join('')
-      : options.map(ammo => '<button type="button" class="route-option ammo-reward-option" data-ammo-reward="' + ammo + '"><strong>' + AMMO_DEFINITIONS[ammo].name + '</strong>' + ammoStatsMarkup(ammo) + '<em>+' + rewardAmount(ammo) + '</em></button>').join('');
-    host.innerHTML = '<div class="route-card reward-card"><div class="reward-options">' + choices + '</div></div>';
+      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${rarity(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>교체 ×1</em></button>`).join('')
+      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${rarity(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>+${rewardAmount(ammo)}</em></button>`).join('');
+    const inventory = owned.map(ammo => `<button type="button" class="ammo-inventory-card" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-inspect-ammo="${ammo}" aria-label="${AMMO_DEFINITIONS[ammo].name} ${quantity(ammo)} 상세 보기"><span class="inventory-card-head">${rarity(ammo)}<b>${quantity(ammo)}</b></span><strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}</button>`).join('');
+    host.innerHTML = `<div class="route-card reward-card">
+      <div class="reward-options" data-reward-options>${choices}</div>
+      <div class="ammo-inventory-panel" data-ammo-inventory hidden><div class="ammo-inventory-grid">${inventory}</div></div>
+      <div class="reward-actions"><button type="button" data-toggle-inventory aria-pressed="false">소지 탄약</button><button type="button" data-skip-ammo-reward>넘기기</button></div>
+      <button type="button" class="ammo-inspect-layer" data-ammo-inspect hidden aria-label="탄약 상세 닫기"></button>
+    </div>`;
     host.querySelectorAll<HTMLButtonElement>('[data-ammo-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseAmmoReward(button.dataset.ammoReward as SpecialAmmoType)));
     host.querySelectorAll<HTMLButtonElement>('[data-replace-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onReplaceReward(button.dataset.replaceReward as SpecialAmmoType)));
+    const rewardPanel = this.required(host, '[data-reward-options]');
+    const inventoryPanel = this.required(host, '[data-ammo-inventory]');
+    const inventoryToggle = this.required(host, '[data-toggle-inventory]') as HTMLButtonElement;
+    const inspectLayer = this.required(host, '[data-ammo-inspect]') as HTMLButtonElement;
+    let inspectedButton: HTMLButtonElement | undefined;
+    inventoryToggle.addEventListener('click', () => {
+      const showInventory = inventoryPanel.hidden;
+      inventoryPanel.hidden = !showInventory;
+      rewardPanel.hidden = showInventory;
+      inventoryToggle.textContent = showInventory ? '배급 선택' : '소지 탄약';
+      inventoryToggle.setAttribute('aria-pressed', String(showInventory));
+      (showInventory ? inventoryPanel : rewardPanel).querySelector<HTMLButtonElement>('button')?.focus();
+    });
+    host.querySelector<HTMLButtonElement>('[data-skip-ammo-reward]')?.addEventListener('click', this.callbacks.onSkipAmmoReward);
+    host.querySelectorAll<HTMLButtonElement>('[data-inspect-ammo]').forEach(button => button.addEventListener('click', () => {
+      inspectedButton = button;
+      const ammo = button.dataset.inspectAmmo as AmmoType;
+      const definition = AMMO_DEFINITIONS[ammo];
+      inspectLayer.style.setProperty('--bullet', definition.cssColor);
+      inspectLayer.innerHTML = `<span class="ammo-inspect-card"><span class="inventory-card-head">${rarity(ammo)}<b>${quantity(ammo)}</b></span><span class="inspect-round"><span class="round-visual"><i></i></span></span><strong>${definition.name}</strong>${ammoStatsMarkup(ammo)}</span>`;
+      inspectLayer.hidden = false;
+      inspectLayer.focus();
+    }));
+    inspectLayer.addEventListener('click', () => {
+      inspectLayer.hidden = true;
+      inspectedButton?.focus();
+    });
+    host.onkeydown = event => {
+      if (event.key === 'Escape' && !inspectLayer.hidden) {
+        event.preventDefault();
+        inspectLayer.click();
+      }
+    };
     host.hidden = false;
     host.querySelector<HTMLButtonElement>('button')?.focus();
   }
@@ -289,7 +332,11 @@ export class GameUI {
 
   hideAttachmentReward(): void { this.required(this.shell, '#attachment-reward').hidden = true; }
 
-  hideAmmoRewards(): void { this.required(this.shell, '#ammo-reward').hidden = true; }
+  hideAmmoRewards(): void {
+    const host = this.required(this.shell, '#ammo-reward');
+    host.hidden = true;
+    host.onkeydown = null;
+  }
 
   setLocked(locked: boolean): void {
     this.locked = locked;
