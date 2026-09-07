@@ -3,7 +3,7 @@ import { getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
-import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, SERVICE_45, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, rewardAmount, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
@@ -84,19 +84,19 @@ export class GameUI {
           <div id="canvas-host" class="canvas-host"></div>
           <header class="top-hud">
             <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong></div>
-            <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">76 / 76</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
+            <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">22 / 22</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
               <div class="enemy-stat enemy-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong id="armor-text">0</strong></span></div>
-              <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/100</em></strong></span><i><b id="impact-fill"></b></i></div>
+              <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
               <div class="enemy-stat enemy-advance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 7 7-7 7M10 5l7 7-7 7M17 5l4 7-4 7"/></svg><span><small>다음 접근</small><strong id="next-move-text">2.0 m</strong></span></div>
               <div id="intent-card" class="enemy-intent" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.2v.2"/></svg><span><small id="intent-timing">다음 행동</small><strong id="intent-name">특수 행동</strong></span></div>
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
-            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
+            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리 · 화력 -1</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong></aside>
         </main>
         <section class="tactical-console" aria-label="전투 준비">
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
-          <div class="ammo-rack"><div class="section-label"><span>탄약</span></div><div class="ammo-options">
+          <div class="ammo-rack"><div class="section-label"><span>탄약</span><small>${SERVICE_45.name} · 기본 화력 ${SERVICE_45.baseFirepower}</small></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
           <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="sequence-preview" aria-live="polite" hidden><div id="preview-chain"></div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
@@ -399,7 +399,8 @@ export class GameUI {
     this.enemyStatus.innerHTML = statuses.join('');
     this.enemyStatus.hidden = statuses.length === 0;
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
-    this.rangeBandText.textContent = RANGE_NAMES[getRangeBand(enemy.distance)];
+    const rangeBand = getRangeBand(enemy.distance);
+    this.rangeBandText.textContent = `${RANGE_NAMES[rangeBand]} · 화력 -${SERVICE_45.rangePenalties[rangeBand]}`;
     this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
     this.intentCard.hidden = !enemy.intent;
@@ -423,7 +424,10 @@ export class GameUI {
       return;
     }
     preview.hidden = false;
-    this.previewChain.innerHTML = sequence.shots.map((shot) => `<span title="정확도 ${Math.round(shot.breakdown.accuracy)}% · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} ×${shot.breakdown.rangeMultiplier.toFixed(2)}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${Math.round(shot.breakdown.accuracy)}%</b></span>`).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
+    this.previewChain.innerHTML = sequence.shots.map((shot) => {
+      const accuracy = `${shot.breakdown.accuracyModifier >= 0 ? '+' : ''}${shot.breakdown.accuracyModifier}`;
+      return `<span title="정확도 ${accuracy} · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} 화력 -${shot.breakdown.rangePenalty} · 최종 화력 ${shot.breakdown.finalFirepower}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${accuracy}</b></span>`;
+    }).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
     const final = sequence.finalState;
     const effects: string[] = [`체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];
     if (sequence.totalArmorDamage) effects.push(`방어 감소 ${sequence.totalArmorDamage}`);
@@ -552,9 +556,9 @@ export class GameUI {
   private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement): void {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
-    const accuracy = `${definition.accuracy > 0 ? '+' : ''}${definition.accuracy}%`;
+    const accuracy = `${definition.accuracyModifier >= 0 ? '+' : ''}${definition.accuracyModifier}`;
     const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.directDamage}</b></span><span>명중 보정 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.impact}</b></span></div>${buildup ? `<small>${buildup.slice(3)}</small>` : ''}`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>정확도 <b>${accuracy}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.impact}</b></span></div>${buildup ? `<small>${buildup.slice(3)}</small>` : ''}`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;

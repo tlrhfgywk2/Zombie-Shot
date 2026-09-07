@@ -1,10 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { createEnemyState } from '../data/enemyDefinitions';
 import { createPlayerCombatState } from './AttachmentLoadout';
-import { CombatResolver } from './CombatResolver';
+import { calculateFinalFirepower, CombatResolver } from './CombatResolver';
 
 describe('CombatResolver', () => {
   const resolver = new CombatResolver();
+
+  it('무기 5 + 탄약 2 + 정확도 1 - 거리 2를 최종 화력 6으로 계산한다', () => {
+    expect(calculateFinalFirepower({
+      weaponFirepower: 5, ammoFirepower: 2, attachmentFirepower: 0,
+      accuracyModifier: 1, rangePenalty: 2, statusFirepowerBonus: 0, specialFirepowerBonus: 0,
+    })).toBe(6);
+  });
 
   it('철갑탄 → 확장탄은 역순보다 장갑 적에게 큰 체력 피해를 준다', () => {
     const enemy = createEnemyState('armored');
@@ -16,14 +23,15 @@ describe('CombatResolver', () => {
     expect(payoffFirst.shots[0]?.breakdown.armorBlocked).toBeGreaterThan(0);
   });
 
-  it('정확도는 100%를 넘을 수 있고 해당 비율로 피해에 기여한다', () => {
+  it('정확도는 정수 화력을 가산하며 피해에 곱하지 않는다', () => {
     const enemy = createEnemyState('tough');
     const result = resolver.resolveSequence(['standard'], enemy, { loadout: { optic: 'compactReflexSight' } });
     const baseline = resolver.resolveSequence(['standard'], enemy);
     const shot = result.shots[0];
 
-    expect(shot?.breakdown.accuracy).toBe(105);
-    expect(shot?.breakdown.finalDamage).toBeGreaterThan(baseline.shots[0]!.breakdown.finalDamage);
+    expect(shot?.breakdown.accuracyModifier).toBe(1);
+    expect(shot?.breakdown.finalFirepower).toBe(baseline.shots[0]!.breakdown.finalFirepower + 1);
+    expect(Number.isInteger(shot?.breakdown.finalFirepower)).toBe(true);
   });
 
   it('반동은 후속 탄 정확도를 낮추고 안정 장착물은 손실을 줄인다', () => {
@@ -31,19 +39,21 @@ describe('CombatResolver', () => {
     const bare = resolver.resolveSequence(['standard', 'standard', 'standard'], enemy);
     const stable = resolver.resolveSequence(['standard', 'standard', 'standard'], enemy, { loadout: { muzzle: 'dualPortCompensator' } });
 
-    expect(bare.shots.map((shot) => shot.breakdown.accuracy)).toEqual([100, 93, 86]);
-    expect(stable.shots[2]!.breakdown.accuracy - stable.shots[0]!.breakdown.accuracy).toBeCloseTo(-9.8);
+    expect(bare.shots.map((shot) => shot.breakdown.accuracyModifier)).toEqual([0, -1, -2]);
+    expect(stable.shots.map((shot) => shot.breakdown.accuracyModifier)).toEqual([1, 1, 1]);
   });
 
   it('거리 단계와 초음파 불이익을 피해 내역에 분리해 표시한다', () => {
     const state = createPlayerCombatState();
     state.rangePenaltySteps = 1;
     state.rangePenaltyTurns = 2;
-    const normal = resolver.resolveSequence(['standard'], createEnemyState('tough'));
-    const disrupted = resolver.resolveSequence(['standard'], createEnemyState('tough'), { playerState: state });
+    const enemy = { ...createEnemyState('normal'), distance: 7 };
+    const normal = resolver.resolveSequence(['standard'], enemy);
+    const disrupted = resolver.resolveSequence(['standard'], enemy, { playerState: state });
 
-    expect(normal.shots[0]?.breakdown.rangeBand).toBe('far');
-    expect(disrupted.shots[0]?.breakdown.rangeMultiplier).toBeLessThan(normal.shots[0]!.breakdown.rangeMultiplier);
+    expect(normal.shots[0]?.breakdown.rangeBand).toBe('mid');
+    expect(normal.shots[0]?.breakdown.rangePenalty).toBe(1);
+    expect(disrupted.shots[0]?.breakdown.rangePenalty).toBe(2);
   });
 
   it('충격 누적이 임계치에 도달하면 이동과 특수 의도를 함께 지연한다', () => {
@@ -75,14 +85,14 @@ describe('CombatResolver', () => {
     enemy.statuses.corruptedShots = 2;
     const sequence = resolver.resolveSequence(['standard', 'magnum', 'incendiary'], enemy);
 
-    expect(sequence.shots[0]?.breakdown.statusMultiplier).toBe(1);
-    expect(sequence.shots[1]?.breakdown.statusMultiplier).toBe(1.25);
-    expect(sequence.shots[2]?.breakdown.statusMultiplier).toBe(1.25);
+    expect(sequence.shots[0]?.breakdown.statusFirepowerBonus).toBe(0);
+    expect(sequence.shots[1]?.breakdown.statusFirepowerBonus).toBe(2);
+    expect(sequence.shots[2]?.breakdown.statusFirepowerBonus).toBe(2);
     expect(sequence.finalState.statuses.corruptedShots).toBe(0);
   });
 
   it('사망 후 발사하지 않은 탄환과 조건부 회수탄을 반환 목록에 남긴다', () => {
-    const enemy = { ...createEnemyState('normal'), hp: 5 };
+    const enemy = { ...createEnemyState('normal'), hp: 4 };
     const result = resolver.resolveSequence(['bloodHex', 'incendiary', 'standard'], enemy);
 
     expect(result.shots).toHaveLength(1);
@@ -97,7 +107,20 @@ describe('CombatResolver', () => {
     const second = resolver.resolveEnemyAction(first.after, first.playerAfter);
     const third = resolver.resolveEnemyAction(second.after, second.playerAfter);
 
-    expect([first.burnDamage, second.burnDamage, third.burnDamage]).toEqual([8, 8, 0]);
+    expect([first.burnDamage, second.burnDamage, third.burnDamage]).toEqual([3, 3, 0]);
+  });
+
+  it('거리와 반동 페널티가 기본값보다 커도 유효 사격은 최소 화력 1을 준다', () => {
+    const result = resolver.resolveSequence(Array(8).fill('overpressure'), createEnemyState('tough'));
+    expect(result.shots.at(-1)?.breakdown.finalFirepower).toBe(1);
+  });
+
+  it('체력이 정확히 0이 되는 탄에서 사격을 멈추고 뒤 탄약을 반환한다', () => {
+    const enemy = { ...createEnemyState('normal'), hp: 6, maxHp: 6, distance: 3 };
+    const result = resolver.resolveSequence(['standard', 'standard'], enemy);
+    expect(result.finalState.hp).toBe(0);
+    expect(result.shots).toHaveLength(1);
+    expect(result.unfiredRounds).toEqual(['standard']);
   });
 
   it.each([

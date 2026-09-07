@@ -1,4 +1,4 @@
-import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentModifier, type LoadoutSnapshot, type ModifierCondition } from '../data/attachmentDefinitions';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, SERVICE_45, type AttachmentModifier, type LoadoutSnapshot, type ModifierCondition } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE, RANGE_NAMES } from '../data/ammoDefinitions';
 import { getEnabledAttachmentIds, createPlayerCombatState } from './AttachmentLoadout';
 import type { AmmoType, EnemyActionResult, EnemyState, PlayerCombatState, RangeBand, SequenceResult, ShotResult, StatusType } from './types';
@@ -12,9 +12,24 @@ export interface CombatContext {
 
 interface ShotContext extends CombatContext {
   cumulativeRecoil?: number;
-  previousAmmo?: AmmoType;
-  totalRounds?: number;
 }
+
+export interface FirepowerInputs {
+  weaponFirepower: number;
+  ammoFirepower: number;
+  attachmentFirepower: number;
+  accuracyModifier: number;
+  rangePenalty: number;
+  statusFirepowerBonus: number;
+  specialFirepowerBonus: number;
+}
+
+/** 모든 직접 피해 가산/감산을 한곳에서 정수로 해결한다. */
+export const calculateFinalFirepower = (inputs: FirepowerInputs, minimum = COMBAT_BALANCE.minimumFirepower): number => {
+  if (![...Object.values(inputs), minimum].every(Number.isInteger)) throw new Error('직접 화력 계산에는 정수만 사용할 수 있습니다.');
+  return Math.max(minimum, inputs.weaponFirepower + inputs.ammoFirepower + inputs.attachmentFirepower
+    + inputs.accuracyModifier - inputs.rangePenalty + inputs.statusFirepowerBonus + inputs.specialFirepowerBonus);
+};
 
 const cloneState = (state: EnemyState): EnemyState => ({
   ...state,
@@ -33,7 +48,7 @@ export const getRangeBand = (distance: number): RangeBand => {
   return 'far';
 };
 
-const getEffectiveRangeBand = (band: RangeBand, penaltySteps: number): RangeBand => rangeOrder[Math.min(rangeOrder.length - 1, rangeOrder.indexOf(band) + penaltySteps)] ?? 'far';
+export const getEffectiveRangeBand = (band: RangeBand, penaltySteps: number): RangeBand => rangeOrder[Math.min(rangeOrder.length - 1, rangeOrder.indexOf(band) + penaltySteps)] ?? 'far';
 
 export const isNearestValidTarget = (target: EnemyState, targets: readonly EnemyState[] = [target]): boolean =>
   target.hp > 0 && target.distance >= 0 && !targets.some(other => other.hp > 0 && other.distance >= 0 && other.distance < target.distance);
@@ -67,40 +82,49 @@ export class CombatResolver {
       .flatMap((id) => ATTACHMENT_DEFINITIONS[id].modifiers)
       .filter((modifier) => !('condition' in modifier) || conditionMatches(modifier.condition, rangeBand, isNearestValidTarget(before, context.targets)));
 
-    const ammoPenaltyMultiplier = this.multiplyModifiers(activeModifiers, 'ammoPenaltyMultiplier');
-    const ammoAccuracy = definition.accuracy < 0 ? definition.accuracy * ammoPenaltyMultiplier : definition.accuracy;
-    // 탄약에서 발생한 반동만 경감한다. 무기 반동과 적의 정확도 방해는 원래 값이다.
-    const recoilGenerated = Math.max(COMBAT_BALANCE.minimumRecoil, COMBAT_BALANCE.weaponRecoil + Math.max(0, definition.recoil) * ammoPenaltyMultiplier + Math.min(0, definition.recoil));
+    const ammoPenaltyReduction = this.sumModifiers(activeModifiers, 'ammoPenaltyReduction');
+    const ammoAccuracy = definition.accuracyModifier < 0
+      ? Math.min(0, definition.accuracyModifier + ammoPenaltyReduction)
+      : definition.accuracyModifier;
+    // 탄약에서 발생한 반동과 음수 정확도만 정수 단위로 경감한다.
+    const recoilGenerated = Math.max(COMBAT_BALANCE.minimumRecoil, SERVICE_45.recoil + Math.max(0, definition.recoil - ammoPenaltyReduction));
     const cumulativeRecoil = context.cumulativeRecoil ?? 0;
-    const accuracy = Math.max(COMBAT_BALANCE.minimumAccuracy, COMBAT_BALANCE.baseAccuracy + playerState.accuracyPenalty + ammoAccuracy + this.sumModifiers(activeModifiers, 'accuracy') - cumulativeRecoil);
-    const attachmentMultiplier = 1;
-    let statusMultiplier = definition.specialEnemyMultiplier && before.special ? definition.specialEnemyMultiplier : 1;
+    const accuracyModifier = SERVICE_45.accuracyModifier + playerState.accuracyPenalty + ammoAccuracy
+      + this.sumModifiers(activeModifiers, 'accuracy') - cumulativeRecoil;
+    const attachmentFirepower = this.sumModifiers(activeModifiers, 'firepower');
+    const specialFirepowerBonus = before.special ? definition.specialEnemyFirepowerBonus ?? 0 : 0;
+    let statusFirepowerBonus = 0;
     if (after.statuses.exposedShots > 0) {
-      statusMultiplier *= COMBAT_BALANCE.exposedDamageMultiplier;
+      statusFirepowerBonus += COMBAT_BALANCE.exposedFirepowerBonus;
       after.statuses.exposedShots -= 1;
     }
     const isSpecialAmmo = rarityRank[definition.rarity] >= rarityRank.rare;
     if (isSpecialAmmo && after.statuses.corruptedShots > 0) {
-      statusMultiplier *= COMBAT_BALANCE.corruptedSpecialMultiplier;
+      statusFirepowerBonus += COMBAT_BALANCE.corruptedSpecialFirepowerBonus;
       after.statuses.corruptedShots -= 1;
     }
 
-    const baseDamage = definition.directDamage;
-    const sonicMultiplier = Math.max(0.55, 1 - playerState.rangePenaltySteps * 0.12);
-    // 기존 거리 피해 효율을 유지하면서 실제 중거리의 손실분(10%p)만 절반으로 줄인다.
-    const rangeRecovery = rangeBand === 'mid'
-      ? (1 - COMBAT_BALANCE.handgunRangeMultiplier.mid) * (1 - this.multiplyModifiers(activeModifiers, 'midRangePenaltyMultiplier')) : 0;
-    const rangeMultiplier = (COMBAT_BALANCE.handgunRangeMultiplier[effectiveRangeBand] + rangeRecovery) * sonicMultiplier;
-    const scaledDamage = Math.max(0, Math.round(baseDamage * (accuracy / 100) * rangeMultiplier * attachmentMultiplier * statusMultiplier));
+    const rangePenaltyReduction = this.sumModifiers(activeModifiers, 'rangePenaltyReduction');
+    const rangePenalty = Math.max(0, SERVICE_45.rangePenalties[effectiveRangeBand] - rangePenaltyReduction);
+    const firepowerInputs: FirepowerInputs = {
+      weaponFirepower: SERVICE_45.baseFirepower,
+      ammoFirepower: definition.firepower,
+      attachmentFirepower,
+      accuracyModifier,
+      rangePenalty,
+      statusFirepowerBonus,
+      specialFirepowerBonus,
+    };
+    const finalFirepower = calculateFinalFirepower(firepowerInputs);
 
     const armorBroken = Math.min(after.armor, definition.armorBreak);
     after.armor -= armorBroken;
-    const armorBlocked = Math.min(after.armor, scaledDamage);
+    const armorBlocked = Math.min(after.armor, finalFirepower);
     // 방어 파괴 탄은 고유 파괴량과 피해 흡수를 같은 한 발에서 중복 차감하지 않는다.
     const armorConsumedByAbsorption = definition.armorBreak > 0 ? 0 : armorBlocked;
     after.armor -= armorConsumedByAbsorption;
     const armorDamage = armorBroken + armorConsumedByAbsorption;
-    const hpDamage = Math.min(after.hp, scaledDamage - armorBlocked);
+    const hpDamage = Math.min(after.hp, finalFirepower - armorBlocked);
     after.hp -= hpDamage;
 
     let burnApplied = 0;
@@ -133,7 +157,8 @@ export class CombatResolver {
     }
 
     const conserved = Boolean(definition.recoverOnKill && after.hp <= 0);
-    const parts = [`${definition.name} 명중`, `정확도 ${Math.round(accuracy)}%`, `${RANGE_NAMES[effectiveRangeBand]} ×${rangeMultiplier.toFixed(2)}`];
+    const signedAccuracy = `${accuracyModifier >= 0 ? '+' : ''}${accuracyModifier}`;
+    const parts = [`${definition.name} 명중`, `정확도 ${signedAccuracy}`, `${RANGE_NAMES[effectiveRangeBand]} 화력 -${rangePenalty}`, `최종 화력 ${finalFirepower}`];
     if (armorBroken) parts.push(`방어 파괴 ${armorBroken}`);
     if (armorBlocked) parts.push(`방어 흡수 ${armorBlocked}`);
     if (statusTriggered) parts.push(`${this.statusName(statusTriggered)} 발동`);
@@ -142,8 +167,8 @@ export class CombatResolver {
 
     return {
       ammoType, index, damage: hpDamage + armorDamage, hpDamage, armorDamage, burnApplied, staggerApplied, impactApplied,
-      statusTriggered, vulnerabilityMultiplier: statusMultiplier, conserved, killed: after.hp <= 0, description: parts.join(' · '),
-      breakdown: { baseDamage, accuracy, rangeBand, effectiveRangeBand, rangeMultiplier, attachmentMultiplier, statusMultiplier, armorBlocked, armorBroken, cumulativeRecoil, recoilGenerated, finalDamage: hpDamage },
+      statusTriggered, conserved, killed: after.hp <= 0, description: parts.join(' · '),
+      breakdown: { ...firepowerInputs, rangeBand, effectiveRangeBand, armorBlocked, armorBroken, cumulativeRecoil, recoilGenerated, finalFirepower, finalDamage: hpDamage },
       before, after,
     };
   }
@@ -155,7 +180,7 @@ export class CombatResolver {
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo || current.hp <= 0) break;
-      const shot = this.resolveShot(ammo, index, current, { ...context, previousAmmo: rounds[index - 1], totalRounds: rounds.length, cumulativeRecoil });
+      const shot = this.resolveShot(ammo, index, current, { ...context, cumulativeRecoil });
       shots.push(shot);
       cumulativeRecoil += shot.breakdown.recoilGenerated;
       current = cloneState(shot.after);
@@ -166,7 +191,6 @@ export class CombatResolver {
       shots, finalState: current,
       totalHpDamage: shots.reduce((sum, shot) => sum + shot.hpDamage, 0),
       totalArmorDamage: shots.reduce((sum, shot) => sum + shot.armorDamage, 0),
-      averageAccuracy: shots.length ? shots.reduce((sum, shot) => sum + shot.breakdown.accuracy, 0) / shots.length : 0,
       conservedRounds, unfiredRounds: [...unfiredRounds], returnedRounds: [...conservedRounds, ...unfiredRounds], killed: current.hp <= 0,
     };
   }
@@ -219,14 +243,14 @@ export class CombatResolver {
 
   private applyIntent(type: NonNullable<EnemyState['intent']>['type'], enemy: EnemyState, player: PlayerCombatState, loadout: LoadoutSnapshot): string {
     if (type === 'groundShock') {
-      player.accuracyPenalty = -22;
+      player.accuracyPenalty = -2;
       player.accuracyPenaltyTurns = 2;
-      return '지반 충격: 정확도 -22%가 2턴 적용됩니다.';
+      return '지반 충격: 정확도 -2가 2턴 적용됩니다.';
     }
     if (type === 'sonicPulse') {
       player.rangePenaltySteps = 1;
       player.rangePenaltyTurns = 2;
-      return '초음파 공명: 유효 거리와 거리 피해가 2턴 감소합니다.';
+      return '초음파 공명: 유효 거리 단계가 2턴 악화됩니다.';
     }
     const equippedSlots = ATTACHMENT_SLOT_ORDER.filter((slot) => loadout[slot]);
     const slot = equippedSlots[enemy.turnsElapsed % Math.max(1, equippedSlots.length)];
@@ -235,12 +259,8 @@ export class CombatResolver {
     return `오염 투척: ${ATTACHMENT_SLOT_NAMES[slot]} 슬롯이 2턴 봉쇄됩니다.`;
   }
 
-  private multiplyModifiers(modifiers: readonly AttachmentModifier[], kind: 'ammoPenaltyMultiplier' | 'midRangePenaltyMultiplier'): number {
-    return modifiers.filter(modifier => modifier.kind === kind).reduce((product, modifier) => product * modifier.value, 1);
-  }
-
-  private sumModifiers(modifiers: readonly AttachmentModifier[], kind: 'accuracy'): number {
-    return modifiers.filter((modifier): modifier is Extract<AttachmentModifier, { kind: typeof kind }> => modifier.kind === kind).reduce((sum, modifier) => sum + modifier.value, 0);
+  private sumModifiers(modifiers: readonly AttachmentModifier[], kind: AttachmentModifier['kind']): number {
+    return modifiers.filter(modifier => modifier.kind === kind).reduce((sum, modifier) => sum + modifier.value, 0);
   }
 
   private statusName(type: StatusType): string {

@@ -3,6 +3,8 @@ import type { AttachmentSlot, RangeBand } from '../combat/types';
 export type WeaponId = 'service45';
 export const SERVICE_45 = {
   id: 'service45' as WeaponId, internalName: 'Service .45', name: '서비스 .45',
+  baseFirepower: 2, accuracyModifier: 0, recoil: 0,
+  rangePenalties: { near: 0, mid: 1, far: 2 } as Record<RangeBand, number>,
   baseMagazineCapacity: 4, maximumMagazineCapacity: 6,
 };
 export type AttachmentRarity = 'common' | 'advanced' | 'rare' | 'epic';
@@ -16,9 +18,10 @@ export type AttachmentId = 'compactCompensator' | 'dualPortCompensator' | 'exten
 export interface ModifierCondition { range?: RangeBand; nearestTarget?: boolean }
 export type AttachmentModifier =
   | { kind: 'accuracy'; value: number; condition?: ModifierCondition }
+  | { kind: 'firepower'; value: number; condition?: ModifierCondition }
   | { kind: 'capacity'; value: number }
-  | { kind: 'ammoPenaltyMultiplier'; value: number }
-  | { kind: 'midRangePenaltyMultiplier'; value: number };
+  | { kind: 'ammoPenaltyReduction'; value: number }
+  | { kind: 'rangePenaltyReduction'; value: number; condition?: ModifierCondition };
 export interface AttachmentDefinition {
   id: AttachmentId;
   name: string;
@@ -35,12 +38,12 @@ export const ATTACHMENT_SLOT_NAMES: Record<AttachmentSlot, string> = {
 export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> = {
   compactCompensator: {
     id: 'compactCompensator', name: '소형 보정기', slot: 'muzzle', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '정확도 +5%p', modifiers: [{ kind: 'accuracy', value: 5 }],
+    summary: '정확도 +1', modifiers: [{ kind: 'accuracy', value: 1 }],
   },
   dualPortCompensator: {
     id: 'dualPortCompensator', name: '이중 포트 보정기', slot: 'muzzle', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '정확도 +5%p · 탄약 정확도 페널티 ×0.70',
-    modifiers: [{ kind: 'accuracy', value: 5 }, { kind: 'ammoPenaltyMultiplier', value: 0.7 }],
+    summary: '정확도 +1 · 탄약 반동/음수 정확도 1 감소',
+    modifiers: [{ kind: 'accuracy', value: 1 }, { kind: 'ammoPenaltyReduction', value: 1 }],
   },
   extendedBasePad: {
     id: 'extendedBasePad', name: '확장 바닥판', slot: 'magazine', rarity: 'common', compatibleWeapons: ['service45'],
@@ -52,29 +55,29 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
   },
   highVisibilitySight: {
     id: 'highVisibilitySight', name: '고시인성 가늠쇠', slot: 'optic', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '정확도 +5%p', modifiers: [{ kind: 'accuracy', value: 5 }],
+    summary: '정확도 +1', modifiers: [{ kind: 'accuracy', value: 1 }],
   },
   compactReflexSight: {
     id: 'compactReflexSight', name: '소형 반사 조준기', slot: 'optic', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '정확도 +5%p · 중거리 피해 효율 손실 ×0.50',
-    modifiers: [{ kind: 'accuracy', value: 5 }, { kind: 'midRangePenaltyMultiplier', value: 0.5 }],
+    summary: '정확도 +1 · 중거리 화력 페널티 1 감소',
+    modifiers: [{ kind: 'accuracy', value: 1 }, { kind: 'rangePenaltyReduction', value: 1, condition: { range: 'mid' } }],
   },
   compactLaserSight: {
     id: 'compactLaserSight', name: '소형 레이저 조준기', slot: 'rail', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '근거리 정확도 +10%p', modifiers: [{ kind: 'accuracy', value: 10, condition: { range: 'near' } }],
+    summary: '근거리 정확도 +1', modifiers: [{ kind: 'accuracy', value: 1, condition: { range: 'near' } }],
   },
   laserLightModule: {
     id: 'laserLightModule', name: '레이저·라이트 모듈', slot: 'rail', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '근거리 정확도 +10%p · 가장 가까운 유효 표적에 +5%p',
-    modifiers: [{ kind: 'accuracy', value: 10, condition: { range: 'near' } }, { kind: 'accuracy', value: 5, condition: { nearestTarget: true } }],
+    summary: '근거리 정확도 +1 · 가장 가까운 유효 표적에 +1',
+    modifiers: [{ kind: 'accuracy', value: 1, condition: { range: 'near' } }, { kind: 'accuracy', value: 1, condition: { nearestTarget: true } }],
   },
   rubberGrip: {
     id: 'rubberGrip', name: '고무 손잡이', slot: 'grip', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '정확도 +5%p', modifiers: [{ kind: 'accuracy', value: 5 }],
+    summary: '정확도 +1', modifiers: [{ kind: 'accuracy', value: 1 }],
   },
   g10Grip: {
     id: 'g10Grip', name: '격자형 G10 손잡이', slot: 'grip', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '탄약 정확도 페널티 ×0.80', modifiers: [{ kind: 'ammoPenaltyMultiplier', value: 0.8 }],
+    summary: '탄약 반동/음수 정확도 1 감소', modifiers: [{ kind: 'ammoPenaltyReduction', value: 1 }],
   },
 };
 export const ATTACHMENT_ORDER = Object.keys(ATTACHMENT_DEFINITIONS) as AttachmentId[];

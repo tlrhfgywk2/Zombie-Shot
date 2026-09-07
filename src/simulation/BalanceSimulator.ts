@@ -32,7 +32,7 @@ export function simulateEncounter(priority: readonly AmmoType[], type: EnemyType
   const resolver = new CombatResolver();
   let enemy = createEnemyState(type);
   player.clearCombatDisruptions();
-  let shots = 0, armorBroken = 0, staggerTriggers = 0, accuracyAbove100 = 0;
+  let shots = 0, armorBroken = 0, staggerTriggers = 0, positiveAccuracyShots = 0;
   for (let turn = 0; turn < 12 && enemy.hp > 0 && enemy.distance > 0; turn += 1) {
     // 소유 탄약에 직접 접근하는 결정론적 전략. 무작위 드로우가 아니다.
     while (player.magazine.size < player.magazine.capacity) {
@@ -48,7 +48,7 @@ export function simulateEncounter(priority: readonly AmmoType[], type: EnemyType
       shots += 1;
       armorBroken += shot.breakdown.armorBroken;
       staggerTriggers += shot.staggerApplied;
-      accuracyAbove100 += Number(shot.breakdown.accuracy > 100);
+      positiveAccuracyShots += Number(shot.breakdown.accuracyModifier > 0);
     }
     player.magazine.clear();
     enemy = sequence.finalState;
@@ -58,7 +58,7 @@ export function simulateEncounter(priority: readonly AmmoType[], type: EnemyType
       player.applyCombatState(action.playerAfter);
     }
   }
-  return { won: enemy.hp <= 0, shots, armorBroken, staggerTriggers, accuracyAbove100 };
+  return { won: enemy.hp <= 0, shots, armorBroken, staggerTriggers, positiveAccuracyShots };
 }
 export function runBalanceSimulation() {
   const loadouts = createAllLoadouts();
@@ -104,6 +104,10 @@ export function runBalanceSimulation() {
 export const formatBalanceReport = (report: ReturnType<typeof runBalanceSimulation>): string => JSON.stringify({
   '단일 조우 표본': report.encounters.length,
   '전체 경로 표본': report.routes.length,
+  '표준탄 무장착 처치 발수': Object.fromEntries((Object.keys(ENEMY_DEFINITIONS) as EnemyType[]).map(type => {
+    const player = new Player();
+    return [ENEMY_DEFINITIONS[type].name, simulateEncounter(['standard'], type, player).shots];
+  })),
   '적별 승률': Object.fromEntries(Object.keys(ENEMY_DEFINITIONS).map(type => {
     const samples = report.encounters.filter(row => row.type === type);
     return [ENEMY_DEFINITIONS[type as EnemyType].name, samples.filter(row => row.won).length / samples.length];

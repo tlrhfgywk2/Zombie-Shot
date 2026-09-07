@@ -42,7 +42,10 @@ describe('실제 게임의 구간/보상 연결', () => {
     for (let i = 0; i < 4; i += 1) harness.callbacks.onAddAmmo('standard');
     harness.callbacks.onLoad();
     await vi.waitFor(() => expect(internals.busy).toBe(false));
-    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
+    for (let i = 0; i < 4; i += 1) harness.callbacks.onAddAmmo('standard');
+    harness.callbacks.onLoad();
+    await vi.waitFor(() => expect(internals.busy).toBe(false));
+    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
     await vi.waitFor(() => expect(internals.state.phase).toBe('AMMO_REWARD'));
     expect(internals.player.getStock().hollowPoint).toBe(0);
     harness.callbacks.onChooseAmmoReward('match');

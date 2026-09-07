@@ -68,17 +68,20 @@ export interface PlayerCombatState {
 }
 
 export interface ShotBreakdown {
-  baseDamage: number;
-  accuracy: number;
+  weaponFirepower: number;
+  ammoFirepower: number;
+  attachmentFirepower: number;
+  accuracyModifier: number;
   rangeBand: RangeBand;
   effectiveRangeBand: RangeBand;
-  rangeMultiplier: number;
-  attachmentMultiplier: number;
-  statusMultiplier: number;
+  rangePenalty: number;
+  statusFirepowerBonus: number;
+  specialFirepowerBonus: number;
   armorBlocked: number;
   armorBroken: number;
   cumulativeRecoil: number;
   recoilGenerated: number;
+  finalFirepower: number;
   finalDamage: number;
 }
 
@@ -92,7 +95,6 @@ export interface ShotResult {
   staggerApplied: number;
   impactApplied: number;
   statusTriggered?: StatusType;
-  vulnerabilityMultiplier: number;
   conserved: boolean;
   killed: boolean;
   description: string;
@@ -106,7 +108,6 @@ export interface SequenceResult {
   finalState: EnemyState;
   totalHpDamage: number;
   totalArmorDamage: number;
-  averageAccuracy: number;
   conservedRounds: AmmoType[];
   unfiredRounds: AmmoType[];
   returnedRounds: AmmoType[];
