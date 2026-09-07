@@ -173,10 +173,11 @@ export class GamePresentation {
     this.presentationState = '탄약 삽입';
     this.animationInProgress = true;
     this.audio.prepare();
-    this.resetWeaponPose();
+    await this.animateWeaponToReloadPose();
     this.clearCartridges();
     const magazine = this.magazineModel.root;
     if (magazine.parent !== this.scene) this.scene.attach(magazine);
+    this.magazineModel.roundDisplay.visible = true;
     this.setMagazineRounds([]);
     magazine.visible = true;
     magazine.position.copy(this.layout.magazineLoad);
@@ -256,6 +257,7 @@ export class GamePresentation {
       magazine.quaternion.copy(pose.quaternion);
     });
     this.attachMagazineAtSeat();
+    this.magazineModel.roundDisplay.visible = false;
     if (!this.isMagazineSeated()) throw new Error('탄창이 실제 착좌 기준점에 도달하지 못했습니다.');
     this.presentationState = '탄창 착좌 완료';
     this.captureMagazineDiagnostic();
@@ -960,7 +962,30 @@ export class GamePresentation {
     this.pistolModel.root.position.copy(this.layout.weaponRest);
     constrainWeaponPosition(this.pistolModel.root.position, this.layout);
     this.pistolModel.root.quaternion.setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
+    this.pistolModel.root.scale.setScalar(this.layout.pistolScale);
     this.pistolModel.slide.position.set(0, 0, 0);
+  }
+
+  private async animateWeaponToReloadPose(): Promise<void> {
+    const pistol = this.pistolModel.root;
+    const startPosition = pistol.position.clone();
+    const startQuaternion = pistol.quaternion.clone();
+    const startScale = pistol.scale.x;
+    const reloadQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
+    const alreadyAtRest = startPosition.distanceToSquared(this.layout.weaponRest) < 0.000001
+      && startQuaternion.angleTo(reloadQuaternion) < 0.0001
+      && Math.abs(startScale - this.layout.pistolScale) < 0.0001;
+    if (!alreadyAtRest) {
+      this.presentationState = '재장전 자세 전환';
+      await this.tween(PRESENTATION_TIMING.weaponReloadTransition, (progress) => {
+        const eased = this.easeInOut(progress);
+        pistol.position.lerpVectors(startPosition, this.layout.weaponRest, eased);
+        constrainWeaponPosition(pistol.position, this.layout);
+        pistol.quaternion.slerpQuaternions(startQuaternion, reloadQuaternion, eased);
+        pistol.scale.setScalar(THREE.MathUtils.lerp(startScale, this.layout.pistolScale, eased));
+      });
+    }
+    this.resetWeaponPose();
   }
 
   private readonly resize = (): void => {
