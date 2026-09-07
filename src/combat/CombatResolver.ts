@@ -96,8 +96,10 @@ export class CombatResolver {
     const armorBroken = Math.min(after.armor, definition.armorBreak);
     after.armor -= armorBroken;
     const armorBlocked = Math.min(after.armor, scaledDamage);
-    after.armor -= armorBlocked;
-    const armorDamage = armorBroken + armorBlocked;
+    // 방어 파괴 탄은 고유 파괴량과 피해 흡수를 같은 한 발에서 중복 차감하지 않는다.
+    const armorConsumedByAbsorption = definition.armorBreak > 0 ? 0 : armorBlocked;
+    after.armor -= armorConsumedByAbsorption;
+    const armorDamage = armorBroken + armorConsumedByAbsorption;
     const hpDamage = Math.min(after.hp, scaledDamage - armorBlocked);
     after.hp -= hpDamage;
 
