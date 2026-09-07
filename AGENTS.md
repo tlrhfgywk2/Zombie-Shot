@@ -6,6 +6,8 @@ Zombie Shot is a TypeScript, Vite, and Three.js browser/WebGL game supporting de
 
 Preserve presentation diagnostics. Markers, anchors, bounds, effect diagnostics, and labels must remain behind an explicit option such as `?presentationDebug=1` and must never appear in ordinary play.
 
+Keep visible UI copy minimal. Prefer icons, values, bars, disabled states, and direct manipulation over explanatory sentences or action logs. Add text only when the player cannot reasonably infer a mechanic or make a meaningful choice without it; avoid restating animations, previews, button labels, or immediately visible results.
+
 ## Branch and deployment policy
 
 - `develop` is the authoritative integration branch and the target for normal feature/fix PRs.
