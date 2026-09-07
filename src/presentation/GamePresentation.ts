@@ -243,6 +243,9 @@ export class GamePresentation {
       magazine.quaternion.slerpQuaternions(magazineStartQuaternion, approachPose.quaternion, eased);
       magazine.scale.setScalar(THREE.MathUtils.lerp(magazineStartScale, insertionScale, eased));
     });
+    // 접근 자세에서는 확인창을 보여 주되, 손잡이 안으로 진입하기 직전에 가린다.
+    // 손잡이는 여러 개의 얇은 메시로 구성되어 내부 확인창을 완전히 차폐하지 못한다.
+    this.magazineModel.roundDisplay.visible = false;
     await this.tween(PRESENTATION_TIMING.magazineSeat, (progress) => {
       this.presentationState = '탄창 착좌';
       this.pistolModel.root.position.y = this.layout.weaponInsertion.y + Math.sin(progress * Math.PI) * 0.035;
