@@ -1,0 +1,96 @@
+import { describe, expect, it } from 'vitest';
+import { AMMO_DEFINITIONS, AMMO_ORDER, COMBAT_BALANCE } from '../data/ammoDefinitions';
+import { ATTACHMENT_DEFINITIONS, SERVICE_45 } from '../data/attachmentDefinitions';
+import { createEnemyState, ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
+import { CombatResolver, formatRangePenalty } from './CombatResolver';
+
+const resolver = new CombatResolver();
+const unarmoredTarget = (distance: number) => ({
+  ...createEnemyState('tough'), hp: 100, maxHp: 100, armor: 0, maxArmor: 0, distance,
+});
+const expectBetween = (value: number, minimum: number, maximum: number): void => {
+  expect(value).toBeGreaterThanOrEqual(minimum);
+  expect(value).toBeLessThanOrEqual(maximum);
+};
+
+describe('정수 전투 수치 스케일', () => {
+  it('모든 조정 가능한 피해 수치가 정수이며 폐기한 퍼센트 필드를 갖지 않는다', () => {
+    for (const definition of Object.values(AMMO_DEFINITIONS)) {
+      for (const value of [definition.firepower, definition.accuracyModifier, definition.recoil, definition.armorBreak, definition.impact, definition.buildup?.amount ?? 0, definition.specialEnemyFirepowerBonus ?? 0]) {
+        expect(Number.isInteger(value)).toBe(true);
+      }
+      expect(definition).not.toHaveProperty('directDamage');
+      expect(definition).not.toHaveProperty('accuracy');
+      expect(definition).not.toHaveProperty('penetration');
+    }
+    for (const value of [SERVICE_45.baseFirepower, SERVICE_45.accuracyModifier, SERVICE_45.recoil, ...Object.values(SERVICE_45.rangePenalties), COMBAT_BALANCE.minimumFirepower, COMBAT_BALANCE.burnDamagePerTurn]) {
+      expect(Number.isInteger(value)).toBe(true);
+    }
+    for (const attachment of Object.values(ATTACHMENT_DEFINITIONS)) {
+      for (const modifier of attachment.modifiers) expect(Number.isInteger(modifier.value)).toBe(true);
+    }
+  });
+
+  it('초반 일반·강적·특수 적 체력과 방어가 읽기 쉬운 기준 범위에 있다', () => {
+    for (const type of ['normal', 'fast'] as const) expectBetween(ENEMY_DEFINITIONS[type].hp, 18, 28);
+    for (const type of ['armored', 'tough'] as const) expectBetween(ENEMY_DEFINITIONS[type].hp, 28, 40);
+    for (const type of ['contaminator', 'groundshaker', 'screecher'] as const) expectBetween(ENEMY_DEFINITIONS[type].hp, 40, 60);
+    expectBetween(ENEMY_DEFINITIONS.armored.armor, 2, 5);
+    expectBetween(ENEMY_DEFINITIONS.groundshaker.armor, 6, 10);
+    for (const definition of Object.values(ENEMY_DEFINITIONS)) {
+      expect(Number.isInteger(definition.hp)).toBe(true);
+      expect(Number.isInteger(definition.armor)).toBe(true);
+      expect(Number.isInteger(definition.staggerThreshold)).toBe(true);
+    }
+  });
+
+  it('서비스 .45 거리 단계는 0/1/2 정수 페널티를 중앙 규칙으로 적용한다', () => {
+    const shots = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, unarmoredTarget(distance)));
+    expect(shots.map(shot => shot.breakdown.rangePenalty)).toEqual([0, 1, 2]);
+    expect(shots.map(shot => shot.breakdown.finalFirepower)).toEqual([6, 5, 4]);
+    expect([0, 1, 2].map(formatRangePenalty)).toEqual(['화력 0', '화력 -1', '화력 -2']);
+  });
+
+  it('대표 탄약과 장착 빌드는 4~12 화력 안에서 역할 차이를 만든다', () => {
+    const mid = unarmoredTarget(7);
+    const basic = resolver.resolveShot('standard', 0, mid);
+    const strong = resolver.resolveShot('overpressure', 0, mid);
+    const accurateFar = resolver.resolveShot('match', 0, unarmoredTarget(11));
+    const inaccurateFar = resolver.resolveShot('overpressure', 0, unarmoredTarget(11));
+    const attachmentBuild = resolver.resolveShot('standard', 0, unarmoredTarget(3), {
+      loadout: { muzzle: 'compactCompensator', optic: 'highVisibilitySight', grip: 'rubberGrip' },
+    });
+
+    expect(basic.breakdown.finalFirepower).toBe(5);
+    expect(strong.breakdown.finalFirepower).toBe(8);
+    expect(accurateFar.breakdown.finalFirepower).toBe(5);
+    expect(inaccurateFar.breakdown.finalFirepower).toBe(7);
+    expect(attachmentBuild.breakdown.finalFirepower).toBe(9);
+    expect(accurateFar.breakdown.accuracyModifier).toBe(2);
+    expect(inaccurateFar.breakdown.accuracyModifier).toBe(-1);
+  });
+
+  it('철갑 선행, 무관통 방어 흡수, 화상 지속 피해가 독립적으로 작동한다', () => {
+    const armored = createEnemyState('armored');
+    const setupFirst = resolver.resolveSequence(['armorPiercing', 'hollowPoint'], armored);
+    const payoffFirst = resolver.resolveSequence(['hollowPoint', 'armorPiercing'], armored);
+    const noPenetration = resolver.resolveShot('standard', 0, armored);
+    const burning = resolver.resolveSequence(['incendiary', 'incendiary'], unarmoredTarget(11));
+    const firstBurn = resolver.resolveEnemyAction(burning.finalState);
+    const secondBurn = resolver.resolveEnemyAction(firstBurn.after, firstBurn.playerAfter);
+
+    expect(setupFirst.totalHpDamage).toBe(6);
+    expect(payoffFirst.totalHpDamage).toBe(3);
+    expect(noPenetration.hpDamage).toBe(0);
+    expect(noPenetration.armorDamage).toBe(4);
+    expect(burning.totalHpDamage).toBe(6);
+    expect(firstBurn.burnDamage + secondBurn.burnDamage).toBe(6);
+  });
+
+  it('활성 탄약의 첫 직접 화력은 너무 이른 일격 처치를 만들지 않는다', () => {
+    const normal = createEnemyState('normal');
+    const firstShots = AMMO_ORDER.map(ammo => resolver.resolveShot(ammo, 0, normal));
+    expect(Math.max(...firstShots.map(shot => shot.hpDamage))).toBeLessThan(normal.hp);
+    expect(firstShots.every(shot => Number.isInteger(shot.breakdown.finalFirepower))).toBe(true);
+  });
+});

@@ -9,7 +9,7 @@ describe('현실 탄약 밸런스 표본', () => {
     expect(report.routes).toHaveLength(6 * 4 * 16);
     expect(report.encounters.some(row => row.armorBroken > 0)).toBe(true);
     expect(report.encounters.some(row => row.staggerTriggers > 0)).toBe(true);
-    expect(report.encounters.some(row => row.accuracyAbove100 > 0)).toBe(true);
+    expect(report.encounters.some(row => row.positiveAccuracyShots > 0)).toBe(true);
   });
   it('표준탄만으로 장갑 적을 처치할 수 있다', () => {
     expect(simulateEncounter(['standard'], 'armored', new Player()).won).toBe(true);
