@@ -50,11 +50,6 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(internals.player.getBuild().match).toBe(0);
     harness.callbacks.onChooseRoute('normal');
     expect(internals.state.phase).toBe('AMMO_REWARD');
-    harness.callbacks.onCancelReward();
-    expect(internals.player.getBuild().match).toBe(0);
-    harness.callbacks.onChooseAmmoReward('overpressure');
-    expect(internals.player.getBuild().overpressure).toBe(0);
-    harness.callbacks.onChooseAmmoReward('match');
     harness.callbacks.onReplaceReward('armorPiercing');
     expect(internals.state.phase).toBe('ROUTE_SELECTION');
     expect(internals.player.getBuild().match).toBe(1);

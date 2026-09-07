@@ -3,8 +3,8 @@ import { getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
-import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, SERVICE_45, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
-import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, countAllocations, rewardAmount, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
+import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, rewardAmount, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
@@ -21,7 +21,6 @@ export interface GameUICallbacks {
   onClaimAttachment: (equip: boolean) => void;
   onChooseAmmoReward: (ammo: SpecialAmmoType) => void;
   onReplaceReward: (ammo: SpecialAmmoType) => void;
-  onCancelReward: () => void;
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
@@ -48,11 +47,9 @@ export class GameUI {
   private readonly levelText: HTMLElement;
   private readonly waveText: HTMLElement;
   private readonly phaseText: HTMLElement;
-  private readonly statusText: HTMLElement;
   private readonly loadButton: HTMLButtonElement;
   private readonly slots: HTMLButtonElement[];
   private readonly overlay: HTMLElement;
-  private readonly combatLog: HTMLElement;
   private readonly audioMute: HTMLButtonElement;
   private readonly audioState: HTMLElement;
   private readonly audioVolume: HTMLInputElement;
@@ -62,9 +59,7 @@ export class GameUI {
   private readonly attachmentBay: HTMLElement;
   private readonly attachmentTabs: HTMLButtonElement[];
   private readonly routeChoice: HTMLElement;
-  private readonly endEyebrow: HTMLElement;
   private readonly endTitle: HTMLElement;
-  private readonly endDetail: HTMLElement;
   private readonly ammoTooltip: HTMLElement;
   private rounds: readonly AmmoType[] = [];
   private build = createAmmoBuild();
@@ -83,7 +78,7 @@ export class GameUI {
         <main class="game-stage" aria-label="전투 화면">
           <div id="canvas-host" class="canvas-host"></div>
           <header class="top-hud">
-            <div class="brand"><span class="brand-mark"></span><div><small>전술 생존 실험</small><strong>좀비 샷</strong></div></div>
+            <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong></div>
             <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">76 / 76</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
               <div class="enemy-stat enemy-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong id="armor-text">0</strong></span></div>
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/100</em></strong></span><i><b id="impact-fill"></b></i></div>
@@ -92,7 +87,7 @@ export class GameUI {
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
             <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div></div>
           </header>
-          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><p id="status-text">탄약과 장착물을 조합하세요.</p><div id="combat-log" class="combat-log" aria-live="assertive"></div></aside>
+          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong></aside>
         </main>
         <section class="tactical-console" aria-label="전투 준비">
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
@@ -104,15 +99,15 @@ export class GameUI {
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div></div>
           <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/10</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
-            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}><div><strong>${ATTACHMENT_SLOT_NAMES[slot]} 선택</strong></div>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
+            <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
         </div></section>
         <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
-        <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><span>정찰 보고</span><h2>다음 조우를 선택하세요</h2><p>구간에 진입하면 확정한 배분만큼 특수탄 잔량을 채웁니다. 표준탄은 항상 무한입니다.</p><div id="route-options" class="route-options"></div></div></section>
+        <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
         <section id="ammo-reward" class="route-choice" hidden aria-label="탄약 배분 보상"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
-        <div id="game-over" class="game-over" hidden><div class="game-over-card"><span id="end-eyebrow">생존 실패</span><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><p id="end-detail">탄약 재고와 순서를 다시 설계해 보세요.</p><button id="restart-button">다시 시작</button></div></div>
+        <div id="game-over" class="game-over" hidden><div class="game-over-card"><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><button id="restart-button">다시 시작</button></div></div>
       </div>`;
 
     this.shell = this.required(root, '.game-shell');
@@ -132,8 +127,6 @@ export class GameUI {
     this.levelText = this.required(root, '#level-text');
     this.waveText = this.required(root, '#wave-text');
     this.phaseText = this.required(root, '#phase-text');
-    this.statusText = this.required(root, '#status-text');
-    this.combatLog = this.required(root, '#combat-log');
     this.loadButton = this.required(root, '#load-button') as HTMLButtonElement;
     this.overlay = this.required(root, '#game-over');
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
@@ -145,9 +138,7 @@ export class GameUI {
     this.attachmentBay = this.required(root, '#attachment-bay');
     this.attachmentTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-attachment-slot]')];
     this.routeChoice = this.required(root, '#route-choice');
-    this.endEyebrow = this.required(root, '#end-eyebrow');
     this.endTitle = this.required(root, '#end-title');
-    this.endDetail = this.required(root, '#end-detail');
     this.ammoTooltip = this.required(root, '#ammo-tooltip');
     this.slots = [...root.querySelectorAll<HTMLButtonElement>('.mag-slot')];
 
@@ -258,19 +249,16 @@ export class GameUI {
     });
   }
 
-  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
+  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, _capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
     this.hideTooltip();
     const host = this.required(this.shell, '#ammo-reward');
     const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
-    const buildText = current.map(ammo => AMMO_DEFINITIONS[ammo].name + ' ×' + build[ammo]).join(' · ');
-    const needed = selected ? Math.max(0, countAllocations(build) + rewardAmount(selected) - capacity) : 0;
-    const title = selected ? AMMO_DEFINITIONS[selected].name + ' +' + rewardAmount(selected) + ' · 교체할 배분 선택' : '다음 구간의 탄약을 고르세요';
-    const description = selected ? '현재 배분 중 ' + needed + '발을 직접 선택하세요. 남은 선택 ' + (needed - replacements.length) + '발.' : '3종 중 하나를 선택해 런 배분을 늘립니다. 용량이 가득 차면 기존 배분과 교체합니다.';
-    const choices = selected ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => '<button type="button" class="route-option" data-replace-reward="' + ammo + '"><strong>' + AMMO_DEFINITIONS[ammo].name + ' 1발 교체</strong><small>현재 배분 ' + build[ammo] + ' → ' + (build[ammo] - replacements.filter(value => value === ammo).length - 1) + '</small></button>').join('') : options.map(ammo => '<button type="button" class="route-option ammo-reward-option" data-ammo-reward="' + ammo + '"><span>' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · 배분 +' + rewardAmount(ammo) + '</span><strong>' + AMMO_DEFINITIONS[ammo].name + '</strong><small>' + AMMO_DEFINITIONS[ammo].role + '</small>' + ammoStatsMarkup(ammo) + '<em>현재 배분 ' + build[ammo] + '발</em></button>').join('');
-    host.innerHTML = '<div class="route-card reward-card"><span>구간 완료 · 특수탄 배분 ' + countAllocations(build) + '/' + capacity + '</span><h2>' + title + '</h2><p>' + description + '</p><p>표준탄 ∞ · ' + buildText + '</p><div class="reward-options">' + choices + '</div>' + (selected ? '<button class="reward-back" type="button" data-cancel-reward>보상 다시 고르기</button>' : '') + '<p>배분 확정 후 다음 구간에 들어갈 때 잔량이 회복됩니다.</p></div>';
+    const choices = selected
+      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => '<button type="button" class="route-option ammo-reward-option" data-replace-reward="' + ammo + '"><strong>' + AMMO_DEFINITIONS[ammo].name + '</strong><em>교체 ×1</em></button>').join('')
+      : options.map(ammo => '<button type="button" class="route-option ammo-reward-option" data-ammo-reward="' + ammo + '"><strong>' + AMMO_DEFINITIONS[ammo].name + '</strong>' + ammoStatsMarkup(ammo) + '<em>+' + rewardAmount(ammo) + '</em></button>').join('');
+    host.innerHTML = '<div class="route-card reward-card"><div class="reward-options">' + choices + '</div></div>';
     host.querySelectorAll<HTMLButtonElement>('[data-ammo-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseAmmoReward(button.dataset.ammoReward as SpecialAmmoType)));
     host.querySelectorAll<HTMLButtonElement>('[data-replace-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onReplaceReward(button.dataset.replaceReward as SpecialAmmoType)));
-    host.querySelector('[data-cancel-reward]')?.addEventListener('click', () => this.callbacks.onCancelReward());
     host.hidden = false;
     host.querySelector<HTMLButtonElement>('button')?.focus();
   }
@@ -281,14 +269,11 @@ export class GameUI {
     const item = id ? ATTACHMENT_DEFINITIONS[id] : undefined;
     const replaced = item ? loadout[item.slot] : undefined;
     host.innerHTML = `<div class="route-card attachment-reward-card">
-      <span>특수 감염체 처치 · 부착물 확정 보상</span>
       <h2 id="attachment-reward-title">${item ? item.name : '모든 부착물을 수집했습니다'}</h2>
-      ${item ? `<p class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]} · ${ATTACHMENT_SLOT_NAMES[item.slot]} · ${SERVICE_45.name}</p>
+      ${item ? `<p class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]} · ${ATTACHMENT_SLOT_NAMES[item.slot]}</p>
       <div class="attachment-reward-effect">${item.summary}</div>
-      <p>${replaced ? `${ATTACHMENT_DEFINITIONS[replaced].name} 대신 장착합니다. 교체한 부착물은 보관함에 남습니다.` : '지금 장착하거나 보관한 뒤 전투 준비 중 장착할 수 있습니다.'}</p>
-      <div class="reward-options"><button type="button" class="route-option" data-claim-attachment="equip"><strong>받고 장착</strong><small>다음 전투부터 적용</small></button><button type="button" class="route-option" data-claim-attachment="store"><strong>받고 보관</strong><small>현재 장비 유지</small></button></div>`
-      : '<p>이번 런의 호환 부착물 10종을 모두 보유하고 있어 중복 보상을 지급하지 않습니다.</p><button type="button" class="route-option" data-claim-attachment="store">계속</button>'}
-      <p>이번 런 동안 유지 · 재시작 시 초기화</p>
+      <div class="reward-options"><button type="button" class="route-option" data-claim-attachment="equip"><strong>${replaced ? '교체' : '장착'}</strong></button><button type="button" class="route-option" data-claim-attachment="store"><strong>보관</strong></button></div>`
+      : '<button type="button" class="route-option" data-claim-attachment="store">계속</button>'}
     </div>`;
     host.querySelectorAll<HTMLButtonElement>('[data-claim-attachment]').forEach(button => button.addEventListener('click', () => this.callbacks.onClaimAttachment(button.dataset.claimAttachment === 'equip')));
     host.onkeydown = event => {
@@ -351,12 +336,12 @@ export class GameUI {
     this.updateAttachmentPanel();
   }
 
-  showRouteChoice(stageNumber: number, options: readonly RouteOption[]): void {
+  showRouteChoice(options: readonly RouteOption[]): void {
     const host = this.required(this.routeChoice, '#route-options');
     host.innerHTML = options.map((option) => {
       const enemies = option.roster.map((type) => ENEMY_DEFINITIONS[type].name).join(' · ');
       const intent = option.roster.map((type) => ENEMY_DEFINITIONS[type].intent?.description).filter(Boolean).join(' / ');
-      return `<button type="button" class="route-option route-${option.kind}" data-route="${option.kind}"><span>${option.kind === 'special' ? '특수 조우' : '일반 조우'} · 구간 ${stageNumber}</span><strong>${option.title}</strong><small>${option.subtitle}</small><em>${enemies}</em>${intent ? `<b>${intent}</b>` : ''}<i>완료 보상: ${option.reward}</i></button>`;
+      return `<button type="button" class="route-option route-${option.kind}" data-route="${option.kind}"><span>${option.kind === 'special' ? '특수 조우' : '일반 조우'}</span><strong>${option.title}</strong><em>${enemies}</em>${intent ? `<b>${intent}</b>` : ''}<i>${option.reward}</i></button>`;
     }).join('');
     host.querySelectorAll<HTMLButtonElement>('[data-route]').forEach((button) => button.addEventListener('click', () => this.callbacks.onChooseRoute(button.dataset.route as RouteKind)));
     this.routeChoice.hidden = false;
@@ -373,9 +358,8 @@ export class GameUI {
     this.audioVolume.disabled = preferences.muted;
   }
 
-  setPhase(phase: GamePhase, message: string): void {
+  setPhase(phase: GamePhase): void {
     this.phaseText.textContent = PHASE_LABELS[phase];
-    this.statusText.textContent = message;
     document.body.dataset.phase = phase;
   }
 
@@ -433,25 +417,10 @@ export class GameUI {
   }
 
   showShot(result: ShotResult): void {
-    const damageDetail = [`기본 ${result.breakdown.baseDamage}`, `정확도 ${Math.round(result.breakdown.accuracy)}%`, `${RANGE_NAMES[result.breakdown.effectiveRangeBand]} ×${result.breakdown.rangeMultiplier.toFixed(2)}`, `체력 피해 ${result.hpDamage}`];
-    if (result.breakdown.armorBroken) damageDetail.push(`방어 파괴 ${result.breakdown.armorBroken}`);
-    if (result.burnApplied) damageDetail.push(`화상 ${result.burnApplied}턴`);
-    if (result.breakdown.armorBlocked) damageDetail.push(`방어 흡수 ${result.breakdown.armorBlocked}`);
-    if (result.conserved) damageDetail.push('탄환 보존');
-    this.combatLog.innerHTML = `<span style="--ammo-color:${AMMO_DEFINITIONS[result.ammoType].cssColor}">${result.index + 1}</span><div><strong>${result.description}</strong><small>${damageDetail.join(' · ')}</small></div>`;
     this.slots.forEach((slot, index) => slot.classList.toggle('is-firing', index === result.index));
   }
-
-  showEvent(title: string, detail: string): void {
-    this.combatLog.innerHTML = `<span class="event-mark">!</span><div><strong>${title}</strong><small>${detail}</small></div>`;
-    this.slots.forEach((slot) => slot.classList.remove('is-firing'));
-  }
-
-  clearEvent(): void { this.combatLog.innerHTML = ''; this.slots.forEach((slot) => slot.classList.remove('is-firing')); }
-  showEndState(eyebrow: string, title: string, detail: string, show: boolean): void {
-    this.endEyebrow.textContent = eyebrow;
+  showEndState(title: string, show: boolean): void {
     this.endTitle.textContent = title;
-    this.endDetail.textContent = detail;
     this.overlay.hidden = !show;
   }
 
@@ -504,7 +473,7 @@ export class GameUI {
   private showAttachmentTooltip(id: AttachmentId, anchor: HTMLElement): void {
     this.hideTooltip();
     const definition = ATTACHMENT_DEFINITIONS[id];
-    this.ammoTooltip.innerHTML = `<header><span>${ATTACHMENT_SLOT_NAMES[definition.slot]} · ${ATTACHMENT_RARITY_NAMES[definition.rarity]}</span><strong>${definition.name}</strong></header><p>${definition.summary}</p><small>정확도는 최종 피해 효율입니다. 탄약 페널티 감소는 탄약의 정확도 손실과 누적 반동에 적용됩니다. 같은 슬롯은 하나만 장착하며 교체한 부착물은 보관됩니다.</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${ATTACHMENT_SLOT_NAMES[definition.slot]} · ${ATTACHMENT_RARITY_NAMES[definition.rarity]}</span><strong>${definition.name}</strong></header><p>${definition.summary}</p>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', '#c8ff4d');
     this.ammoTooltip.classList.add('is-attachment');
     this.ammoTooltip.hidden = false;
