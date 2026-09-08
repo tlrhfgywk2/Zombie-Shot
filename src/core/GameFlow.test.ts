@@ -86,7 +86,7 @@ describe('실제 게임의 구간/보상 연결', () => {
 
     const [sequence, action] = harness.ui.renderPreview.mock.calls.at(-1)!;
     expect(sequence.killed).toBe(true);
-    expect(sequence.totalRecoilMovement).toBe(0.03);
+    expect(sequence.totalRecoilMovement).toBe(0.02);
     expect(action.movement).toBe(enemy.advancePerTurn);
   });
   it('탄약 배급을 넘기면 보유 배분을 바꾸지 않고 경로 선택으로 진행한다', () => {

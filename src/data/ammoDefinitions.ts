@@ -65,7 +65,7 @@ export const COMBAT_BALANCE = {
   minimumMagazineCapacity: 4,
   maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
   minimumRecoil: 0,
-  recoilMovementCoefficient: 0.015,
+  recoilMovementCoefficient: 0.01,
   minimumFirepower: 1,
   exposedFirepowerBonus: 3,
   corruptedSpecialFirepowerBonus: 2,
