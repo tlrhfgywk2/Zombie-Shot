@@ -54,7 +54,6 @@ export class GameUI {
   private readonly audioMute: HTMLButtonElement;
   private readonly audioState: HTMLElement;
   private readonly audioVolume: HTMLInputElement;
-  private readonly previewChain: HTMLElement;
   private readonly previewOutcome: HTMLElement;
   private readonly intentCard: HTMLElement;
   private readonly attachmentBay: HTMLElement;
@@ -100,7 +99,7 @@ export class GameUI {
           <div class="ammo-rack"><div class="section-label"><span>탄약</span></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
-          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="sequence-preview" aria-live="polite" hidden><div id="preview-chain"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
+          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div></div>
           <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/10</small></div><div class="attachment-workspace">
@@ -139,7 +138,6 @@ export class GameUI {
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
     this.audioState = this.required(root, '#audio-state');
     this.audioVolume = this.required(root, '#audio-volume') as HTMLInputElement;
-    this.previewChain = this.required(root, '#preview-chain');
     this.previewOutcome = this.required(root, '#preview-outcome');
     this.intentCard = this.required(root, '#intent-card');
     this.attachmentBay = this.required(root, '#attachment-bay');
@@ -428,18 +426,11 @@ export class GameUI {
     const totalMovement = (sequence?.totalRecoilMovement ?? 0) + (action?.movement ?? 0);
     this.nextMoveText.textContent = sequence || action ? `${totalMovement.toFixed(1)} m` : '—';
     this.nextMoveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-delayed', Boolean(action?.staggerConsumed));
-    const preview = this.previewChain.parentElement!;
     if (!sequence) {
-      preview.hidden = true;
       this.previewOutcome.hidden = true;
-      this.previewChain.textContent = '';
       this.previewOutcome.textContent = '';
       return;
     }
-    preview.hidden = false;
-    this.previewChain.innerHTML = sequence.shots.map((shot) => {
-      return `<span style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName}</span>`;
-    }).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
     const rangePenalty = sequence.effectiveRangePenaltyPercent === 0 ? '0%' : `-${sequence.effectiveRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
       <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${sequence.totalHpDamage}</strong></span></div>

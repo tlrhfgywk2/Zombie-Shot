@@ -320,8 +320,12 @@ export class Game {
       const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), context.playerState, context.loadout);
       this.ui.renderPreview(undefined, action);
     } else {
-      const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context);
-      const action = sequence.killed || sequence.breached ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
+      const enemy = this.zombie.snapshot();
+      const sequence = this.resolver.resolveSequence(rounds, enemy, context);
+      // 확정 처치여도 기존 다음 접근값은 유지하고, 발사 사이 반동 접근은 UI에서 별도로 더한다.
+      const action = sequence.killed
+        ? this.resolver.resolveEnemyAction(enemy, context.playerState, context.loadout)
+        : sequence.breached ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
       this.ui.renderPreview(sequence, action);
     }
   }
