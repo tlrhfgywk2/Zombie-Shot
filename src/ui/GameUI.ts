@@ -440,13 +440,14 @@ export class GameUI {
     this.previewChain.innerHTML = sequence.shots.map((shot) => {
       return `<span style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName}</span>`;
     }).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
-    const final = sequence.finalState;
+    const rangePenalty = sequence.effectiveRangePenaltyPercent === 0 ? '0%' : `-${sequence.effectiveRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
-      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>피해</small><strong>${sequence.totalHpDamage}</strong></span></div>
-      <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong>${final.armor}</strong></span></div>
-      <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b>${final.statuses.impact}</b><em>/${final.staggerThreshold}</em></strong></span></div>`;
+      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${sequence.totalHpDamage}</strong></span></div>
+      <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorDamage}</strong></span></div>
+      <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalImpactApplied}</strong></span></div>
+      <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 감소</small><strong>${rangePenalty}</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 피해 ${sequence.totalHpDamage}, 반동 접근 ${sequence.totalRecoilMovement.toFixed(2)}미터, 남은 방어 ${final.armor}, 충격 ${final.statuses.impact}/${final.staggerThreshold}`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${sequence.totalHpDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalImpactApplied}, 최종 거리 화력 감소 ${sequence.effectiveRangePenaltyPercent}%`);
   }
 
   showShot(result: ShotResult): void {
