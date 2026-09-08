@@ -9,7 +9,6 @@ import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
 import { type AudioPreferences, loadAudioPreferences, saveAudioPreferences } from '../presentation/AudioPreferences';
-import { PRESENTATION_TIMING } from '../presentation/presentationConfig';
 import { GameUI } from '../ui/GameUI';
 import { GameStateMachine } from './GameStateMachine';
 
@@ -116,11 +115,19 @@ export class Game {
       this.player.fireRound(shot);
       this.zombie.applyState(shot.after);
       this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
+      const hasNextShot = shot !== sequence.shots.at(-1);
+      if (hasNextShot || shot.breakdown.recoilMovement > 0) {
+        await this.presentation.animateReacquisition(this.zombie.distance, shot.breakdown.recoilAfterShot);
+      }
       this.syncEnemy();
-      await this.pause(PRESENTATION_TIMING.betweenShots);
     }
     this.player.magazine.clear();
     this.syncMagazine();
+    if (!this.zombie.isDead && this.zombie.distance <= 0) {
+      this.showBreach();
+      this.busy = false;
+      return;
+    }
     await this.resolveEnemyAction();
     this.busy = false;
   }
@@ -148,10 +155,7 @@ export class Game {
     await this.presentation.animateAdvance(this.zombie.distance);
     this.syncEnemy();
     if (this.zombie.distance <= 0) {
-      this.player.isAlive = false;
-      this.state.transition('GAME_OVER');
-      this.ui.setPhase('GAME_OVER');
-      this.ui.showEndState('감염체가 방어선을 돌파했습니다', true);
+      this.showBreach();
       return;
     }
     await this.pause(350);
@@ -172,6 +176,13 @@ export class Game {
       return;
     }
     await this.continueAfterDeath();
+  }
+
+  private showBreach(): void {
+    this.player.isAlive = false;
+    this.state.transition('GAME_OVER');
+    this.ui.setPhase('GAME_OVER');
+    this.ui.showEndState('감염체가 방어선을 돌파했습니다', true);
   }
 
   private async claimAttachmentReward(equip: boolean): Promise<void> {
@@ -310,7 +321,7 @@ export class Game {
       this.ui.renderPreview(undefined, action);
     } else {
       const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context);
-      const action = sequence.killed ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
+      const action = sequence.killed || sequence.breached ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
       this.ui.renderPreview(sequence, action);
     }
   }

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, type AttachmentId } from '../data/attachmentDefinitions';
 import { createEnemyState } from '../data/enemyDefinitions';
 import { createPlayerCombatState } from './AttachmentLoadout';
@@ -9,56 +8,61 @@ const resolver = new CombatResolver();
 const target = (distance = 3) => ({ ...createEnemyState('tough'), hp: 1000, maxHp: 1000, armor: 0, distance });
 const loadout = (id: AttachmentId) => ({ [ATTACHMENT_DEFINITIONS[id].slot]: id });
 
-describe('서비스 .45 확정 v1 효과', () => {
-  it.each(['compactCompensator', 'highVisibilitySight', 'rubberGrip', 'compactReflexSight'] as const)('%s는 정확도에 정수 1을 더한다', id => {
-    expect(resolver.resolveShot('standard', 0, target(), { loadout: loadout(id) }).breakdown.accuracyModifier).toBe(1);
-  });
-  it('탄약 페널티 감소는 음수 정확도를 0까지만 정수 단위로 줄인다', () => {
-    const original = AMMO_DEFINITIONS.overpressure.accuracyModifier;
-    AMMO_DEFINITIONS.overpressure.accuracyModifier = -2;
-    try {
-      const playerState = createPlayerCombatState(); playerState.accuracyPenalty = -2;
-      const shot = resolver.resolveShot('overpressure', 0, target(), { playerState, loadout: { muzzle: 'dualPortCompensator', grip: 'g10Grip' } });
-      expect(shot.breakdown.accuracyModifier).toBe(-1);
-    } finally { AMMO_DEFINITIONS.overpressure.accuracyModifier = original; }
-    const boosted = resolver.resolveShot('match', 0, target(), { loadout: { muzzle: 'dualPortCompensator', grip: 'g10Grip' } });
-    expect(boosted.breakdown.accuracyModifier).toBe(3);
-  });
-  it('탄약 반동 감소는 작은 정수로 중첩되고 0 아래로 내려가지 않는다', () => {
+describe('서비스 .45 장착물 효과', () => {
+  it('총구와 손잡이는 반동을 완전히 지우지 않는 비율로 제어한다', () => {
     expect(resolver.resolveShot('overpressure', 0, target()).breakdown.recoilGenerated).toBe(2);
-    expect(resolver.resolveShot('overpressure', 0, target(), { loadout: { muzzle: 'dualPortCompensator' } }).breakdown.recoilGenerated).toBe(1);
-    expect(resolver.resolveShot('overpressure', 0, target(), { loadout: { muzzle: 'dualPortCompensator', grip: 'g10Grip' } }).breakdown.recoilGenerated).toBe(0);
+    expect(resolver.resolveShot('overpressure', 0, target(), { loadout: loadout('compactCompensator') }).breakdown.recoilGenerated).toBe(1.6);
+    expect(resolver.resolveShot('overpressure', 0, target(), { loadout: loadout('dualPortCompensator') }).breakdown.recoilGenerated).toBe(1.3);
+    expect(resolver.resolveShot('overpressure', 0, target(), { loadout: loadout('rubberGrip') }).breakdown.recoilGenerated).toBe(1.7);
+    expect(resolver.resolveShot('overpressure', 0, target(), { loadout: loadout('g10Grip') }).breakdown.recoilGenerated).toBe(1.5);
   });
-  it('반사 조준기는 중거리 페널티만 1 줄이고 초음파 거리 악화를 보존한다', () => {
-    for (const [distance, penalty] of [[3, 0], [7, 0], [11, 2]]) {
-      expect(resolver.resolveShot('standard', 0, target(distance), { loadout: { optic: 'compactReflexSight' } }).breakdown.rangePenalty).toBe(penalty);
-    }
-    const playerState = createPlayerCombatState(); playerState.rangePenaltySteps = 1;
-    const shot = resolver.resolveShot('standard', 0, target(7), { playerState, loadout: { optic: 'compactReflexSight' } });
-    expect(shot.breakdown.rangePenalty).toBe(1);
+
+  it('서로 다른 슬롯의 반동 감소는 곱연산되어 반동을 0으로 만들지 않는다', () => {
+    const shot = resolver.resolveShot('overpressure', 0, target(), { loadout: { muzzle: 'dualPortCompensator', grip: 'g10Grip' } });
+    expect(shot.breakdown.recoilGenerated).toBe(0.975);
+    expect(shot.breakdown.recoilGenerated).toBeGreaterThan(0);
   });
-  it('레이저는 근거리만 +1이고 모듈은 가장 가까운 살아 있는 표적에만 +1을 더한다', () => {
+
+  it('가늠쇠와 반사 조준기는 명시된 거리 손실만 완화한다', () => {
+    const sight = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, target(distance), { loadout: loadout('highVisibilitySight') }).breakdown.rangePenaltyPercent);
+    const reflex = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, target(distance), { loadout: loadout('compactReflexSight') }).breakdown.rangePenaltyPercent);
+    expect(sight).toEqual([0, 0, 25]);
+    expect(reflex).toEqual([0, 0, 15]);
+  });
+
+  it('반사 조준기는 초음파로 악화된 실제 원거리 손실을 완화한다', () => {
+    const playerState = createPlayerCombatState();
+    playerState.rangePenaltySteps = 1;
+    const shot = resolver.resolveShot('standard', 0, target(7), { playerState, loadout: loadout('compactReflexSight') });
+    expect(shot.breakdown.effectiveRangeBand).toBe('far');
+    expect(shot.breakdown.rangePenaltyPercent).toBe(15);
+  });
+
+  it('매치탄과 반사 조준기의 고정 거리 완화는 퍼센트포인트로 단순 합산된다', () => {
+    const shot = resolver.resolveShot('match', 0, target(11), { loadout: loadout('compactReflexSight') });
+    expect(shot.breakdown.rangePenaltyPercent).toBe(5);
+    expect(shot.breakdown.distanceAdjustedFirepower).toBe(2.85);
+    expect(shot.breakdown.finalFirepower).toBe(3);
+  });
+
+  it('레이저는 범위와 가장 가까운 유효 표적 조건에서만 반동을 줄인다', () => {
     const near = target(3), mid = target(7), dead = { ...target(1), hp: 0 };
     expect(isNearestValidTarget(near, [near, mid, dead])).toBe(true);
     expect(isNearestValidTarget(mid, [near, mid])).toBe(false);
     expect(isNearestValidTarget(dead, [dead])).toBe(false);
-    expect(resolver.resolveShot('standard', 0, near, { loadout: loadout('compactLaserSight') }).breakdown.accuracyModifier).toBe(1);
-    expect(resolver.resolveShot('standard', 0, mid, { loadout: loadout('compactLaserSight') }).breakdown.accuracyModifier).toBe(0);
-    expect(resolver.resolveShot('standard', 0, near, { loadout: loadout('laserLightModule') }).breakdown.accuracyModifier).toBe(2);
-    expect(resolver.resolveShot('standard', 0, mid, { loadout: loadout('laserLightModule') }).breakdown.accuracyModifier).toBe(1);
-    expect(resolver.resolveShot('standard', 0, mid, { targets: [near, mid], loadout: loadout('laserLightModule') }).breakdown.accuracyModifier).toBe(0);
+    expect(resolver.resolveShot('standard', 0, near, { loadout: loadout('compactLaserSight') }).breakdown.recoilGenerated).toBe(0.85);
+    expect(resolver.resolveShot('standard', 0, mid, { loadout: loadout('compactLaserSight') }).breakdown.recoilGenerated).toBe(1);
+    expect(resolver.resolveShot('standard', 0, near, { loadout: loadout('laserLightModule') }).breakdown.recoilGenerated).toBe(0.72);
+    expect(resolver.resolveShot('standard', 0, mid, { loadout: loadout('laserLightModule') }).breakdown.recoilGenerated).toBe(0.9);
+    expect(resolver.resolveShot('standard', 0, mid, { targets: [near, mid], loadout: loadout('laserLightModule') }).breakdown.recoilGenerated).toBe(1);
   });
-  it.each(ATTACHMENT_ORDER)('%s는 봉쇄 시 효과가 없고 피해·축적 배율을 직접 올리지 않는다', id => {
-    const playerState = createPlayerCombatState(); playerState.disabledSlots[ATTACHMENT_DEFINITIONS[id].slot] = 2;
+
+  it.each(ATTACHMENT_ORDER)('%s는 봉쇄 시 효과가 없고 허용된 명시 효과만 가진다', id => {
+    const playerState = createPlayerCombatState();
+    playerState.disabledSlots[ATTACHMENT_DEFINITIONS[id].slot] = 2;
     const baseline = resolver.resolveShot('overpressure', 0, target());
     const blocked = resolver.resolveShot('overpressure', 0, target(), { playerState, loadout: loadout(id) });
     expect(blocked.breakdown).toEqual(baseline.breakdown);
-    expect(ATTACHMENT_DEFINITIONS[id].modifiers.every(m => ['accuracy', 'firepower', 'capacity', 'ammoPenaltyReduction', 'rangePenaltyReduction'].includes(m.kind))).toBe(true);
-  });
-
-  it('서로 다른 슬롯의 정확도 장착물은 정수로 가산 중첩된다', () => {
-    const shot = resolver.resolveShot('standard', 0, target(), { loadout: { muzzle: 'compactCompensator', optic: 'highVisibilitySight', grip: 'rubberGrip' } });
-    expect(shot.breakdown.accuracyModifier).toBe(3);
-    expect(shot.breakdown.finalFirepower).toBe(7);
+    expect(ATTACHMENT_DEFINITIONS[id].modifiers.every(modifier => ['firepower', 'capacity', 'recoilReductionPercent', 'rangePenaltyReductionPercent'].includes(modifier.kind))).toBe(true);
   });
 });
