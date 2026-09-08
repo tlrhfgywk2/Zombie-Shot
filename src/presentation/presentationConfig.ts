@@ -13,7 +13,8 @@ export const PRESENTATION_TIMING = {
   readySettle: 220,
   shotTravel: 185,
   shotSettle: 120,
-  betweenShots: 170,
+  reacquireBase: 170,
+  reacquirePerRecoil: 45,
   hitReaction: 145,
   burnPulse: 480,
   advance: 600,
@@ -48,3 +49,8 @@ export const PRESENTATION_EFFECTS = {
   casingUpSpeed: 1.05,
   casingOutwardSpeed: 1.2,
 } as const;
+
+export const getReacquisitionDuration = (accumulatedRecoil: number): number => {
+  if (!Number.isFinite(accumulatedRecoil) || accumulatedRecoil < 0) throw new Error('재조준 시간에는 0 이상의 누적 반동이 필요합니다.');
+  return Math.round(PRESENTATION_TIMING.reacquireBase + accumulatedRecoil * PRESENTATION_TIMING.reacquirePerRecoil);
+};

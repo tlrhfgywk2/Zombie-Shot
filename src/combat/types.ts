@@ -60,8 +60,8 @@ export interface EnemyState {
 }
 
 export interface PlayerCombatState {
-  accuracyPenalty: number;
-  accuracyPenaltyTurns: number;
+  recoilPenaltyPercent: number;
+  recoilPenaltyTurns: number;
   rangePenaltySteps: number;
   rangePenaltyTurns: number;
   disabledSlots: Partial<Record<AttachmentSlot, number>>;
@@ -71,16 +71,19 @@ export interface ShotBreakdown {
   weaponFirepower: number;
   ammoFirepower: number;
   attachmentFirepower: number;
-  accuracyModifier: number;
+  directFirepower: number;
   rangeBand: RangeBand;
   effectiveRangeBand: RangeBand;
-  rangePenalty: number;
+  rangePenaltyPercent: number;
+  distanceAdjustedFirepower: number;
   statusFirepowerBonus: number;
   specialFirepowerBonus: number;
   armorBlocked: number;
   armorBroken: number;
   cumulativeRecoil: number;
   recoilGenerated: number;
+  recoilAfterShot: number;
+  recoilMovement: number;
   finalFirepower: number;
   finalDamage: number;
 }
@@ -108,10 +111,12 @@ export interface SequenceResult {
   finalState: EnemyState;
   totalHpDamage: number;
   totalArmorDamage: number;
+  totalRecoilMovement: number;
   conservedRounds: AmmoType[];
   unfiredRounds: AmmoType[];
   returnedRounds: AmmoType[];
   killed: boolean;
+  breached: boolean;
 }
 
 export interface EnemyActionResult {
