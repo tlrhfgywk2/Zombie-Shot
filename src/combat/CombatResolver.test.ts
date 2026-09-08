@@ -76,8 +76,22 @@ describe('CombatResolver', () => {
 
     expect(normal.shots[0]?.breakdown.rangeBand).toBe('mid');
     expect(normal.shots[0]?.breakdown.rangePenaltyPercent).toBe(10);
+    expect(normal.effectiveRangePenaltyPercent).toBe(10);
     expect(disrupted.shots[0]?.breakdown.effectiveRangeBand).toBe('far');
     expect(disrupted.shots[0]?.breakdown.rangePenaltyPercent).toBe(25);
+    expect(disrupted.effectiveRangePenaltyPercent).toBe(25);
+  });
+
+  it('혼합 탄약과 부착물의 최종 거리 손실을 직접 화력 가중 퍼센트로 집계한다', () => {
+    const enemy = { ...createEnemyState('tough'), hp: 100, maxHp: 100, distance: 11 };
+    const rounds = ['standard', 'match'] as const;
+    const bare = resolver.resolveSequence(rounds, enemy);
+    const tuned = resolver.resolveSequence(rounds, enemy, { loadout: { optic: 'compactReflexSight' } });
+
+    expect(bare.shots.map(shot => shot.breakdown.rangePenaltyPercent)).toEqual([25, 15]);
+    expect(bare.effectiveRangePenaltyPercent).toBe(20.7);
+    expect(tuned.shots.map(shot => shot.breakdown.rangePenaltyPercent)).toEqual([15, 5]);
+    expect(tuned.effectiveRangePenaltyPercent).toBe(10.7);
   });
 
   it('일반 이동과 반동 접근을 각각 한 번만 적용한다', () => {

@@ -51,6 +51,14 @@ export const calculateRecoilMovement = (advancePerTurn: number, cumulativeRecoil
   return Number((advancePerTurn * COMBAT_BALANCE.recoilMovementCoefficient * cumulativeRecoil).toFixed(2));
 };
 
+/** 탄별 최종 거리 손실을 직접 화력으로 가중해 발사 순서 전체의 실효 감소율을 구한다. */
+export const calculateEffectiveRangePenaltyPercent = (shots: readonly ShotResult[]): number => {
+  const directFirepower = shots.reduce((sum, shot) => sum + shot.breakdown.directFirepower, 0);
+  if (directFirepower <= 0) return 0;
+  const distanceAdjustedFirepower = shots.reduce((sum, shot) => sum + shot.breakdown.distanceAdjustedFirepower, 0);
+  return Number((Math.max(0, 1 - distanceAdjustedFirepower / directFirepower) * 100).toFixed(1));
+};
+
 const cloneState = (state: EnemyState): EnemyState => ({
   ...state,
   intent: state.intent ? { ...state.intent } : undefined,
@@ -165,8 +173,8 @@ export class CombatResolver {
       }
     }
 
-    const impactApplied = Math.max(0, definition.impact);
-    if (after.hp > 0) {
+    const impactApplied = after.hp > 0 ? Math.max(0, definition.impact) : 0;
+    if (impactApplied > 0) {
       after.statuses.impact += impactApplied;
       if (after.statuses.impact >= after.staggerThreshold) {
         after.statuses.impact -= after.staggerThreshold;
@@ -213,6 +221,8 @@ export class CombatResolver {
       shots, finalState: current,
       totalHpDamage: shots.reduce((sum, shot) => sum + shot.hpDamage, 0),
       totalArmorDamage: shots.reduce((sum, shot) => sum + shot.armorDamage, 0),
+      totalImpactApplied: shots.reduce((sum, shot) => sum + shot.impactApplied, 0),
+      effectiveRangePenaltyPercent: calculateEffectiveRangePenaltyPercent(shots),
       totalRecoilMovement: Number(shots.reduce((sum, shot) => sum + shot.breakdown.recoilMovement, 0).toFixed(2)),
       conservedRounds, unfiredRounds: [...unfiredRounds], returnedRounds: [...conservedRounds, ...unfiredRounds], killed: current.hp <= 0, breached: current.hp > 0 && current.distance <= 0,
     };

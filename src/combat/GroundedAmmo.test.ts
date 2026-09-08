@@ -96,6 +96,7 @@ describe('탄종 역할과 프리뷰의 공통 계산', () => {
     const enemy = { ...createEnemyState('contaminator'), distance: 3 };
     const setup = resolver.resolveSequence(['flatPoint', 'flatPoint'], enemy);
     expect(setup.finalState.statuses.staggerTurns).toBe(1);
+    expect(setup.totalImpactApplied).toBe(6);
     const action = resolver.resolveEnemyAction(setup.finalState);
     expect(action.intentDelayed).toBe(true);
     expect(action.movement).toBeLessThan(enemy.advancePerTurn);

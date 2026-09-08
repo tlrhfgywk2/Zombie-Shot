@@ -111,6 +111,8 @@ export interface SequenceResult {
   finalState: EnemyState;
   totalHpDamage: number;
   totalArmorDamage: number;
+  totalImpactApplied: number;
+  effectiveRangePenaltyPercent: number;
   totalRecoilMovement: number;
   conservedRounds: AmmoType[];
   unfiredRounds: AmmoType[];
