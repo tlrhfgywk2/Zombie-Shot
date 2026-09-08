@@ -59,6 +59,6 @@ describe('서비스 .45 확정 v1 효과', () => {
   it('서로 다른 슬롯의 정확도 장착물은 정수로 가산 중첩된다', () => {
     const shot = resolver.resolveShot('standard', 0, target(), { loadout: { muzzle: 'compactCompensator', optic: 'highVisibilitySight', grip: 'rubberGrip' } });
     expect(shot.breakdown.accuracyModifier).toBe(3);
-    expect(shot.breakdown.finalFirepower).toBe(9);
+    expect(shot.breakdown.finalFirepower).toBe(7);
   });
 });

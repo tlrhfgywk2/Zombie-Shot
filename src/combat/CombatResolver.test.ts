@@ -63,6 +63,7 @@ describe('CombatResolver', () => {
     expect(sequence.finalState.statuses.staggerTurns).toBe(1);
     expect(action.staggerConsumed).toBe(true);
     expect(action.intentDelayed).toBe(true);
+    expect(action.movement).toBe(0.84);
     expect(action.playerAfter.disabledSlots).toEqual({});
   });
 
@@ -92,7 +93,7 @@ describe('CombatResolver', () => {
   });
 
   it('사망 후 발사하지 않은 탄환과 조건부 회수탄을 반환 목록에 남긴다', () => {
-    const enemy = { ...createEnemyState('normal'), hp: 4 };
+    const enemy = { ...createEnemyState('normal'), hp: 2 };
     const result = resolver.resolveSequence(['bloodHex', 'incendiary', 'standard'], enemy);
 
     expect(result.shots).toHaveLength(1);
@@ -116,7 +117,7 @@ describe('CombatResolver', () => {
   });
 
   it('체력이 정확히 0이 되는 탄에서 사격을 멈추고 뒤 탄약을 반환한다', () => {
-    const enemy = { ...createEnemyState('normal'), hp: 6, maxHp: 6, distance: 3 };
+    const enemy = { ...createEnemyState('normal'), hp: 4, maxHp: 4, distance: 3 };
     const result = resolver.resolveSequence(['standard', 'standard'], enemy);
     expect(result.finalState.hp).toBe(0);
     expect(result.shots).toHaveLength(1);

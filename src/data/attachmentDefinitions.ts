@@ -3,7 +3,7 @@ import type { AttachmentSlot, RangeBand } from '../combat/types';
 export type WeaponId = 'service45';
 export const SERVICE_45 = {
   id: 'service45' as WeaponId, internalName: 'Service .45', name: '서비스 .45',
-  baseFirepower: 2, accuracyModifier: 0, recoil: 0,
+  baseFirepower: 0, accuracyModifier: 0, recoil: 0,
   rangePenalties: { near: 0, mid: 1, far: 2 } as Record<RangeBand, number>,
   baseMagazineCapacity: 4, maximumMagazineCapacity: 6,
 };
