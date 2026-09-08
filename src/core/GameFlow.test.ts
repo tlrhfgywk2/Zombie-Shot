@@ -74,6 +74,21 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(player.applyAmmoReward('standard' as SpecialAmmoType, ['armorPiercing'])).toBe(false);
     expect(player.getBuild()).toEqual(before);
   });
+  it('처치 프리뷰에서도 기존 다음 접근과 사격 사이 반동 접근을 계속 제공한다', () => {
+    const game = new Game({} as HTMLElement);
+    const internals = game as unknown as { zombie: Zombie; sync: () => void };
+    const enemy = internals.zombie.snapshot();
+    internals.zombie.applyState({ ...enemy, hp: 5, armor: 0 });
+    internals.sync();
+
+    harness.callbacks.onAddAmmo('standard');
+    harness.callbacks.onAddAmmo('standard');
+
+    const [sequence, action] = harness.ui.renderPreview.mock.calls.at(-1)!;
+    expect(sequence.killed).toBe(true);
+    expect(sequence.totalRecoilMovement).toBe(0.03);
+    expect(action.movement).toBe(enemy.advancePerTurn);
+  });
   it('탄약 배급을 넘기면 보유 배분을 바꾸지 않고 경로 선택으로 진행한다', () => {
     const game = new Game({} as HTMLElement);
     const internals = game as unknown as { player: Player; state: GameStateMachine };
