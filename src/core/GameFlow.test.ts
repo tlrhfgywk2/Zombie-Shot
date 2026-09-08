@@ -39,13 +39,11 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(internals.player.getStock().hollowPoint).toBe(0);
     expect(internals.player.getStock().armorPiercing).toBe(2);
     expect(harness.ui.showAmmoRewards).not.toHaveBeenCalled();
-    for (let i = 0; i < 4; i += 1) harness.callbacks.onAddAmmo('standard');
-    harness.callbacks.onLoad();
-    await vi.waitFor(() => expect(internals.busy).toBe(false));
-    for (let i = 0; i < 4; i += 1) harness.callbacks.onAddAmmo('standard');
-    harness.callbacks.onLoad();
-    await vi.waitFor(() => expect(internals.busy).toBe(false));
-    harness.callbacks.onAddAmmo('standard'); harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
+    for (let volley = 0; volley < 6 && internals.state.phase === 'AMMO_SELECTION'; volley += 1) {
+      for (let i = 0; i < 4; i += 1) harness.callbacks.onAddAmmo('standard');
+      harness.callbacks.onLoad();
+      await vi.waitFor(() => expect(internals.busy).toBe(false));
+    }
     await vi.waitFor(() => expect(internals.state.phase).toBe('AMMO_REWARD'));
     expect(internals.player.getStock().hollowPoint).toBe(0);
     harness.callbacks.onChooseAmmoReward('match');

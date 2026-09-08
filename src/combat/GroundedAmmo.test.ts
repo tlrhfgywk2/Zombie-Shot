@@ -38,25 +38,25 @@ describe('누적 반동', () => {
   it('최소 화력과 양수 정확도 가산을 보존하며 탄창마다 누적을 초기화한다', () => {
     const result = sequence(Array<AmmoType>(8).fill('overpressure'));
     expect(result.shots.at(-1)!.breakdown.finalFirepower).toBe(1);
-    expect(sequence(['match']).shots[0]!.hpDamage).toBe(7);
+    expect(sequence(['match']).shots[0]!.hpDamage).toBe(5);
     expect(sequence(['standard']).shots[0]!.breakdown.accuracyModifier).toBe(0);
   });
 });
 
 describe('수치 방어층과 방어 파괴', () => {
-  it('중거리 오염 투척체의 방어를 먼저 파괴하고 정수 화력 4를 적용한다', () => {
+  it('중거리 오염 투척체의 방어를 먼저 파괴하고 탄약 화력 2를 적용한다', () => {
     const shot = resolver.resolveSequence(['armorPiercing'], createEnemyState('contaminator')).shots[0]!;
     expect(shot.breakdown.rangeBand).toBe('mid');
     expect(shot.breakdown.rangePenalty).toBe(1);
     expect(shot.breakdown.armorBroken).toBe(3);
     expect(shot.breakdown.armorBlocked).toBe(0);
     expect(shot.after.armor).toBe(0);
-    expect(shot.hpDamage).toBe(4);
+    expect(shot.hpDamage).toBe(2);
   });
   it('방어 8 표적은 방어 파괴 4 철갑탄 한 발에 방어가 4만 감소한다', () => {
     const shot = resolver.resolveSequence(['armorPiercing'], createEnemyState('groundshaker')).shots[0]!;
     expect(shot.breakdown.armorBroken).toBe(4);
-    expect(shot.breakdown.armorBlocked).toBe(4);
+    expect(shot.breakdown.armorBlocked).toBe(2);
     expect(shot.armorDamage).toBe(4);
     expect(shot.after.armor).toBe(4);
     expect(shot.hpDamage).toBe(0);
@@ -65,25 +65,25 @@ describe('수치 방어층과 방어 파괴', () => {
     const shot = sequence(['standard'], 3).shots[0]!;
     expect(shot.armorDamage).toBe(3);
     expect(shot.after.armor).toBe(0);
-    expect(shot.hpDamage).toBe(3);
-    expect(shot.after.hp).toBe(497);
+    expect(shot.hpDamage).toBe(1);
+    expect(shot.after.hp).toBe(499);
   });
   it('큰 방어층은 흡수한 피해만 감소한다', () => {
     const shot = sequence(['standard'], 30).shots[0]!;
-    expect(shot.breakdown.armorBlocked).toBe(6);
-    expect(shot.armorDamage).toBe(6);
-    expect(shot.after.armor).toBe(24);
+    expect(shot.breakdown.armorBlocked).toBe(4);
+    expect(shot.armorDamage).toBe(4);
+    expect(shot.after.armor).toBe(26);
     expect(shot.hpDamage).toBe(0);
   });
   it('방어 파괴가 선행하고 초과 파괴량은 체력 피해로 바뀌지 않는다', () => {
     const shot = sequence(['armorPiercing'], 3).shots[0]!;
     expect(shot.breakdown.armorBroken).toBe(3);
     expect(shot.breakdown.armorBlocked).toBe(0);
-    expect(shot.hpDamage).toBe(5);
-    expect(sequence(['armorPiercing']).shots[0]!.hpDamage).toBe(5);
+    expect(shot.hpDamage).toBe(3);
+    expect(sequence(['armorPiercing']).shots[0]!.hpDamage).toBe(3);
   });
   it('무장갑에는 화력을 온전히 적용하고 철갑 선행은 역순보다 유리하다', () => {
-    expect(sequence(['standard']).totalHpDamage).toBe(6);
+    expect(sequence(['standard']).totalHpDamage).toBe(4);
     expect(sequence(['armorPiercing', 'hollowPoint'], 5).totalHpDamage).toBeGreaterThan(sequence(['hollowPoint', 'armorPiercing'], 5).totalHpDamage);
   });
 });

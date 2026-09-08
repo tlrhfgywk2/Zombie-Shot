@@ -26,6 +26,7 @@ describe('정수 전투 수치 스케일', () => {
     for (const value of [SERVICE_45.baseFirepower, SERVICE_45.accuracyModifier, SERVICE_45.recoil, ...Object.values(SERVICE_45.rangePenalties), COMBAT_BALANCE.minimumFirepower, COMBAT_BALANCE.burnDamagePerTurn]) {
       expect(Number.isInteger(value)).toBe(true);
     }
+    expect(SERVICE_45.baseFirepower).toBe(0);
     for (const attachment of Object.values(ATTACHMENT_DEFINITIONS)) {
       for (const modifier of attachment.modifiers) expect(Number.isInteger(modifier.value)).toBe(true);
     }
@@ -47,11 +48,11 @@ describe('정수 전투 수치 스케일', () => {
   it('서비스 .45 거리 단계는 0/1/2 정수 페널티를 중앙 규칙으로 적용한다', () => {
     const shots = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, unarmoredTarget(distance)));
     expect(shots.map(shot => shot.breakdown.rangePenalty)).toEqual([0, 1, 2]);
-    expect(shots.map(shot => shot.breakdown.finalFirepower)).toEqual([6, 5, 4]);
+    expect(shots.map(shot => shot.breakdown.finalFirepower)).toEqual([4, 3, 2]);
     expect([0, 1, 2].map(formatRangePenalty)).toEqual(['화력 0', '화력 -1', '화력 -2']);
   });
 
-  it('대표 탄약과 장착 빌드는 4~12 화력 안에서 역할 차이를 만든다', () => {
+  it('대표 탄약과 장착 빌드는 무기 기본 화력 없이 역할 차이를 만든다', () => {
     const mid = unarmoredTarget(7);
     const basic = resolver.resolveShot('standard', 0, mid);
     const strong = resolver.resolveShot('overpressure', 0, mid);
@@ -61,11 +62,11 @@ describe('정수 전투 수치 스케일', () => {
       loadout: { muzzle: 'compactCompensator', optic: 'highVisibilitySight', grip: 'rubberGrip' },
     });
 
-    expect(basic.breakdown.finalFirepower).toBe(5);
-    expect(strong.breakdown.finalFirepower).toBe(8);
-    expect(accurateFar.breakdown.finalFirepower).toBe(5);
-    expect(inaccurateFar.breakdown.finalFirepower).toBe(7);
-    expect(attachmentBuild.breakdown.finalFirepower).toBe(9);
+    expect(basic.breakdown.finalFirepower).toBe(3);
+    expect(strong.breakdown.finalFirepower).toBe(6);
+    expect(accurateFar.breakdown.finalFirepower).toBe(3);
+    expect(inaccurateFar.breakdown.finalFirepower).toBe(5);
+    expect(attachmentBuild.breakdown.finalFirepower).toBe(7);
     expect(accurateFar.breakdown.accuracyModifier).toBe(2);
     expect(inaccurateFar.breakdown.accuracyModifier).toBe(-1);
   });
@@ -79,11 +80,11 @@ describe('정수 전투 수치 스케일', () => {
     const firstBurn = resolver.resolveEnemyAction(burning.finalState);
     const secondBurn = resolver.resolveEnemyAction(firstBurn.after, firstBurn.playerAfter);
 
-    expect(setupFirst.totalHpDamage).toBe(6);
-    expect(payoffFirst.totalHpDamage).toBe(3);
+    expect(setupFirst.totalHpDamage).toBe(2);
+    expect(payoffFirst.totalHpDamage).toBe(1);
     expect(noPenetration.hpDamage).toBe(0);
-    expect(noPenetration.armorDamage).toBe(4);
-    expect(burning.totalHpDamage).toBe(6);
+    expect(noPenetration.armorDamage).toBe(2);
+    expect(burning.totalHpDamage).toBe(2);
     expect(firstBurn.burnDamage + secondBurn.burnDamage).toBe(6);
   });
 

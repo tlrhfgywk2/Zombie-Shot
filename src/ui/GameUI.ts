@@ -93,13 +93,14 @@ export class GameUI {
             <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리 · 화력 -1</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong></aside>
+          <aside id="preview-outcome" class="combat-forecast" aria-label="발사 결과 예상" aria-live="polite" hidden></aside>
         </main>
         <section class="tactical-console" aria-label="전투 준비">
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
-          <div class="ammo-rack"><div class="section-label"><span>탄약</span><small>${SERVICE_45.name} · 기본 화력 ${SERVICE_45.baseFirepower}</small></div><div class="ammo-options">
+          <div class="ammo-rack"><div class="section-label"><span>탄약</span></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
-          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="sequence-preview" aria-live="polite" hidden><div id="preview-chain"></div><div id="preview-outcome"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
+          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="sequence-preview" aria-live="polite" hidden><div id="preview-chain"></div></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div></div>
           <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/10</small></div><div class="attachment-workspace">
@@ -152,11 +153,12 @@ export class GameUI {
     root.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach((button) => {
       const ammo = button.dataset.ammo as AmmoType;
       button.addEventListener('click', () => {
-        if (this.consumeSuppressedClick() || this.locked) return;
+        if (this.consumeSuppressedClick() || !this.isAmmoSelectable(ammo)) return;
         this.callbacks.onAddAmmo(ammo);
       });
-      this.bindPointerDrag(button, () => ({ ammo }), () => this.showAmmoTooltip(ammo, button));
+      this.bindPointerDrag(button, () => this.isAmmoSelectable(ammo) ? ({ ammo }) : undefined);
       this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button));
+      this.bindTouchTooltip(button, () => this.showAmmoTooltip(ammo, button));
     });
 
     this.slots.forEach((slot, index) => {
@@ -165,6 +167,14 @@ export class GameUI {
         this.handleSlotTap(index);
       });
       this.bindPointerDrag(slot, () => this.rounds[index] ? ({ sourceIndex: index }) : undefined);
+      this.bindHoverTooltip(slot, () => {
+        const ammo = this.rounds[index];
+        if (ammo) this.showAmmoTooltip(ammo, slot);
+      });
+      this.bindTouchTooltip(slot, () => {
+        const ammo = this.rounds[index];
+        if (ammo) this.showAmmoTooltip(ammo, slot);
+      });
     });
     this.attachmentTabs.forEach((button, index) => {
       button.addEventListener('click', () => {
@@ -211,7 +221,7 @@ export class GameUI {
     window.visualViewport?.addEventListener('resize', this.updateResponsiveLayout);
     document.addEventListener('visibilitychange', this.resetDragVisuals);
     document.addEventListener('pointerdown', (event) => {
-      if (!(event.target as Element).closest('.ammo-token, .attachment-option')) this.hideTooltip();
+      if (!(event.target as Element).closest('.ammo-token, .mag-slot, .attachment-option')) this.hideTooltip();
     });
     document.addEventListener('keydown', (event) => { if (event.key === 'Escape') this.hideTooltip(); });
   }
@@ -249,8 +259,9 @@ export class GameUI {
       const count = stock[ammo];
       const loaded = reserved.filter(value => value === ammo).length;
       button.hidden = ammo !== 'standard' && build[ammo] === 0;
-      button.disabled = this.locked || (count !== 'infinite' && count - loaded <= 0);
-      button.setAttribute('aria-disabled', String(button.disabled));
+      const unavailable = this.locked || (count !== 'infinite' && count - loaded <= 0);
+      button.disabled = false;
+      button.setAttribute('aria-disabled', String(unavailable));
       const label = ammo === 'standard' ? '∞' : count + ' / ' + build[ammo];
       button.querySelector<HTMLElement>('.stock-count')!.textContent = label;
       button.setAttribute('aria-label', AMMO_DEFINITIONS[ammo].name + ' · ' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · ' + label + ' · 장전 예약 ' + loaded + '발');
@@ -419,22 +430,22 @@ export class GameUI {
     const preview = this.previewChain.parentElement!;
     if (!sequence) {
       preview.hidden = true;
+      this.previewOutcome.hidden = true;
       this.previewChain.textContent = '';
       this.previewOutcome.textContent = '';
       return;
     }
     preview.hidden = false;
     this.previewChain.innerHTML = sequence.shots.map((shot) => {
-      const accuracy = `${shot.breakdown.accuracyModifier >= 0 ? '+' : ''}${shot.breakdown.accuracyModifier}`;
-      return `<span title="정확도 ${accuracy} · ${RANGE_NAMES[shot.breakdown.effectiveRangeBand]} ${formatRangePenalty(shot.breakdown.rangePenalty)} · 최종 화력 ${shot.breakdown.finalFirepower}" style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName} <b>${accuracy}</b></span>`;
+      return `<span style="--ammo-color:${AMMO_DEFINITIONS[shot.ammoType].cssColor}">${shot.index + 1}. ${AMMO_DEFINITIONS[shot.ammoType].shortName}</span>`;
     }).join('<i>→</i>') + sequence.unfiredRounds.map(ammo => '<span>' + AMMO_DEFINITIONS[ammo].shortName + ' · 처치 후 미발사</span>').join('');
     const final = sequence.finalState;
-    const effects: string[] = [`체력 ${final.hp}`, `방어 ${final.armor}`, `체력 피해 ${sequence.totalHpDamage}`];
-    if (sequence.totalArmorDamage) effects.push(`방어 감소 ${sequence.totalArmorDamage}`);
-    if (final.statuses.burnTurns) effects.push(`화상 ${final.statuses.burnTurns}턴`);
-    if (sequence.killed) effects.push('처치 예상');
-    if (sequence.returnedRounds.length) effects.push(`반환 ${sequence.returnedRounds.length}발`);
-    this.previewOutcome.textContent = effects.join(' · ');
+    this.previewOutcome.innerHTML = `
+      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>피해</small><strong>${sequence.totalHpDamage}</strong></span></div>
+      <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong>${final.armor}</strong></span></div>
+      <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b>${final.statuses.impact}</b><em>/${final.staggerThreshold}</em></strong></span></div>`;
+    this.previewOutcome.hidden = false;
+    this.previewOutcome.setAttribute('aria-label', `예상 피해 ${sequence.totalHpDamage}, 남은 방어 ${final.armor}, 충격 ${final.statuses.impact}/${final.staggerThreshold}`);
   }
 
   showShot(result: ShotResult): void {
@@ -542,6 +553,12 @@ export class GameUI {
     return true;
   }
 
+  private isAmmoSelectable(ammo: AmmoType): boolean {
+    const count = this.stock[ammo];
+    const loaded = this.rounds.filter(value => value === ammo).length;
+    return !this.locked && (count === 'infinite' || count - loaded > 0);
+  }
+
   private readonly resetDragVisuals = (): void => {
     this.gestureVersion += 1;
     document.body.classList.remove('ammo-drag-active');
@@ -602,7 +619,7 @@ export class GameUI {
       timer = undefined;
     };
     element.addEventListener('pointerenter', (event) => {
-      if (event.pointerType !== 'mouse' || element.disabled) return;
+      if (event.pointerType !== 'mouse') return;
       clear();
       timer = window.setTimeout(show, 500);
     });
@@ -620,11 +637,15 @@ export class GameUI {
       clear();
       this.hideTooltip();
     });
+    element.addEventListener('focus', () => {
+      clear();
+      show();
+    });
   }
 
   private bindTouchTooltip(element: HTMLButtonElement, show: () => void): void {
     element.addEventListener('pointerdown', (event) => {
-      if (event.pointerType === 'mouse' || event.button !== 0 || element.disabled || this.locked) return;
+      if (event.pointerType === 'mouse' || event.button !== 0) return;
       const startX = event.clientX;
       const startY = event.clientY;
       let longPressed = false;
@@ -654,7 +675,7 @@ export class GameUI {
     });
   }
 
-  private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined, onLongPress?: () => void): void {
+  private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined): void {
     element.addEventListener('pointerdown', (event) => {
       if (this.locked || event.button !== 0) return;
       const payload = getPayload();
@@ -663,17 +684,10 @@ export class GameUI {
       const startY = event.clientY;
       const gestureVersion = this.gestureVersion;
       let dragging = false;
-      let longPressed = false;
-      const longPressTimer = onLongPress && event.pointerType !== 'mouse' ? window.setTimeout(() => {
-        if (gestureVersion !== this.gestureVersion) return;
-        longPressed = true;
-        onLongPress();
-      }, 520) : undefined;
       element.setPointerCapture(event.pointerId);
       const move = (moveEvent: PointerEvent): void => {
         if (gestureVersion !== this.gestureVersion) return;
         if (!dragging && Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) >= 8) {
-          if (longPressTimer !== undefined) window.clearTimeout(longPressTimer);
           this.hideTooltip();
           dragging = true;
           element.classList.add('is-dragging');
@@ -685,7 +699,6 @@ export class GameUI {
         this.slots.forEach((slot) => slot.classList.toggle('drop-target', slot === target));
       };
       const cleanup = (pointerId: number): void => {
-        if (longPressTimer !== undefined) window.clearTimeout(longPressTimer);
         element.removeEventListener('pointermove', move);
         element.removeEventListener('pointerup', end);
         element.removeEventListener('pointercancel', cancel);
@@ -697,11 +710,6 @@ export class GameUI {
       };
       const end = (endEvent: PointerEvent): void => {
         cleanup(endEvent.pointerId);
-        if (longPressed) {
-          this.suppressClick = true;
-          window.setTimeout(() => { this.suppressClick = false; }, 0);
-          return;
-        }
         if (dragging && gestureVersion === this.gestureVersion) {
           const target = document.elementFromPoint(endEvent.clientX, endEvent.clientY)?.closest<HTMLButtonElement>('.mag-slot');
           const destination = target ? Number(target.dataset.slot) : Number.NaN;
