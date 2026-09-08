@@ -50,11 +50,11 @@ describe('CombatResolver', () => {
     expect(shots.map(shot => shot.breakdown.finalFirepower)).toEqual([4, 4, 4, 4]);
   });
 
-  it('누적 반동과 재조준 접근은 문턱 없이 정비례한다', () => {
-    expect([1, 2, 3].map(recoil => calculateRecoilMovement(2, recoil))).toEqual([0.03, 0.06, 0.09]);
+  it('누적 반동과 재조준 접근은 마지막 탄까지 문턱 없이 정비례한다', () => {
+    expect([1, 2, 3].map(recoil => calculateRecoilMovement(2, recoil))).toEqual([0.02, 0.04, 0.06]);
     const sequence = resolver.resolveSequence(['standard', 'standard', 'standard', 'standard'], { ...createEnemyState('normal'), hp: 100, maxHp: 100 });
-    expect(sequence.shots.map(shot => shot.breakdown.recoilMovement)).toEqual([0.03, 0.06, 0.09, 0]);
-    expect(sequence.totalRecoilMovement).toBe(0.18);
+    expect(sequence.shots.map(shot => shot.breakdown.recoilMovement)).toEqual([0.02, 0.04, 0.06, 0.08]);
+    expect(sequence.totalRecoilMovement).toBe(0.2);
   });
 
   it('반동은 탄창 안에서 누적되고 새 발사 시퀀스에서는 0으로 초기화된다', () => {
@@ -99,9 +99,9 @@ describe('CombatResolver', () => {
     const sequence = resolver.resolveSequence(['standard', 'standard', 'standard', 'standard'], enemy);
     const action = resolver.resolveEnemyAction(sequence.finalState);
 
-    expect(sequence.finalState.distance).toBe(7.82);
+    expect(sequence.finalState.distance).toBe(7.8);
     expect(action.movement).toBe(2);
-    expect(action.after.distance).toBe(5.82);
+    expect(action.after.distance).toBe(5.8);
     expect(enemy.distance - action.after.distance).toBeCloseTo(2 + sequence.totalRecoilMovement, 5);
   });
 
@@ -195,6 +195,6 @@ describe('CombatResolver', () => {
     const rounds = ['arc', 'stagger', 'sanctified', 'standard'] as const;
     const context = { loadout: { optic: 'compactReflexSight', rail: 'laserLightModule' } } as const;
     expect(resolver.resolveSequence(rounds, enemy, context)).toEqual(resolver.resolveSequence(rounds, enemy, context));
-    expect(COMBAT_BALANCE.recoilMovementCoefficient).toBe(0.015);
+    expect(COMBAT_BALANCE.recoilMovementCoefficient).toBe(0.01);
   });
 });

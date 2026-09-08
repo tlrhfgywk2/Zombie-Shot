@@ -12,7 +12,6 @@ export interface CombatContext {
 
 interface ShotContext extends CombatContext {
   cumulativeRecoil?: number;
-  hasFollowingRound?: boolean;
 }
 
 export interface FirepowerInputs {
@@ -185,7 +184,7 @@ export class CombatResolver {
     }
 
     const conserved = Boolean(definition.recoverOnKill && after.hp <= 0);
-    const recoilMovement = context.hasFollowingRound && after.hp > 0 ? calculateRecoilMovement(after.advancePerTurn, recoilAfterShot) : 0;
+    const recoilMovement = after.hp > 0 ? calculateRecoilMovement(after.advancePerTurn, recoilAfterShot) : 0;
     if (recoilMovement > 0) after.distance = Math.max(0, Number((after.distance - recoilMovement).toFixed(2)));
     const parts = [`${definition.name} 명중`, `${RANGE_NAMES[effectiveRangeBand]} ${formatRangePenalty(rangePenaltyPercent)}`, `최종 화력 ${finalFirepower}`];
     if (recoilMovement) parts.push(`재조준 접근 ${recoilMovement.toFixed(2)}m`);
@@ -210,7 +209,7 @@ export class CombatResolver {
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo || current.hp <= 0 || current.distance <= 0) break;
-      const shot = this.resolveShot(ammo, index, current, { ...context, cumulativeRecoil, hasFollowingRound: index < rounds.length - 1 });
+      const shot = this.resolveShot(ammo, index, current, { ...context, cumulativeRecoil });
       shots.push(shot);
       cumulativeRecoil = shot.breakdown.recoilAfterShot;
       current = cloneState(shot.after);

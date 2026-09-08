@@ -20,8 +20,8 @@ describe('누적 반동', () => {
   it('저반동 선행은 후속 재조준 접근을 줄이고 고반동 선행은 늘린다', () => {
     const lowFirst = sequence(['subsonic', 'standard', 'standard']);
     const highFirst = sequence(['overpressure', 'standard', 'standard']);
-    expect(lowFirst.shots.map(shot => shot.breakdown.recoilMovement)).toEqual([0, 0.03, 0]);
-    expect(highFirst.shots.map(shot => shot.breakdown.recoilMovement)).toEqual([0.05, 0.08, 0]);
+    expect(lowFirst.shots.map(shot => shot.breakdown.recoilMovement)).toEqual([0, 0.02, 0.03]);
+    expect(highFirst.shots.map(shot => shot.breakdown.recoilMovement)).toEqual([0.03, 0.05, 0.07]);
     expect(highFirst.totalRecoilMovement).toBeGreaterThan(lowFirst.totalRecoilMovement);
   });
 
