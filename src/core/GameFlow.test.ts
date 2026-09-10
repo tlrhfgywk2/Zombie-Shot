@@ -46,6 +46,14 @@ describe('실제 게임의 구간/보상 연결', () => {
     }
     await vi.waitFor(() => expect(internals.state.phase).toBe('AMMO_REWARD'));
     expect(internals.player.getStock().hollowPoint).toBe(0);
+    expect(harness.ui.showAmmoRewards).toHaveBeenLastCalledWith(
+      ['match', 'hollowPoint', 'wadcutter'],
+      internals.player.getBuild(),
+      internals.player.getStock(),
+      internals.player.getSpecialCapacity(),
+      undefined,
+      [],
+    );
     harness.callbacks.onChooseAmmoReward('match');
     expect(internals.state.phase).toBe('AMMO_REWARD');
     expect(internals.player.getBuild().match).toBe(0);
