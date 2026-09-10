@@ -266,13 +266,13 @@ export class GameUI {
     });
   }
 
-  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, _capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
+  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, stock: AmmoStock, _capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
     this.hideTooltip();
     const host = this.required(this.shell, '#ammo-reward');
     const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
     const choices = selected
-      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>교체 ×1</em></button>`).join('')
-      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>+${rewardAmount(ammo)}</em></button>`).join('');
+      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>보유 ×${stock[ammo]} · 교체 ×1</em></button>`).join('')
+      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>보유 ×${stock[ammo]} · +${rewardAmount(ammo)}</em></button>`).join('');
     host.innerHTML = `<div class="route-card reward-card">
       <header class="ammo-screen-header"><h2 id="ammo-reward-title">탄약 보급</h2><button type="button" data-open-ammo-inventory aria-haspopup="dialog">보유 탄약</button></header>
       <div class="reward-options">${choices}</div>
