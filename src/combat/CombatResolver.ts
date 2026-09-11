@@ -1,7 +1,7 @@
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, SERVICE_45, type AttachmentModifier, type LoadoutSnapshot, type ModifierCondition } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE, RANGE_NAMES } from '../data/ammoDefinitions';
 import { getEnabledAttachmentIds, createPlayerCombatState } from './AttachmentLoadout';
-import type { AmmoType, EnemyActionType, EnemyActionResult, EnemyState, PlayerCombatState, RangeBand, SequenceResult, ShotResult, StatusType } from './types';
+import type { AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState, PlayerCombatState, RangeBand, SequenceResult, ShotResult, StatusType } from './types';
 
 export interface CombatContext {
   loadout?: LoadoutSnapshot;
@@ -15,13 +15,21 @@ interface ShotContext extends CombatContext {
   pendingShockSaturation?: boolean;
 }
 
-export interface FirepowerInputs {
+interface VolleyRangeProfile {
+  rangeBand: RangeBand;
+  effectiveRangeBand: RangeBand;
+  baseRangePenaltyPercent: number;
+  matchAmmoCount: number;
+  matchRangePenaltyReductionPercent: number;
+  finalRangePenaltyPercent: number;
+}
+
+export interface EffectiveFirepowerInputs {
   weaponFirepower: number;
   ammoFirepower: number;
   attachmentFirepower: number;
   statusFirepowerBonus: number;
   specialFirepowerBonus: number;
-  rangePenaltyPercent: number;
 }
 
 /** 양의 화력은 최근접 정수로 반올림하며 정확히 .5면 올린다. */
@@ -30,19 +38,27 @@ export const roundPositiveFirepower = (value: number): number => {
   return Math.floor(value + 0.5 + Number.EPSILON);
 };
 
-export const calculateDirectFirepower = (inputs: Omit<FirepowerInputs, 'rangePenaltyPercent'>): number => {
+export const calculateEffectiveFirepower = (inputs: EffectiveFirepowerInputs): number => {
   if (!Object.values(inputs).every(Number.isInteger)) throw new Error('직접 화력 항에는 정수만 사용할 수 있습니다.');
   return inputs.weaponFirepower + inputs.ammoFirepower + inputs.attachmentFirepower
     + inputs.statusFirepowerBonus + inputs.specialFirepowerBonus;
 };
 
-/** 직접 화력을 합산한 뒤 거리 손실을 한 번 적용하고 전역 반올림 규칙으로 정수화한다. */
-export const calculateFinalFirepower = (inputs: FirepowerInputs, minimum = COMBAT_BALANCE.minimumFirepower): number => {
-  if (!Number.isInteger(inputs.rangePenaltyPercent) || inputs.rangePenaltyPercent < 0 || inputs.rangePenaltyPercent > 100) throw new Error('거리 화력 손실은 0~100의 정수 퍼센트여야 합니다.');
+/** 탄별 유효 화력 합계에 최종 거리 화력 감소를 한 번 적용하고 정수화한다. */
+export const calculateFinalVolleyFirepower = (rawVolleyFirepower: number, rangePenaltyPercent: number, minimum = COMBAT_BALANCE.minimumFirepower): number => {
+  if (!Number.isInteger(rawVolleyFirepower) || rawVolleyFirepower < 0) throw new Error('발사 순서 유효 화력은 0 이상의 정수여야 합니다.');
+  if (!Number.isInteger(rangePenaltyPercent) || rangePenaltyPercent < 0 || rangePenaltyPercent > 100) throw new Error('거리 화력 감소는 0~100의 정수 퍼센트여야 합니다.');
   if (!Number.isInteger(minimum)) throw new Error('최소 화력은 정수여야 합니다.');
-  const directFirepower = calculateDirectFirepower(inputs);
-  const distanceAdjusted = Math.max(0, directFirepower * (1 - inputs.rangePenaltyPercent / 100));
+  if (rawVolleyFirepower === 0) return 0;
+  const distanceAdjusted = rawVolleyFirepower * (1 - rangePenaltyPercent / 100);
   return Math.max(minimum, roundPositiveFirepower(distanceAdjusted));
+};
+
+/** 매치탄은 화력 기여도나 위치와 무관하게 최종 거리 화력 감소를 발당 3%p 낮춘다. */
+export const calculateFinalRangePenaltyPercent = (basePenaltyPercent: number, matchAmmoCount: number): number => {
+  if (!Number.isInteger(basePenaltyPercent) || basePenaltyPercent < 0 || basePenaltyPercent > 100) throw new Error('기본 거리 화력 감소는 0~100의 정수 퍼센트여야 합니다.');
+  if (!Number.isInteger(matchAmmoCount) || matchAmmoCount < 0) throw new Error('매치탄 수는 0 이상의 정수여야 합니다.');
+  return Math.max(0, basePenaltyPercent - matchAmmoCount * COMBAT_BALANCE.matchRangePenaltyReductionPercent);
 };
 
 export const ACTION_SHOCK_THRESHOLDS: Record<EnemyActionType, number> = {
@@ -56,12 +72,12 @@ export const selectEnemyAction = (enemy: EnemyState): EnemyActionType =>
 export const getActionShockThreshold = (enemy: EnemyState, action = selectEnemyAction(enemy)): number =>
   Math.max(1, ACTION_SHOCK_THRESHOLDS[action] + enemy.shockResistance);
 
-/** 탄별 최종 거리 손실을 직접 화력으로 가중해 발사 순서 전체의 실효 감소율을 구한다. */
-export const calculateEffectiveRangePenaltyPercent = (shots: readonly ShotResult[]): number => {
-  const directFirepower = shots.reduce((sum, shot) => sum + shot.breakdown.directFirepower, 0);
-  if (directFirepower <= 0) return 0;
-  const distanceAdjustedFirepower = shots.reduce((sum, shot) => sum + shot.breakdown.distanceAdjustedFirepower, 0);
-  return Number((Math.max(0, 1 - distanceAdjustedFirepower / directFirepower) * 100).toFixed(1));
+export const previewEnemyAction = (enemy: EnemyState): EnemyActionPreview => {
+  const selectedAction = selectEnemyAction(enemy);
+  const slowMultiplier = enemy.statuses.slowTurns > 0 ? COMBAT_BALANCE.slowMovementMultiplier : 1;
+  const movement = selectedAction === 'approach'
+    ? Math.min(enemy.distance, Number((enemy.advancePerTurn * slowMultiplier).toFixed(2))) : 0;
+  return { selectedAction, threshold: getActionShockThreshold(enemy, selectedAction), movement };
 };
 
 const cloneState = (state: EnemyState): EnemyState => ({
@@ -118,15 +134,63 @@ const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
 
 export class CombatResolver {
   resolveShot(ammoType: AmmoType, index: number, enemyState: EnemyState, context: ShotContext = {}): ShotResult {
+    const profile = this.getVolleyRangeProfile([ammoType], enemyState, context);
+    return this.resolveRound(ammoType, index, enemyState, context, profile, 0, 0);
+  }
+
+  resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
+    const profile = this.getVolleyRangeProfile(rounds, enemyState, context);
+    let current = cloneState(enemyState);
+    const shots: ShotResult[] = [];
+    let pendingHeavyKick = false;
+    let pendingShockSaturation = false;
+    let rawVolleyFirepower = 0;
+    let finalVolleyFirepower = 0;
+    for (let index = 0; index < rounds.length; index += 1) {
+      const ammo = rounds[index];
+      if (!ammo || current.hp <= 0) break;
+      const shot = this.resolveRound(
+        ammo, index, current, { ...context, pendingHeavyKick, pendingShockSaturation },
+        profile, rawVolleyFirepower, finalVolleyFirepower,
+      );
+      shots.push(shot);
+      rawVolleyFirepower += shot.breakdown.effectiveFirepower;
+      finalVolleyFirepower += shot.breakdown.finalFirepower;
+      pendingHeavyKick = AMMO_DEFINITIONS[ammo].sequenceTrait === 'heavyKick';
+      pendingShockSaturation = AMMO_DEFINITIONS[ammo].sequenceTrait === 'shockSaturation';
+      current = cloneState(shot.after);
+    }
+    const conservedRounds = shots.filter((shot) => shot.conserved).map((shot) => shot.ammoType);
+    const unfiredRounds = rounds.slice(shots.length);
+    return {
+      shots, finalState: current, rawVolleyFirepower,
+      baseRangePenaltyPercent: profile.baseRangePenaltyPercent,
+      matchAmmoCount: profile.matchAmmoCount,
+      matchRangePenaltyReductionPercent: profile.matchRangePenaltyReductionPercent,
+      finalRangePenaltyPercent: profile.finalRangePenaltyPercent,
+      finalVolleyFirepower,
+      totalHpDamage: shots.reduce((sum, shot) => sum + shot.hpDamage, 0),
+      totalArmorDamage: shots.reduce((sum, shot) => sum + shot.armorDamage, 0),
+      totalActionShockApplied: shots.reduce((sum, shot) => sum + shot.actionShockApplied, 0),
+      conservedRounds, unfiredRounds: [...unfiredRounds], returnedRounds: [...conservedRounds, ...unfiredRounds], killed: current.hp <= 0,
+    };
+  }
+
+  private resolveRound(
+    ammoType: AmmoType,
+    index: number,
+    enemyState: EnemyState,
+    context: ShotContext,
+    profile: VolleyRangeProfile,
+    precedingRawFirepower: number,
+    precedingFinalFirepower: number,
+  ): ShotResult {
     const before = cloneState(enemyState);
     const after = cloneState(enemyState);
     const playerState = context.playerState ?? createPlayerCombatState();
     const definition = AMMO_DEFINITIONS[ammoType];
-    const rangeBand = getRangeBand(before.distance);
-    const effectiveRangeBand = getEffectiveRangeBand(rangeBand, playerState.rangePenaltySteps);
-    const activeModifiers = getEnabledAttachmentIds(context.loadout ?? {}, playerState)
-      .flatMap((id) => ATTACHMENT_DEFINITIONS[id].modifiers)
-      .filter((modifier) => !('condition' in modifier) || conditionMatches(modifier.condition, effectiveRangeBand, isNearestValidTarget(before, context.targets)));
+    const { rangeBand, effectiveRangeBand, finalRangePenaltyPercent } = profile;
+    const activeModifiers = this.getActiveModifiers(before, context, effectiveRangeBand);
 
     const stabilized = Boolean(context.pendingHeavyKick && definition.sequenceTrait === 'stable');
     const heavyKickPenalty = context.pendingHeavyKick && !stabilized
@@ -143,19 +207,20 @@ export class CombatResolver {
       after.statuses.corruptedShots -= 1;
     }
 
-    const rangePenaltyReduction = this.sumModifiers(activeModifiers, 'rangePenaltyReductionPercent') + (heavyKickPenalty > 0 ? 0 : definition.rangePenaltyReduction ?? 0);
-    const rangePenaltyPercent = Math.max(0, SERVICE_45.rangePenaltyPercentages[effectiveRangeBand] - rangePenaltyReduction);
-    const firepowerInputs: FirepowerInputs = {
+    const firepowerInputs: EffectiveFirepowerInputs = {
       weaponFirepower: SERVICE_45.baseFirepower,
       ammoFirepower: Math.max(0, definition.firepower + (before.armor === 0 ? definition.unarmoredFirepowerModifier ?? 0 : 0) - heavyKickPenalty),
       attachmentFirepower,
       statusFirepowerBonus,
       specialFirepowerBonus,
-      rangePenaltyPercent,
     };
-    const directFirepower = calculateDirectFirepower(firepowerInputs);
-    const distanceAdjustedFirepower = Number((directFirepower * (1 - rangePenaltyPercent / 100)).toFixed(4));
-    const finalFirepower = calculateFinalFirepower(firepowerInputs);
+    const effectiveFirepower = calculateEffectiveFirepower(firepowerInputs);
+    const cumulativeFinalFirepower = calculateFinalVolleyFirepower(
+      precedingRawFirepower + effectiveFirepower,
+      finalRangePenaltyPercent,
+    );
+    // 탄별 거리 반올림 대신 누적 발사 순서의 정수 화력 차이를 이 탄의 실제 기여분으로 배정한다.
+    const finalFirepower = cumulativeFinalFirepower - precedingFinalFirepower;
 
     const armorBroken = Math.min(after.armor, definition.armorBreak);
     after.armor -= armorBroken;
@@ -187,7 +252,7 @@ export class CombatResolver {
     const actionShockApplied = after.hp > 0 ? projectedShock : 0;
     after.actionShock += actionShockApplied;
     const conserved = Boolean(definition.recoverOnKill && after.hp <= 0);
-    const parts = [`${definition.name} 명중`, `${RANGE_NAMES[effectiveRangeBand]} ${formatRangePenalty(rangePenaltyPercent)}`, `최종 화력 ${finalFirepower}`];
+    const parts = [`${definition.name} 명중`, `${RANGE_NAMES[effectiveRangeBand]} ${formatRangePenalty(finalRangePenaltyPercent)}`, `최종 화력 ${finalFirepower}`];
     if (armorBroken) parts.push(`방어 파괴 ${armorBroken}`);
     if (armorBlocked) parts.push(`방어 흡수 ${armorBlocked}`);
     if (statusTriggered) parts.push(`${this.statusName(statusTriggered)} 발동`);
@@ -196,35 +261,33 @@ export class CombatResolver {
     return {
       ammoType, index, damage: hpDamage + armorDamage, hpDamage, armorDamage, burnApplied, actionShockApplied,
       statusTriggered, conserved, killed: after.hp <= 0, description: parts.join(' · '),
-      breakdown: { ...firepowerInputs, directFirepower, distanceAdjustedFirepower, rangeBand, effectiveRangeBand, armorBlocked, armorBroken, heavyKickPenalty, stabilized, shockSaturationPenalty, projectedShock, finalFirepower, finalDamage: hpDamage },
+      breakdown: { ...firepowerInputs, effectiveFirepower, rangeBand, effectiveRangeBand, armorBlocked, armorBroken, heavyKickPenalty, stabilized, shockSaturationPenalty, projectedShock, finalFirepower, finalDamage: hpDamage },
       before, after,
     };
   }
 
-  resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
-    let current = cloneState(enemyState);
-    const shots: ShotResult[] = [];
-    let pendingHeavyKick = false;
-    let pendingShockSaturation = false;
-    for (let index = 0; index < rounds.length; index += 1) {
-      const ammo = rounds[index];
-      if (!ammo || current.hp <= 0) break;
-      const shot = this.resolveShot(ammo, index, current, { ...context, pendingHeavyKick, pendingShockSaturation });
-      shots.push(shot);
-      pendingHeavyKick = AMMO_DEFINITIONS[ammo].sequenceTrait === 'heavyKick';
-      pendingShockSaturation = AMMO_DEFINITIONS[ammo].sequenceTrait === 'shockSaturation';
-      current = cloneState(shot.after);
-    }
-    const conservedRounds = shots.filter((shot) => shot.conserved).map((shot) => shot.ammoType);
-    const unfiredRounds = rounds.slice(shots.length);
+  private getVolleyRangeProfile(rounds: readonly AmmoType[], enemy: EnemyState, context: CombatContext): VolleyRangeProfile {
+    const playerState = context.playerState ?? createPlayerCombatState();
+    const rangeBand = getRangeBand(enemy.distance);
+    const effectiveRangeBand = getEffectiveRangeBand(rangeBand, playerState.rangePenaltySteps);
+    const activeModifiers = this.getActiveModifiers(enemy, context, effectiveRangeBand);
+    const attachmentReduction = this.sumModifiers(activeModifiers, 'rangePenaltyReductionPercent');
+    const baseRangePenaltyPercent = Math.max(0, SERVICE_45.rangePenaltyPercentages[effectiveRangeBand] - attachmentReduction);
+    const matchAmmoCount = rounds.filter((ammo) => ammo === 'match').length;
+    const finalRangePenaltyPercent = calculateFinalRangePenaltyPercent(baseRangePenaltyPercent, matchAmmoCount);
     return {
-      shots, finalState: current,
-      totalHpDamage: shots.reduce((sum, shot) => sum + shot.hpDamage, 0),
-      totalArmorDamage: shots.reduce((sum, shot) => sum + shot.armorDamage, 0),
-      totalActionShockApplied: shots.reduce((sum, shot) => sum + shot.actionShockApplied, 0),
-      effectiveRangePenaltyPercent: calculateEffectiveRangePenaltyPercent(shots),
-      conservedRounds, unfiredRounds: [...unfiredRounds], returnedRounds: [...conservedRounds, ...unfiredRounds], killed: current.hp <= 0,
+      rangeBand, effectiveRangeBand, baseRangePenaltyPercent, matchAmmoCount,
+      matchRangePenaltyReductionPercent: baseRangePenaltyPercent - finalRangePenaltyPercent,
+      finalRangePenaltyPercent,
     };
+  }
+
+  private getActiveModifiers(enemy: EnemyState, context: CombatContext, effectiveRangeBand: RangeBand): AttachmentModifier[] {
+    const playerState = context.playerState ?? createPlayerCombatState();
+    return getEnabledAttachmentIds(context.loadout ?? {}, playerState)
+      .flatMap((id) => ATTACHMENT_DEFINITIONS[id].modifiers)
+      .filter((modifier) => !('condition' in modifier)
+        || conditionMatches(modifier.condition, effectiveRangeBand, isNearestValidTarget(enemy, context.targets)));
   }
 
   /** 적의 현재 체력이나 돌파 여부와 무관하게 탄창 전체가 명중했을 때의 체력 피해를 계산한다. */
@@ -244,8 +307,8 @@ export class CombatResolver {
       after.statuses.burnTurns -= 1;
     }
     const killedByBurn = after.hp <= 0;
-    const selectedAction = selectEnemyAction(after);
-    const threshold = getActionShockThreshold(after, selectedAction);
+    const actionPreview = previewEnemyAction(after);
+    const { selectedAction, threshold } = actionPreview;
     const shockInterrupted = !killedByBurn && after.actionShock >= threshold;
     const elementalInterruption = !killedByBurn && !shockInterrupted && after.statuses.shockTurns > 0
       && selectedAction !== 'approach' && selectedAction !== 'attack';
@@ -267,8 +330,7 @@ export class CombatResolver {
         if (after.intent) after.intent.countdown = Math.max(1, after.intent.countdown - 1);
         if (!interrupted && selectedAction === 'attack') playerKilled = true;
         if (!interrupted && selectedAction === 'approach') {
-          const slowMultiplier = after.statuses.slowTurns > 0 ? COMBAT_BALANCE.slowMovementMultiplier : 1;
-          movement = Math.min(after.distance, Number((after.advancePerTurn * slowMultiplier).toFixed(2)));
+          movement = actionPreview.movement;
           after.distance = Math.max(0, Number((after.distance - movement).toFixed(2)));
         }
       }

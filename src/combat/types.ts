@@ -71,11 +71,10 @@ export interface ShotBreakdown {
   weaponFirepower: number;
   ammoFirepower: number;
   attachmentFirepower: number;
-  directFirepower: number;
+  /** 탄약/장착물/상태/인접 탄 효과를 모두 반영하되 거리 화력 감소 전인 탄별 유효 화력. */
+  effectiveFirepower: number;
   rangeBand: RangeBand;
   effectiveRangeBand: RangeBand;
-  rangePenaltyPercent: number;
-  distanceAdjustedFirepower: number;
   statusFirepowerBonus: number;
   specialFirepowerBonus: number;
   armorBlocked: number;
@@ -108,14 +107,25 @@ export interface ShotResult {
 export interface SequenceResult {
   shots: ShotResult[];
   finalState: EnemyState;
+  rawVolleyFirepower: number;
+  baseRangePenaltyPercent: number;
+  matchAmmoCount: number;
+  matchRangePenaltyReductionPercent: number;
+  finalRangePenaltyPercent: number;
+  finalVolleyFirepower: number;
   totalHpDamage: number;
   totalArmorDamage: number;
   totalActionShockApplied: number;
-  effectiveRangePenaltyPercent: number;
   conservedRounds: AmmoType[];
   unfiredRounds: AmmoType[];
   returnedRounds: AmmoType[];
   killed: boolean;
+}
+
+export interface EnemyActionPreview {
+  selectedAction: EnemyActionType;
+  threshold: number;
+  movement: number;
 }
 
 export interface EnemyActionResult {

@@ -10,9 +10,10 @@ const sequence = (rounds: AmmoType[], armor = 0) => resolver.resolveSequence(rou
 
 describe('수치 방어층과 방어 파괴', () => {
   it('중거리 오염 투척체의 방어를 먼저 파괴하고 거리 조정 화력을 적용한다', () => {
-    const shot = resolver.resolveSequence(['armorPiercing'], createEnemyState('contaminator')).shots[0]!;
+    const result = resolver.resolveSequence(['armorPiercing'], createEnemyState('contaminator'));
+    const shot = result.shots[0]!;
     expect(shot.breakdown.rangeBand).toBe('mid');
-    expect(shot.breakdown.rangePenaltyPercent).toBe(10);
+    expect(result.finalRangePenaltyPercent).toBe(10);
     expect(shot.breakdown.armorBroken).toBe(3);
     expect(shot.breakdown.armorBlocked).toBe(0);
     expect(shot.after.armor).toBe(0);

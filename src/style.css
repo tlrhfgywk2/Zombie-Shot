@@ -7,6 +7,9 @@
   --panel: rgba(13, 18, 15, .86);
   --line: rgba(205, 235, 210, .14);
   --muted: #8f9a91;
+  --combat-value-size: .92rem;
+  --combat-value-prominent: 1rem;
+  --combat-label-size: .56rem;
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body, #app { width: 100%; height: 100%; margin: 0; }
@@ -30,26 +33,25 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-heading span:last-child { color: #b7c0b9; letter-spacing: .04em; }
 .hp-track { height: 5px; margin-top: .65rem; background: #2e1717; overflow: hidden; }
 .hp-track span { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #ff4d37, #ff8769); box-shadow: 0 0 12px rgba(255,70,50,.55); transition: width .25s ease; }
-.enemy-vitals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin-top: .48rem; }
-.enemy-vitals:has(.enemy-intent:not([hidden])) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.enemy-vitals { display: grid; grid-template-columns: .86fr 1fr 1.55fr; gap: 4px; margin-top: .48rem; }
 .enemy-stat { position: relative; display: flex; align-items: center; min-width: 0; min-height: 46px; gap: .42rem; padding: .35rem .42rem; border: 1px solid rgba(255,255,255,.09); background: rgba(255,255,255,.035); }
-.enemy-stat > svg, .enemy-intent > svg { flex: 0 0 25px; width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px currentColor); }
-.enemy-stat > span, .enemy-intent > span { display: grid; min-width: 0; }
-.enemy-stat small, .enemy-intent small { color: #8f9a91; font-size: .48rem; font-weight: 850; letter-spacing: .06em; white-space: nowrap; }
-.enemy-stat strong, .enemy-intent strong { margin-top: .05rem; font-size: .92rem; font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
+.enemy-stat > svg, .enemy-action > svg { flex: 0 0 25px; width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px currentColor); }
+.enemy-stat > span, .enemy-action > span { display: grid; min-width: 0; }
+.enemy-stat small, .enemy-action small { color: #8f9a91; font-size: var(--combat-label-size); font-weight: 850; letter-spacing: .06em; white-space: nowrap; }
+.enemy-stat strong, .enemy-action strong { margin-top: .05rem; font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; white-space: nowrap; }
 .enemy-stat[data-empty] { opacity: .62; }
 .enemy-armor { color: #84bcff; }
 .enemy-impact { color: #70e6d2; }
 .enemy-impact strong b { color: inherit; font-size: inherit; }
-.enemy-impact strong em { color: #78938e; font-size: .5rem; font-style: normal; font-weight: 700; }
+.enemy-impact strong em { color: #8aa8a2; font-size: .72rem; font-style: normal; font-weight: 800; }
 .enemy-impact > i { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 2px; overflow: hidden; background: rgba(112,230,210,.13); }
 .enemy-impact > i b { display: block; width: 0; height: 100%; background: #70e6d2; box-shadow: 0 0 8px #70e6d2; transition: width .25s ease; }
-.enemy-advance { color: #ffbd66; }
-.enemy-advance[data-delayed] { border-color: rgba(255,94,75,.55); background: rgba(255,76,55,.08); }
-.enemy-advance[data-delayed] strong { color: #ff6756; text-shadow: 0 0 10px rgba(255,76,55,.38); }
-.enemy-intent { display: flex; align-items: center; min-width: 0; min-height: 46px; gap: .38rem; padding: .35rem .42rem; border: 1px solid rgba(255,174,58,.42); color: #ffd68f; background: rgba(67,39,13,.48); }
-.enemy-intent > svg { flex-basis: 23px; width: 23px; height: 23px; }
-.enemy-intent strong { overflow: hidden; font-size: .7rem; text-overflow: ellipsis; }
+.enemy-action { position: relative; display: flex; align-items: center; min-width: 0; min-height: 46px; gap: .42rem; padding: .35rem .42rem; border: 1px solid rgba(255,174,58,.42); color: #ffd68f; background: rgba(67,39,13,.48); }
+.enemy-action > span { flex: 1; }
+.enemy-action strong { overflow: hidden; font-size: .82rem; text-overflow: ellipsis; }
+.enemy-action > em { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .18rem; padding-left: .36rem; border-left: 1px solid rgba(112,230,210,.28); color: #70e6d2; font-style: normal; }
+.enemy-action > em svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.enemy-action > em b { font-size: var(--combat-value-prominent); font-variant-numeric: tabular-nums; line-height: 1; }
 .enemy-status-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .enemy-status-list span { padding: .18rem .35rem; border: 1px solid rgba(255,255,255,.13); color: #dce5de; background: rgba(0,0,0,.28); font-size: .56rem; font-weight: 800; }
 .enemy-status-list [data-status="burn"] { border-color: rgba(255,133,53,.45); color: #ffb15f; }
@@ -248,13 +250,14 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   padding: .42rem .48rem .46rem;
 }
 .game-shell[data-layout="portrait"] .enemy-vitals { gap: 2px; margin-top: .3rem; }
-.game-shell[data-layout="portrait"] .enemy-stat, .game-shell[data-layout="portrait"] .enemy-intent { min-height: 38px; gap: .24rem; padding: .22rem .25rem; }
-.game-shell[data-layout="portrait"] .enemy-stat > svg, .game-shell[data-layout="portrait"] .enemy-intent > svg { flex-basis: 18px; width: 18px; height: 18px; }
-.game-shell[data-layout="portrait"] .enemy-stat small, .game-shell[data-layout="portrait"] .enemy-intent small { font-size: .42rem; letter-spacing: 0; }
-.game-shell[data-layout="portrait"] .enemy-stat strong, .game-shell[data-layout="portrait"] .enemy-intent strong { font-size: .68rem; }
-.game-shell[data-layout="portrait"] .enemy-impact strong em { display: none; }
-.game-shell[data-layout="portrait"] .enemy-intent { position: static; width: auto; }
-.game-shell[data-layout="portrait"] .enemy-intent strong { max-width: 43px; font-size: .57rem; }
+.game-shell[data-layout="portrait"] .enemy-stat, .game-shell[data-layout="portrait"] .enemy-action { min-height: 38px; gap: .22rem; padding: .22rem .24rem; }
+.game-shell[data-layout="portrait"] .enemy-stat > svg, .game-shell[data-layout="portrait"] .enemy-action > svg { flex-basis: 18px; width: 18px; height: 18px; }
+.game-shell[data-layout="portrait"] .enemy-stat small, .game-shell[data-layout="portrait"] .enemy-action small { font-size: .42rem; letter-spacing: 0; }
+.game-shell[data-layout="portrait"] .enemy-stat strong, .game-shell[data-layout="portrait"] .enemy-action strong { font-size: .68rem; }
+.game-shell[data-layout="portrait"] .enemy-impact strong em { font-size: .58rem; }
+.game-shell[data-layout="portrait"] .enemy-action > em { gap: .08rem; padding-left: .2rem; }
+.game-shell[data-layout="portrait"] .enemy-action > em svg { width: 13px; height: 13px; }
+.game-shell[data-layout="portrait"] .enemy-action > em b { font-size: .7rem; }
 .game-shell[data-layout="portrait"] .enemy-context { left: 0; right: auto; width: calc(100vw - 16px); font-size: .58rem; }
 .game-shell[data-layout="portrait"] .enemy-heading { font-size: .62rem; letter-spacing: .08em; }
 .game-shell[data-layout="portrait"] .hp-track { height: 4px; margin-top: .3rem; }
@@ -478,10 +481,11 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="desktop"] .brand strong { font-size: 1.32rem; }
 .game-shell[data-layout="desktop"] .enemy-card { padding: .88rem .95rem .92rem; }
 .game-shell[data-layout="desktop"] .enemy-heading { font-size: .78rem; }
-.game-shell[data-layout="desktop"] .enemy-stat, .game-shell[data-layout="desktop"] .enemy-intent { min-height: 54px; gap: .52rem; padding: .44rem .52rem; }
-.game-shell[data-layout="desktop"] .enemy-stat > svg, .game-shell[data-layout="desktop"] .enemy-intent > svg { flex-basis: 29px; width: 29px; height: 29px; }
-.game-shell[data-layout="desktop"] .enemy-stat small, .game-shell[data-layout="desktop"] .enemy-intent small { font-size: .55rem; }
+.game-shell[data-layout="desktop"] .enemy-stat, .game-shell[data-layout="desktop"] .enemy-action { min-height: 54px; gap: .52rem; padding: .44rem .52rem; }
+.game-shell[data-layout="desktop"] .enemy-stat > svg, .game-shell[data-layout="desktop"] .enemy-action > svg { flex-basis: 29px; width: 29px; height: 29px; }
+.game-shell[data-layout="desktop"] .enemy-stat small, .game-shell[data-layout="desktop"] .enemy-action small { font-size: .58rem; }
 .game-shell[data-layout="desktop"] .enemy-stat strong { font-size: 1.06rem; }
+.game-shell[data-layout="desktop"] .enemy-action strong { font-size: .9rem; }
 .game-shell[data-layout="desktop"] .utility-stack { width: 160px; gap: .48rem; }
 .game-shell[data-layout="desktop"] .distance-card small { font-size: .69rem; }
 .game-shell[data-layout="desktop"] .distance-card strong { font-size: 1.42rem; }
@@ -663,24 +667,29 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 
 .game-shell[data-layout="portrait"] .console-header { display: none; }
 
-/* 행동 예고와 인접 탄약 효과 */
-.enemy-vitals:has(.enemy-intent:not([hidden])) { grid-template-columns: 1fr 1fr 1fr; }
-.enemy-intent { grid-column: 1 / -1; min-height: 34px; }
-.enemy-intent > span { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 6px; }
-.enemy-intent small { font-size: .62rem; }
-.enemy-intent strong { overflow: visible; white-space: normal; font-size: .72rem; }
-.enemy-intent[data-interrupted] { border-color: #70e6d2; color: #90f3e3; }
-.enemy-intent[data-lethal] { border-color: #ff6756; color: #ff8b7e; background: rgba(95,18,13,.7); }
-.game-shell .tactical-console .mag-slot { height: 94px; min-height: 94px; grid-template-rows: 1fr auto auto; }
-.sequence-effect { display: block; font-size: .59rem; line-height: 1.35; color: #bbc8bc; text-align: center; overflow-wrap: anywhere; }
-.sequence-effect[data-affected] { color: #ffd68f; }
-.game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 86px; min-height: 86px; }
-.game-shell[data-layout="portrait"] .sequence-effect { font-size: .52rem; }
-.game-shell[data-layout="portrait"] .enemy-impact strong em { display: inline; }
+/* 통합 행동 예고와 아이콘 기반 탄약 유효 수치 */
+.game-shell .tactical-console .mag-slot { height: 98px; min-height: 98px; }
+.game-shell .tactical-console .mag-slot.filled { grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto 1fr; place-items: initial; column-gap: .34rem; padding: .52rem .38rem .34rem .5rem; }
+.game-shell .tactical-console .mag-slot.filled .round-visual { grid-row: 1 / 3; align-self: center; justify-self: center; width: 13px; height: 38px; margin: 0; }
+.game-shell .tactical-console .mag-slot.filled > strong { align-self: end; overflow: hidden; color: #edf3ee; font-size: .7rem; letter-spacing: .05em; text-overflow: ellipsis; white-space: nowrap; }
+.sequence-stats { display: flex; align-self: start; align-items: center; min-width: 0; gap: .38rem; margin-top: .3rem; }
+.sequence-stat { display: inline-flex; align-items: center; min-width: 0; gap: .16rem; color: #eef4ee; }
+.sequence-stat svg { flex: 0 0 17px; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.sequence-stat b { font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
+.sequence-firepower { color: #ff8b7e; }
+.sequence-armor { color: #84bcff; }
+.sequence-shock { color: #70e6d2; }
+.sequence-stat[data-modified] { color: #ffd68f; text-shadow: 0 0 8px rgba(255,190,96,.25); }
+.sequence-note { grid-column: 1 / -1; align-self: end; color: #9aa69c; font-size: .62rem; text-align: center; }
 
-.game-shell[data-layout="desktop"] .tactical-console .mag-slot { height: 94px; min-height: 94px; }
-.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 124px; }
-.game-shell[data-layout="portrait"] .enemy-intent small { font-size: .54rem; }
-.game-shell[data-layout="portrait"] .enemy-intent strong { max-width: none; font-size: .62rem; }
-
-.sequence-effect > span { display: block; white-space: nowrap; }
+.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 112px; }
+.game-shell[data-layout="portrait"] .enemy-vitals { grid-template-columns: .86fr 1fr 1.45fr; }
+.game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 78px; min-height: 78px; }
+.game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled { grid-template-columns: 16px minmax(0, 1fr); column-gap: .16rem; padding: .34rem .18rem .22rem .28rem; }
+.game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled .round-visual { width: 9px; height: 29px; }
+.game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled > strong { font-size: .55rem; letter-spacing: 0; }
+.game-shell[data-layout="portrait"] .sequence-stats { gap: .15rem; margin-top: .2rem; }
+.game-shell[data-layout="portrait"] .sequence-stat { gap: .05rem; }
+.game-shell[data-layout="portrait"] .sequence-stat svg { flex-basis: 12px; width: 12px; height: 12px; }
+.game-shell[data-layout="portrait"] .sequence-stat b { font-size: .65rem; }
+.game-shell[data-layout="portrait"] .sequence-note { font-size: .52rem; }

@@ -24,8 +24,8 @@ describe('서비스 .45 장착물 효과', () => {
   });
 
   it('가늠쇠와 반사 조준기는 명시된 거리 손실만 완화한다', () => {
-    const sight = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, target(distance), { loadout: loadout('highVisibilitySight') }).breakdown.rangePenaltyPercent);
-    const reflex = [3, 7, 11].map(distance => resolver.resolveShot('standard', 0, target(distance), { loadout: loadout('compactReflexSight') }).breakdown.rangePenaltyPercent);
+    const sight = [3, 7, 11].map(distance => resolver.resolveSequence(['standard'], target(distance), { loadout: loadout('highVisibilitySight') }).finalRangePenaltyPercent);
+    const reflex = [3, 7, 11].map(distance => resolver.resolveSequence(['standard'], target(distance), { loadout: loadout('compactReflexSight') }).finalRangePenaltyPercent);
     expect(sight).toEqual([0, 0, 25]);
     expect(reflex).toEqual([0, 0, 15]);
   });
@@ -33,16 +33,17 @@ describe('서비스 .45 장착물 효과', () => {
   it('반사 조준기는 초음파로 악화된 실제 원거리 손실을 완화한다', () => {
     const playerState = createPlayerCombatState();
     playerState.rangePenaltySteps = 1;
-    const shot = resolver.resolveShot('standard', 0, target(7), { playerState, loadout: loadout('compactReflexSight') });
-    expect(shot.breakdown.effectiveRangeBand).toBe('far');
-    expect(shot.breakdown.rangePenaltyPercent).toBe(15);
+    const sequence = resolver.resolveSequence(['standard'], target(7), { playerState, loadout: loadout('compactReflexSight') });
+    expect(sequence.shots[0]?.breakdown.effectiveRangeBand).toBe('far');
+    expect(sequence.finalRangePenaltyPercent).toBe(15);
   });
 
-  it('매치탄과 반사 조준기의 고정 거리 완화는 퍼센트포인트로 단순 합산된다', () => {
-    const shot = resolver.resolveShot('match', 0, target(11), { loadout: loadout('compactReflexSight') });
-    expect(shot.breakdown.rangePenaltyPercent).toBe(0);
-    expect(shot.breakdown.distanceAdjustedFirepower).toBe(3);
-    expect(shot.breakdown.finalFirepower).toBe(3);
+  it('매치탄은 반사 조준기가 만든 기본 감소에서 발사 순서 전체 3%p를 추가 완화한다', () => {
+    const sequence = resolver.resolveSequence(['match'], target(11), { loadout: loadout('compactReflexSight') });
+    expect(sequence.baseRangePenaltyPercent).toBe(15);
+    expect(sequence.finalRangePenaltyPercent).toBe(12);
+    expect(sequence.rawVolleyFirepower).toBe(3);
+    expect(sequence.finalVolleyFirepower).toBe(3);
   });
 
   it('레이저는 범위와 가장 가까운 유효 표적 조건에서만 총기 흔들림 연출을 줄인다', () => {
