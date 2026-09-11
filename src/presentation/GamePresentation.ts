@@ -180,9 +180,7 @@ export class GamePresentation {
     this.magazineModel.roundDisplay.visible = true;
     this.setMagazineRounds([]);
     magazine.visible = true;
-    magazine.position.copy(this.layout.magazineLoad);
-    magazine.rotation.set(-0.04, 0.02, -0.12);
-    magazine.scale.setScalar(this.layout.magazineScale);
+    await this.animateMagazinePresentation();
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo) continue;
@@ -268,20 +266,9 @@ export class GamePresentation {
     if (this.presentationDebug) await this.wait(800);
     await this.wait(PRESENTATION_TIMING.magazineSeatingPause);
     await this.animateChamber();
+    await this.animateChamberCheck();
     this.captureMagazineDiagnostic();
-    this.presentationState = '조준 준비';
-    const readyPosition = this.pistolModel.root.position.clone();
-    const readyQuaternion = this.pistolModel.root.quaternion.clone();
-    const target = this.getZombieTarget();
-    const aimQuaternion = getAimQuaternion(this.layout.weaponAim, target);
-    await this.tween(PRESENTATION_TIMING.readySettle, (progress) => {
-      const eased = this.easeInOut(progress);
-      this.pistolModel.root.position.lerpVectors(readyPosition, this.layout.weaponAim, eased);
-      constrainWeaponPosition(this.pistolModel.root.position, this.layout);
-      this.pistolModel.root.quaternion.slerpQuaternions(readyQuaternion, aimQuaternion, eased);
-      this.pistolModel.root.scale.setScalar(THREE.MathUtils.lerp(insertionScale, this.layout.pistolScale, eased));
-    });
-    this.aimPistolAtTarget(target);
+    await this.animateAimSequence(insertionScale);
     this.clearCartridges();
     this.animationInProgress = false;
     this.presentationState = '사격 준비';
@@ -334,6 +321,49 @@ export class GamePresentation {
     this.muzzleFlash.intensity = 0;
     this.animationInProgress = false;
     this.presentationState = '발사 후 연기 잔류';
+  }
+
+  async animateMagazineDiscard(): Promise<void> {
+    this.presentationState = '탄창 배출';
+    this.animationInProgress = true;
+    const magazine = this.magazineModel.root;
+    this.pistolModel.root.updateMatrixWorld(true);
+    if (magazine.parent !== this.scene) this.scene.attach(magazine);
+    this.magazineModel.roundDisplay.visible = false;
+    const startPosition = magazine.position.clone();
+    const startQuaternion = magazine.quaternion.clone();
+    const startScale = magazine.scale.x;
+    const releasePosition = startPosition.clone().add(new THREE.Vector3(-0.04, -0.18, 0.12));
+    const releaseQuaternion = startQuaternion.clone().multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(0.06, 0.02, -0.08)),
+    );
+    this.audio.magazineRelease();
+    await this.tween(PRESENTATION_TIMING.magazineRelease, (progress) => {
+      const eased = this.easeInOut(progress);
+      magazine.position.lerpVectors(startPosition, releasePosition, eased);
+      magazine.quaternion.slerpQuaternions(startQuaternion, releaseQuaternion, eased);
+    });
+
+    this.presentationState = '탄창 폐기';
+    // 화면 안쪽과 카메라 쪽으로 떨어뜨려 총기/어두운 바닥과 겹치지 않게 한다.
+    const discardPosition = releasePosition.clone().add(new THREE.Vector3(-0.72, -0.82, 0.62));
+    const discardQuaternion = releaseQuaternion.clone().multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(1.35, -0.28, -0.72)),
+    );
+    await this.tween(PRESENTATION_TIMING.magazineDiscard, (progress) => {
+      const eased = progress * progress;
+      magazine.position.lerpVectors(releasePosition, discardPosition, eased);
+      magazine.quaternion.slerpQuaternions(releaseQuaternion, discardQuaternion, progress);
+      magazine.scale.setScalar(THREE.MathUtils.lerp(startScale, startScale * 0.9, progress));
+    });
+    magazine.visible = false;
+    magazine.position.copy(this.layout.magazineLoad);
+    magazine.rotation.set(-0.04, 0.02, -0.12);
+    magazine.scale.setScalar(this.layout.magazineScale);
+    this.setMagazineRounds([]);
+    await this.animateWeaponToReloadPose();
+    this.animationInProgress = false;
+    this.presentationState = '탄창 폐기 완료';
   }
 
   async animateBurn(): Promise<void> {
@@ -477,6 +507,98 @@ export class GamePresentation {
       slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel, 0, this.easeOutBack(progress));
     });
     slide.position.x = 0;
+  }
+
+  private async animateChamberCheck(): Promise<void> {
+    const pistol = this.pistolModel.root;
+    const slide = this.pistolModel.slide;
+    const startPosition = pistol.position.clone();
+    const startQuaternion = pistol.quaternion.clone();
+    const inspectPosition = startPosition.clone().add(new THREE.Vector3(-0.045, 0.055, 0.035));
+    const inspectQuaternion = startQuaternion.clone().multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(0.035, -0.06, 0.028)),
+    );
+    this.presentationState = '약실 확인';
+    await this.tween(PRESENTATION_TIMING.chamberCheckMove, (progress) => {
+      const eased = this.easeInOut(progress);
+      pistol.position.lerpVectors(startPosition, inspectPosition, eased);
+      constrainWeaponPosition(pistol.position, this.layout);
+      pistol.quaternion.slerpQuaternions(startQuaternion, inspectQuaternion, eased);
+      slide.position.x = THREE.MathUtils.lerp(0, -PRESENTATION_MOTION.slideTravel * 0.1, eased);
+    });
+    await this.wait(PRESENTATION_TIMING.chamberCheckHold);
+    await this.tween(PRESENTATION_TIMING.chamberCheckReturn, (progress) => {
+      const eased = this.easeInOut(progress);
+      pistol.position.lerpVectors(inspectPosition, startPosition, eased);
+      constrainWeaponPosition(pistol.position, this.layout);
+      pistol.quaternion.slerpQuaternions(inspectQuaternion, startQuaternion, eased);
+      slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel * 0.1, 0, eased);
+    });
+    pistol.position.copy(startPosition);
+    pistol.quaternion.copy(startQuaternion);
+    slide.position.x = 0;
+  }
+
+  private async animateMagazinePresentation(): Promise<void> {
+    const magazine = this.magazineModel.root;
+    const endPosition = this.layout.magazineLoad.clone();
+    const startPosition = endPosition.clone().add(new THREE.Vector3(-0.32, -0.78, 0.16));
+    const endQuaternion = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.04, 0.02, -0.12));
+    const startQuaternion = endQuaternion.clone().multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.08, 0.08, -0.24)),
+    );
+    magazine.position.copy(startPosition);
+    magazine.quaternion.copy(startQuaternion);
+    magazine.scale.setScalar(this.layout.magazineScale * 0.9);
+    this.presentationState = '탄창 꺼내기';
+    await this.tween(PRESENTATION_TIMING.magazinePresent, (progress) => {
+      const eased = this.easeOutBack(progress);
+      magazine.position.lerpVectors(startPosition, endPosition, eased);
+      magazine.quaternion.slerpQuaternions(startQuaternion, endQuaternion, eased);
+      magazine.scale.setScalar(THREE.MathUtils.lerp(this.layout.magazineScale * 0.9, this.layout.magazineScale, eased));
+    });
+    magazine.position.copy(endPosition);
+    magazine.quaternion.copy(endQuaternion);
+    magazine.scale.setScalar(this.layout.magazineScale);
+  }
+
+  private async animateAimSequence(insertionScale: number): Promise<void> {
+    const pistol = this.pistolModel.root;
+    const startPosition = pistol.position.clone();
+    const startQuaternion = pistol.quaternion.clone();
+    const startScale = pistol.scale.x;
+    const target = this.getZombieTarget();
+
+    pistol.scale.setScalar(this.layout.pistolScale);
+    this.aimPistolAtTarget(target);
+    const finalPosition = this.baseWeaponPosition.clone();
+    const finalQuaternion = this.baseAimQuaternion.clone();
+    pistol.position.copy(startPosition);
+    pistol.quaternion.copy(startQuaternion);
+    pistol.scale.setScalar(startScale);
+
+    const roughPosition = finalPosition.clone().add(new THREE.Vector3(-0.09, 0.075, 0.035));
+    constrainWeaponPosition(roughPosition, this.layout);
+    const roughQuaternion = finalQuaternion.clone().multiply(
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -0.025, 0.055)),
+    );
+    this.presentationState = '대략 조준';
+    await this.tween(PRESENTATION_TIMING.roughAim, (progress) => {
+      const eased = this.easeInOut(progress);
+      pistol.position.lerpVectors(startPosition, roughPosition, eased);
+      constrainWeaponPosition(pistol.position, this.layout);
+      pistol.quaternion.slerpQuaternions(startQuaternion, roughQuaternion, eased);
+      pistol.scale.setScalar(THREE.MathUtils.lerp(insertionScale, this.layout.pistolScale, eased));
+    });
+
+    this.presentationState = '정밀 조준';
+    await this.tween(PRESENTATION_TIMING.preciseAim, (progress) => {
+      const eased = this.easeInOut(progress);
+      pistol.position.lerpVectors(roughPosition, finalPosition, eased);
+      constrainWeaponPosition(pistol.position, this.layout);
+      pistol.quaternion.slerpQuaternions(roughQuaternion, finalQuaternion, eased);
+    });
+    this.aimPistolAtTarget(target);
   }
 
   private buildShotEffectPools(): void {
@@ -840,7 +962,7 @@ export class GamePresentation {
       effect.add(piece);
     }
     this.scene.add(effect);
-    await this.tween(170, (progress) => {
+    await this.tween(PRESENTATION_TIMING.impact, (progress) => {
       for (const piece of pieces) {
         const direction = piece.userData.direction as THREE.Vector3;
         piece.position.copy(direction).multiplyScalar(progress * (ammoType === 'magnum' ? 0.42 : 0.25));

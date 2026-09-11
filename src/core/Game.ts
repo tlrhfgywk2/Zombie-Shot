@@ -123,6 +123,7 @@ export class Game {
       }
       this.syncEnemy();
     }
+    await this.presentation.animateMagazineDiscard();
     this.player.magazine.clear();
     this.syncMagazine();
     await this.resolveEnemyAction();
