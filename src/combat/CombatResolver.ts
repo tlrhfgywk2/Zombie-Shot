@@ -263,13 +263,15 @@ export class CombatResolver {
     // 탄별 거리 반올림 대신 누적 발사 순서의 정수 화력 차이를 이 탄의 실제 기여분으로 배정한다.
     const finalFirepower = cumulativeFinalFirepower - precedingFinalFirepower;
 
-    const armorBroken = Math.min(after.armor, definition.armorBreak);
-    after.armor -= armorBroken;
-    const armorBlocked = Math.min(after.armor, finalFirepower);
+    const armorBeforeShot = after.armor;
+    // 방어 파괴는 같은 탄의 화력보다 먼저 방어층을 없애지 않는다. 이 탄은 사격 전 방어에
+    // 의해 경감되고, 제거된 방어는 다음 탄부터 화력을 막지 않는다.
+    const armorBlocked = Math.min(armorBeforeShot, finalFirepower);
+    const armorBroken = Math.min(armorBeforeShot, definition.armorBreak);
     // 방어 파괴 탄은 고유 파괴량과 피해 흡수를 같은 한 발에서 중복 차감하지 않는다.
     const armorConsumedByAbsorption = definition.armorBreak > 0 ? 0 : armorBlocked;
-    after.armor -= armorConsumedByAbsorption;
-    const armorDamage = armorBroken + armorConsumedByAbsorption;
+    const armorDamage = Math.max(armorBroken, armorConsumedByAbsorption);
+    after.armor = armorBeforeShot - armorDamage;
     const hpDamage = Math.min(after.hp, finalFirepower - armorBlocked);
     after.hp -= hpDamage;
 
