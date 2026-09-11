@@ -2,7 +2,7 @@ import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_ORDER, DEFAULT_LOADOUT, isAttac
 import { COMBAT_BALANCE } from '../data/ammoDefinitions';
 import type { AttachmentSlot, PlayerCombatState } from './types';
 
-export const createPlayerCombatState = (): PlayerCombatState => ({ recoilPenaltyPercent: 0, recoilPenaltyTurns: 0, rangePenaltySteps: 0, rangePenaltyTurns: 0, disabledSlots: {} });
+export const createPlayerCombatState = (): PlayerCombatState => ({ heavyKickPenaltyBonus: 0, heavyKickPenaltyTurns: 0, rangePenaltySteps: 0, rangePenaltyTurns: 0, disabledSlots: {} });
 
 export const getEnabledAttachmentIds = (loadout: LoadoutSnapshot, playerState: PlayerCombatState = createPlayerCombatState()): AttachmentId[] => ATTACHMENT_SLOT_ORDER.flatMap((slot) => {
   const id = loadout[slot];

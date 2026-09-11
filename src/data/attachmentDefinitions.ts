@@ -3,7 +3,7 @@ import type { AttachmentSlot, RangeBand } from '../combat/types';
 export type WeaponId = 'service45';
 export const SERVICE_45 = {
   id: 'service45' as WeaponId, internalName: 'Service .45', name: '서비스 .45',
-  baseFirepower: 0, recoil: 0,
+  baseFirepower: 0,
   rangePenaltyPercentages: { near: 0, mid: 10, far: 25 } as Record<RangeBand, number>,
   baseMagazineCapacity: 4, maximumMagazineCapacity: 6,
 };
@@ -19,7 +19,7 @@ export interface ModifierCondition { range?: RangeBand; nearestTarget?: boolean 
 export type AttachmentModifier =
   | { kind: 'firepower'; value: number; condition?: ModifierCondition }
   | { kind: 'capacity'; value: number }
-  | { kind: 'recoilReductionPercent'; value: number; condition?: ModifierCondition }
+  | { kind: 'visualKickReductionPercent'; value: number; condition?: ModifierCondition }
   | { kind: 'rangePenaltyReductionPercent'; value: number; condition?: ModifierCondition };
 export interface AttachmentDefinition {
   id: AttachmentId;
@@ -37,12 +37,12 @@ export const ATTACHMENT_SLOT_NAMES: Record<AttachmentSlot, string> = {
 export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> = {
   compactCompensator: {
     id: 'compactCompensator', name: '소형 보정기', slot: 'muzzle', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '반동 20% 감소', modifiers: [{ kind: 'recoilReductionPercent', value: 20 }],
+    summary: '총기 흔들림 연출 20% 감소', modifiers: [{ kind: 'visualKickReductionPercent', value: 20 }],
   },
   dualPortCompensator: {
     id: 'dualPortCompensator', name: '이중 포트 보정기', slot: 'muzzle', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '반동 35% 감소',
-    modifiers: [{ kind: 'recoilReductionPercent', value: 35 }],
+    summary: '총기 흔들림 연출 35% 감소',
+    modifiers: [{ kind: 'visualKickReductionPercent', value: 35 }],
   },
   extendedBasePad: {
     id: 'extendedBasePad', name: '확장 바닥판', slot: 'magazine', rarity: 'common', compatibleWeapons: ['service45'],
@@ -66,23 +66,23 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
   },
   compactLaserSight: {
     id: 'compactLaserSight', name: '소형 레이저 조준기', slot: 'rail', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '근거리 반동 15% 감소', modifiers: [{ kind: 'recoilReductionPercent', value: 15, condition: { range: 'near' } }],
+    summary: '근거리 총기 흔들림 연출 15% 감소', modifiers: [{ kind: 'visualKickReductionPercent', value: 15, condition: { range: 'near' } }],
   },
   laserLightModule: {
     id: 'laserLightModule', name: '레이저·라이트 모듈', slot: 'rail', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '근거리 반동 20% 감소 · 가장 가까운 표적 10% 감소',
+    summary: '근거리 총기 흔들림 연출 20% 감소 · 가장 가까운 표적 10% 감소',
     modifiers: [
-      { kind: 'recoilReductionPercent', value: 20, condition: { range: 'near' } },
-      { kind: 'recoilReductionPercent', value: 10, condition: { nearestTarget: true } },
+      { kind: 'visualKickReductionPercent', value: 20, condition: { range: 'near' } },
+      { kind: 'visualKickReductionPercent', value: 10, condition: { nearestTarget: true } },
     ],
   },
   rubberGrip: {
     id: 'rubberGrip', name: '고무 손잡이', slot: 'grip', rarity: 'common', compatibleWeapons: ['service45'],
-    summary: '반동 15% 감소', modifiers: [{ kind: 'recoilReductionPercent', value: 15 }],
+    summary: '총기 흔들림 연출 15% 감소', modifiers: [{ kind: 'visualKickReductionPercent', value: 15 }],
   },
   g10Grip: {
     id: 'g10Grip', name: '격자형 G10 손잡이', slot: 'grip', rarity: 'advanced', compatibleWeapons: ['service45'],
-    summary: '반동 25% 감소', modifiers: [{ kind: 'recoilReductionPercent', value: 25 }],
+    summary: '총기 흔들림 연출 25% 감소', modifiers: [{ kind: 'visualKickReductionPercent', value: 25 }],
   },
 };
 export const ATTACHMENT_ORDER = Object.keys(ATTACHMENT_DEFINITIONS) as AttachmentId[];

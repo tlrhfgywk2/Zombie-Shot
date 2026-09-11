@@ -13,11 +13,12 @@ export interface AmmoDefinition {
   cssColor: string;
   supply?: 'infinite';
   firepower: number;
-  recoil: number;
+  sequenceTrait?: 'heavyKick' | 'stable' | 'shockSaturation';
+  unarmoredFirepowerModifier?: number;
   /** 무기 거리 손실에서 직접 빼는 고정 퍼센트포인트. */
   rangePenaltyReduction?: number;
   armorBreak: number;
-  impact: number;
+  actionShock: number;
   buildup?: { type: StatusType; amount: number };
   specialEnemyFirepowerBonus?: number;
   recoverOnKill?: boolean;
@@ -25,15 +26,15 @@ export interface AmmoDefinition {
 
 export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   ...DORMANT_AMMO_DEFINITIONS,
-  wadcutter: { id: 'wadcutter', name: '와드커터탄', shortName: '와드', role: '낮은 반동의 안정적인 선행탄', rarity: 'common', tags: ['ballistic'], color: 0xa9d9ae, cssColor: '#a9d9ae', firepower: 3, recoil: 0, armorBreak: 0, impact: 0 },
-  flatPoint: { id: 'flatPoint', name: '평두탄', shortName: '평두', role: '충격 임계와 다음 탄 노출', rarity: 'common', tags: ['ballistic'], color: 0x70e6d2, cssColor: '#70e6d2', firepower: 4, recoil: 1, armorBreak: 0, impact: 3 },
-  overpressure: { id: 'overpressure', name: '고압탄', shortName: '고압', role: '강한 화력 · 긴 후속 재조준', rarity: 'uncommon', tags: ['ballistic'], color: 0xe9a065, cssColor: '#e9a065', firepower: 8, recoil: 2, armorBreak: 0, impact: 0 },
-  subsonic: { id: 'subsonic', name: '저소음탄', shortName: '저소음', role: '반동 없는 연속 사격', rarity: 'uncommon', tags: ['ballistic'], color: 0xa3c6ce, cssColor: '#a3c6ce', firepower: 3, recoil: 0, armorBreak: 0, impact: 0 },
-  bonded: { id: 'bonded', name: '본디드탄', shortName: '본디드', role: '강화된 방어 제거와 화력', rarity: 'uncommon', tags: ['ballistic'], color: 0x7eb5df, cssColor: '#7eb5df', firepower: 5, recoil: 1, armorBreak: 5, impact: 0 },
-  match: { id: 'match', name: '매치탄', shortName: '매치', role: '거리 손실 완화와 무반동', rarity: 'uncommon', tags: ['ballistic'], color: 0xcfb9ee, cssColor: '#cfb9ee', firepower: 3, recoil: 0, rangePenaltyReduction: 10, armorBreak: 0, impact: 0 },
-  standard: { id: 'standard', name: '표준탄', shortName: '표준', role: '안정적인 기준 탄약', rarity: 'common', tags: ['ballistic'], color: 0xd8c6a2, cssColor: '#d8c6a2', firepower: 4, recoil: 1, armorBreak: 0, impact: 0, supply: 'infinite' },
-  armorPiercing: { id: 'armorPiercing', name: '철갑탄', shortName: '철갑', role: '방어를 먼저 제거하는 준비탄', rarity: 'common', tags: ['ballistic'], color: 0x78b7ff, cssColor: '#78b7ff', firepower: 3, recoil: 1, armorBreak: 4, impact: 0 },
-  hollowPoint: { id: 'hollowPoint', name: '확장탄', shortName: '확장', role: '무장갑 표적 고화력', rarity: 'common', tags: ['ballistic'], color: 0xff8ca1, cssColor: '#ff8ca1', firepower: 6, recoil: 1, armorBreak: 0, impact: 0 },
+  wadcutter: { id: 'wadcutter', name: '와드커터탄', shortName: '와드', role: '충격을 다음 턴까지 축적', rarity: 'common', tags: ['ballistic'], color: 0xa9d9ae, cssColor: '#a9d9ae', firepower: 3, armorBreak: 0, actionShock: 2 },
+  flatPoint: { id: 'flatPoint', name: '평두탄', shortName: '평두', role: '충격 포화 · 바로 다음 충격 -2', rarity: 'common', tags: ['ballistic'], color: 0x70e6d2, cssColor: '#70e6d2', firepower: 4, armorBreak: 0, actionShock: 5, sequenceTrait: 'shockSaturation' },
+  overpressure: { id: 'overpressure', name: '고압탄', shortName: '고압', role: '강한 반동 · 바로 다음 화력 -2', rarity: 'uncommon', tags: ['ballistic'], color: 0xe9a065, cssColor: '#e9a065', firepower: 8, armorBreak: 0, actionShock: 0, sequenceTrait: 'heavyKick' },
+  subsonic: { id: 'subsonic', name: '저소음탄', shortName: '저소음', role: '안정 · 앞 탄의 강한 반동 흡수', rarity: 'uncommon', tags: ['ballistic'], color: 0xa3c6ce, cssColor: '#a3c6ce', firepower: 4, sequenceTrait: 'stable', armorBreak: 0, actionShock: 0 },
+  bonded: { id: 'bonded', name: '본디드탄', shortName: '본디드', role: '무장갑이면 화력 -2', rarity: 'uncommon', tags: ['ballistic'], color: 0x7eb5df, cssColor: '#7eb5df', firepower: 5, armorBreak: 5, actionShock: 0, unarmoredFirepowerModifier: -2 },
+  match: { id: 'match', name: '매치탄', shortName: '매치', role: '거리 손실 15%p 완화 · 반동 직후 정밀 효과 없음', rarity: 'uncommon', tags: ['ballistic'], color: 0xcfb9ee, cssColor: '#cfb9ee', firepower: 3, rangePenaltyReduction: 15, armorBreak: 0, actionShock: 0 },
+  standard: { id: 'standard', name: '표준탄', shortName: '표준', role: '안정적인 기준 탄약', rarity: 'common', tags: ['ballistic'], color: 0xd8c6a2, cssColor: '#d8c6a2', firepower: 4, armorBreak: 0, actionShock: 0, supply: 'infinite' },
+  armorPiercing: { id: 'armorPiercing', name: '철갑탄', shortName: '철갑', role: '방어를 먼저 제거하는 준비탄', rarity: 'common', tags: ['ballistic'], color: 0x78b7ff, cssColor: '#78b7ff', firepower: 3, armorBreak: 4, actionShock: 0 },
+  hollowPoint: { id: 'hollowPoint', name: '확장탄', shortName: '확장', role: '사격 전 무장갑이면 화력 +3', rarity: 'common', tags: ['ballistic'], color: 0xff8ca1, cssColor: '#ff8ca1', firepower: 4, unarmoredFirepowerModifier: 3, armorBreak: 0, actionShock: 0 },
 };
 
 // 이 목록만 일반 플레이와 보상에 노출한다. 기존 원소/신화 정의는 실험용으로만 보존한다.
@@ -64,17 +65,14 @@ export const COMBAT_BALANCE = {
   magazineCapacity: 4,
   minimumMagazineCapacity: 4,
   maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
-  minimumRecoil: 0,
-  recoilMovementCoefficient: 0.01,
   minimumFirepower: 1,
-  exposedFirepowerBonus: 3,
+  heavyKickPenalty: 2,
+  shockSaturationPenalty: 2,
   corruptedSpecialFirepowerBonus: 2,
   burnDamagePerTurn: 3,
   burnTurnsApplied: 2,
   slowTurnsApplied: 2,
   slowMovementMultiplier: 0.55,
-  staggerTurnsApplied: 1,
-  staggerMovementMultiplier: 0.3,
   statusThreshold: 4,
   rangeThresholds: { near: 4, mid: 8 },
 } as const;

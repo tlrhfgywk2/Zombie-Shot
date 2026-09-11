@@ -25,6 +25,8 @@ export type AttachmentSlot = 'muzzle' | 'magazine' | 'optic' | 'rail' | 'grip';
 export type EnemyType = 'normal' | 'armored' | 'fast' | 'tough' | 'contaminator' | 'groundshaker' | 'screecher';
 export type EnemyIntentType = 'contaminate' | 'groundShock' | 'sonicPulse';
 
+export type EnemyActionType = 'approach' | 'attack' | EnemyIntentType;
+
 export interface EnemyIntentState {
   type: EnemyIntentType;
   name: string;
@@ -36,11 +38,8 @@ export interface EnemyIntentState {
 export interface EnemyStatuses {
   burnTurns: number;
   slowTurns: number;
-  staggerTurns: number;
   shockTurns: number;
-  exposedShots: number;
   corruptedShots: number;
-  impact: number;
   buildup: Record<StatusType, number>;
 }
 
@@ -52,7 +51,8 @@ export interface EnemyState {
   maxArmor: number;
   distance: number;
   advancePerTurn: number;
-  staggerThreshold: number;
+  shockResistance: number;
+  actionShock: number;
   special: boolean;
   turnsElapsed: number;
   intent?: EnemyIntentState;
@@ -60,8 +60,8 @@ export interface EnemyState {
 }
 
 export interface PlayerCombatState {
-  recoilPenaltyPercent: number;
-  recoilPenaltyTurns: number;
+  heavyKickPenaltyBonus: number;
+  heavyKickPenaltyTurns: number;
   rangePenaltySteps: number;
   rangePenaltyTurns: number;
   disabledSlots: Partial<Record<AttachmentSlot, number>>;
@@ -80,10 +80,10 @@ export interface ShotBreakdown {
   specialFirepowerBonus: number;
   armorBlocked: number;
   armorBroken: number;
-  cumulativeRecoil: number;
-  recoilGenerated: number;
-  recoilAfterShot: number;
-  recoilMovement: number;
+  heavyKickPenalty: number;
+  stabilized: boolean;
+  shockSaturationPenalty: number;
+  projectedShock: number;
   finalFirepower: number;
   finalDamage: number;
 }
@@ -95,8 +95,7 @@ export interface ShotResult {
   hpDamage: number;
   armorDamage: number;
   burnApplied: number;
-  staggerApplied: number;
-  impactApplied: number;
+  actionShockApplied: number;
   statusTriggered?: StatusType;
   conserved: boolean;
   killed: boolean;
@@ -111,26 +110,30 @@ export interface SequenceResult {
   finalState: EnemyState;
   totalHpDamage: number;
   totalArmorDamage: number;
-  totalImpactApplied: number;
+  totalActionShockApplied: number;
   effectiveRangePenaltyPercent: number;
-  totalRecoilMovement: number;
   conservedRounds: AmmoType[];
   unfiredRounds: AmmoType[];
   returnedRounds: AmmoType[];
   killed: boolean;
-  breached: boolean;
 }
 
 export interface EnemyActionResult {
+  selectedAction: EnemyActionType;
+  threshold: number;
+  interrupted: boolean;
+  /** 휴면 원소 전하의 특수 행동 교란. 행동 충격 소비와 구분한다. */
+  elementalInterruption: boolean;
+  shockConsumed: number;
+  shockRemaining: number;
+  playerKilled: boolean;
   before: EnemyState;
   after: EnemyState;
   playerBefore: PlayerCombatState;
   playerAfter: PlayerCombatState;
   burnDamage: number;
   movement: number;
-  staggerConsumed: boolean;
   intentResolved?: EnemyIntentType;
-  intentDelayed: boolean;
   intentDetail?: string;
   killedByBurn: boolean;
 }

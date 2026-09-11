@@ -1,5 +1,5 @@
 import { ammoRewardOwnedCount, ammoStatsMarkup } from './AmmoView';
-import { getRangeBand } from '../combat/CombatResolver';
+import { ACTION_NAMES, getActionShockThreshold, selectEnemyAction, getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
@@ -394,16 +394,14 @@ export class GameUI {
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
     this.armorText.textContent = String(enemy.armor);
     this.armorText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.armor === 0);
-    this.impactText.textContent = String(enemy.statuses.impact);
-    this.impactThreshold.textContent = `/${enemy.staggerThreshold}`;
-    this.impactFill.style.width = `${Math.min(100, enemy.statuses.impact / enemy.staggerThreshold * 100)}%`;
-    this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.statuses.impact === 0);
+    this.impactText.textContent = String(enemy.actionShock);
+    this.impactThreshold.textContent = `/${getActionShockThreshold(enemy)}`;
+    this.impactFill.style.width = `${Math.min(100, enemy.actionShock / getActionShockThreshold(enemy) * 100)}%`;
+    this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.actionShock === 0);
     const statuses: string[] = [];
     if (enemy.statuses.burnTurns) statuses.push(`<span data-status="burn">화상 ${enemy.statuses.burnTurns}</span>`);
     if (enemy.statuses.slowTurns) statuses.push(`<span data-status="slow">둔화 ${enemy.statuses.slowTurns}</span>`);
-    if (enemy.statuses.staggerTurns) statuses.push('<span data-status="stagger">이동 억제</span>');
     if (enemy.statuses.shockTurns) statuses.push('<span data-status="shock">전하 교란</span>');
-    if (enemy.statuses.exposedShots) statuses.push('<span data-status="exposed">노출</span>');
     if (enemy.statuses.corruptedShots) statuses.push(`<span data-status="corruption">침식 ${enemy.statuses.corruptedShots}</span>`);
     this.enemyStatus.innerHTML = statuses.join('');
     this.enemyStatus.hidden = statuses.length === 0;
@@ -412,34 +410,56 @@ export class GameUI {
     this.rangeBandText.textContent = RANGE_NAMES[rangeBand];
     this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
-    this.intentCard.hidden = !enemy.intent;
-    const intentDetail = enemy.intent?.description.replace('다음 행동: ', '');
-    if (enemy.intent) {
-      this.required(this.intentCard, '#intent-timing').textContent = enemy.intent.countdown <= 1 ? '다음 행동' : `${enemy.intent.countdown}행동 후`;
-      this.required(this.intentCard, '#intent-name').textContent = enemy.intent.name;
-    }
-    this.enemyContext.innerHTML = `<span><b>방어</b> 피해를 먼저 흡수합니다.</span><span><b>충격</b> 가득 차면 다음 접근과 특수 행동이 지연됩니다.</span><span><b>다음 접근</b> 연속 사격의 반동 접근과 이후 이동 합계입니다.</span>${intentDetail ? `<span class="intent-detail"><b>${enemy.intent!.name}</b> ${intentDetail}</span>` : ''}`;
-    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.statuses.impact}/${enemy.staggerThreshold}${enemy.intent ? `, ${enemy.intent.name} ${enemy.intent.countdown}행동 후` : ''}`);
+    this.intentCard.hidden = false;
+    this.required(this.intentCard, '#intent-timing').textContent = `다음 행동 · 충격 ${getActionShockThreshold(enemy)}`;
+    this.required(this.intentCard, '#intent-name').textContent = ACTION_NAMES[selectEnemyAction(enemy)];
+    this.enemyContext.innerHTML = '<span><b>충격</b> 임계치만큼 소비하여 행동을 중단합니다. 남은 충격은 유지됩니다.</span><span><b>치명 공격</b> 접근 후 다음 턴에 실행됩니다.</span>';
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.actionShock}/${getActionShockThreshold(enemy)}${enemy.intent ? `, ${enemy.intent.name} ${enemy.intent.countdown}행동 후` : ''}`);
   }
 
-  renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined, fullMagazineDamage?: number): void {
-    const totalMovement = (sequence?.totalRecoilMovement ?? 0) + (action?.movement ?? 0);
-    this.nextMoveText.textContent = sequence || action ? `${totalMovement.toFixed(1)} m` : '—';
-    this.nextMoveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-delayed', Boolean(action?.staggerConsumed));
+  renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined): void {
+    this.nextMoveText.textContent = action ? `${action.movement.toFixed(1)} m` : '—';
+    this.nextMoveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-delayed', Boolean(action?.interrupted));
+    if (action) {
+      this.intentCard.hidden = false;
+      this.intentCard.toggleAttribute('data-interrupted', action.interrupted);
+      this.intentCard.toggleAttribute('data-lethal', action.selectedAction === 'attack' && !action.interrupted);
+      this.required(this.intentCard, '#intent-timing').textContent = `다음 · 충격 ${action.threshold}`;
+      this.required(this.intentCard, '#intent-name').textContent = `${ACTION_NAMES[action.selectedAction]}${action.interrupted ? ` 중단 · ${action.before.actionShock}→${action.shockRemaining}` : ''}`;
+    } else if (sequence?.killed) {
+      this.required(this.intentCard, '#intent-timing').textContent = '예상 처치';
+      this.required(this.intentCard, '#intent-name').textContent = '행동 없음';
+      this.intentCard.removeAttribute('data-lethal');
+      this.intentCard.removeAttribute('data-interrupted');
+    }
+    this.slots.forEach((slot, index) => {
+      slot.querySelector('.sequence-effect')?.remove();
+      const shot = sequence?.shots[index];
+      if (!shot) {
+        if (this.rounds[index] && sequence) slot.insertAdjacentHTML('beforeend', '<small class="sequence-effect">미발사</small>');
+        return;
+      }
+      const detail = shot.breakdown;
+      const relation = detail.stabilized ? '안정' : detail.heavyKickPenalty ? `화력 −${detail.heavyKickPenalty}`
+        : detail.shockSaturationPenalty ? `충격 −${detail.shockSaturationPenalty}` : '';
+      const label = `화력 ${detail.finalFirepower} · 충격 ${shot.actionShockApplied}${relation ? ` · ${relation}` : ''}`;
+      slot.insertAdjacentHTML('beforeend', `<small class="sequence-effect" ${relation ? 'data-affected' : ''}><span>화력 ${detail.finalFirepower}</span><span>충격 ${shot.actionShockApplied}</span>${relation ? `<span>${relation}</span>` : ''}</small>`);
+      slot.setAttribute('aria-label', `${slot.getAttribute('aria-label')}, ${label}`);
+    });
     if (!sequence) {
       this.previewOutcome.hidden = true;
       this.previewOutcome.textContent = '';
       return;
     }
-    const totalDamage = fullMagazineDamage ?? sequence.totalHpDamage;
+    const totalDamage = sequence.totalHpDamage;
     const rangePenalty = sequence.effectiveRangePenaltyPercent === 0 ? '0%' : `-${sequence.effectiveRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
       <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${totalDamage}</strong></span></div>
       <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorDamage}</strong></span></div>
-      <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalImpactApplied}</strong></span></div>
+      <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalActionShockApplied}</strong></span></div>
       <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 감소</small><strong>${rangePenalty}</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${totalDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalImpactApplied}, 최종 거리 화력 감소 ${sequence.effectiveRangePenaltyPercent}%`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${totalDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.effectiveRangePenaltyPercent}%`);
   }
 
   showShot(result: ShotResult): void {
@@ -569,7 +589,7 @@ export class GameUI {
     const definition = AMMO_DEFINITIONS[ammo];
     const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
     const range = definition.rangePenaltyReduction ? `<span>거리 손실 <b>-${definition.rangePenaltyReduction}%p</b></span>` : '';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>반동 <b>+${definition.recoil}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.impact}</b></span>${range}</div><small>반동: 연속 사격 시 재조준이 길어져 좀비가 더 접근합니다.${buildup}</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.actionShock}</b></span>${range}</div><small>${definition.sequenceTrait ? { heavyKick: '바로 다음 화력 -2 · 안정탄으로 흡수', stable: '강한 반동을 흡수', shockSaturation: '바로 다음 충격 -2' }[definition.sequenceTrait] : ''}${buildup}</small>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;

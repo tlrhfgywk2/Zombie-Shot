@@ -360,19 +360,16 @@ export class GamePresentation {
     this.zombieTargetZ = end;
   }
 
-  async animateReacquisition(distance: number, accumulatedRecoil: number): Promise<void> {
-    this.presentationState = `재조준 · 반동 ${accumulatedRecoil.toFixed(2)}`;
+  async animateReacquisition(heavyKick: boolean, visualScale = 1): Promise<void> {
+    this.presentationState = '재조준';
     this.animationInProgress = true;
-    const zombieStart = this.zombieModel.root.position.z;
-    const zombieEnd = 1.1 - distance * 0.72;
-    const recoilRatio = Math.min(1, accumulatedRecoil / 6);
+    const recoilRatio = (heavyKick ? 1 : 0.25) * visualScale;
     const weaponEndPosition = this.baseWeaponPosition.clone();
     const weaponStartPosition = weaponEndPosition.clone().add(new THREE.Vector3(-0.025 - recoilRatio * 0.025, 0.015, 0));
     const weaponStartQuaternion = this.baseAimQuaternion.clone().multiply(
       new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), PRESENTATION_MOTION.weaponRecoil * (0.18 + recoilRatio * 0.22)),
     );
-    const duration = getReacquisitionDuration(accumulatedRecoil);
-    this.zombieTargetZ = zombieEnd;
+    const duration = getReacquisitionDuration(heavyKick ? 2 : 0);
     this.pistolModel.root.position.copy(weaponStartPosition);
     this.pistolModel.root.quaternion.copy(weaponStartQuaternion);
     await this.tween(duration, (progress) => {
@@ -380,11 +377,7 @@ export class GamePresentation {
       this.pistolModel.root.position.lerpVectors(weaponStartPosition, weaponEndPosition, eased);
       constrainWeaponPosition(this.pistolModel.root.position, this.layout);
       this.pistolModel.root.quaternion.slerpQuaternions(weaponStartQuaternion, this.baseAimQuaternion, eased);
-      this.zombieModel.root.position.z = THREE.MathUtils.lerp(zombieStart, zombieEnd, eased);
-      this.zombieModel.root.position.x = Math.sin(progress * Math.PI * 2) * 0.018 * recoilRatio;
     });
-    this.zombieModel.root.position.set(0, this.zombieModel.root.position.y, zombieEnd);
-    this.zombieTargetZ = zombieEnd;
     this.animationInProgress = false;
     this.presentationState = '재조준 완료';
   }

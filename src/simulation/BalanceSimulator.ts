@@ -32,8 +32,8 @@ export function simulateEncounter(priority: readonly AmmoType[], type: EnemyType
   const resolver = new CombatResolver();
   let enemy = createEnemyState(type);
   player.clearCombatDisruptions();
-  let shots = 0, armorBroken = 0, staggerTriggers = 0, recoilMovement = 0, normalMovement = 0;
-  for (let turn = 0; turn < 12 && enemy.hp > 0 && enemy.distance > 0; turn += 1) {
+  let shots = 0, armorBroken = 0, interruptions = 0, normalMovement = 0;
+  for (let turn = 0; turn < 12 && enemy.hp > 0; turn += 1) {
     // 소유 탄약에 직접 접근하는 결정론적 전략. 무작위 드로우가 아니다.
     while (player.magazine.size < player.magazine.capacity) {
       for (const ammo of priority) {
@@ -43,23 +43,23 @@ export function simulateEncounter(priority: readonly AmmoType[], type: EnemyType
       if (player.magazine.size < player.magazine.capacity) player.addAmmo('standard');
     }
     const sequence = resolver.resolveSequence(player.magazine.getRounds(), enemy, { loadout: player.loadout.getSnapshot(), playerState: player.getCombatState() });
-    recoilMovement += sequence.totalRecoilMovement;
     for (const shot of sequence.shots) {
       player.fireRound(shot);
       shots += 1;
       armorBroken += shot.breakdown.armorBroken;
-      staggerTriggers += shot.staggerApplied;
     }
     player.magazine.clear();
     enemy = sequence.finalState;
-    if (enemy.hp > 0 && enemy.distance > 0) {
+    if (enemy.hp > 0) {
       const action = resolver.resolveEnemyAction(enemy, player.getCombatState(), player.loadout.getSnapshot());
       enemy = action.after;
+      interruptions += Number(action.interrupted);
+      if (action.playerKilled) break;
       normalMovement += action.movement;
       player.applyCombatState(action.playerAfter);
     }
   }
-  return { won: enemy.hp <= 0, shots, armorBroken, staggerTriggers, recoilMovement: Number(recoilMovement.toFixed(2)), normalMovement: Number(normalMovement.toFixed(2)) };
+  return { won: enemy.hp <= 0, shots, armorBroken, interruptions, normalMovement: Number(normalMovement.toFixed(2)) };
 }
 export function runBalanceSimulation() {
   const loadouts = createAllLoadouts();

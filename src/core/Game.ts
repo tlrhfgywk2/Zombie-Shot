@@ -1,4 +1,4 @@
-import { CombatResolver } from '../combat/CombatResolver';
+import { CombatResolver, getVisualKickScale } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
 import { countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
@@ -116,18 +116,13 @@ export class Game {
       this.zombie.applyState(shot.after);
       this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
       const hasNextShot = shot !== sequence.shots.at(-1);
-      if (hasNextShot || shot.breakdown.recoilMovement > 0) {
-        await this.presentation.animateReacquisition(this.zombie.distance, shot.breakdown.recoilAfterShot);
+      if (hasNextShot) {
+        await this.presentation.animateReacquisition(shot.ammoType === 'overpressure', getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
       }
       this.syncEnemy();
     }
     this.player.magazine.clear();
     this.syncMagazine();
-    if (!this.zombie.isDead && this.zombie.distance <= 0) {
-      this.showBreach();
-      this.busy = false;
-      return;
-    }
     await this.resolveEnemyAction();
     this.busy = false;
   }
@@ -152,9 +147,9 @@ export class Game {
       await this.pause(420);
     }
 
-    await this.presentation.animateAdvance(this.zombie.distance);
+    if (action.movement > 0) await this.presentation.animateAdvance(this.zombie.distance);
     this.syncEnemy();
-    if (this.zombie.distance <= 0) {
+    if (action.playerKilled) {
       this.showBreach();
       return;
     }
@@ -162,6 +157,7 @@ export class Game {
     this.state.transition('AMMO_SELECTION');
     this.ui.setLocked(false);
     this.ui.setPhase('AMMO_SELECTION');
+    this.syncMagazine();
   }
 
   private async handleZombieDeath(): Promise<void> {
@@ -307,8 +303,8 @@ export class Game {
   }
 
   private sync(): void {
-    this.syncMagazine();
     this.syncEnemy();
+    this.syncMagazine();
     this.ui.setPhase(this.state.phase);
   }
 
@@ -322,12 +318,10 @@ export class Game {
     } else {
       const enemy = this.zombie.snapshot();
       const sequence = this.resolver.resolveSequence(rounds, enemy, context);
-      const fullMagazineDamage = this.resolver.resolveFullMagazineDamage(rounds, enemy, context);
-      // 확정 처치여도 기존 다음 접근값은 유지하고, 사격별 반동 접근은 UI에서 별도로 더한다.
-      const action = sequence.killed
-        ? this.resolver.resolveEnemyAction(enemy, context.playerState, context.loadout)
-        : sequence.breached ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
-      this.ui.renderPreview(sequence, action, fullMagazineDamage);
+      const action = sequence.killed ? undefined
+        : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
+      this.ui.renderPreview(sequence, action);
+
     }
   }
 
