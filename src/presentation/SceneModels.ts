@@ -26,6 +26,11 @@ export interface MagazineModel {
   witnessRounds: THREE.Mesh[];
 }
 
+export interface FirstPersonHandsModel {
+  firingHand: THREE.Group;
+  supportHand: THREE.Group;
+}
+
 export interface ZombieModel {
   root: THREE.Group;
   torso: THREE.Mesh;
@@ -42,6 +47,38 @@ const mesh = (geometry: THREE.BufferGeometry, material: THREE.Material, castShad
   result.castShadow = castShadow;
   return result;
 };
+
+const createTacticalHand = (name: string, mirrored: boolean): THREE.Group => {
+  const root = new THREE.Group();
+  root.name = name;
+  const glove = new THREE.MeshStandardMaterial({ color: 0x27332d, roughness: 0.88, metalness: 0.03 });
+  const reinforced = new THREE.MeshStandardMaterial({ color: 0x111814, roughness: 0.72, metalness: 0.08 });
+  const palm = mesh(new THREE.BoxGeometry(0.31, 0.38, 0.2), glove);
+  palm.position.y = -0.02;
+  palm.rotation.x = 0.08;
+  const knuckle = mesh(new THREE.BoxGeometry(0.3, 0.1, 0.225), reinforced);
+  knuckle.position.y = 0.13;
+  const forearm = mesh(new THREE.CapsuleGeometry(0.115, 0.54, 5, 9), glove);
+  forearm.position.y = -0.45;
+  forearm.rotation.z = mirrored ? -0.08 : 0.08;
+  root.add(palm, knuckle, forearm);
+  for (let index = 0; index < 4; index += 1) {
+    const finger = mesh(new THREE.CapsuleGeometry(0.036, 0.16 - index * 0.012, 4, 7), glove);
+    finger.position.set(-0.115 + index * 0.076, 0.23, 0.015);
+    finger.rotation.z = mirrored ? -0.1 : 0.1;
+    root.add(finger);
+  }
+  const thumb = mesh(new THREE.CapsuleGeometry(0.046, 0.19, 4, 8), glove);
+  thumb.position.set(mirrored ? 0.19 : -0.19, -0.015, 0.035);
+  thumb.rotation.z = mirrored ? -0.72 : 0.72;
+  root.add(thumb);
+  return root;
+};
+
+export const createFirstPersonHandsModel = (): FirstPersonHandsModel => ({
+  firingHand: createTacticalHand('firingHand', false),
+  supportHand: createTacticalHand('supportHand', true),
+});
 
 export const createPistolModel = (): PistolModel => {
   const root = new THREE.Group();

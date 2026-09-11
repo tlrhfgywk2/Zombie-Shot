@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { describe, expect, it } from 'vitest';
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER } from '../data/attachmentDefinitions';
-import { createAttachmentModel, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
+import { createAttachmentModel, createFirstPersonHandsModel, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
 describe('권총 모델 기준점', () => {
   it('총구는 총열의 +X 전방에 있고 명시적으로 이름 붙어 있다', () => {
@@ -13,6 +13,14 @@ describe('권총 모델 기준점', () => {
     expect(pistol.stageAnchor.name).toBe('pistolStageAnchor');
     expect(pistol.stageAnchor.parent).toBe(pistol.root);
     expect(pistol.stageAnchor.position.y).toBeLessThan(-0.8);
+  });
+
+  it('1인칭 조작용 양손 모델을 만든다', () => {
+    const hands = createFirstPersonHandsModel();
+    expect(hands.firingHand.name).toBe('firingHand');
+    expect(hands.supportHand.name).toBe('supportHand');
+    expect(hands.firingHand.children.length).toBeGreaterThan(5);
+    expect(hands.supportHand.children.length).toBeGreaterThan(5);
   });
 
   it('탄창 착좌 기준점은 프레임 아래 내부 스톱에 있고 탄피 배출구는 슬라이드의 보이는 측면에 있다', () => {

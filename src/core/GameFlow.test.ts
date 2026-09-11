@@ -237,6 +237,13 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(harness.ui.renderPreview.mock.calls.slice(previewCallCount)).toContainEqual([sequence]);
   });
 
+  it('플레이어가 선택한 총기 연출 속도를 프레젠테이션에 전달한다', () => {
+    new Game({} as HTMLElement);
+    harness.callbacks.onPresentationSpeedChange(0.5);
+    expect(harness.presentation.setPlaybackSpeed).toHaveBeenLastCalledWith(0.5);
+    expect(harness.ui.renderPresentationPreferences).toHaveBeenLastCalledWith({ speed: 0.5 });
+  });
+
   it('탄창은 모든 예정 사격이 끝난 뒤 한 번만 폐기한다', async () => {
     const game = new Game({} as HTMLElement);
     const state = game as unknown as { busy: boolean };

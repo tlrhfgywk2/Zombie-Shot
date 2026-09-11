@@ -8,6 +8,7 @@ import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, crea
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
+import type { PresentationPreferences } from '../presentation/PresentationPreferences';
 import { applyResponsiveLayoutMode } from '../presentation/ResponsiveLayout';
 import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
 
@@ -26,6 +27,7 @@ export interface GameUICallbacks {
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
+  onPresentationSpeedChange: (speed: number) => void;
   onLoad: () => void;
   onRestart: () => void;
 }
@@ -69,6 +71,8 @@ export class GameUI {
   private readonly audioMute: HTMLButtonElement;
   private readonly audioState: HTMLElement;
   private readonly audioVolume: HTMLInputElement;
+  private readonly presentationSpeed: HTMLInputElement;
+  private readonly presentationSpeedValue: HTMLElement;
   private readonly previewOutcome: HTMLElement;
   private readonly attachmentBay: HTMLElement;
   private readonly attachmentTabs: HTMLButtonElement[];
@@ -102,7 +106,7 @@ export class GameUI {
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
               <div id="enemy-action" class="enemy-action"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span><small>다음 행동</small><strong id="next-action-name">접근 2.0 m</strong></span><em id="next-action-shock" aria-label="중단 충격 4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><b>4</b></em></div>
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
-            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
+            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label><label class="presentation-speed-control"><span>연출</span><strong id="presentation-speed-value">1×</strong><input id="presentation-speed" type="range" min="0.5" max="2" step="0.25" value="1" aria-label="총기 연출 속도" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><section id="player-debuffs" class="player-debuffs" aria-label="플레이어 약화 효과" aria-live="polite" hidden></section></aside>
           <aside id="preview-outcome" class="combat-forecast" aria-label="발사 결과 예상" aria-live="polite" hidden></aside>
@@ -153,6 +157,8 @@ export class GameUI {
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
     this.audioState = this.required(root, '#audio-state');
     this.audioVolume = this.required(root, '#audio-volume') as HTMLInputElement;
+    this.presentationSpeed = this.required(root, '#presentation-speed') as HTMLInputElement;
+    this.presentationSpeedValue = this.required(root, '#presentation-speed-value');
     this.previewOutcome = this.required(root, '#preview-outcome');
     this.attachmentBay = this.required(root, '#attachment-bay');
     this.attachmentTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-attachment-slot]')];
@@ -224,6 +230,7 @@ export class GameUI {
     });
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
+    this.presentationSpeed.addEventListener('input', () => this.callbacks.onPresentationSpeedChange(Number(this.presentationSpeed.value)));
     this.loadButton.addEventListener('click', () => { if (!this.locked) this.callbacks.onLoad(); });
     this.required(root, '#inventory-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
@@ -410,6 +417,12 @@ export class GameUI {
     this.audioVolume.value = String(preferences.volume);
     this.audioVolume.setAttribute('aria-valuetext', `${Math.round(preferences.volume * 100)}%`);
     this.audioVolume.disabled = preferences.muted;
+  }
+
+  renderPresentationPreferences(preferences: PresentationPreferences): void {
+    this.presentationSpeed.value = String(preferences.speed);
+    this.presentationSpeedValue.textContent = `${preferences.speed}×`;
+    this.presentationSpeed.setAttribute('aria-valuetext', `${preferences.speed}배속`);
   }
 
   setPhase(phase: GamePhase): void {
