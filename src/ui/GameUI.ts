@@ -1,6 +1,6 @@
-import { ammoRewardOwnedCount, ammoStatsMarkup } from './AmmoView';
-import { ACTION_NAMES, getActionShockThreshold, selectEnemyAction, getRangeBand } from '../combat/CombatResolver';
-import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
+import { ammoRewardOwnedCount, ammoStatsMarkup, firingOrderStatEntries } from './AmmoView';
+import { ACTION_NAMES, getRangeBand } from '../combat/CombatResolver';
+import type { AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
@@ -33,6 +33,12 @@ const PHASE_LABELS: Record<GamePhase, string> = {
   ATTACHMENT_REWARD: '부착물 획득', AMMO_REWARD: '탄약 보급', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
+const COMBAT_STAT_ICONS = {
+  firepower: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>',
+  armor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg>',
+  shock: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg>',
+} as const;
+
 export class GameUI {
   private readonly hpFill: HTMLElement;
   private readonly hpText: HTMLElement;
@@ -42,7 +48,8 @@ export class GameUI {
   private readonly impactFill: HTMLElement;
   private readonly enemyStatus: HTMLElement;
   private readonly enemyContext: HTMLElement;
-  private readonly nextMoveText: HTMLElement;
+  private readonly nextActionName: HTMLElement;
+  private readonly nextActionShock: HTMLElement;
   private readonly distanceText: HTMLElement;
   private readonly rangeBandText: HTMLElement;
   private readonly levelText: HTMLElement;
@@ -55,7 +62,6 @@ export class GameUI {
   private readonly audioState: HTMLElement;
   private readonly audioVolume: HTMLInputElement;
   private readonly previewOutcome: HTMLElement;
-  private readonly intentCard: HTMLElement;
   private readonly attachmentBay: HTMLElement;
   private readonly attachmentTabs: HTMLButtonElement[];
   private readonly routeChoice: HTMLElement;
@@ -86,8 +92,7 @@ export class GameUI {
             <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">22 / 22</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
               <div class="enemy-stat enemy-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong id="armor-text">0</strong></span></div>
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
-              <div class="enemy-stat enemy-advance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 7 7-7 7M10 5l7 7-7 7M17 5l4 7-4 7"/></svg><span><small>다음 접근</small><strong id="next-move-text">2.0 m</strong></span></div>
-              <div id="intent-card" class="enemy-intent" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.2v.2"/></svg><span><small id="intent-timing">다음 행동</small><strong id="intent-name">특수 행동</strong></span></div>
+              <div id="enemy-action" class="enemy-action"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span><small>다음 행동</small><strong id="next-action-name">접근 2.0 m</strong></span><em id="next-action-shock" aria-label="중단 충격 4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><b>4</b></em></div>
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
             <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
@@ -127,7 +132,8 @@ export class GameUI {
     this.impactFill = this.required(root, '#impact-fill');
     this.enemyStatus = this.required(root, '#enemy-status');
     this.enemyContext = this.required(root, '#enemy-context');
-    this.nextMoveText = this.required(root, '#next-move-text');
+    this.nextActionName = this.required(root, '#next-action-name');
+    this.nextActionShock = this.required(root, '#next-action-shock');
     this.distanceText = this.required(root, '#distance-text');
     this.rangeBandText = this.required(root, '#range-band-text');
     this.levelText = this.required(root, '#level-text');
@@ -139,7 +145,6 @@ export class GameUI {
     this.audioState = this.required(root, '#audio-state');
     this.audioVolume = this.required(root, '#audio-volume') as HTMLInputElement;
     this.previewOutcome = this.required(root, '#preview-outcome');
-    this.intentCard = this.required(root, '#intent-card');
     this.attachmentBay = this.required(root, '#attachment-bay');
     this.attachmentTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-attachment-slot]')];
     this.routeChoice = this.required(root, '#route-choice');
@@ -389,14 +394,14 @@ export class GameUI {
     document.body.dataset.phase = phase;
   }
 
-  updateEnemy(enemy: EnemyState, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
+  updateEnemy(enemy: EnemyState, action: EnemyActionPreview, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
     this.hpFill.style.width = `${Math.max(0, enemy.hp / enemy.maxHp) * 100}%`;
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
     this.armorText.textContent = String(enemy.armor);
     this.armorText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.armor === 0);
     this.impactText.textContent = String(enemy.actionShock);
-    this.impactThreshold.textContent = `/${getActionShockThreshold(enemy)}`;
-    this.impactFill.style.width = `${Math.min(100, enemy.actionShock / getActionShockThreshold(enemy) * 100)}%`;
+    this.impactThreshold.textContent = `/${action.threshold}`;
+    this.impactFill.style.width = `${Math.min(100, enemy.actionShock / action.threshold * 100)}%`;
     this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.actionShock === 0);
     const statuses: string[] = [];
     if (enemy.statuses.burnTurns) statuses.push(`<span data-status="burn">화상 ${enemy.statuses.burnTurns}</span>`);
@@ -410,41 +415,26 @@ export class GameUI {
     this.rangeBandText.textContent = RANGE_NAMES[rangeBand];
     this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
-    this.intentCard.hidden = false;
-    this.required(this.intentCard, '#intent-timing').textContent = `다음 행동 · 충격 ${getActionShockThreshold(enemy)}`;
-    this.required(this.intentCard, '#intent-name').textContent = ACTION_NAMES[selectEnemyAction(enemy)];
+    this.nextActionName.textContent = action.selectedAction === 'approach'
+      ? `${ACTION_NAMES[action.selectedAction]} ${action.movement.toFixed(1)} m`
+      : ACTION_NAMES[action.selectedAction];
+    this.nextActionShock.querySelector<HTMLElement>('b')!.textContent = String(action.threshold);
+    this.nextActionShock.setAttribute('aria-label', `중단 충격 ${action.threshold}`);
     this.enemyContext.innerHTML = '<span><b>충격</b> 임계치만큼 소비하여 행동을 중단합니다. 남은 충격은 유지됩니다.</span><span><b>치명 공격</b> 접근 후 다음 턴에 실행됩니다.</span>';
-    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.actionShock}/${getActionShockThreshold(enemy)}${enemy.intent ? `, ${enemy.intent.name} ${enemy.intent.countdown}행동 후` : ''}`);
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
   }
 
-  renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined): void {
-    this.nextMoveText.textContent = action ? `${action.movement.toFixed(1)} m` : '—';
-    this.nextMoveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-delayed', Boolean(action?.interrupted));
-    if (action) {
-      this.intentCard.hidden = false;
-      this.intentCard.toggleAttribute('data-interrupted', action.interrupted);
-      this.intentCard.toggleAttribute('data-lethal', action.selectedAction === 'attack' && !action.interrupted);
-      this.required(this.intentCard, '#intent-timing').textContent = `다음 · 충격 ${action.threshold}`;
-      this.required(this.intentCard, '#intent-name').textContent = `${ACTION_NAMES[action.selectedAction]}${action.interrupted ? ` 중단 · ${action.before.actionShock}→${action.shockRemaining}` : ''}`;
-    } else if (sequence?.killed) {
-      this.required(this.intentCard, '#intent-timing').textContent = '예상 처치';
-      this.required(this.intentCard, '#intent-name').textContent = '행동 없음';
-      this.intentCard.removeAttribute('data-lethal');
-      this.intentCard.removeAttribute('data-interrupted');
-    }
+  renderPreview(sequence: SequenceResult | undefined): void {
     this.slots.forEach((slot, index) => {
-      slot.querySelector('.sequence-effect')?.remove();
+      slot.querySelector('.sequence-stats, .sequence-note')?.remove();
       const shot = sequence?.shots[index];
       if (!shot) {
-        if (this.rounds[index] && sequence) slot.insertAdjacentHTML('beforeend', '<small class="sequence-effect">미발사</small>');
+        if (this.rounds[index] && sequence) slot.insertAdjacentHTML('beforeend', '<small class="sequence-note">미발사</small>');
         return;
       }
-      const detail = shot.breakdown;
-      const relation = detail.stabilized ? '안정' : detail.heavyKickPenalty ? `화력 −${detail.heavyKickPenalty}`
-        : detail.shockSaturationPenalty ? `충격 −${detail.shockSaturationPenalty}` : '';
-      const label = `화력 ${detail.finalFirepower} · 충격 ${shot.actionShockApplied}${relation ? ` · ${relation}` : ''}`;
-      slot.insertAdjacentHTML('beforeend', `<small class="sequence-effect" ${relation ? 'data-affected' : ''}><span>화력 ${detail.finalFirepower}</span><span>충격 ${shot.actionShockApplied}</span>${relation ? `<span>${relation}</span>` : ''}</small>`);
-      slot.setAttribute('aria-label', `${slot.getAttribute('aria-label')}, ${label}`);
+      const visibleStats = firingOrderStatEntries(shot);
+      slot.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}</span>`);
+      slot.setAttribute('aria-label', `${slot.getAttribute('aria-label')}, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}`);
     });
     if (!sequence) {
       this.previewOutcome.hidden = true;
@@ -452,14 +442,14 @@ export class GameUI {
       return;
     }
     const totalDamage = sequence.totalHpDamage;
-    const rangePenalty = sequence.effectiveRangePenaltyPercent === 0 ? '0%' : `-${sequence.effectiveRangePenaltyPercent}%`;
+    const rangePenalty = sequence.finalRangePenaltyPercent === 0 ? '0%' : `-${sequence.finalRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
       <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${totalDamage}</strong></span></div>
       <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorDamage}</strong></span></div>
       <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalActionShockApplied}</strong></span></div>
-      <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 감소</small><strong>${rangePenalty}</strong></span></div>`;
+      <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 화력</small><strong>${rangePenalty}</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${totalDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.effectiveRangePenaltyPercent}%`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${totalDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.finalRangePenaltyPercent}%`);
   }
 
   showShot(result: ShotResult): void {
@@ -588,8 +578,7 @@ export class GameUI {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
     const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
-    const range = definition.rangePenaltyReduction ? `<span>거리 손실 <b>-${definition.rangePenaltyReduction}%p</b></span>` : '';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.actionShock}</b></span>${range}</div><small>${definition.sequenceTrait ? { heavyKick: '바로 다음 화력 -2 · 안정탄으로 흡수', stable: '강한 반동을 흡수', shockSaturation: '바로 다음 충격 -2' }[definition.sequenceTrait] : ''}${buildup}</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.actionShock}</b></span></div><small>${definition.sequenceTrait ? { heavyKick: '바로 다음 화력 -2 · 안정탄으로 흡수', stable: '강한 반동을 흡수', shockSaturation: '바로 다음 충격 -2' }[definition.sequenceTrait] : ''}${buildup}</small>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;

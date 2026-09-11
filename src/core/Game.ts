@@ -1,4 +1,4 @@
-import { CombatResolver, getVisualKickScale } from '../combat/CombatResolver';
+import { CombatResolver, getVisualKickScale, previewEnemyAction } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
 import { countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
@@ -312,22 +312,14 @@ export class Game {
     const rounds = this.player.magazine.getRounds();
     this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity, this.player.getBuild(), this.player.getSpecialCapacity());
     const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
-    if (rounds.length === 0) {
-      const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), context.playerState, context.loadout);
-      this.ui.renderPreview(undefined, action);
-    } else {
-      const enemy = this.zombie.snapshot();
-      const sequence = this.resolver.resolveSequence(rounds, enemy, context);
-      const action = sequence.killed ? undefined
-        : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
-      this.ui.renderPreview(sequence, action);
-
-    }
+    const sequence = rounds.length > 0 ? this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context) : undefined;
+    this.ui.renderPreview(sequence);
   }
 
   private syncEnemy(): void {
+    const enemy = this.zombie.snapshot();
     const waveSize = this.currentRoster.length || 1;
-    this.ui.updateEnemy(this.zombie.snapshot(), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
+    this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
     this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
     this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1, this.zombie.type);

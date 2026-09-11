@@ -25,9 +25,9 @@ describe('순서·거리 체계 밸런스 감사', () => {
 
   it('10%는 완만하고 25%는 작은 화력에서도 의미 있게 작동한다', () => {
     const standard = audit.damage.filter(item => item.ammo === 'standard');
-    expect(standard.map(item => item.finalFirepower)).toEqual([4, 4, 3]);
+    expect(standard.map(item => item.finalVolleyFirepower)).toEqual([4, 4, 3]);
     const overpressure = audit.damage.filter(item => item.ammo === 'overpressure');
-    expect(overpressure.map(item => item.finalFirepower)).toEqual([8, 7, 6]);
+    expect(overpressure.map(item => item.finalVolleyFirepower)).toEqual([8, 7, 6]);
   });
 
   it('재현 가능한 상세 감사 보고서를 출력한다', () => {

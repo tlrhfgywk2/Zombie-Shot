@@ -3,16 +3,13 @@ import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { ATTACHMENT_DEFINITIONS } from '../data/attachmentDefinitions';
 import { createEnemyState } from '../data/enemyDefinitions';
 import { createPlayerCombatState } from './AttachmentLoadout';
-import { calculateFinalFirepower, CombatResolver, roundPositiveFirepower } from './CombatResolver';
+import { calculateFinalRangePenaltyPercent, calculateFinalVolleyFirepower, CombatResolver, roundPositiveFirepower } from './CombatResolver';
 
 describe('CombatResolver', () => {
   const resolver = new CombatResolver();
 
-  it('직접 화력을 합산한 뒤 거리 퍼센트를 적용하고 최근접 정수로 만든다', () => {
-    expect(calculateFinalFirepower({
-      weaponFirepower: 2, ammoFirepower: 5, attachmentFirepower: 0,
-      statusFirepowerBonus: 0, specialFirepowerBonus: 0, rangePenaltyPercent: 10,
-    })).toBe(6);
+  it('발사 순서 유효 화력 합계에 거리 퍼센트를 한 번 적용하고 최근접 정수로 만든다', () => {
+    expect(calculateFinalVolleyFirepower(7, 10)).toBe(6);
   });
 
   it.each([
@@ -51,23 +48,41 @@ describe('CombatResolver', () => {
     const disrupted = resolver.resolveSequence(['standard'], enemy, { playerState: state });
 
     expect(normal.shots[0]?.breakdown.rangeBand).toBe('mid');
-    expect(normal.shots[0]?.breakdown.rangePenaltyPercent).toBe(10);
-    expect(normal.effectiveRangePenaltyPercent).toBe(10);
+    expect(normal.baseRangePenaltyPercent).toBe(10);
+    expect(normal.finalRangePenaltyPercent).toBe(10);
     expect(disrupted.shots[0]?.breakdown.effectiveRangeBand).toBe('far');
-    expect(disrupted.shots[0]?.breakdown.rangePenaltyPercent).toBe(25);
-    expect(disrupted.effectiveRangePenaltyPercent).toBe(25);
+    expect(disrupted.baseRangePenaltyPercent).toBe(25);
+    expect(disrupted.finalRangePenaltyPercent).toBe(25);
   });
 
-  it('혼합 탄약과 부착물의 최종 거리 손실을 직접 화력 가중 퍼센트로 집계한다', () => {
+  it('매치탄은 화력 비중과 무관하게 최종 거리 화력 감소를 발당 3%p 낮춘다', () => {
     const enemy = { ...createEnemyState('tough'), hp: 100, maxHp: 100, distance: 11 };
     const rounds = ['standard', 'match'] as const;
     const bare = resolver.resolveSequence(rounds, enemy);
     const tuned = resolver.resolveSequence(rounds, enemy, { loadout: { optic: 'compactReflexSight' } });
 
-    expect(bare.shots.map(shot => shot.breakdown.rangePenaltyPercent)).toEqual([25, 10]);
-    expect(bare.effectiveRangePenaltyPercent).toBe(18.6);
-    expect(tuned.shots.map(shot => shot.breakdown.rangePenaltyPercent)).toEqual([15, 0]);
-    expect(tuned.effectiveRangePenaltyPercent).toBe(8.6);
+    expect(bare).toMatchObject({ baseRangePenaltyPercent: 25, matchAmmoCount: 1, finalRangePenaltyPercent: 22 });
+    expect(tuned).toMatchObject({ baseRangePenaltyPercent: 15, matchAmmoCount: 1, finalRangePenaltyPercent: 12 });
+  });
+
+  it('기본 15%에서 매치탄 수만으로 15/12/9/6/3/0%가 되고 음수가 되지 않는다', () => {
+    expect([0, 1, 2, 3, 4, 5, 6].map((count) => calculateFinalRangePenaltyPercent(15, count)))
+      .toEqual([15, 12, 9, 6, 3, 0, 0]);
+  });
+
+  it('매치탄 한 발만 발사해도 기본 감소에서 정확히 3%p만 완화한다', () => {
+    const matchOnly = resolver.resolveSequence(['match'], { ...createEnemyState('tough'), hp: 100, maxHp: 100, distance: 11 });
+    expect(matchOnly).toMatchObject({ baseRangePenaltyPercent: 25, finalRangePenaltyPercent: 22, matchAmmoCount: 1 });
+  });
+
+  it('4+4+4+7 발사 순서는 10%를 합계 19에 한 번 적용해 최종 화력 17을 만든다', () => {
+    const sequence = resolver.resolveSequence(
+      ['standard', 'standard', 'standard', 'hollowPoint'],
+      { ...createEnemyState('tough'), hp: 100, maxHp: 100, armor: 0, distance: 7 },
+    );
+    expect(sequence.shots.map((shot) => shot.breakdown.effectiveFirepower)).toEqual([4, 4, 4, 7]);
+    expect(sequence).toMatchObject({ rawVolleyFirepower: 19, finalRangePenaltyPercent: 10, finalVolleyFirepower: 17 });
+    expect(sequence.shots.reduce((sum, shot) => sum + shot.breakdown.finalFirepower, 0)).toBe(17);
   });
 
   it('보통 4발 표준탄은 일반 감염체의 기준 4행동 접근을 3행동으로 줄이지 않는다', () => {

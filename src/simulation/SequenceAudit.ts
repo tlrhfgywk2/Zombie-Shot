@@ -48,15 +48,15 @@ export function runSequenceAudit() {
   }));
 
   const damage = AMMO_ORDER.flatMap(ammo => bands.map(({ band, distance }) => {
-    const shot = resolver.resolveShot(ammo, 0, { ...durableEnemy('tough'), armor: 0, maxArmor: 0, distance });
+    const sequence = resolver.resolveSequence([ammo], { ...durableEnemy('tough'), armor: 0, maxArmor: 0, distance });
+    const shot = sequence.shots[0]!;
     return {
       ammo,
       name: AMMO_DEFINITIONS[ammo].name,
       band,
-      directFirepower: shot.breakdown.directFirepower,
-      penaltyPercent: shot.breakdown.rangePenaltyPercent,
-      beforeRounding: shot.breakdown.distanceAdjustedFirepower,
-      finalFirepower: shot.breakdown.finalFirepower,
+      effectiveFirepower: shot.breakdown.effectiveFirepower,
+      penaltyPercent: sequence.finalRangePenaltyPercent,
+      finalVolleyFirepower: sequence.finalVolleyFirepower,
     };
   }));
 

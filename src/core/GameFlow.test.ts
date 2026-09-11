@@ -6,6 +6,7 @@ import type { Player } from '../entities/Player';
 import { Game } from './Game';
 import type { GameStateMachine } from './GameStateMachine';
 import type { SpecialAmmoType } from '../data/ammoDefinitions';
+import { CombatResolver } from '../combat/CombatResolver';
 
 const harness = vi.hoisted(() => {
   const methods: Record<string, any> = { canvasHost: {} };
@@ -81,21 +82,27 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(player.applyAmmoReward('standard' as SpecialAmmoType, ['armorPiercing'])).toBe(false);
     expect(player.getBuild()).toEqual(before);
   });
-  it('처치 프리뷰는 적 행동이 없으며 실제 발사 피해를 표시한다', () => {
+  it('처치 프리뷰도 실제 적 정보와 다음 행동을 바꾸지 않고 전용 예상 피해만 표시한다', () => {
     const game = new Game({} as HTMLElement);
     const internals = game as unknown as { zombie: Zombie; sync: () => void };
     const enemy = internals.zombie.snapshot();
     internals.zombie.applyState({ ...enemy, hp: 5, armor: 0 });
     internals.sync();
+    const actualEnemyPanel = harness.ui.updateEnemy.mock.calls.at(-1)!;
 
     harness.callbacks.onAddAmmo('standard');
+    const [nonLethalSequence] = harness.ui.renderPreview.mock.calls.at(-1)!;
+    expect(nonLethalSequence.killed).toBe(false);
+    expect(harness.ui.updateEnemy.mock.calls.at(-1)).toEqual(actualEnemyPanel);
+
     harness.callbacks.onAddAmmo('standard');
 
-    const [sequence, action] = harness.ui.renderPreview.mock.calls.at(-1)!;
+    const [sequence] = harness.ui.renderPreview.mock.calls.at(-1)!;
     expect(sequence.killed).toBe(true);
     expect(sequence.finalState.distance).toBe(enemy.distance);
-    expect(action).toBeUndefined();
     expect(sequence.totalHpDamage).toBe(5);
+    expect(harness.ui.renderPreview.mock.calls.at(-1)).toHaveLength(1);
+    expect(harness.ui.updateEnemy.mock.calls.at(-1)).toEqual(actualEnemyPanel);
   });
   it('탄약 배급을 넘기면 보유 배분을 바꾸지 않고 경로 선택으로 진행한다', () => {
     const game = new Game({} as HTMLElement);
@@ -176,20 +183,23 @@ describe('실제 게임의 구간/보상 연결', () => {
     await vi.waitFor(() => expect(state.busy).toBe(false));
     expect(state.state.phase).toBe('GAME_OVER');
   });
-  it('실제 사격 상태와 선택 프리뷰가 순서 효과와 다음 행동까지 일치한다', async () => {
+  it('실제 사격 상태는 공용 시퀀스 계산과 일치한다', async () => {
     const game = new Game({} as HTMLElement);
     const state = game as unknown as { player: Player; zombie: Zombie; busy: boolean; sync: () => void };
     state.zombie.applyState({ ...state.zombie.snapshot(), hp: 100, maxHp: 100, distance: 8 });
     for (const ammo of ['overpressure', 'flatPoint', 'wadcutter'] as const) state.player.applyAmmoReward(ammo);
     state.player.startStage(); state.sync();
     for (const ammo of ['overpressure', 'flatPoint', 'wadcutter', 'standard'] as const) harness.callbacks.onAddAmmo(ammo);
-    const [sequence, action] = harness.ui.renderPreview.mock.calls.at(-1)!;
+    const [sequence] = harness.ui.renderPreview.mock.calls.at(-1)!;
     expect(sequence.shots[1].breakdown.heavyKickPenalty).toBe(2);
     expect(sequence.shots[2].actionShockApplied).toBe(0);
+    const expectedAction = new CombatResolver().resolveEnemyAction(
+      sequence.finalState, state.player.getCombatState(), state.player.loadout.getSnapshot(),
+    );
     harness.callbacks.onLoad();
     await vi.waitFor(() => expect(state.busy).toBe(false));
     expect(harness.ui.showShot.mock.calls.map((call: any[]) => call[0])).toEqual(sequence.shots);
-    expect(state.zombie.snapshot()).toEqual(action.after);
+    expect(state.zombie.snapshot()).toEqual(expectedAction.after);
   });
 
 });
