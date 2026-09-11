@@ -92,10 +92,11 @@ describe('실제 게임의 구간/보상 연결', () => {
     harness.callbacks.onAddAmmo('standard');
     harness.callbacks.onAddAmmo('standard');
 
-    const [sequence, action] = harness.ui.renderPreview.mock.calls.at(-1)!;
+    const [sequence, action, fullMagazineDamage] = harness.ui.renderPreview.mock.calls.at(-1)!;
     expect(sequence.killed).toBe(true);
     expect(sequence.totalRecoilMovement).toBe(0.02);
     expect(action.movement).toBe(enemy.advancePerTurn);
+    expect(fullMagazineDamage).toBe(8);
   });
   it('탄약 배급을 넘기면 보유 배분을 바꾸지 않고 경로 선택으로 진행한다', () => {
     const game = new Game({} as HTMLElement);

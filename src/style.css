@@ -61,8 +61,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-context .intent-detail b { color: #ffd68f; }
 .enemy-card:hover .enemy-context, .enemy-card:focus .enemy-context, .enemy-card:focus-within .enemy-context { opacity: 1; visibility: visible; transform: translateY(0); }
 .utility-stack { justify-self: end; width: 140px; display: grid; gap: .38rem; }
-.distance-card { width: 100%; text-align: right; padding-right: .8rem; border-right: 2px solid var(--acid); }
-.distance-card strong { display: block; margin-top: .15rem; font-family: "Arial Narrow", sans-serif; font-size: 1.25rem; }
+.distance-card { display: grid; grid-template-columns: auto 1fr; align-items: baseline; width: 100%; gap: .5rem; padding-right: .8rem; border-right: 2px solid var(--acid); text-align: right; }
+.distance-card small { white-space: nowrap; }
+.distance-card strong { display: block; margin-top: 0; font-family: "Arial Narrow", sans-serif; font-size: 1.25rem; white-space: nowrap; }
 .audio-controls { display: grid; grid-template-columns: 50px 1fr; min-height: 44px; border: 1px solid var(--line); background: rgba(10, 15, 12, .8); pointer-events: auto; backdrop-filter: blur(8px); }
 .audio-controls button { display: grid; place-content: center; min-width: 0; min-height: 44px; padding: .25rem; border: 0; border-right: 1px solid var(--line); background: transparent; cursor: pointer; touch-action: manipulation; }
 .audio-controls button span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .08em; }
@@ -371,9 +372,8 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 
 /* The playfield and the preparation controls occupy separate layout rows. */
 .game-shell {
-  --console-height: clamp(286px, 33dvh, 314px);
   display: grid;
-  grid-template-rows: minmax(0, 1fr) var(--console-height);
+  grid-template-rows: minmax(0, 1fr) auto;
   min-height: 0;
 }
 .game-stage { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
@@ -469,9 +469,12 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .attachment-option.is-equipped::after { align-self: center; }
 .hint,
 .attachment-drawer { display: none; }
-.game-shell .ammo-tooltip { bottom: calc(var(--console-height) + 8px); }
+.game-shell .ammo-tooltip { bottom: 8px; }
 
-.game-shell[data-layout="desktop"] { --console-height: clamp(310px, 35dvh, 340px); }
+.game-shell[data-layout="desktop"] { font-size: 17px; }
+@media (min-width: 1200px) {
+  .game-shell[data-layout="compact-landscape"] { font-size: 17px; }
+}
 .game-shell[data-layout="desktop"] .top-hud { grid-template-columns: 1fr minmax(320px, 500px) 1fr; gap: 1.25rem; padding: max(22px, env(safe-area-inset-top)) max(26px, env(safe-area-inset-right)) 0 max(26px, env(safe-area-inset-left)); }
 .game-shell[data-layout="desktop"] .brand strong { font-size: 1.32rem; }
 .game-shell[data-layout="desktop"] .enemy-card { padding: .88rem .95rem .92rem; }
@@ -514,12 +517,10 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="desktop"] .ammo-tooltip > div b { margin-top: .12rem; font-size: .96rem; }
 .game-shell[data-layout="desktop"] .ammo-tooltip > small { font-size: .73rem; }
 
-.game-shell[data-layout="tablet-landscape"] { --console-height: 296px; }
 .game-shell[data-layout="tablet-landscape"] .top-hud { grid-template-columns: 1fr minmax(260px, 360px) 1fr; padding-top: max(10px, env(safe-area-inset-top)); }
 .game-shell[data-layout="tablet-landscape"] .enemy-card { padding: .52rem .72rem .58rem; }
 .game-shell[data-layout="tablet-landscape"] .hp-track { margin-top: .38rem; }
 .game-shell[data-layout="tablet-landscape"] .enemy-meta { margin-top: .3rem; }
-.game-shell[data-layout="tablet-portrait"] { --console-height: 374px; }
 .game-shell[data-layout="tablet-portrait"] .top-hud {
   grid-template-columns: minmax(130px, .7fr) minmax(250px, 1.35fr) 132px;
   gap: .65rem;
@@ -532,8 +533,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="tablet-portrait"] .attachment-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .game-shell[data-layout="tablet-portrait"] .attachment-option em { display: none; }
 
-.game-shell[data-layout="portrait"] { --console-height: min(410px, 48dvh); }
-.game-shell[data-layout="portrait"] .ammo-tooltip { bottom: calc(var(--console-height) + 6px); }
+.game-shell[data-layout="portrait"] .ammo-tooltip { bottom: 6px; }
 .game-shell[data-layout="portrait"] .tactical-console {
   overflow: hidden;
   padding: 5px calc(5px + env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) calc(5px + env(safe-area-inset-left));
@@ -564,7 +564,6 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .attachment-option em { display: none; }
 .game-shell[data-layout="portrait"] .attachment-option.is-equipped::after { font-size: .46rem; }
 
-.game-shell[data-layout="compact-landscape"] { --console-height: min(190px, 50dvh); }
 .game-shell[data-layout="compact-landscape"] .tactical-console { padding: 4px 8px max(4px, env(safe-area-inset-bottom)); }
 .game-shell[data-layout="compact-landscape"] .console-header { display: none; }
 .game-shell[data-layout="compact-landscape"] .tactical-console .loadout { grid-template-columns: .85fr 1fr 1.15fr; gap: 4px; }
@@ -595,6 +594,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .reward-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .reward-options .route-option { min-width: 0; min-height: 210px; border-color: color-mix(in srgb, var(--bullet), transparent 65%); background: linear-gradient(145deg, color-mix(in srgb, var(--bullet), transparent 92%), rgba(255,255,255,.035)); }
 .reward-options .route-option:hover, .reward-options .route-option:focus-visible { border-color: var(--acid); background: rgba(200,255,77,.12); }
+.reward-options .ammo-reward-option > em { font-size: .82rem; font-weight: 850; }
 .reward-options .ammo-stats { display: grid; width: 100%; font-size: 13px; margin: 8px 0; }
 .reward-options .ammo-stats > span { color: #b7c4bb; font-size: inherit; }
 .ammo-rarity { color: var(--bullet); font-size: .62rem; font-weight: 900; letter-spacing: .12em; }
@@ -623,8 +623,6 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .inspect-round .round-visual i { left: 7px; right: 7px; bottom: 16px; height: 3px; }
 .ammo-inspect-card .ammo-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; font-size: .82rem; }
 .ammo-inspect-card .ammo-stats > span { padding: .65rem .75rem; background: rgba(255,255,255,.05); }
-.game-shell { --console-height: 270px; }
-.game-shell[data-layout="portrait"] { --console-height: min(390px, 48dvh); }
 .game-shell[data-layout="portrait"] .tactical-console { overflow-y: auto; }
 .game-shell[data-layout="portrait"] .reward-options { grid-template-columns: 1fr; gap: 6px; }
 .game-shell[data-layout="portrait"] .reward-options .route-option { min-height: 0; padding: 10px; }

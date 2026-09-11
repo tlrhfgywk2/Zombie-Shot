@@ -322,11 +322,12 @@ export class Game {
     } else {
       const enemy = this.zombie.snapshot();
       const sequence = this.resolver.resolveSequence(rounds, enemy, context);
+      const fullMagazineDamage = this.resolver.resolveFullMagazineDamage(rounds, enemy, context);
       // 확정 처치여도 기존 다음 접근값은 유지하고, 사격별 반동 접근은 UI에서 별도로 더한다.
       const action = sequence.killed
         ? this.resolver.resolveEnemyAction(enemy, context.playerState, context.loadout)
         : sequence.breached ? undefined : this.resolver.resolveEnemyAction(sequence.finalState, context.playerState, context.loadout);
-      this.ui.renderPreview(sequence, action);
+      this.ui.renderPreview(sequence, action, fullMagazineDamage);
     }
   }
 
