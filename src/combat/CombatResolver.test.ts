@@ -139,6 +139,7 @@ describe('CombatResolver', () => {
     expect(result.conservedRounds).toEqual(['bloodHex']);
     expect(result.unfiredRounds).toEqual(['incendiary', 'standard']);
     expect(result.returnedRounds).toEqual(['bloodHex', 'incendiary', 'standard']);
+    expect(result.roundPreviews.map((round) => round.ammoType)).toEqual(['bloodHex', 'incendiary', 'standard']);
   });
 
   it('총 피해 프리뷰는 현재 체력과 돌파에 제한되지 않고 탄창 전체를 계산한다', () => {
