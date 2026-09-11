@@ -466,11 +466,11 @@ export class GameUI {
     const rangePenalty = sequence.finalRangePenaltyPercent === 0 ? '0%' : `-${sequence.finalRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
       <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 화력</small><strong>${totalFirepower}</strong></span></div>
-      <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorDamage}</strong></span></div>
+      <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorBreak}</strong></span></div>
       <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalActionShockApplied}</strong></span></div>
       <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 화력</small><strong>${rangePenalty}</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${totalFirepower}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.finalRangePenaltyPercent}%`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${totalFirepower}, 방어 파괴 ${sequence.totalArmorBreak}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.finalRangePenaltyPercent}%`);
   }
 
   showShot(result: ShotResult): void {

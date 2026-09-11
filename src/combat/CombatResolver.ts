@@ -174,7 +174,7 @@ export class CombatResolver {
       finalRangePenaltyPercent: profile.finalRangePenaltyPercent,
       finalVolleyFirepower,
       totalHpDamage: shots.reduce((sum, shot) => sum + shot.hpDamage, 0),
-      totalArmorDamage: shots.reduce((sum, shot) => sum + shot.armorDamage, 0),
+      totalArmorBreak: shots.reduce((sum, shot) => sum + shot.breakdown.armorBroken, 0),
       totalActionShockApplied: shots.reduce((sum, shot) => sum + shot.actionShockApplied, 0),
       conservedRounds, unfiredRounds: [...unfiredRounds], returnedRounds: [...conservedRounds, ...unfiredRounds], killed: current.hp <= 0,
     };

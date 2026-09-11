@@ -126,7 +126,8 @@ export interface SequenceResult {
   finalRangePenaltyPercent: number;
   finalVolleyFirepower: number;
   totalHpDamage: number;
-  totalArmorDamage: number;
+  /** 탄약 고유 방어 파괴로 실제 제거한 방어의 합계. 일반 화력에 흡수된 방어는 포함하지 않는다. */
+  totalArmorBreak: number;
   totalActionShockApplied: number;
   conservedRounds: AmmoType[];
   unfiredRounds: AmmoType[];
