@@ -633,13 +633,14 @@ export class GameUI {
     });
     element.addEventListener('focus', () => {
       clear();
-      show();
+      if (element.matches(':focus-visible')) show();
     });
   }
 
   private bindTouchTooltip(element: HTMLButtonElement, show: () => void): void {
     element.addEventListener('pointerdown', (event) => {
       if (event.pointerType === 'mouse' || event.button !== 0) return;
+      this.hideTooltip();
       const startX = event.clientX;
       const startY = event.clientY;
       let longPressed = false;
@@ -658,7 +659,10 @@ export class GameUI {
       };
       const end = (): void => {
         cleanup();
-        if (!longPressed) return;
+        if (!longPressed) {
+          this.hideTooltip();
+          return;
+        }
         this.suppressClick = true;
         window.setTimeout(() => { this.suppressClick = false; }, 0);
       };
