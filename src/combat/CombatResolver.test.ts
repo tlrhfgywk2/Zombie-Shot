@@ -154,4 +154,14 @@ describe('CombatResolver', () => {
     expect(resolver.resolveFullMagazineDamage(rounds, enemy)).toBe(16);
   });
 
+  it('일반 화력으로 소모한 방어를 방어 파괴 합계로 표시하지 않는다', () => {
+    const enemy = { ...createEnemyState('armored'), hp: 100, maxHp: 100, armor: 4, maxArmor: 4, distance: 3 };
+    const standard = resolver.resolveSequence(['standard'], enemy);
+    const armorPiercing = resolver.resolveSequence(['armorPiercing'], enemy);
+
+    expect(standard.shots[0]).toMatchObject({ armorDamage: 4, breakdown: { armorBroken: 0 } });
+    expect(standard.totalArmorBreak).toBe(0);
+    expect(armorPiercing.totalArmorBreak).toBe(4);
+  });
+
 });
