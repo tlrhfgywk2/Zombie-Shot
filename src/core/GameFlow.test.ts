@@ -202,4 +202,16 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(state.zombie.snapshot()).toEqual(expectedAction.after);
   });
 
+  it('장전 시작으로 슬롯을 잠가도 사전 계산한 발사 순서 수치를 즉시 다시 표시한다', () => {
+    new Game({} as HTMLElement);
+    harness.callbacks.onAddAmmo('standard');
+    const [sequence] = harness.ui.renderPreview.mock.calls.at(-1)!;
+    const previewCallCount = harness.ui.renderPreview.mock.calls.length;
+
+    harness.callbacks.onLoad();
+
+    expect(harness.ui.setLocked).toHaveBeenCalledWith(true);
+    expect(harness.ui.renderPreview.mock.calls.slice(previewCallCount)).toContainEqual([sequence]);
+  });
+
 });
