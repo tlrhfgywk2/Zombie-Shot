@@ -669,10 +669,11 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 
 /* 통합 행동 예고와 아이콘 기반 탄약 유효 수치 */
 .game-shell .tactical-console .mag-slot { height: 98px; min-height: 98px; }
-.game-shell .tactical-console .mag-slot.filled { grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto 1fr; place-items: initial; column-gap: .34rem; padding: .52rem .38rem .34rem .5rem; }
-.game-shell .tactical-console .mag-slot.filled .round-visual { grid-row: 1 / 3; align-self: center; justify-self: center; width: 13px; height: 38px; margin: 0; }
-.game-shell .tactical-console .mag-slot.filled > strong { align-self: end; overflow: hidden; color: #edf3ee; font-size: .7rem; letter-spacing: .05em; text-overflow: ellipsis; white-space: nowrap; }
-.sequence-stats { display: flex; align-self: start; align-items: center; min-width: 0; gap: .38rem; margin-top: .3rem; }
+.game-shell .tactical-console .mag-slot.filled { grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: 1fr; align-items: stretch; column-gap: .34rem; padding: .46rem .38rem .38rem .5rem; }
+.game-shell .tactical-console .mag-slot.filled .round-visual { grid-column: 1; grid-row: 1; align-self: center; justify-self: center; width: 13px; height: 38px; margin: 0; }
+.slot-content { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-width: 0; gap: .42rem; }
+.slot-content > strong { max-width: 100%; overflow: hidden; color: #edf3ee; font-size: .7rem; line-height: 1; letter-spacing: .05em; text-overflow: ellipsis; white-space: nowrap; }
+.sequence-stats { display: flex; align-items: center; min-width: 0; gap: .38rem; }
 .sequence-stat { display: inline-flex; align-items: center; min-width: 0; gap: .16rem; color: #eef4ee; }
 .sequence-stat svg { flex: 0 0 17px; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .sequence-stat b { font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
@@ -680,16 +681,15 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .sequence-armor { color: #84bcff; }
 .sequence-shock { color: #70e6d2; }
 .sequence-stat[data-modified] { color: #ffd68f; text-shadow: 0 0 8px rgba(255,190,96,.25); }
-.sequence-note { grid-column: 1 / -1; align-self: end; color: #9aa69c; font-size: .62rem; text-align: center; }
 
 .game-shell[data-layout="portrait"] { --portrait-top-hud-height: 112px; }
 .game-shell[data-layout="portrait"] .enemy-vitals { grid-template-columns: .86fr 1fr 1.45fr; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 78px; min-height: 78px; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled { grid-template-columns: 16px minmax(0, 1fr); column-gap: .16rem; padding: .34rem .18rem .22rem .28rem; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled .round-visual { width: 9px; height: 29px; }
-.game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled > strong { font-size: .55rem; letter-spacing: 0; }
-.game-shell[data-layout="portrait"] .sequence-stats { gap: .15rem; margin-top: .2rem; }
+.game-shell[data-layout="portrait"] .slot-content { gap: .22rem; }
+.game-shell[data-layout="portrait"] .slot-content > strong { font-size: .55rem; letter-spacing: 0; }
+.game-shell[data-layout="portrait"] .sequence-stats { gap: .15rem; }
 .game-shell[data-layout="portrait"] .sequence-stat { gap: .05rem; }
 .game-shell[data-layout="portrait"] .sequence-stat svg { flex-basis: 12px; width: 12px; height: 12px; }
 .game-shell[data-layout="portrait"] .sequence-stat b { font-size: .65rem; }
-.game-shell[data-layout="portrait"] .sequence-note { font-size: .52rem; }

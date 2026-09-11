@@ -104,8 +104,20 @@ export interface ShotResult {
   after: EnemyState;
 }
 
+/** 실제 사망 시점과 무관하게 장전된 각 탄이 순서 효과까지 반영해 갖는 전투 수치. */
+export interface RoundPreview {
+  ammoType: AmmoType;
+  index: number;
+  effectiveFirepower: number;
+  armorBreak: number;
+  effectiveActionShock: number;
+  heavyKickPenalty: number;
+  shockSaturationPenalty: number;
+}
+
 export interface SequenceResult {
   shots: ShotResult[];
+  roundPreviews: RoundPreview[];
   finalState: EnemyState;
   rawVolleyFirepower: number;
   baseRangePenaltyPercent: number;

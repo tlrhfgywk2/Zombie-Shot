@@ -1,7 +1,7 @@
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, SERVICE_45, type AttachmentModifier, type LoadoutSnapshot, type ModifierCondition } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE, RANGE_NAMES } from '../data/ammoDefinitions';
 import { getEnabledAttachmentIds, createPlayerCombatState } from './AttachmentLoadout';
-import type { AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState, PlayerCombatState, RangeBand, SequenceResult, ShotResult, StatusType } from './types';
+import type { AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState, PlayerCombatState, RangeBand, RoundPreview, SequenceResult, ShotResult, StatusType } from './types';
 
 export interface CombatContext {
   loadout?: LoadoutSnapshot;
@@ -140,6 +140,7 @@ export class CombatResolver {
 
   resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
     const profile = this.getVolleyRangeProfile(rounds, enemyState, context);
+    const roundPreviews = this.resolveRoundPreviews(rounds, enemyState, context, profile);
     let current = cloneState(enemyState);
     const shots: ShotResult[] = [];
     let pendingHeavyKick = false;
@@ -163,7 +164,7 @@ export class CombatResolver {
     const conservedRounds = shots.filter((shot) => shot.conserved).map((shot) => shot.ammoType);
     const unfiredRounds = rounds.slice(shots.length);
     return {
-      shots, finalState: current, rawVolleyFirepower,
+      shots, roundPreviews, finalState: current, rawVolleyFirepower,
       baseRangePenaltyPercent: profile.baseRangePenaltyPercent,
       matchAmmoCount: profile.matchAmmoCount,
       matchRangePenaltyReductionPercent: profile.matchRangePenaltyReductionPercent,
@@ -174,6 +175,46 @@ export class CombatResolver {
       totalActionShockApplied: shots.reduce((sum, shot) => sum + shot.actionShockApplied, 0),
       conservedRounds, unfiredRounds: [...unfiredRounds], returnedRounds: [...conservedRounds, ...unfiredRounds], killed: current.hp <= 0,
     };
+  }
+
+  /** 처치로 실제 사격이 끝나더라도 발사 순서 패널은 모든 장전 탄의 유효 수치를 유지한다. */
+  private resolveRoundPreviews(
+    rounds: readonly AmmoType[],
+    enemyState: EnemyState,
+    context: CombatContext,
+    profile: VolleyRangeProfile,
+  ): RoundPreview[] {
+    let current = cloneState({ ...enemyState, hp: Number.MAX_SAFE_INTEGER, maxHp: Number.MAX_SAFE_INTEGER });
+    const previews: RoundPreview[] = [];
+    let pendingHeavyKick = false;
+    let pendingShockSaturation = false;
+    let rawVolleyFirepower = 0;
+    let finalVolleyFirepower = 0;
+
+    for (let index = 0; index < rounds.length; index += 1) {
+      const ammoType = rounds[index];
+      if (!ammoType) continue;
+      const shot = this.resolveRound(
+        ammoType, index, current, { ...context, pendingHeavyKick, pendingShockSaturation },
+        profile, rawVolleyFirepower, finalVolleyFirepower,
+      );
+      previews.push({
+        ammoType,
+        index,
+        effectiveFirepower: shot.breakdown.effectiveFirepower,
+        armorBreak: AMMO_DEFINITIONS[ammoType].armorBreak,
+        effectiveActionShock: shot.breakdown.projectedShock,
+        heavyKickPenalty: shot.breakdown.heavyKickPenalty,
+        shockSaturationPenalty: shot.breakdown.shockSaturationPenalty,
+      });
+      rawVolleyFirepower += shot.breakdown.effectiveFirepower;
+      finalVolleyFirepower += shot.breakdown.finalFirepower;
+      pendingHeavyKick = AMMO_DEFINITIONS[ammoType].sequenceTrait === 'heavyKick';
+      pendingShockSaturation = AMMO_DEFINITIONS[ammoType].sequenceTrait === 'shockSaturation';
+      current = cloneState(shot.after);
+    }
+
+    return previews;
   }
 
   private resolveRound(

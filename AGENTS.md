@@ -28,6 +28,8 @@ For normal source changes, run where applicable: `npm test`, `npm run lint`, and
 
 For visual acceptance, the rendered result is the source of truth. Tests, matching transforms, object existence, state transitions, and spawn logs are supplementary evidence only. If preview and Pages differ, first compare the visible BUILD SHA and deployment source revision, then investigate runtime differences rather than assuming cache.
 
+UI/UX 변경은 정상 상태만 보지 말고 해당 기능의 대표적인 경계 상태까지 실제 렌더링으로 검증한다. 반복 카드·슬롯 UI는 빈 상태, 모든 슬롯이 채워진 상태, 긴 이름, 수치 조합, 예상 처치로 뒤쪽 탄이 미발사되는 상태를 포함해 정렬과 오버플로를 확인한다. 요소 존재나 텍스트 값만으로 시각 검증을 대체하지 말고, 데스크톱과 세로 화면에서 탄 그림·제목·핵심 수치의 기준선과 컨테이너 경계를 직접 확인한다.
+
 ## Cross-account handoff
 
 Never assume the next Codex session can read a previous conversation. GitHub is the persistent handoff layer. Stable rules belong here; task-specific progress belongs in the task PR description. Before stopping substantial or incomplete work, commit useful logical checkpoints and update the PR without falsely claiming completion or unrun validation.

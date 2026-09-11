@@ -1,4 +1,4 @@
-import type { AmmoType, ShotResult } from '../combat/types';
+import type { AmmoType, RoundPreview } from '../combat/types';
 import { AMMO_DEFINITIONS, type AmmoBuild, type SpecialAmmoType } from '../data/ammoDefinitions';
 
 export function ammoRewardOwnedCount(ammo: SpecialAmmoType, build: AmmoBuild, replacements: readonly SpecialAmmoType[] = []): number {
@@ -22,12 +22,11 @@ export interface FiringOrderStatEntry {
   modified: boolean;
 }
 
-export function firingOrderStatEntries(shot: ShotResult): FiringOrderStatEntry[] {
-  const detail = shot.breakdown;
+export function firingOrderStatEntries(round: RoundPreview): FiringOrderStatEntry[] {
   const entries: FiringOrderStatEntry[] = [
-    { kind: 'firepower', label: '화력', value: detail.effectiveFirepower, modified: detail.heavyKickPenalty > 0 },
-    { kind: 'armor', label: '방어 파괴', value: detail.armorBroken, modified: false },
-    { kind: 'shock', label: '충격', value: shot.actionShockApplied, modified: detail.shockSaturationPenalty > 0 },
+    { kind: 'firepower', label: '화력', value: round.effectiveFirepower, modified: round.heavyKickPenalty > 0 },
+    { kind: 'armor', label: '방어 파괴', value: round.armorBreak, modified: false },
+    { kind: 'shock', label: '충격', value: round.effectiveActionShock, modified: round.shockSaturationPenalty > 0 },
   ];
   return entries.filter((stat) => stat.value > 0);
 }

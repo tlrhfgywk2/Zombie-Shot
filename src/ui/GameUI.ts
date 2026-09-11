@@ -241,7 +241,7 @@ export class GameUI {
       slot.hidden = index >= capacity;
       const ammo = rounds[index];
       slot.className = `mag-slot${ammo ? ` filled ammo-${ammo}` : ''}`;
-      slot.innerHTML = ammo ? `<span class="slot-index">0${index + 1}</span><span class="round-visual"><i></i></span><strong>${AMMO_DEFINITIONS[ammo].shortName}</strong>` : `<span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span>`;
+      slot.innerHTML = ammo ? `<span class="slot-index">0${index + 1}</span><span class="round-visual"><i></i></span><span class="slot-content"><strong>${AMMO_DEFINITIONS[ammo].shortName}</strong></span>` : `<span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span>`;
       slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}, 탭하여 즉시 제거` : `${index + 1}번 빈 슬롯`);
       slot.setAttribute('aria-pressed', 'false');
     });
@@ -426,14 +426,12 @@ export class GameUI {
 
   renderPreview(sequence: SequenceResult | undefined): void {
     this.slots.forEach((slot, index) => {
-      slot.querySelector('.sequence-stats, .sequence-note')?.remove();
-      const shot = sequence?.shots[index];
-      if (!shot) {
-        if (this.rounds[index] && sequence) slot.insertAdjacentHTML('beforeend', '<small class="sequence-note">미발사</small>');
-        return;
-      }
-      const visibleStats = firingOrderStatEntries(shot);
-      slot.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}</span>`);
+      const content = slot.querySelector<HTMLElement>('.slot-content');
+      content?.querySelector('.sequence-stats')?.remove();
+      const round = sequence?.roundPreviews[index];
+      if (!round || !content) return;
+      const visibleStats = firingOrderStatEntries(round);
+      content.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}</span>`);
       slot.setAttribute('aria-label', `${slot.getAttribute('aria-label')}, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}`);
     });
     if (!sequence) {
