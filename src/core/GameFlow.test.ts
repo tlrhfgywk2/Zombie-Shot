@@ -49,7 +49,6 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(harness.ui.showAmmoRewards).toHaveBeenLastCalledWith(
       ['match', 'hollowPoint', 'wadcutter'],
       internals.player.getBuild(),
-      internals.player.getStock(),
       internals.player.getSpecialCapacity(),
       undefined,
       [],

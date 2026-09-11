@@ -1,5 +1,10 @@
 import type { AmmoType } from '../combat/types';
-import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
+import { AMMO_DEFINITIONS, type AmmoBuild, type SpecialAmmoType } from '../data/ammoDefinitions';
+
+export function ammoRewardOwnedCount(ammo: SpecialAmmoType, build: AmmoBuild, replacements: readonly SpecialAmmoType[] = []): number {
+  const pendingReplacements = replacements.filter(value => value === ammo).length;
+  return Math.max(0, build[ammo] - pendingReplacements);
+}
 
 export function ammoStatsMarkup(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];

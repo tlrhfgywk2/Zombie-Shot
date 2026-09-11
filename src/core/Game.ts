@@ -214,7 +214,7 @@ export class Game {
   }
 
   private showAmmoRewards(): void {
-    this.ui.showAmmoRewards(this.rewardOptions, this.player.getBuild(), this.player.getStock(), this.player.getSpecialCapacity(), this.pendingReward, this.rewardReplacements);
+    this.ui.showAmmoRewards(this.rewardOptions, this.player.getBuild(), this.player.getSpecialCapacity(), this.pendingReward, this.rewardReplacements);
   }
 
   private chooseAmmoReward(ammo: SpecialAmmoType): void {
