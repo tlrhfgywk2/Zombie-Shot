@@ -10,16 +10,18 @@ import { CombatResolver } from '../combat/CombatResolver';
 
 const harness = vi.hoisted(() => {
   const methods: Record<string, any> = { canvasHost: {} };
+  const presentationMethods: Record<string, any> = {};
   return {
     callbacks: {} as GameUICallbacks,
     ui: new Proxy(methods, { get(target, name: string) { return target[name] ??= vi.fn(); } }),
+    presentation: new Proxy(presentationMethods, { get(target, name: string) { return target[name] ??= vi.fn().mockResolvedValue(undefined); } }),
   };
 });
 vi.mock('../ui/GameUI', () => ({ GameUI: class {
   constructor(root: HTMLElement, callbacks: GameUICallbacks) { void root; harness.callbacks = callbacks; return harness.ui; }
 } }));
 vi.mock('../presentation/GamePresentation', () => ({ GamePresentation: class {
-  constructor() { return new Proxy({}, { get: () => vi.fn().mockResolvedValue(undefined) }); }
+  constructor() { return harness.presentation; }
 } }));
 vi.mock('../presentation/AudioPreferences', () => ({
   loadAudioPreferences: () => ({ muted: true, volume: 0 }), saveAudioPreferences: () => undefined,
@@ -233,6 +235,22 @@ describe('실제 게임의 구간/보상 연결', () => {
 
     expect(harness.ui.setLocked).toHaveBeenCalledWith(true);
     expect(harness.ui.renderPreview.mock.calls.slice(previewCallCount)).toContainEqual([sequence]);
+  });
+
+  it('탄창은 모든 예정 사격이 끝난 뒤 한 번만 폐기한다', async () => {
+    const game = new Game({} as HTMLElement);
+    const state = game as unknown as { busy: boolean };
+    harness.callbacks.onAddAmmo('standard');
+    harness.callbacks.onAddAmmo('standard');
+
+    harness.callbacks.onLoad();
+    await vi.waitFor(() => expect(state.busy).toBe(false));
+
+    expect(harness.presentation.animateShot).toHaveBeenCalledTimes(2);
+    expect(harness.presentation.animateMagazineDiscard).toHaveBeenCalledTimes(1);
+    expect(harness.presentation.animateMagazineDiscard.mock.invocationCallOrder[0]).toBeGreaterThan(
+      harness.presentation.animateShot.mock.invocationCallOrder.at(-1),
+    );
   });
 
 });

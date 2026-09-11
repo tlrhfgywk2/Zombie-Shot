@@ -45,6 +45,11 @@ export class AudioManager {
     this.tone(520, 0.035, 0.035, 'triangle', 0.045);
   }
 
+  magazineRelease(): void {
+    this.tone(185, 0.04, 0.05, 'square');
+    this.noise(0.075, 0.035, 620, 0.025);
+  }
+
   slidePull(): void {
     this.noise(0.13, 0.035, 980);
     this.tone(165, 0.1, 0.04, 'sawtooth');
