@@ -105,6 +105,8 @@ export class Game {
     });
     this.state.transition('LOADING');
     this.ui.setLocked(true);
+    // 잠금 처리에서 슬롯 DOM을 다시 그리므로, 장전한 탄창의 계산 프리뷰를 즉시 복원한다.
+    this.ui.renderPreview(sequence);
     this.ui.setPhase('LOADING');
     await this.presentation.animateLoading(rounds);
     this.state.transition('FIRING');
