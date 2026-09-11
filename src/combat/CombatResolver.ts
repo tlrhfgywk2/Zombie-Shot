@@ -227,6 +227,22 @@ export class CombatResolver {
     };
   }
 
+  /** 적의 현재 체력이나 돌파 여부와 무관하게 탄창 전체가 명중했을 때의 체력 피해를 계산한다. */
+  resolveFullMagazineDamage(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): number {
+    let current = cloneState({ ...enemyState, hp: Number.MAX_SAFE_INTEGER, maxHp: Number.MAX_SAFE_INTEGER });
+    let cumulativeRecoil = 0;
+    let totalHpDamage = 0;
+    for (let index = 0; index < rounds.length; index += 1) {
+      const ammo = rounds[index];
+      if (!ammo) continue;
+      const shot = this.resolveShot(ammo, index, current, { ...context, cumulativeRecoil });
+      totalHpDamage += shot.hpDamage;
+      cumulativeRecoil = shot.breakdown.recoilAfterShot;
+      current = cloneState(shot.after);
+    }
+    return totalHpDamage;
+  }
+
   resolveEnemyAction(enemyState: EnemyState, playerState: PlayerCombatState = createPlayerCombatState(), loadout: LoadoutSnapshot = {}): EnemyActionResult {
     const before = cloneState(enemyState);
     const after = cloneState(enemyState);

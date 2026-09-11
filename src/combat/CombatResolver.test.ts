@@ -182,6 +182,15 @@ describe('CombatResolver', () => {
     expect(result.returnedRounds).toEqual(['bloodHex', 'incendiary', 'standard']);
   });
 
+  it('총 피해 프리뷰는 현재 체력과 돌파에 제한되지 않고 탄창 전체를 계산한다', () => {
+    const enemy = { ...createEnemyState('normal'), hp: 1, armor: 0, distance: 0.01 };
+    const rounds = ['standard', 'standard', 'standard', 'standard'] as const;
+
+    expect(resolver.resolveSequence(rounds, enemy).totalHpDamage).toBe(1);
+    expect(resolver.resolveSequence(rounds, enemy).shots).toHaveLength(1);
+    expect(resolver.resolveFullMagazineDamage(rounds, enemy)).toBe(16);
+  });
+
   it('지반 충격은 2턴 동안 반동만 늘리고 무반동 탄은 그대로 둔다', () => {
     const applied = resolver.resolveEnemyAction(createEnemyState('groundshaker')).playerAfter;
     expect(applied.recoilPenaltyPercent).toBe(50);

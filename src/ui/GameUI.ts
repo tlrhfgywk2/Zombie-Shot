@@ -1,10 +1,10 @@
 import { ammoStatsMarkup } from './AmmoView';
-import { formatRangePenalty, getRangeBand } from '../combat/CombatResolver';
+import { getRangeBand } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionResult, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
-import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, SERVICE_45, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
-import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, rewardAmount, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
+import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
@@ -89,10 +89,11 @@ export class GameUI {
               <div class="enemy-stat enemy-advance"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 5 7 7-7 7M10 5l7 7-7 7M17 5l4 7-4 7"/></svg><span><small>다음 접근</small><strong id="next-move-text">2.0 m</strong></span></div>
               <div id="intent-card" class="enemy-intent" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5M12 17.2v.2"/></svg><span><small id="intent-timing">다음 행동</small><strong id="intent-name">특수 행동</strong></span></div>
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
-            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리 · 화력 -10%</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
+            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong></aside>
           <aside id="preview-outcome" class="combat-forecast" aria-label="발사 결과 예상" aria-live="polite" hidden></aside>
+          <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         </main>
         <section class="tactical-console" aria-label="전투 준비">
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
@@ -107,7 +108,6 @@ export class GameUI {
             <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
         </div></section>
-        <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
         <section id="ammo-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-reward-title"></section>
@@ -271,8 +271,8 @@ export class GameUI {
     const host = this.required(this.shell, '#ammo-reward');
     const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
     const choices = selected
-      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>보유 ×${stock[ammo]} · 교체 ×1</em></button>`).join('')
-      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>보유 ×${stock[ammo]} · +${rewardAmount(ammo)}</em></button>`).join('');
+      ? current.filter(ammo => build[ammo] > replacements.filter(value => value === ammo).length).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>보유 ${stock[ammo]}</em></button>`).join('')
+      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>보유 ${stock[ammo]}</em></button>`).join('');
     host.innerHTML = `<div class="route-card reward-card">
       <header class="ammo-screen-header"><h2 id="ammo-reward-title">탄약 보급</h2><button type="button" data-open-ammo-inventory aria-haspopup="dialog">보유 탄약</button></header>
       <div class="reward-options">${choices}</div>
@@ -409,7 +409,7 @@ export class GameUI {
     this.enemyStatus.hidden = statuses.length === 0;
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
     const rangeBand = getRangeBand(enemy.distance);
-    this.rangeBandText.textContent = `${RANGE_NAMES[rangeBand]} · ${formatRangePenalty(SERVICE_45.rangePenaltyPercentages[rangeBand])}`;
+    this.rangeBandText.textContent = RANGE_NAMES[rangeBand];
     this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
     this.intentCard.hidden = !enemy.intent;
@@ -422,7 +422,7 @@ export class GameUI {
     this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.statuses.impact}/${enemy.staggerThreshold}${enemy.intent ? `, ${enemy.intent.name} ${enemy.intent.countdown}행동 후` : ''}`);
   }
 
-  renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined): void {
+  renderPreview(sequence: SequenceResult | undefined, action: EnemyActionResult | undefined, fullMagazineDamage?: number): void {
     const totalMovement = (sequence?.totalRecoilMovement ?? 0) + (action?.movement ?? 0);
     this.nextMoveText.textContent = sequence || action ? `${totalMovement.toFixed(1)} m` : '—';
     this.nextMoveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-delayed', Boolean(action?.staggerConsumed));
@@ -431,14 +431,15 @@ export class GameUI {
       this.previewOutcome.textContent = '';
       return;
     }
+    const totalDamage = fullMagazineDamage ?? sequence.totalHpDamage;
     const rangePenalty = sequence.effectiveRangePenaltyPercent === 0 ? '0%' : `-${sequence.effectiveRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
-      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${sequence.totalHpDamage}</strong></span></div>
+      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${totalDamage}</strong></span></div>
       <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorDamage}</strong></span></div>
       <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalImpactApplied}</strong></span></div>
       <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 감소</small><strong>${rangePenalty}</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${sequence.totalHpDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalImpactApplied}, 최종 거리 화력 감소 ${sequence.effectiveRangePenaltyPercent}%`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${totalDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalImpactApplied}, 최종 거리 화력 감소 ${sequence.effectiveRangePenaltyPercent}%`);
   }
 
   showShot(result: ShotResult): void {
