@@ -141,22 +141,25 @@ export class CombatResolver {
   resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
     const profile = this.getVolleyRangeProfile(rounds, enemyState, context);
     const roundPreviews = this.resolveRoundPreviews(rounds, enemyState, context, profile);
+    // 예상 처치 시점과 무관하게 합계 프리뷰는 장전된 탄창 전체의 유효 화력을 나타낸다.
+    const rawVolleyFirepower = roundPreviews.reduce((sum, round) => sum + round.effectiveFirepower, 0);
+    const finalVolleyFirepower = calculateFinalVolleyFirepower(rawVolleyFirepower, profile.finalRangePenaltyPercent);
     let current = cloneState(enemyState);
     const shots: ShotResult[] = [];
     let pendingHeavyKick = false;
     let pendingShockSaturation = false;
-    let rawVolleyFirepower = 0;
-    let finalVolleyFirepower = 0;
+    let resolvedRawFirepower = 0;
+    let resolvedFinalFirepower = 0;
     for (let index = 0; index < rounds.length; index += 1) {
       const ammo = rounds[index];
       if (!ammo || current.hp <= 0) break;
       const shot = this.resolveRound(
         ammo, index, current, { ...context, pendingHeavyKick, pendingShockSaturation },
-        profile, rawVolleyFirepower, finalVolleyFirepower,
+        profile, resolvedRawFirepower, resolvedFinalFirepower,
       );
       shots.push(shot);
-      rawVolleyFirepower += shot.breakdown.effectiveFirepower;
-      finalVolleyFirepower += shot.breakdown.finalFirepower;
+      resolvedRawFirepower += shot.breakdown.effectiveFirepower;
+      resolvedFinalFirepower += shot.breakdown.finalFirepower;
       pendingHeavyKick = AMMO_DEFINITIONS[ammo].sequenceTrait === 'heavyKick';
       pendingShockSaturation = AMMO_DEFINITIONS[ammo].sequenceTrait === 'shockSaturation';
       current = cloneState(shot.after);

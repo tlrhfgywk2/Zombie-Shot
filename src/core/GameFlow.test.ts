@@ -101,6 +101,8 @@ describe('실제 게임의 구간/보상 연결', () => {
     expect(sequence.killed).toBe(true);
     expect(sequence.finalState.distance).toBe(enemy.distance);
     expect(sequence.totalHpDamage).toBe(5);
+    expect(sequence.rawVolleyFirepower).toBe(8);
+    expect(sequence.finalVolleyFirepower).toBe(7);
     expect(harness.ui.renderPreview.mock.calls.at(-1)).toHaveLength(1);
     expect(harness.ui.updateEnemy.mock.calls.at(-1)).toEqual(actualEnemyPanel);
   });
@@ -182,6 +184,25 @@ describe('실제 게임의 구간/보상 연결', () => {
     harness.callbacks.onAddAmmo('standard'); harness.callbacks.onLoad();
     await vi.waitFor(() => expect(state.busy).toBe(false));
     expect(state.state.phase).toBe('GAME_OVER');
+  });
+  it('감염체 특수 행동으로 갱신된 플레이어 약화 상태를 UI에 전달한다', async () => {
+    const game = new Game({} as HTMLElement);
+    const state = game as unknown as { player: Player; zombie: Zombie; currentRoster: string[]; state: GameStateMachine; busy: boolean; sync: () => void };
+    state.zombie = new Zombie('groundshaker');
+    const enemy = state.zombie.snapshot();
+    state.zombie.applyState({ ...enemy, hp: 100, maxHp: 100, armor: 100, maxArmor: 100 });
+    state.currentRoster = ['groundshaker'];
+    state.sync();
+
+    harness.callbacks.onAddAmmo('standard');
+    harness.callbacks.onLoad();
+
+    await vi.waitFor(() => expect(state.busy).toBe(false));
+    expect(state.state.phase).toBe('AMMO_SELECTION');
+    expect(harness.ui.renderPlayerDebuffs).toHaveBeenLastCalledWith(expect.objectContaining({
+      heavyKickPenaltyBonus: 1,
+      heavyKickPenaltyTurns: 2,
+    }));
   });
   it('실제 사격 상태는 공용 시퀀스 계산과 일치한다', async () => {
     const game = new Game({} as HTMLElement);
