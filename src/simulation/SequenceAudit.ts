@@ -9,13 +9,13 @@ const bands: readonly { band: RangeBand; distance: number }[] = [
   { band: 'near', distance: 3 }, { band: 'mid', distance: 7 }, { band: 'far', distance: 11 },
 ];
 
-export const RECOIL_AUDIT_CONFIGURATIONS: readonly { name: string; rounds: readonly AmmoType[]; loadout?: LoadoutSnapshot }[] = [
-  { name: '저반동 4발', rounds: ['subsonic', 'subsonic', 'subsonic', 'subsonic'] },
+export const SEQUENCE_AUDIT_CONFIGURATIONS: readonly { name: string; rounds: readonly AmmoType[]; loadout?: LoadoutSnapshot }[] = [
+  { name: '안정탄 4발', rounds: ['subsonic', 'subsonic', 'subsonic', 'subsonic'] },
   { name: '표준탄 4발', rounds: ['standard', 'standard', 'standard', 'standard'] },
   { name: '표준탄 6발', rounds: ['standard', 'standard', 'standard', 'standard', 'standard', 'standard'] },
-  { name: '고반동 4발', rounds: ['overpressure', 'overpressure', 'overpressure', 'overpressure'] },
-  { name: '고반동 제어 4발', rounds: ['overpressure', 'overpressure', 'overpressure', 'overpressure'], loadout: { muzzle: 'dualPortCompensator', grip: 'g10Grip' } },
-  { name: '고반동 6발', rounds: ['overpressure', 'overpressure', 'overpressure', 'overpressure', 'overpressure', 'overpressure'] },
+  { name: '고압 4발', rounds: ['overpressure', 'overpressure', 'overpressure', 'overpressure'] },
+  { name: '고압 연출 감소 4발', rounds: ['overpressure', 'overpressure', 'overpressure', 'overpressure'], loadout: { muzzle: 'dualPortCompensator', grip: 'g10Grip' } },
+  { name: '고압 6발', rounds: ['overpressure', 'overpressure', 'overpressure', 'overpressure', 'overpressure', 'overpressure'] },
 ];
 
 const durableEnemy = (type: EnemyType) => ({ ...createEnemyState(type), hp: 10000, maxHp: 10000 });
@@ -31,17 +31,16 @@ const turnsToContact = (type: EnemyType, rounds?: readonly AmmoType[], loadout: 
   return turns;
 };
 
-export function runRecoilDistanceAudit() {
-  const movement = RECOIL_AUDIT_CONFIGURATIONS.flatMap(configuration => (['normal', 'armored', 'tough'] as const).map(type => {
+export function runSequenceAudit() {
+  const movement = SEQUENCE_AUDIT_CONFIGURATIONS.flatMap(configuration => (['normal', 'armored', 'tough'] as const).map(type => {
     const enemy = durableEnemy(type);
     const sequence = resolver.resolveSequence(configuration.rounds, enemy, { loadout: configuration.loadout });
-    const action = sequence.breached ? undefined : resolver.resolveEnemyAction(sequence.finalState);
+    const action = resolver.resolveEnemyAction(sequence.finalState);
     return {
       configuration: configuration.name,
       enemy: type,
       normalMovement: enemy.advancePerTurn,
-      recoilMovement: sequence.totalRecoilMovement,
-      movementPerCycle: Number((sequence.totalRecoilMovement + (action?.movement ?? 0)).toFixed(2)),
+      movementPerCycle: Number(((action?.movement ?? 0)).toFixed(2)),
       distanceAfterMagazine: sequence.finalState.distance,
       baselineTurnsToContact: turnsToContact(type),
       effectiveTurnsToContact: turnsToContact(type, configuration.rounds, configuration.loadout),
@@ -72,4 +71,4 @@ export function runRecoilDistanceAudit() {
   return { movement, damage, rounding };
 }
 
-export const formatRecoilDistanceAudit = (audit: ReturnType<typeof runRecoilDistanceAudit>): string => JSON.stringify(audit, null, 2);
+export const formatSequenceAudit = (audit: ReturnType<typeof runSequenceAudit>): string => JSON.stringify(audit, null, 2);

@@ -50,7 +50,7 @@ export const PRESENTATION_EFFECTS = {
   casingOutwardSpeed: 1.2,
 } as const;
 
-export const getReacquisitionDuration = (accumulatedRecoil: number): number => {
-  if (!Number.isFinite(accumulatedRecoil) || accumulatedRecoil < 0) throw new Error('재조준 시간에는 0 이상의 누적 반동이 필요합니다.');
-  return Math.round(PRESENTATION_TIMING.reacquireBase + accumulatedRecoil * PRESENTATION_TIMING.reacquirePerRecoil);
+export const getReacquisitionDuration = (visualKickStrength: number): number => {
+  if (!Number.isFinite(visualKickStrength) || visualKickStrength < 0) throw new Error('재조준 시간에는 0 이상의 연출 강도이 필요합니다.');
+  return Math.round(PRESENTATION_TIMING.reacquireBase + visualKickStrength * PRESENTATION_TIMING.reacquirePerRecoil);
 };

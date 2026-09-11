@@ -16,7 +16,7 @@ const expectBetween = (value: number, minimum: number, maximum: number): void =>
 describe('정규화 전투 수치 스케일', () => {
   it('직접 피해·특수 효과는 작은 정수이고 폐기 필드가 없다', () => {
     for (const definition of Object.values(AMMO_DEFINITIONS)) {
-      for (const value of [definition.firepower, definition.recoil, definition.rangePenaltyReduction ?? 0, definition.armorBreak, definition.impact, definition.buildup?.amount ?? 0, definition.specialEnemyFirepowerBonus ?? 0]) {
+      for (const value of [definition.firepower, definition.rangePenaltyReduction ?? 0, definition.armorBreak, definition.actionShock, definition.buildup?.amount ?? 0, definition.specialEnemyFirepowerBonus ?? 0]) {
         expect(Number.isInteger(value)).toBe(true);
       }
       expect(definition).not.toHaveProperty('directDamage');
@@ -24,7 +24,7 @@ describe('정규화 전투 수치 스케일', () => {
       expect(definition).not.toHaveProperty('accuracyModifier');
       expect(definition).not.toHaveProperty('penetration');
     }
-    for (const value of [SERVICE_45.baseFirepower, SERVICE_45.recoil, ...Object.values(SERVICE_45.rangePenaltyPercentages), COMBAT_BALANCE.minimumFirepower, COMBAT_BALANCE.burnDamagePerTurn]) {
+    for (const value of [SERVICE_45.baseFirepower, ...Object.values(SERVICE_45.rangePenaltyPercentages), COMBAT_BALANCE.minimumFirepower, COMBAT_BALANCE.burnDamagePerTurn]) {
       expect(Number.isInteger(value)).toBe(true);
     }
     expect(SERVICE_45.baseFirepower).toBe(0);
@@ -42,7 +42,7 @@ describe('정규화 전투 수치 스케일', () => {
     for (const definition of Object.values(ENEMY_DEFINITIONS)) {
       expect(Number.isInteger(definition.hp)).toBe(true);
       expect(Number.isInteger(definition.armor)).toBe(true);
-      expect(Number.isInteger(definition.staggerThreshold)).toBe(true);
+      expect(Number.isInteger(definition.shockResistance)).toBe(true);
     }
   });
 
@@ -64,10 +64,10 @@ describe('정규화 전투 수치 스케일', () => {
 
     expect(basic.breakdown.finalFirepower).toBe(4);
     expect(strong.breakdown.finalFirepower).toBe(7);
-    expect(matchFar.breakdown.rangePenaltyPercent).toBe(15);
+    expect(matchFar.breakdown.rangePenaltyPercent).toBe(10);
     expect(matchFar.breakdown.finalFirepower).toBe(3);
     expect(armor.breakdown.armorBroken).toBe(4);
-    expect(impact.finalState.statuses.staggerTurns).toBe(1);
+    expect(impact.finalState.actionShock).toBe(8);
   });
 
   it('철갑 선행, 무관통 방어 흡수, 화상 지속 피해가 독립적으로 작동한다', () => {

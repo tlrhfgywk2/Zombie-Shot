@@ -54,7 +54,6 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-status-list span { padding: .18rem .35rem; border: 1px solid rgba(255,255,255,.13); color: #dce5de; background: rgba(0,0,0,.28); font-size: .56rem; font-weight: 800; }
 .enemy-status-list [data-status="burn"] { border-color: rgba(255,133,53,.45); color: #ffb15f; }
 .enemy-status-list [data-status="slow"] { border-color: rgba(111,220,255,.45); color: #8fe5ff; }
-.enemy-status-list [data-status="stagger"], .enemy-status-list [data-status="exposed"] { border-color: rgba(112,230,210,.45); color: #90f3e3; }
 .enemy-context { position: absolute; z-index: 6; top: calc(100% + 7px); left: 0; right: 0; display: grid; gap: .28rem; padding: .6rem .7rem; border: 1px solid rgba(200,255,77,.3); color: #b9c4bb; background: rgba(7,12,9,.96); box-shadow: 0 12px 36px rgba(0,0,0,.5); font-size: .61rem; line-height: 1.4; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .14s ease, transform .14s ease, visibility .14s; pointer-events: none; }
 .enemy-context b { color: #e6ffb0; }
 .enemy-context .intent-detail { padding-top: .28rem; border-top: 1px solid rgba(255,174,58,.25); color: #e2c291; }
@@ -663,3 +662,25 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="desktop"] .attachment-option { height: auto; min-height: 58px; }
 
 .game-shell[data-layout="portrait"] .console-header { display: none; }
+
+/* 행동 예고와 인접 탄약 효과 */
+.enemy-vitals:has(.enemy-intent:not([hidden])) { grid-template-columns: 1fr 1fr 1fr; }
+.enemy-intent { grid-column: 1 / -1; min-height: 34px; }
+.enemy-intent > span { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 6px; }
+.enemy-intent small { font-size: .62rem; }
+.enemy-intent strong { overflow: visible; white-space: normal; font-size: .72rem; }
+.enemy-intent[data-interrupted] { border-color: #70e6d2; color: #90f3e3; }
+.enemy-intent[data-lethal] { border-color: #ff6756; color: #ff8b7e; background: rgba(95,18,13,.7); }
+.game-shell .tactical-console .mag-slot { height: 94px; min-height: 94px; grid-template-rows: 1fr auto auto; }
+.sequence-effect { display: block; font-size: .59rem; line-height: 1.35; color: #bbc8bc; text-align: center; overflow-wrap: anywhere; }
+.sequence-effect[data-affected] { color: #ffd68f; }
+.game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 86px; min-height: 86px; }
+.game-shell[data-layout="portrait"] .sequence-effect { font-size: .52rem; }
+.game-shell[data-layout="portrait"] .enemy-impact strong em { display: inline; }
+
+.game-shell[data-layout="desktop"] .tactical-console .mag-slot { height: 94px; min-height: 94px; }
+.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 124px; }
+.game-shell[data-layout="portrait"] .enemy-intent small { font-size: .54rem; }
+.game-shell[data-layout="portrait"] .enemy-intent strong { max-width: none; font-size: .62rem; }
+
+.sequence-effect > span { display: block; white-space: nowrap; }
