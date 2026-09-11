@@ -79,6 +79,16 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .phase-panel { position: absolute; z-index: 3; left: max(22px, env(safe-area-inset-left)); top: 22%; width: min(265px, 24vw); padding-left: 1rem; border-left: 2px solid rgba(200,255,77,.7); pointer-events: none; }
 .eyebrow, .section-label { color: var(--muted); font-size: .64rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
 .phase-panel > strong { display: block; margin-top: .25rem; font-size: clamp(1.15rem, 2vw, 1.65rem); }
+.player-debuffs { display: grid; gap: 4px; width: 100%; margin-top: .72rem; }
+.player-debuffs::before { content: "플레이어 약화"; color: #bd8f86; font-size: var(--combat-label-size); font-weight: 900; letter-spacing: .12em; }
+.player-debuff { display: grid; grid-template-columns: 25px minmax(0, 1fr) auto; align-items: center; min-height: 46px; gap: .48rem; padding: .42rem .5rem; border: 1px solid rgba(255,103,86,.46); color: #ff8d7f; background: linear-gradient(90deg, rgba(81,22,17,.75), rgba(22,13,11,.78)); box-shadow: 0 9px 25px rgba(0,0,0,.3); backdrop-filter: blur(7px); }
+.player-debuff[data-debuff="range"] { border-color: rgba(255,189,102,.5); color: #ffbd66; }
+.player-debuff[data-debuff="attachment"] { border-color: rgba(200,149,255,.5); color: #d0a2ff; }
+.player-debuff > svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px currentColor); }
+.player-debuff > span { display: grid; min-width: 0; }
+.player-debuff small { color: #c7aaa4; font-size: var(--combat-label-size); font-weight: 850; letter-spacing: .06em; }
+.player-debuff strong { margin-top: .08rem; overflow: hidden; color: #f1e5e1; font-size: .74rem; line-height: 1.15; text-overflow: ellipsis; white-space: nowrap; }
+.player-debuff em { color: currentColor; font-size: var(--combat-value-size); font-style: normal; font-weight: 950; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .loadout { position: absolute; z-index: 4; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: grid; grid-template-columns: minmax(370px, 1fr) minmax(480px, 1.12fr); width: min(1180px, calc(100% - 40px)); border: 1px solid var(--line); background: linear-gradient(135deg, rgba(16, 22, 18, .96), rgba(8, 12, 10, .91)); box-shadow: 0 24px 90px rgba(0,0,0,.46); backdrop-filter: blur(14px); }
 .ammo-rack, .magazine-panel { padding: .85rem 1rem 1rem; }
 .ammo-rack { border-right: 1px solid var(--line); }
@@ -300,6 +310,13 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 }
 .game-shell[data-layout="portrait"] .phase-panel > .eyebrow { font-size: .51rem; letter-spacing: .08em; white-space: nowrap; }
 .game-shell[data-layout="portrait"] .phase-panel > strong { margin: 0; font-size: .82rem; white-space: nowrap; }
+.game-shell[data-layout="portrait"] .player-debuffs { grid-column: 1 / -1; margin-top: 0; }
+.game-shell[data-layout="portrait"] .player-debuffs::before { font-size: .48rem; }
+.game-shell[data-layout="portrait"] .player-debuff { grid-template-columns: 20px minmax(0, 1fr) auto; min-height: 36px; gap: .34rem; padding: .3rem .38rem; }
+.game-shell[data-layout="portrait"] .player-debuff > svg { width: 20px; height: 20px; }
+.game-shell[data-layout="portrait"] .player-debuff small { font-size: .48rem; }
+.game-shell[data-layout="portrait"] .player-debuff strong { font-size: .62rem; }
+.game-shell[data-layout="portrait"] .player-debuff em { font-size: .7rem; }
 .game-shell[data-layout="portrait"] .loadout {
   left: calc(var(--portrait-edge) + env(safe-area-inset-left));
   right: calc(var(--portrait-edge) + env(safe-area-inset-right));
@@ -492,6 +509,12 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="desktop"] .inventory-open-button { min-height: 44px; font-size: .7rem; }
 .game-shell[data-layout="desktop"] .phase-panel { width: min(300px, 25vw); }
 .game-shell[data-layout="desktop"] .phase-panel > strong { font-size: clamp(1.35rem, 2.2vw, 1.85rem); }
+.game-shell[data-layout="desktop"] .player-debuffs::before { font-size: .62rem; }
+.game-shell[data-layout="desktop"] .player-debuff { min-height: 54px; grid-template-columns: 29px minmax(0, 1fr) auto; padding: .48rem .58rem; }
+.game-shell[data-layout="desktop"] .player-debuff > svg { width: 29px; height: 29px; }
+.game-shell[data-layout="desktop"] .player-debuff small { font-size: .61rem; }
+.game-shell[data-layout="desktop"] .player-debuff strong { font-size: .82rem; }
+.game-shell[data-layout="desktop"] .player-debuff em { font-size: 1.02rem; }
 .game-shell[data-layout="desktop"] .tactical-console { padding: .65rem max(1rem, env(safe-area-inset-right)) max(.65rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left)); }
 .game-shell[data-layout="desktop"] .tactical-console .loadout { gap: .58rem; }
 .game-shell[data-layout="desktop"] .tactical-console .ammo-rack, .game-shell[data-layout="desktop"] .tactical-console .magazine-panel { padding: .7rem .82rem; }

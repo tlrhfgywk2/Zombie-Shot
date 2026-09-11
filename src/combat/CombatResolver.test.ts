@@ -142,12 +142,15 @@ describe('CombatResolver', () => {
     expect(result.roundPreviews.map((round) => round.ammoType)).toEqual(['bloodHex', 'incendiary', 'standard']);
   });
 
-  it('총 피해 프리뷰는 현재 체력과 돌파에 제한되지 않고 탄창 전체를 계산한다', () => {
+  it('예상 처치 이후 탄도 최종 일제 화력 합계에 포함한다', () => {
     const enemy = { ...createEnemyState('normal'), hp: 1, armor: 0, distance: 0.01 };
     const rounds = ['standard', 'standard', 'standard', 'standard'] as const;
 
-    expect(resolver.resolveSequence(rounds, enemy).totalHpDamage).toBe(1);
-    expect(resolver.resolveSequence(rounds, enemy).shots).toHaveLength(1);
+    const sequence = resolver.resolveSequence(rounds, enemy);
+    expect(sequence.totalHpDamage).toBe(1);
+    expect(sequence.shots).toHaveLength(1);
+    expect(sequence.rawVolleyFirepower).toBe(16);
+    expect(sequence.finalVolleyFirepower).toBe(16);
     expect(resolver.resolveFullMagazineDamage(rounds, enemy)).toBe(16);
   });
 

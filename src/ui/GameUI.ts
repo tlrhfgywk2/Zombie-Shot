@@ -9,6 +9,7 @@ import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
 import { applyResponsiveLayoutMode } from '../presentation/ResponsiveLayout';
+import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
 
 export interface GameUICallbacks {
   onAddAmmo: (ammo: AmmoType) => void;
@@ -39,6 +40,12 @@ const COMBAT_STAT_ICONS = {
   shock: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg>',
 } as const;
 
+const PLAYER_DEBUFF_ICONS: Record<PlayerDebuffKind, string> = {
+  recoil: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 15 4-4 3 3 5-7 4 3"/><path d="M5 20h14"/></svg>',
+  range: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg>',
+  attachment: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14v10H5zM8 4v3M16 4v3M8 17v3M16 17v3"/><path d="m8 9 8 6M16 9l-8 6"/></svg>',
+};
+
 export class GameUI {
   private readonly hpFill: HTMLElement;
   private readonly hpText: HTMLElement;
@@ -55,6 +62,7 @@ export class GameUI {
   private readonly levelText: HTMLElement;
   private readonly waveText: HTMLElement;
   private readonly phaseText: HTMLElement;
+  private readonly playerDebuffs: HTMLElement;
   private readonly loadButton: HTMLButtonElement;
   private readonly slots: HTMLButtonElement[];
   private readonly overlay: HTMLElement;
@@ -96,7 +104,7 @@ export class GameUI {
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
             <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
-          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong></aside>
+          <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><section id="player-debuffs" class="player-debuffs" aria-label="플레이어 약화 효과" aria-live="polite" hidden></section></aside>
           <aside id="preview-outcome" class="combat-forecast" aria-label="발사 결과 예상" aria-live="polite" hidden></aside>
           <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         </main>
@@ -139,6 +147,7 @@ export class GameUI {
     this.levelText = this.required(root, '#level-text');
     this.waveText = this.required(root, '#wave-text');
     this.phaseText = this.required(root, '#phase-text');
+    this.playerDebuffs = this.required(root, '#player-debuffs');
     this.loadButton = this.required(root, '#load-button') as HTMLButtonElement;
     this.overlay = this.required(root, '#game-over');
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
@@ -367,6 +376,20 @@ export class GameUI {
     this.updateAttachmentPanel();
   }
 
+  renderPlayerDebuffs(playerState: PlayerCombatState): void {
+    const entries = playerDebuffEntries(playerState);
+    this.playerDebuffs.innerHTML = entries.map((entry) => `
+      <article class="player-debuff" data-debuff="${entry.kind}">
+        ${PLAYER_DEBUFF_ICONS[entry.kind]}
+        <span><small>${entry.label}</small><strong>${entry.value}</strong></span>
+        <em>${entry.turns}턴</em>
+      </article>`).join('');
+    this.playerDebuffs.hidden = entries.length === 0;
+    this.playerDebuffs.setAttribute('aria-label', entries.length === 0
+      ? '플레이어 약화 효과 없음'
+      : `플레이어 약화 효과: ${entries.map((entry) => `${entry.label}, ${entry.value}, ${entry.turns}턴`).join('; ')}`);
+  }
+
   showRouteChoice(options: readonly RouteOption[]): void {
     const host = this.required(this.routeChoice, '#route-options');
     host.innerHTML = options.map((option) => {
@@ -439,15 +462,15 @@ export class GameUI {
       this.previewOutcome.textContent = '';
       return;
     }
-    const totalDamage = sequence.totalHpDamage;
+    const totalFirepower = sequence.finalVolleyFirepower;
     const rangePenalty = sequence.finalRangePenaltyPercent === 0 ? '0%' : `-${sequence.finalRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
-      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 피해</small><strong>${totalDamage}</strong></span></div>
+      <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 화력</small><strong>${totalFirepower}</strong></span></div>
       <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorDamage}</strong></span></div>
       <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalActionShockApplied}</strong></span></div>
       <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 화력</small><strong>${rangePenalty}</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 피해 ${totalDamage}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.finalRangePenaltyPercent}%`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${totalFirepower}, 방어 파괴 ${sequence.totalArmorDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.finalRangePenaltyPercent}%`);
   }
 
   showShot(result: ShotResult): void {

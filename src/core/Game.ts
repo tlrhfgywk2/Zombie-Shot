@@ -322,6 +322,7 @@ export class Game {
     const enemy = this.zombie.snapshot();
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
+    this.ui.renderPlayerDebuffs(this.player.getCombatState());
     this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
     this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1, this.zombie.type);
