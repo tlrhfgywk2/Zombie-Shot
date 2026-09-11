@@ -73,6 +73,10 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .audio-controls label { position: relative; display: grid; align-items: center; min-height: 44px; padding: 0 .45rem; }
 .audio-controls input { width: 100%; min-width: 0; height: 28px; margin: 0; accent-color: var(--acid); cursor: pointer; touch-action: manipulation; }
 .audio-controls input:disabled { opacity: .35; cursor: default; }
+.audio-controls .presentation-speed-control { grid-column: 1 / -1; grid-template-columns: auto auto 1fr; min-height: 34px; gap: .32rem; padding: 0 .42rem; border-top: 1px solid var(--line); }
+.presentation-speed-control span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .06em; }
+.presentation-speed-control strong { color: var(--acid); font-size: .58rem; font-variant-numeric: tabular-nums; }
+.presentation-speed-control input { height: 24px; }
 .inventory-open-button { display: flex; align-items: center; justify-content: center; min-height: 38px; gap: .4rem; padding: .45rem .6rem; border: 1px solid var(--line); color: #dfe8e1; background: rgba(10,15,12,.8); font-size: .62rem; font-weight: 850; cursor: pointer; pointer-events: auto; backdrop-filter: blur(8px); }
 .inventory-open-button:hover, .inventory-open-button:focus-visible { border-color: rgba(200,255,77,.55); color: var(--acid); }
 .inventory-open-button svg { width: 17px; height: 17px; fill: currentColor; }
@@ -247,7 +251,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   background: linear-gradient(180deg, rgba(4, 7, 5, .48), transparent 24%, transparent 70%, rgba(5, 8, 6, .64));
 }
 .game-shell[data-layout="portrait"] .top-hud {
-  grid-template-columns: minmax(0, 1fr) 84px;
+  grid-template-columns: minmax(0, 1fr) 116px;
   gap: 6px;
   padding: calc(var(--portrait-edge) + env(safe-area-inset-top)) calc(var(--portrait-edge) + env(safe-area-inset-right)) 0 calc(var(--portrait-edge) + env(safe-area-inset-left));
 }
@@ -273,9 +277,10 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] .hp-track { height: 4px; margin-top: .3rem; }
 .game-shell[data-layout="portrait"] .utility-stack {
   grid-column: 2;
-  width: 84px;
+  position: relative;
+  width: 116px;
   height: 84px;
-  grid-template-columns: 40px 38px;
+  grid-template-columns: 54px 56px;
   grid-template-rows: 36px 42px;
   gap: 6px;
 }
@@ -287,9 +292,10 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 }
 .game-shell[data-layout="portrait"] .distance-card small { font-size: .5rem; letter-spacing: .1em; }
 .game-shell[data-layout="portrait"] .distance-card strong { margin-top: .08rem; font-size: .94rem; }
-.game-shell[data-layout="portrait"] .audio-controls { display: block; min-height: 42px; }
+.game-shell[data-layout="portrait"] .audio-controls { display: block; position: relative; min-height: 42px; overflow: visible; }
 .game-shell[data-layout="portrait"] .audio-controls button { width: 100%; min-height: 42px; border-right: 0; }
-.game-shell[data-layout="portrait"] .audio-controls label { display: none; }
+.game-shell[data-layout="portrait"] .audio-controls > label:not(.presentation-speed-control) { display: none; }
+.game-shell[data-layout="portrait"] .audio-controls .presentation-speed-control { position: absolute; top: calc(100% + 6px); left: 0; display: grid; width: 116px; min-height: 34px; border: 1px solid var(--line); background: rgba(10,15,12,.88); }
 .game-shell[data-layout="portrait"] .inventory-open-button { min-height: 42px; padding: 0; }
 .game-shell[data-layout="portrait"] .inventory-open-button span { display: none; }
 .game-shell[data-layout="portrait"] .phase-panel {
@@ -705,7 +711,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .sequence-shock { color: #70e6d2; }
 .sequence-stat[data-modified] { color: #ffd68f; text-shadow: 0 0 8px rgba(255,190,96,.25); }
 
-.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 112px; }
+.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 142px; }
 .game-shell[data-layout="portrait"] .enemy-vitals { grid-template-columns: .86fr 1fr 1.45fr; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 78px; min-height: 78px; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled { grid-template-columns: 16px minmax(0, 1fr); column-gap: .16rem; padding: .34rem .18rem .22rem .28rem; }
