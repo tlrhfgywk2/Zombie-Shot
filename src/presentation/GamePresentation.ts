@@ -74,6 +74,8 @@ export class GamePresentation {
   private shotEffectSequence = 0;
   private specialThreat = false;
   private playbackSpeed = 1;
+  private destroyed = false;
+  private chamberCheckCleanup?: () => void;
 
   constructor(private readonly host: HTMLElement) {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -105,6 +107,8 @@ export class GamePresentation {
   }
 
   destroy(): void {
+    this.destroyed = true;
+    this.chamberCheckCleanup?.();
     cancelAnimationFrame(this.animationFrame);
     window.removeEventListener('resize', this.resize);
     window.visualViewport?.removeEventListener('resize', this.resize);
@@ -129,6 +133,10 @@ export class GamePresentation {
 
   setPlaybackSpeed(speed: number): void {
     this.playbackSpeed = clampPresentationSpeed(speed);
+  }
+
+  isDestroyed(): boolean {
+    return this.destroyed;
   }
 
   setAttachments(loadout: LoadoutSnapshot, playerState: PlayerCombatState): void {
@@ -281,6 +289,7 @@ export class GamePresentation {
     const chamberedAmmo = rounds[0];
     if (!chamberedAmmo) throw new Error('약실 확인에 사용할 탄약이 없습니다.');
     await this.animateChamberCheck(chamberedAmmo);
+    if (this.destroyed) return;
     this.captureMagazineDiagnostic();
     await this.animateAimSequence(insertionScale);
     this.clearCartridges();
@@ -535,57 +544,60 @@ export class GamePresentation {
     const slide = this.pistolModel.slide;
     const startPosition = pistol.position.clone();
     const startQuaternion = pistol.quaternion.clone();
-    const inspectPosition = startPosition.clone().add(new THREE.Vector3(-0.24, 0.2, 0.38));
+    const startScale = pistol.scale.clone();
+    const startSlidePosition = slide.position.clone();
+    const cameraPosition = this.camera.position.clone();
+    const cameraQuaternion = this.camera.quaternion.clone();
+    const inspectPosition = startPosition.clone().add(new THREE.Vector3(
+      this.layout.mode === 'portrait' ? -0.16 : -0.18,
+      this.layout.mode === 'portrait' ? 0.18 : 0.16,
+      this.layout.mode === 'portrait' ? 0.72 : 0.34,
+    ));
     constrainWeaponPosition(inspectPosition, this.layout);
     const inspectQuaternion = startQuaternion.clone().multiply(
-      new THREE.Quaternion().setFromEuler(new THREE.Euler(0.08, -0.2, 0.13)),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(0.32, -0.065, 0.045)),
     );
-    const chamberedRound = createCartridge(ammoType, 0.32);
+    // 약실의 탄은 프레임에 남고, 슬라이드만 아주 조금 후퇴한다.
+    const chamberedRound = createCartridge(ammoType, 0.62);
     chamberedRound.name = 'chamberedRoundInspection';
-    chamberedRound.rotation.set(0, 0, Math.PI / 2);
-    chamberedRound.position.set(0.01, -0.035, -0.015);
-    this.pistolModel.ejectionPort.add(chamberedRound);
-    const supportHand = this.handsModel.supportHand;
-    if (supportHand.parent !== this.scene) this.scene.attach(supportHand);
-    supportHand.visible = true;
-    this.placeSupportHandAtSlide(0);
-    const supportStart = supportHand.position.clone().add(new THREE.Vector3(-0.05, -0.5, 0.28));
-    supportHand.position.copy(supportStart);
-    this.presentationState = '시야로 약실 들어 올리기';
-    await this.gunTween(PRESENTATION_TIMING.chamberCheckMove, (progress) => {
-      const eased = this.easeInOut(progress);
-      pistol.position.lerpVectors(startPosition, inspectPosition, eased);
-      constrainWeaponPosition(pistol.position, this.layout);
-      pistol.quaternion.slerpQuaternions(startQuaternion, inspectQuaternion, eased);
-      slide.position.x = THREE.MathUtils.lerp(0, -PRESENTATION_MOTION.slideTravel * 0.22, eased);
-      this.placeSupportHandAtSlide(eased, supportStart);
-      this.focusCameraOnObject(this.pistolModel.ejectionPort, eased);
-    });
-    this.presentationState = '약실 탄약 육안 확인';
-    await this.gunTween(PRESENTATION_TIMING.chamberCheckHold, (progress) => {
-      const breath = Math.sin(progress * Math.PI * 2);
-      pistol.position.y = inspectPosition.y + breath * 0.008;
-      pistol.rotation.z += breath * 0.00035;
-      this.placeSupportHandAtSlide(1);
-      this.focusCameraOnObject(this.pistolModel.ejectionPort, 1, breath * 0.004);
-    });
-    const supportInspectPosition = supportHand.position.clone();
-    const supportReturnPosition = supportInspectPosition.clone().add(new THREE.Vector3(-0.05, -0.46, 0.26));
-    await this.gunTween(PRESENTATION_TIMING.chamberCheckReturn, (progress) => {
-      const eased = this.easeInOut(progress);
-      pistol.position.lerpVectors(inspectPosition, startPosition, eased);
-      constrainWeaponPosition(pistol.position, this.layout);
-      pistol.quaternion.slerpQuaternions(inspectQuaternion, startQuaternion, eased);
-      slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.slideTravel * 0.22, 0, eased);
-      supportHand.position.lerpVectors(supportInspectPosition, supportReturnPosition, eased);
-      this.focusCameraOnObject(this.pistolModel.ejectionPort, 1 - eased);
-    });
-    pistol.position.copy(startPosition);
-    pistol.quaternion.copy(startQuaternion);
-    slide.position.x = 0;
-    supportHand.visible = false;
-    this.disposeObject(chamberedRound);
-    this.resetCameraPose();
+    chamberedRound.rotation.z = -Math.PI / 2;
+    this.pistolModel.chamberRoundSeat.add(chamberedRound);
+    let cancelled = false;
+    const cleanup = (): void => {
+      if (cancelled) return;
+      cancelled = true;
+      pistol.position.copy(startPosition);
+      pistol.quaternion.copy(startQuaternion);
+      pistol.scale.copy(startScale);
+      slide.position.copy(startSlidePosition);
+      this.camera.position.copy(cameraPosition);
+      this.camera.quaternion.copy(cameraQuaternion);
+      this.disposeObject(chamberedRound);
+      if (this.chamberCheckCleanup === cleanup) this.chamberCheckCleanup = undefined;
+    };
+    this.chamberCheckCleanup = cleanup;
+    try {
+      this.presentationState = '약실 확인';
+      await this.gunTween(PRESENTATION_TIMING.chamberCheckMove, (progress) => {
+        if (cancelled) return;
+        const eased = this.easeInOut(progress);
+        pistol.position.lerpVectors(startPosition, inspectPosition, eased);
+        pistol.quaternion.slerpQuaternions(startQuaternion, inspectQuaternion, eased);
+        slide.position.x = THREE.MathUtils.lerp(startSlidePosition.x, -PRESENTATION_MOTION.chamberCheckSlideTravel, eased);
+      });
+      if (cancelled) return;
+      await this.gunWait(PRESENTATION_TIMING.chamberCheckHold);
+      if (cancelled) return;
+      await this.gunTween(PRESENTATION_TIMING.chamberCheckReturn, (progress) => {
+        if (cancelled) return;
+        const eased = this.easeInOut(progress);
+        pistol.position.lerpVectors(inspectPosition, startPosition, eased);
+        pistol.quaternion.slerpQuaternions(inspectQuaternion, startQuaternion, eased);
+        slide.position.x = THREE.MathUtils.lerp(-PRESENTATION_MOTION.chamberCheckSlideTravel, startSlidePosition.x, eased);
+      });
+    } finally {
+      cleanup();
+    }
   }
 
   private syncSupportHandToMagazine(): void {
@@ -603,28 +615,6 @@ export class GamePresentation {
       new THREE.Quaternion().setFromEuler(new THREE.Euler(0.14, -0.08, -0.18)),
     );
     hand.scale.setScalar(scale * 0.82);
-  }
-
-  private placeSupportHandAtSlide(blend: number, startPosition?: THREE.Vector3): void {
-    const hand = this.handsModel.supportHand;
-    this.pistolModel.root.updateMatrixWorld(true);
-    const quaternion = this.pistolModel.ejectionPort.getWorldQuaternion(new THREE.Quaternion());
-    const position = this.pistolModel.ejectionPort.getWorldPosition(new THREE.Vector3())
-      .add(new THREE.Vector3(-0.24, 0.04, 0.16).applyQuaternion(quaternion));
-    if (startPosition) hand.position.lerpVectors(startPosition, position, blend);
-    else hand.position.copy(position);
-    hand.quaternion.copy(quaternion).multiply(
-      new THREE.Quaternion().setFromEuler(new THREE.Euler(0.22, -0.18, 0.68)),
-    );
-    hand.scale.setScalar(this.layout.pistolScale * 0.78);
-  }
-
-  private focusCameraOnObject(object: THREE.Object3D, amount: number, verticalOffset = 0): void {
-    object.updateWorldMatrix(true, false);
-    const focus = object.getWorldPosition(new THREE.Vector3());
-    const lookTarget = this.layout.cameraTarget.clone().lerp(focus, amount * 0.1);
-    this.camera.position.copy(this.layout.cameraPosition).add(new THREE.Vector3(-0.035 * amount, 0.012 * amount + verticalOffset, -0.065 * amount));
-    this.camera.lookAt(lookTarget);
   }
 
   private resetCameraPose(): void {
@@ -1219,6 +1209,7 @@ export class GamePresentation {
   }
 
   private resetWeaponPose(): void {
+    this.chamberCheckCleanup?.();
     this.pistolModel.root.position.copy(this.layout.weaponRest);
     constrainWeaponPosition(this.pistolModel.root.position, this.layout);
     this.pistolModel.root.quaternion.setFromEuler(new THREE.Euler(-0.02, -0.04, -0.08));
@@ -1249,6 +1240,7 @@ export class GamePresentation {
   }
 
   private readonly resize = (): void => {
+    if (this.destroyed) return;
     const width = this.host.clientWidth;
     const height = this.host.clientHeight;
     const viewport = getViewportSize();
@@ -1297,6 +1289,7 @@ export class GamePresentation {
   }
 
   private tick = (): void => {
+    if (this.destroyed) return;
     const delta = Math.min(this.clock.getDelta(), 0.05);
     if (this.paused) {
       this.animationFrame = requestAnimationFrame(this.tick);
@@ -1329,6 +1322,7 @@ export class GamePresentation {
       let elapsed = 0;
       let previous = performance.now();
       const frame = (now: number): void => {
+        if (this.destroyed) { resolve(); return; }
         const frameTime = Math.min(Math.max(now - previous, 0), 50);
         previous = now;
         if (!this.paused) elapsed += frameTime * playbackRate();

@@ -34,6 +34,9 @@ describe('권총 모델 기준점', () => {
     expect(pistol.ejectionPort.parent).toBe(pistol.slide);
     expect(pistol.ejectionPort.position.y).toBeGreaterThan(0.6);
     expect(pistol.ejectionPort.position.z).toBeGreaterThan(0.2);
+    expect(pistol.slide.getObjectByName('chamberWindow')).toBeDefined();
+    expect(pistol.chamberRoundSeat.parent).toBe(pistol.root);
+    expect(pistol.chamberRoundSeat.position.y).toBeGreaterThan(0.7);
   });
 
   it('탄창 삽입 기준점은 회전된 급탄부의 실제 상단에 있다', () => {
