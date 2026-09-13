@@ -8,7 +8,7 @@ import { clampPresentationSpeed } from './PresentationPreferences';
 import { getReacquisitionDuration, PRESENTATION_EFFECTS, PRESENTATION_MOTION, PRESENTATION_TIMING } from './presentationConfig';
 import { anchorPresentationLayoutToStage, constrainWeaponPosition, getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
 import { getResponsiveLayoutMode, getViewportSize } from './ResponsiveLayout';
-import { createAttachmentModel, createCartridge, createFirstPersonHandsModel, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
+import { createAttachmentModel, createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
 
 interface MuzzleSmokeEffect {
   root: THREE.Group;
@@ -37,7 +37,6 @@ export class GamePresentation {
   private readonly zombieModel = createZombieModel();
   private readonly pistolModel = createPistolModel();
   private readonly magazineModel = createMagazineModel();
-  private readonly handsModel = createFirstPersonHandsModel();
   private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 7);
   private readonly burnLight = new THREE.PointLight(0xff5a18, 0, 5);
   private readonly cartridges: THREE.Group[] = [];
@@ -226,13 +225,11 @@ export class GamePresentation {
         THREE.MathUtils.lerp(0.02, -0.08, eased),
         THREE.MathUtils.lerp(-0.12, 0.035, eased),
       );
-      this.syncSupportHandToMagazine();
     });
     await this.gunTween(PRESENTATION_TIMING.magazineInspectHold, (progress) => {
       this.presentationState = '탄창 확인';
       magazine.rotation.y = -0.08 + Math.sin(progress * Math.PI) * 0.11;
       magazine.position.y = this.layout.magazineInspect.y + Math.sin(progress * Math.PI) * 0.025;
-      this.syncSupportHandToMagazine();
     });
 
     const magazineStartPosition = magazine.position.clone();
@@ -257,7 +254,6 @@ export class GamePresentation {
       magazine.position.lerpVectors(magazineStartPosition, approachPose.position, eased);
       magazine.quaternion.slerpQuaternions(magazineStartQuaternion, approachPose.quaternion, eased);
       magazine.scale.setScalar(THREE.MathUtils.lerp(magazineStartScale, insertionScale, eased));
-      this.syncSupportHandToMagazine();
     });
     // 접근 자세에서는 확인창을 보여 주되, 손잡이 안으로 진입하기 직전에 가린다.
     // 손잡이는 여러 개의 얇은 메시로 구성되어 내부 확인창을 완전히 차폐하지 못한다.
@@ -274,10 +270,8 @@ export class GamePresentation {
       ), insertionScale);
       magazine.position.copy(pose.position);
       magazine.quaternion.copy(pose.quaternion);
-      this.syncSupportHandToMagazine();
     });
     this.attachMagazineAtSeat();
-    this.handsModel.supportHand.visible = false;
     this.magazineModel.roundDisplay.visible = false;
     if (!this.isMagazineSeated()) throw new Error('탄창이 실제 착좌 기준점에 도달하지 못했습니다.');
     this.presentationState = '탄창 착좌 완료';
@@ -385,7 +379,6 @@ export class GamePresentation {
     magazine.scale.setScalar(this.layout.magazineScale);
     this.setMagazineRounds([]);
     await this.animateWeaponToReloadPose();
-    this.handsModel.supportHand.visible = false;
     this.animationInProgress = false;
     this.presentationState = '탄창 폐기 완료';
   }
@@ -474,12 +467,6 @@ export class GamePresentation {
     this.pistolModel.root.add(weaponFill);
     this.muzzleFlash.position.set(0, 0, 0);
     this.pistolModel.muzzle.add(this.muzzleFlash);
-    this.pistolModel.root.add(this.handsModel.firingHand);
-    this.handsModel.firingHand.position.set(-0.28, -0.52, 0.27);
-    this.handsModel.firingHand.rotation.set(0.08, 0.03, -0.2);
-    this.handsModel.firingHand.scale.setScalar(0.78);
-    this.handsModel.supportHand.visible = false;
-    this.scene.add(this.handsModel.supportHand);
     this.scene.add(this.pistolModel.root);
     this.scene.add(this.magazineModel.root);
     this.attachMagazineAtSeat();
@@ -600,23 +587,6 @@ export class GamePresentation {
     }
   }
 
-  private syncSupportHandToMagazine(): void {
-    const hand = this.handsModel.supportHand;
-    if (hand.parent !== this.scene) this.scene.attach(hand);
-    const magazine = this.magazineModel.root;
-    magazine.updateMatrixWorld(true);
-    const position = magazine.getWorldPosition(new THREE.Vector3());
-    const quaternion = magazine.getWorldQuaternion(new THREE.Quaternion());
-    const scale = magazine.getWorldScale(new THREE.Vector3()).x;
-    position.add(new THREE.Vector3(-0.25, -0.2, 0.2).applyQuaternion(quaternion));
-    hand.visible = true;
-    hand.position.copy(position);
-    hand.quaternion.copy(quaternion).multiply(
-      new THREE.Quaternion().setFromEuler(new THREE.Euler(0.14, -0.08, -0.18)),
-    );
-    hand.scale.setScalar(scale * 0.82);
-  }
-
   private resetCameraPose(): void {
     this.camera.position.copy(this.layout.cameraPosition);
     this.camera.lookAt(this.layout.cameraTarget);
@@ -633,19 +603,16 @@ export class GamePresentation {
     magazine.position.copy(startPosition);
     magazine.quaternion.copy(startQuaternion);
     magazine.scale.setScalar(this.layout.magazineScale * 0.9);
-    this.syncSupportHandToMagazine();
     this.presentationState = '탄창 꺼내기';
     await this.gunTween(PRESENTATION_TIMING.magazinePresent, (progress) => {
       const eased = this.easeOutBack(progress);
       magazine.position.lerpVectors(startPosition, endPosition, eased);
       magazine.quaternion.slerpQuaternions(startQuaternion, endQuaternion, eased);
       magazine.scale.setScalar(THREE.MathUtils.lerp(this.layout.magazineScale * 0.9, this.layout.magazineScale, eased));
-      this.syncSupportHandToMagazine();
     });
     magazine.position.copy(endPosition);
     magazine.quaternion.copy(endQuaternion);
     magazine.scale.setScalar(this.layout.magazineScale);
-    this.syncSupportHandToMagazine();
   }
 
   private async animateAimSequence(insertionScale: number): Promise<void> {
@@ -668,12 +635,6 @@ export class GamePresentation {
     const roughQuaternion = finalQuaternion.clone().multiply(
       new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -0.025, 0.055)),
     );
-    const supportHand = this.handsModel.supportHand;
-    pistol.add(supportHand);
-    supportHand.visible = true;
-    supportHand.position.set(-0.02, -0.31, 0.24);
-    supportHand.rotation.set(0.16, -0.12, 0.22);
-    supportHand.scale.setScalar(0.7);
     this.presentationState = '대략 조준';
     await this.gunTween(PRESENTATION_TIMING.roughAim, (progress) => {
       const eased = this.easeInOut(progress);

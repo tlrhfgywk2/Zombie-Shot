@@ -8,6 +8,8 @@ Preserve presentation diagnostics. Markers, anchors, bounds, effect diagnostics,
 
 Keep visible UI copy minimal. Prefer icons, values, bars, disabled states, and direct manipulation over explanatory sentences or action logs. Add text only when the player cannot reasonably infer a mechanic or make a meaningful choice without it; avoid restating animations, previews, button labels, or immediately visible results.
 
+플레이어의 손·손가락·팔 모델은 게임에 표시하지 않는다. 총기와 탄창의 조작은 해당 물체의 움직임으로만 표현한다.
+
 PC의 전투 의사결정 정보는 한눈에 읽혀야 한다. 체력, 화력, 방어 파괴, 충격, 행동 중단 임계치, 거리와 같은 핵심 수치에 작은 보조 텍스트 크기를 사용하지 않는다. 새 전투 UI는 `--combat-value-size`와 `--combat-value-prominent` 같은 공용 전투 수치 토큰을 우선 사용하고, 기존의 읽기 쉬운 전투 수치 또는 용어 툴팁을 최소 가독성 기준으로 삼는다.
 
 ## Branch and deployment policy
