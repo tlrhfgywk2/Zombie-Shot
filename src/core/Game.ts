@@ -120,6 +120,7 @@ export class Game {
     this.ui.renderPreview(sequence);
     this.ui.setPhase('LOADING');
     await this.presentation.animateLoading(rounds);
+    if (this.presentation.isDestroyed()) return;
     this.state.transition('FIRING');
     this.ui.setPhase('FIRING');
     for (const shot of sequence.shots) {

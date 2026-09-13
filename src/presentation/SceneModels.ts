@@ -12,6 +12,7 @@ export interface PistolModel {
   muzzle: THREE.Object3D;
   magazineSeatAnchor: THREE.Object3D;
   ejectionPort: THREE.Object3D;
+  chamberRoundSeat: THREE.Object3D;
   attachmentSockets: Record<AttachmentSlot, THREE.Group>;
 }
 
@@ -160,9 +161,19 @@ export const createPistolModel = (): PistolModel => {
   const top = mesh(new THREE.BoxGeometry(1.28, 0.08, 0.32), slideMaterial);
   top.position.set(0.07, 0.69, 0);
   slide.add(top);
-  const ejectionPortCover = mesh(new THREE.BoxGeometry(0.34, 0.02, 0.25), darkMetal, false);
-  ejectionPortCover.position.set(0.23, 0.705, 0.03);
+  const ejectionPortCover = mesh(new THREE.BoxGeometry(0.46, 0.012, 0.31), darkMetal, false);
+  ejectionPortCover.name = 'chamberWindow';
+  ejectionPortCover.position.set(0.23, 0.742, 0.04);
   slide.add(ejectionPortCover);
+  for (const z of [-0.126, 0.206]) {
+    const windowLip = mesh(new THREE.BoxGeometry(0.47, 0.018, 0.018), slideMaterial, false);
+    windowLip.position.set(0.23, 0.749, z);
+    slide.add(windowLip);
+  }
+  const chamberRoundSeat = new THREE.Object3D();
+  chamberRoundSeat.name = 'chamberRoundSeat';
+  chamberRoundSeat.position.set(0.23, 0.752, 0.05);
+  root.add(chamberRoundSeat);
   const ejectionPort = new THREE.Object3D();
   ejectionPort.name = 'ejectionPort';
   ejectionPort.position.set(0.23, 0.67, 0.25);
@@ -210,7 +221,7 @@ export const createPistolModel = (): PistolModel => {
   slide.add(attachmentSockets.optic);
   grip.add(attachmentSockets.magazine, attachmentSockets.grip);
 
-  return { root, stageAnchor, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, attachmentSockets };
+  return { root, stageAnchor, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, chamberRoundSeat, attachmentSockets };
 };
 
 export const createAttachmentModel = (id: AttachmentId): THREE.Group => {

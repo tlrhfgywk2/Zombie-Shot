@@ -29,7 +29,10 @@ vi.mock('../presentation/AudioPreferences', () => ({
 vi.mock('../progression/AmmoRewards', () => ({ generateAmmoRewards: () => ['match', 'hollowPoint', 'wadcutter'] }));
 
 describe('실제 게임의 구간/보상 연결', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    harness.presentation.isDestroyed.mockReturnValue(false);
+  });
   it('적 사이 소비를 유지하고 보상 교체 후 구간 진입에서만 회복한다', async () => {
     const game = new Game({} as HTMLElement);
     const internals = game as unknown as { player: Player; state: GameStateMachine; busy: boolean };
@@ -242,6 +245,16 @@ describe('실제 게임의 구간/보상 연결', () => {
     harness.callbacks.onPresentationSpeedChange(0.5);
     expect(harness.presentation.setPlaybackSpeed).toHaveBeenLastCalledWith(0.5);
     expect(harness.ui.renderPresentationPreferences).toHaveBeenLastCalledWith({ speed: 0.5 });
+  });
+
+  it('장전 도중 프레젠테이션이 종료되면 조준과 발사를 이어 가지 않는다', async () => {
+    new Game({} as HTMLElement);
+    harness.presentation.isDestroyed.mockReturnValueOnce(true);
+    harness.callbacks.onAddAmmo('standard');
+    harness.callbacks.onLoad();
+    await vi.waitFor(() => expect(harness.presentation.animateLoading).toHaveBeenCalled());
+    await vi.waitFor(() => expect(harness.presentation.isDestroyed).toHaveBeenCalled());
+    expect(harness.presentation.animateShot).not.toHaveBeenCalled();
   });
 
   it('탄창은 모든 예정 사격이 끝난 뒤 한 번만 폐기한다', async () => {
