@@ -4,7 +4,7 @@ import type { AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, PlayerCo
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
-import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, createAmmoBuild, createStageStock, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
+import { AMMO_DEFINITIONS, AMMO_ORDER, AMMO_BUILD_BALANCE, countAllocations, createAmmoBuild, createStageStock, type AmmoBuild, type SpecialAmmoType, BUILD_TAG_NAMES, COMBAT_BALANCE, RANGE_NAMES, RARITY_NAMES, type AmmoStock } from '../data/ammoDefinitions';
 import type { RouteKind, RouteOption } from '../data/encounterDefinitions';
 import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
@@ -24,6 +24,7 @@ export interface GameUICallbacks {
   onChooseAmmoReward: (ammo: SpecialAmmoType) => void;
   onReplaceReward: (ammo: SpecialAmmoType) => void;
   onSkipAmmoReward: () => void;
+  onUpgradeAmmoCapacity: () => void;
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
@@ -38,8 +39,9 @@ const PHASE_LABELS: Record<GamePhase, string> = {
 
 const COMBAT_STAT_ICONS = {
   firepower: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>',
-  armor: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg>',
+  wound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg>',
   shock: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg>',
+  recoil: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 15 4-4 3 3 5-7 4 3"/></svg>',
 } as const;
 
 const PLAYER_DEBUFF_ICONS: Record<PlayerDebuffKind, string> = {
@@ -51,7 +53,7 @@ const PLAYER_DEBUFF_ICONS: Record<PlayerDebuffKind, string> = {
 export class GameUI {
   private readonly hpFill: HTMLElement;
   private readonly hpText: HTMLElement;
-  private readonly armorText: HTMLElement;
+  private readonly woundText: HTMLElement;
   private readonly impactText: HTMLElement;
   private readonly impactThreshold: HTMLElement;
   private readonly impactFill: HTMLElement;
@@ -102,7 +104,7 @@ export class GameUI {
           <header class="top-hud">
             <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong></div>
             <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">22 / 22</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
-              <div class="enemy-stat enemy-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어</small><strong id="armor-text">0</strong></span></div>
+              <div class="enemy-stat enemy-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong id="wound-text">0</strong></span></div>
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
               <div id="enemy-action" class="enemy-action"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span><small>다음 행동</small><strong id="next-action-name">접근 2.0 m</strong></span><em id="next-action-shock" aria-label="중단 충격 4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><b>4</b></em></div>
             </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
@@ -114,13 +116,13 @@ export class GameUI {
         </main>
         <section class="tactical-console" aria-label="전투 준비">
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
-          <div class="ammo-rack"><div class="section-label"><span>탄약</span></div><div class="ammo-options">
+          <div class="ammo-rack"><div class="section-label"><span>탄약</span><small id="ammo-capacity">휴대 6/14</small></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
           <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div></div>
-          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/10</small></div><div class="attachment-workspace">
+          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/11</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
             <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
@@ -138,7 +140,7 @@ export class GameUI {
 
     this.hpFill = this.required(root, '#hp-fill');
     this.hpText = this.required(root, '#hp-text');
-    this.armorText = this.required(root, '#armor-text');
+    this.woundText = this.required(root, '#wound-text');
     this.impactText = this.required(root, '#impact-text');
     this.impactThreshold = this.required(root, '#impact-threshold');
     this.impactFill = this.required(root, '#impact-fill');
@@ -270,30 +272,32 @@ export class GameUI {
     this.stock = { ...stock };
     this.build = { ...build };
     this.specialCapacity = capacity;
-    const visibleCount = AMMO_ORDER.filter(ammo => ammo === 'standard' || build[ammo] > 0).length;
+    this.required(this.shell, '#ammo-capacity').textContent = `휴대 ${countAllocations(build)}/${capacity}`;
+    const visibleCount = AMMO_ORDER.filter(ammo => ammo === 'ball' || build[ammo] > 0).length;
     const options = this.required(this.shell, '.ammo-options');
     options.style.setProperty('--ammo-columns', String(Math.max(1, Math.min(5, visibleCount))));
     this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach(button => {
       const ammo = button.dataset.ammo as AmmoType;
       const count = stock[ammo];
       const loaded = reserved.filter(value => value === ammo).length;
-      button.hidden = ammo !== 'standard' && build[ammo] === 0;
+      button.hidden = ammo !== 'ball' && build[ammo] === 0;
       const unavailable = this.locked || (count !== 'infinite' && count - loaded <= 0);
       button.disabled = false;
       button.setAttribute('aria-disabled', String(unavailable));
-      const label = ammo === 'standard' ? '∞' : count + ' / ' + build[ammo];
+      const label = ammo === 'ball' ? '∞' : count + ' / ' + build[ammo];
       button.querySelector<HTMLElement>('.stock-count')!.textContent = label;
       button.setAttribute('aria-label', AMMO_DEFINITIONS[ammo].name + ' · ' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · ' + label + ' · 장전 예약 ' + loaded + '발');
     });
   }
 
-  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, _capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
+  showAmmoRewards(options: readonly SpecialAmmoType[], build: AmmoBuild, capacity: number, selected?: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): void {
     this.hideTooltip();
     const host = this.required(this.shell, '#ammo-reward');
-    const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard' && build[ammo] > 0);
+    const current = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'ball' && build[ammo] > 0);
     const choices = selected
       ? current.filter(ammo => ammoRewardOwnedCount(ammo, build, replacements) > 0).map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-replace-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong><em>보유 ${ammoRewardOwnedCount(ammo, build, replacements)}</em></button>`).join('')
-      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>보유 ${ammoRewardOwnedCount(ammo, build)}</em></button>`).join('');
+      : options.map(ammo => `<button type="button" class="route-option ammo-reward-option" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-ammo-reward="${ammo}">${this.ammoRarityMarkup(ammo)}<strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}<em>보유 ${ammoRewardOwnedCount(ammo, build)}</em></button>`).join('')
+        + `<button type="button" class="route-option ammo-reward-option" data-capacity-reward><strong>탄약 휴대 용량 +2</strong><em>현재 ${capacity}</em></button>`;
     host.innerHTML = `<div class="route-card reward-card">
       <header class="ammo-screen-header"><h2 id="ammo-reward-title">탄약 보급</h2><button type="button" data-open-ammo-inventory aria-haspopup="dialog">보유 탄약</button></header>
       <div class="reward-options">${choices}</div>
@@ -301,6 +305,7 @@ export class GameUI {
     </div>`;
     host.querySelectorAll<HTMLButtonElement>('[data-ammo-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseAmmoReward(button.dataset.ammoReward as SpecialAmmoType)));
     host.querySelectorAll<HTMLButtonElement>('[data-replace-reward]').forEach(button => button.addEventListener('click', () => this.callbacks.onReplaceReward(button.dataset.replaceReward as SpecialAmmoType)));
+    host.querySelector<HTMLButtonElement>('[data-capacity-reward]')?.addEventListener('click', this.callbacks.onUpgradeAmmoCapacity);
     host.querySelector<HTMLButtonElement>('[data-open-ammo-inventory]')?.addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
     host.querySelector<HTMLButtonElement>('[data-skip-ammo-reward]')?.addEventListener('click', this.callbacks.onSkipAmmoReward);
     host.hidden = false;
@@ -433,17 +438,14 @@ export class GameUI {
   updateEnemy(enemy: EnemyState, action: EnemyActionPreview, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
     this.hpFill.style.width = `${Math.max(0, enemy.hp / enemy.maxHp) * 100}%`;
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
-    this.armorText.textContent = String(enemy.armor);
-    this.armorText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.armor === 0);
+    this.woundText.textContent = String(enemy.wound);
+    this.woundText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.wound === 0);
     this.impactText.textContent = String(enemy.actionShock);
     this.impactThreshold.textContent = `/${action.threshold}`;
     this.impactFill.style.width = `${Math.min(100, enemy.actionShock / action.threshold * 100)}%`;
     this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.actionShock === 0);
     const statuses: string[] = [];
-    if (enemy.statuses.burnTurns) statuses.push(`<span data-status="burn">화상 ${enemy.statuses.burnTurns}</span>`);
-    if (enemy.statuses.slowTurns) statuses.push(`<span data-status="slow">둔화 ${enemy.statuses.slowTurns}</span>`);
-    if (enemy.statuses.shockTurns) statuses.push('<span data-status="shock">전하 교란</span>');
-    if (enemy.statuses.corruptedShots) statuses.push(`<span data-status="corruption">침식 ${enemy.statuses.corruptedShots}</span>`);
+    if (enemy.wound > 0) statuses.push('<span data-status="vulnerable">취약</span>');
     this.enemyStatus.innerHTML = statuses.join('');
     this.enemyStatus.hidden = statuses.length === 0;
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
@@ -456,19 +458,21 @@ export class GameUI {
       : ACTION_NAMES[action.selectedAction];
     this.nextActionShock.querySelector<HTMLElement>('b')!.textContent = String(action.threshold);
     this.nextActionShock.setAttribute('aria-label', `중단 충격 ${action.threshold}`);
-    this.enemyContext.innerHTML = '<span><b>충격</b> 임계치만큼 소비하여 행동을 중단합니다. 남은 충격은 유지됩니다.</span><span><b>치명 공격</b> 접근 후 다음 턴에 실행됩니다.</span>';
-    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 방어 ${enemy.armor}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
+    this.enemyContext.innerHTML = '<span><b>상처</b>가 있으면 취약합니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span>';
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
   }
 
   renderPreview(sequence: SequenceResult | undefined): void {
     this.slots.forEach((slot, index) => {
       const content = slot.querySelector<HTMLElement>('.slot-content');
       content?.querySelector('.sequence-stats')?.remove();
+      const predictedUnfired = Boolean(sequence?.killed && index >= sequence.shots.length && index < sequence.roundPreviews.length);
+      slot.classList.toggle('will-not-fire', predictedUnfired);
       const round = sequence?.roundPreviews[index];
       if (!round || !content) return;
       const visibleStats = firingOrderStatEntries(round);
-      content.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}</span>`);
-      slot.setAttribute('aria-label', `${slot.getAttribute('aria-label')}, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}`);
+      content.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}${round.movement ? `<span class="sequence-move" aria-label="${round.movement < 0 ? '사격 전 전진' : '사격 후 후퇴'} ${Math.abs(round.movement)}m">${round.movement < 0 ? '←' : '→'}${Math.abs(round.movement)}</span>` : ''}</span>`);
+      slot.setAttribute('aria-label', `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[round.ammoType].name}, 탭하여 즉시 제거, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}${predictedUnfired ? ', 예상 미발사' : ''}`);
     });
     if (!sequence) {
       this.previewOutcome.hidden = true;
@@ -479,11 +483,11 @@ export class GameUI {
     const rangePenalty = sequence.finalRangePenaltyPercent === 0 ? '0%' : `-${sequence.finalRangePenaltyPercent}%`;
     this.previewOutcome.innerHTML = `
       <div class="forecast-stat forecast-damage"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small>총 화력</small><strong>${totalFirepower}</strong></span></div>
-      <div class="forecast-stat forecast-armor"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8 20 6v5.8c0 4.7-3.2 8.1-8 9.5-4.8-1.4-8-4.8-8-9.5V6l8-3.2Z"/><path d="M12 6.2v11.1"/></svg><span><small>방어 파괴</small><strong>${sequence.totalArmorBreak}</strong></span></div>
+      <div class="forecast-stat forecast-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong>+${sequence.totalWoundApplied}</strong></span></div>
       <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong>${sequence.totalActionShockApplied}</strong></span></div>
-      <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>거리 화력</small><strong>${rangePenalty}</strong></span></div>`;
+      <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>최종 거리</small><strong>${sequence.finalState.distance.toFixed(1)} m</strong></span></div>`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${totalFirepower}, 방어 파괴 ${sequence.totalArmorBreak}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 화력 감소 ${sequence.finalRangePenaltyPercent}%`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${totalFirepower}, 상처 ${sequence.totalWoundApplied}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 ${sequence.finalState.distance.toFixed(1)}미터, 거리 화력 감소 ${rangePenalty}`);
   }
 
   showShot(result: ShotResult): void {
@@ -500,7 +504,7 @@ export class GameUI {
   }
 
   private ammoQuantity(ammo: AmmoType): string {
-    return ammo === 'standard' ? '∞' : `×${this.build[ammo]}`;
+    return ammo === 'ball' ? '∞' : `×${this.build[ammo]}`;
   }
 
   private openAmmoInventory(opener: HTMLButtonElement): void {
@@ -512,7 +516,7 @@ export class GameUI {
       this.inventoryBackgroundInert.set(sibling, sibling.inert);
       sibling.inert = true;
     }
-    const owned = AMMO_ORDER.filter(ammo => ammo === 'standard' || this.build[ammo] > 0);
+    const owned = AMMO_ORDER.filter(ammo => ammo === 'ball' || this.build[ammo] > 0);
     const inventory = owned.map(ammo => `<button type="button" class="ammo-inventory-card" style="--bullet:${AMMO_DEFINITIONS[ammo].cssColor}" data-inspect-ammo="${ammo}" aria-label="${AMMO_DEFINITIONS[ammo].name} ${this.ammoQuantity(ammo)} 상세 보기"><span class="inventory-card-head">${this.ammoRarityMarkup(ammo)}<b>${this.ammoQuantity(ammo)}</b></span><strong>${AMMO_DEFINITIONS[ammo].name}</strong>${ammoStatsMarkup(ammo)}</button>`).join('');
     this.ammoInventory.innerHTML = `<div class="route-card ammo-inventory-dialog">
       <header class="ammo-screen-header"><h2 id="ammo-inventory-title">보유 탄약</h2><button type="button" class="ammo-screen-close" data-close-ammo-inventory aria-label="보유 탄약 닫기">×</button></header>
@@ -611,8 +615,7 @@ export class GameUI {
   private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement): void {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
-    const buildup = definition.buildup ? ` · ${this.statusLabel(definition.buildup.type)} 축적 ${definition.buildup.amount}` : '';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>방어 파괴 <b>${definition.armorBreak}</b></span><span>충격 <b>${definition.actionShock}</b></span></div><small>${definition.sequenceTrait ? { heavyKick: '바로 다음 화력 -2 · 안정탄으로 흡수', stable: '강한 반동을 흡수', shockSaturation: '바로 다음 충격 -2' }[definition.sequenceTrait] : ''}${buildup}</small>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span>화력 <b>${definition.firepower}</b></span><span>상처 <b>${definition.wound}</b></span><span>충격 <b>${definition.actionShock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
@@ -632,10 +635,6 @@ export class GameUI {
   private hideTooltip(): void {
     this.ammoTooltip.hidden = true;
     document.querySelectorAll('[aria-describedby="ammo-tooltip"]').forEach((element) => element.removeAttribute('aria-describedby'));
-  }
-
-  private statusLabel(status: string): string {
-    return ({ burn: '열기', chill: '냉기', shock: '전하', corruption: '침식' } as Record<string, string>)[status] ?? status;
   }
 
   private updateAttachmentPanel(): void {

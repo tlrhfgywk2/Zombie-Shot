@@ -1,7 +1,7 @@
 import { Magazine } from '../combat/Magazine';
 import { AttachmentLoadout, createPlayerCombatState, getMagazineCapacity } from '../combat/AttachmentLoadout';
 import type { AmmoType, AttachmentSlot, PlayerCombatState, ShotResult } from '../combat/types';
-import type { AttachmentId } from '../data/attachmentDefinitions';
+import { ATTACHMENT_DEFINITIONS, type AttachmentId } from '../data/attachmentDefinitions';
 import { AMMO_BUILD_BALANCE, AMMO_ORDER, countAllocations, createAmmoBuild, createStageStock, rewardAmount, type AmmoBuild, type AmmoStock, type SpecialAmmoType } from '../data/ammoDefinitions';
 
 export class Player {
@@ -23,8 +23,14 @@ export class Player {
     this.specialCapacity = capacity;
     return true;
   }
+  /** 한 런 동안 유지되는 독립적인 휴대 탄약 강화. 장착물과 무관하다. */
+  upgradeAmmoCapacity(amount = 2): boolean {
+    if (!Number.isInteger(amount) || amount <= 0) return false;
+    this.specialCapacity += amount;
+    return true;
+  }
   getAvailable(ammo: AmmoType): number | 'infinite' {
-    if (ammo === 'standard') return 'infinite';
+    if (ammo === 'ball') return 'infinite';
     return this.stock[ammo] - this.magazine.getRounds().filter(round => round === ammo).length;
   }
   getCombatState(): PlayerCombatState { return { ...this.combatState, disabledSlots: { ...this.combatState.disabledSlots } }; }
@@ -39,11 +45,11 @@ export class Player {
     return this.magazine.set(index, ammo);
   }
   /** 장전은 예약이다. 실제 사격 시에만 스테이지 잔량을 차감한다. */
-  fireRound(shot: Pick<ShotResult, 'ammoType' | 'conserved'>): void {
+  fireRound(shot: Pick<ShotResult, 'ammoType'>): void {
     if (this.magazine.getRounds()[0] !== shot.ammoType) throw new Error('장전 순서와 사격이 일치하지 않습니다.');
-    if (shot.ammoType !== 'standard' && this.stock[shot.ammoType] <= 0) throw new Error('스테이지 탄약이 부족합니다.');
+    if (shot.ammoType !== 'ball' && this.stock[shot.ammoType] <= 0) throw new Error('스테이지 탄약이 부족합니다.');
     this.magazine.remove(0);
-    if (shot.ammoType !== 'standard' && !shot.conserved) this.stock[shot.ammoType] -= 1;
+    if (shot.ammoType !== 'ball') this.stock[shot.ammoType] -= 1;
   }
   startStage(): void {
     this.magazine.clear();
@@ -71,7 +77,7 @@ export class Player {
   }
   getOwnedAttachments(): AttachmentId[] { return [...this.ownedAttachments]; }
   claimAttachment(id: AttachmentId): boolean {
-    if (this.ownedAttachments.has(id)) return false;
+    if (!Object.hasOwn(ATTACHMENT_DEFINITIONS, id) || this.ownedAttachments.has(id)) return false;
     this.ownedAttachments.add(id);
     return true;
   }

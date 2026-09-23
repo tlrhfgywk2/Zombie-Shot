@@ -1,4 +1,5 @@
 import type { AmmoType } from '../combat/types';
+import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { DEFAULT_AUDIO_PREFERENCES, type AudioPreferences, clampVolume } from './AudioPreferences';
 
 export class AudioManager {
@@ -34,8 +35,7 @@ export class AudioManager {
   }
 
   insertRound(ammoType: AmmoType, index: number): void {
-    const frequency: Record<AmmoType, number> = { wadcutter: 460, flatPoint: 540, overpressure: 330, subsonic: 410, bonded: 490, match: 510, standard: 430, armorPiercing: 485, hollowPoint: 395, incendiary: 620, stagger: 540, magnum: 330, cryo: 690, arc: 760, sanctified: 820, bloodHex: 275 };
-    this.tone(frequency[ammoType] + index * 18, 0.045, 0.045, 'square');
+    this.tone(430 + AMMO_DEFINITIONS[ammoType].wound * 16 + index * 18, 0.045, 0.045, 'square');
     this.tone(180, 0.028, 0.025, 'triangle', 0.022);
   }
 
@@ -62,27 +62,17 @@ export class AudioManager {
   }
 
   shot(ammoType: AmmoType): void {
-    const lowFrequency: Record<AmmoType, number> = { wadcutter: 96, flatPoint: 112, overpressure: 70, subsonic: 84, bonded: 105, match: 98, standard: 92, armorPiercing: 105, hollowPoint: 82, incendiary: 102, stagger: 112, magnum: 70, cryo: 118, arc: 128, sanctified: 138, bloodHex: 64 };
-    const volume = ammoType === 'magnum' ? 0.16 : 0.135;
-    this.noise(ammoType === 'magnum' ? 0.16 : 0.12, volume, ammoType === 'stagger' ? 1800 : 1250);
-    this.tone(lowFrequency[ammoType], 0.11, 0.09, 'sawtooth');
-    if (ammoType === 'stagger') this.tone(880, 0.055, 0.025, 'sine', 0.015);
-    if (ammoType === 'incendiary') this.noise(0.2, 0.028, 2400, 0.055);
+    const definition = AMMO_DEFINITIONS[ammoType];
+    this.noise(definition.recoil >= 3 ? 0.16 : 0.12, definition.recoil >= 3 ? 0.16 : 0.135, definition.actionShock > 0 ? 1800 : 1250);
+    this.tone(108 - definition.recoil * 10, 0.11, 0.09, 'sawtooth');
+    if (definition.actionShock > 0) this.tone(880, 0.055, 0.025, 'sine', 0.015);
   }
 
   impact(ammoType: AmmoType): void {
-    if (ammoType === 'magnum') {
+    if (AMMO_DEFINITIONS[ammoType].recoil >= 3) {
       this.noise(0.09, 0.065, 2100);
       this.tone(285, 0.06, 0.035, 'square');
-    } else if (ammoType === 'incendiary') {
-      this.noise(0.16, 0.04, 2800);
-      this.tone(460, 0.09, 0.025, 'sawtooth');
-    } else this.tone(ammoType === 'stagger' ? 390 : 310, 0.045, 0.035, 'triangle');
-  }
-
-  burn(): void {
-    this.noise(0.32, 0.035, 3200);
-    this.tone(240, 0.22, 0.02, 'sawtooth');
+    } else this.tone(AMMO_DEFINITIONS[ammoType].actionShock > 0 ? 390 : 310, 0.045, 0.035, 'triangle');
   }
 
   growl(): void {

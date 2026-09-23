@@ -168,8 +168,10 @@ export const createPistolModel = (): PistolModel => {
   root.add(muzzle);
 
   const attachmentSockets = {
-    muzzle: new THREE.Group(), magazine: new THREE.Group(), optic: new THREE.Group(), rail: new THREE.Group(), grip: new THREE.Group(),
+    barrel: new THREE.Group(), muzzle: new THREE.Group(), magazine: new THREE.Group(), optic: new THREE.Group(), rail: new THREE.Group(), grip: new THREE.Group(),
   } satisfies Record<AttachmentSlot, THREE.Group>;
+  attachmentSockets.barrel.name = 'attachmentSocketBarrel';
+  attachmentSockets.barrel.position.set(0.83, 0.48, 0);
   attachmentSockets.muzzle.name = 'attachmentSocketMuzzle';
   attachmentSockets.muzzle.position.set(1.08, 0.48, 0);
   attachmentSockets.magazine.name = 'attachmentSocketMagazine';
@@ -180,7 +182,7 @@ export const createPistolModel = (): PistolModel => {
   attachmentSockets.rail.position.set(0.68, -0.18, 0);
   attachmentSockets.grip.name = 'attachmentSocketGrip';
   attachmentSockets.grip.position.set(0, -0.48, 0);
-  root.add(attachmentSockets.muzzle, attachmentSockets.rail);
+  root.add(attachmentSockets.barrel, attachmentSockets.muzzle, attachmentSockets.rail);
   slide.add(attachmentSockets.optic);
   grip.add(attachmentSockets.magazine, attachmentSockets.grip);
 
@@ -200,7 +202,10 @@ export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
     const part = mesh(new THREE.BoxGeometry(w, h, d), material);
     part.position.set(x, y, z); root.add(part); return part;
   };
-  if (item.slot === 'muzzle') {
+  if (item.slot === 'barrel') {
+    const sleeve = mesh(new THREE.CylinderGeometry(0.105, 0.105, 0.45, 16), metal);
+    sleeve.rotation.z = Math.PI / 2; sleeve.position.x = 0.15; root.add(sleeve);
+  } else if (item.slot === 'muzzle') {
     const length = advanced ? 0.38 : 0.23;
     // 열린 총구, 양측 포트, 상부 배기 홈으로 짧은 보정기를 구분한다.
     box(length, 0.26, 0.33, length / 2, 0, 0, metal);
@@ -216,10 +221,10 @@ export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
     box(0.48, height, 0.38, 0, -height / 2, 0, advanced ? metal : dark);
     box(0.54, 0.055, 0.42, 0, -height, 0);
     if (advanced) for (const side of [-1, 1]) box(0.06, 0.17, 0.009, 0, -0.15, side * 0.196, port);
-  } else if (id === 'highVisibilitySight') {
+  } else if (id === 'reflexSight') {
     box(0.12, 0.04, 0.17, 1.17, 0.02, 0);
     box(0.075, 0.12, 0.09, 1.17, 0.08, 0, green);
-  } else if (id === 'compactReflexSight') {
+  } else if (id === 'pistolScope') {
     box(0.36, 0.055, 0.32, 0, 0.025, 0);
     for (const side of [-1, 1]) box(0.09, 0.27, 0.038, 0.025, 0.18, side * 0.15, metal);
     box(0.09, 0.04, 0.34, 0.025, 0.32, 0, metal);
@@ -228,9 +233,11 @@ export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
     box(0.1, 0.09, 0.07, -0.05, 0.085, 0.18);
   } else if (item.slot === 'rail') {
     box(advanced ? 0.44 : 0.32, advanced ? 0.23 : 0.14, advanced ? 0.31 : 0.22, 0, -0.02, 0);
-    const laser = mesh(new THREE.CircleGeometry(0.035, 12), new THREE.MeshBasicMaterial({ color: 0xf2504a }));
-    laser.rotation.y = Math.PI / 2; laser.position.set(advanced ? 0.225 : 0.165, -0.04, advanced ? 0.09 : 0); root.add(laser);
-    if (advanced) {
+    if (id !== 'tacticalLight') {
+      const laser = mesh(new THREE.CircleGeometry(0.035, 12), new THREE.MeshBasicMaterial({ color: 0xf2504a }));
+      laser.rotation.y = Math.PI / 2; laser.position.set(advanced ? 0.225 : 0.165, -0.04, advanced ? 0.09 : 0); root.add(laser);
+    }
+    if (id !== 'laserSight') {
       const lamp = mesh(new THREE.CylinderGeometry(0.075, 0.075, 0.09, 12), metal);
       lamp.rotation.z = Math.PI / 2; lamp.position.set(0.23, -0.02, -0.055); root.add(lamp);
       const lens = mesh(new THREE.CircleGeometry(0.059, 12), new THREE.MeshBasicMaterial({ color: 0xe9eccb }));
@@ -386,14 +393,14 @@ export const createCartridge = (ammoType: AmmoType, scale = 1): THREE.Group => {
   group.scale.setScalar(scale);
   const brass = new THREE.MeshStandardMaterial({ color: 0xc9a556, roughness: 0.32, metalness: 0.78 });
   const definition = AMMO_DEFINITIONS[ammoType];
-  const tipMaterial = new THREE.MeshStandardMaterial({ color: definition.color, roughness: 0.4, metalness: 0.26, emissive: definition.color, emissiveIntensity: ammoType === 'incendiary' ? 0.22 : 0.05 });
+  const tipMaterial = new THREE.MeshStandardMaterial({ color: definition.color, roughness: 0.4, metalness: 0.26, emissive: definition.color, emissiveIntensity: definition.wound > 0 ? 0.15 : 0.05 });
   const casing = mesh(new THREE.CylinderGeometry(0.055, 0.058, 0.27, 10), brass);
   const rim = mesh(new THREE.CylinderGeometry(0.064, 0.064, 0.025, 10), brass);
   rim.position.y = -0.145;
   const bullet = mesh(new THREE.ConeGeometry(0.055, 0.14, 10), tipMaterial);
   bullet.position.y = 0.205;
   group.add(casing, rim, bullet);
-  const bandCounts: Record<AmmoType, number> = { wadcutter: 1, flatPoint: 2, overpressure: 3, subsonic: 1, bonded: 3, match: 2, standard: 0, armorPiercing: 1, hollowPoint: 2, incendiary: 3, stagger: 4, magnum: 5, cryo: 2, arc: 3, sanctified: 4, bloodHex: 5 };
+  const bandCounts: Record<AmmoType, number> = Object.fromEntries(Object.keys(AMMO_DEFINITIONS).map((id, index) => [id, index % 4])) as Record<AmmoType, number>;
   for (let index = 0; index < bandCounts[ammoType]; index += 1) {
     const band = mesh(new THREE.TorusGeometry(0.059, 0.008, 5, 10), tipMaterial, false);
     band.rotation.x = Math.PI / 2;

@@ -16,7 +16,7 @@ describe('플레이어 약화 효과 표시', () => {
     state.disabledSlots.muzzle = 2;
 
     expect(playerDebuffEntries(state)).toEqual([
-      { kind: 'recoil', label: '반동 교란', value: '강한 반동 후속 화력 -3', turns: 2 },
+      { kind: 'recoil', label: '반동 교란', value: '반동 화력 감소 +1', turns: 2 },
       { kind: 'range', label: '거리 교란', value: '유효 거리 1단계 악화', turns: 1 },
       { kind: 'attachment', label: '총구 봉쇄', value: '장착물 비활성화', turns: 2 },
     ]);

@@ -7,7 +7,6 @@ describe('총기 연출 타이밍', () => {
     expect(PRESENTATION_TIMING.slidePull).toBe(180);
     expect(PRESENTATION_TIMING.shotTravel).toBe(185);
     expect(PRESENTATION_TIMING.hitReaction).toBe(145);
-    expect(PRESENTATION_TIMING.burnPulse).toBe(480);
     expect(PRESENTATION_TIMING.advance).toBe(600);
     expect(PRESENTATION_TIMING.death).toBe(650);
     expect(PRESENTATION_TIMING.spawn).toBe(480);

@@ -24,7 +24,6 @@ export const PRESENTATION_TIMING = {
   impact: 170,
   magazineRelease: 95,
   magazineDiscard: 360,
-  burnPulse: 480,
   advance: 600,
   death: 650,
   spawn: 480,

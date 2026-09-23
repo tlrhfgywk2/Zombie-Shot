@@ -38,7 +38,6 @@ export class GamePresentation {
   private readonly pistolModel = createPistolModel();
   private readonly magazineModel = createMagazineModel();
   private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 7);
-  private readonly burnLight = new THREE.PointLight(0xff5a18, 0, 5);
   private readonly cartridges: THREE.Group[] = [];
   private readonly muzzleSmokePool: MuzzleSmokeEffect[] = [];
   private readonly casingPool: CasingEffect[] = [];
@@ -160,23 +159,22 @@ export class GamePresentation {
     // 봉쇄는 기능만 막으며 물리 부품은 그대로 남긴다.
     void playerState;
     const muzzleId = loadout.muzzle;
-    this.pistolModel.muzzle.position.x = 1.13 + (muzzleId === 'dualPortCompensator' ? 0.38 : muzzleId === 'compactCompensator' ? 0.23 : 0);
+    this.pistolModel.muzzle.position.x = 1.13 + (muzzleId === 'muzzleBrake' ? 0.38 : muzzleId === 'compensator' ? 0.23 : 0);
   }
 
   wait(milliseconds: number): Promise<void> {
     return this.tween(milliseconds, () => undefined);
   }
 
-  setZombie(distance: number, hpRatio: number, burning: boolean, level: number, type: EnemyType = 'normal'): void {
+  setZombie(distance: number, hpRatio: number, level: number, type: EnemyType = 'normal'): void {
     this.zombieTargetZ = 1.1 - distance * 0.72;
     const scale = 1 + Math.min(level - 1, 10) * 0.025;
     this.zombieModel.root.scale.setScalar(scale);
     const material = this.zombieModel.torso.material as THREE.MeshStandardMaterial;
     const specialColors: Partial<Record<EnemyType, number>> = { contaminator: 0x67543f, groundshaker: 0x5b4b42, screecher: 0x3d5261 };
     material.color.setHex(specialColors[type] ?? 0x30443c);
-    material.emissive.setHex(burning ? 0x5e1705 : hpRatio < 0.35 ? 0x33110d : 0x08110a);
-    material.emissiveIntensity = burning ? 0.82 : 0.32;
-    this.burnLight.intensity = burning ? 1.35 : 0;
+    material.emissive.setHex(hpRatio < 0.35 ? 0x33110d : 0x08110a);
+    material.emissiveIntensity = 0.32;
     this.specialThreat = type === 'contaminator' || type === 'groundshaker' || type === 'screecher';
     this.zombieModel.threatHalo.visible = this.specialThreat;
     const haloMaterial = this.zombieModel.threatHalo.material as THREE.MeshBasicMaterial;
@@ -304,11 +302,11 @@ export class GamePresentation {
     projectile.position.copy(start);
     this.scene.add(projectile);
     this.muzzleFlash.color.setHex(definition.color);
-    this.muzzleFlash.intensity = ammoType === 'incendiary' ? 10 : 7.5;
+    this.muzzleFlash.intensity = AMMO_DEFINITIONS[ammoType].recoil >= 3 ? 10 : 7.5;
     this.spawnMuzzleSmoke();
     this.ejectShellCasing();
     this.audio.shot(ammoType);
-    const slideTravel = PRESENTATION_MOTION.slideTravel * (ammoType === 'magnum' ? 1.12 : 1);
+    const slideTravel = PRESENTATION_MOTION.slideTravel * (AMMO_DEFINITIONS[ammoType].recoil >= 3 ? 1.12 : 1);
     await this.gunTween(PRESENTATION_TIMING.shotTravel, (progress) => {
       const projectileProgress = Math.min(progress * 1.55, 1);
       projectile.position.lerpVectors(start, target, projectileProgress * projectileProgress);
@@ -383,22 +381,14 @@ export class GamePresentation {
     this.presentationState = '탄창 폐기 완료';
   }
 
-  async animateBurn(): Promise<void> {
-    this.audio.burn();
-    this.burnLight.intensity = 3.2;
-    await this.tween(PRESENTATION_TIMING.burnPulse, (progress) => {
-      this.burnLight.intensity = 1.3 + Math.sin(progress * Math.PI * 7) * 0.85;
-      this.zombieModel.root.rotation.y = Math.sin(progress * Math.PI * 4) * 0.085;
-      this.zombieModel.head.rotation.z = -0.08 + Math.sin(progress * Math.PI * 5) * 0.05;
-    });
-    this.zombieModel.root.rotation.y = 0;
-    this.zombieModel.head.rotation.z = -0.08;
+  async animateAdvance(distance: number): Promise<void> {
+    this.audio.growl();
+    await this.animateDistanceChange(distance);
   }
 
-  async animateAdvance(distance: number): Promise<void> {
+  async animateDistanceChange(distance: number): Promise<void> {
     const start = this.zombieModel.root.position.z;
     const end = 1.1 - distance * 0.72;
-    this.audio.growl();
     await this.tween(PRESENTATION_TIMING.advance, (progress) => {
       this.zombieModel.root.position.z = THREE.MathUtils.lerp(start, end, this.easeInOut(progress));
       this.zombieModel.root.position.x = Math.sin(progress * Math.PI * 4) * 0.07;
@@ -457,8 +447,6 @@ export class GamePresentation {
 
   private buildActors(): void {
     this.zombieModel.root.position.z = this.zombieTargetZ;
-    this.burnLight.position.set(0, 0.9, 0.4);
-    this.zombieModel.root.add(this.burnLight);
     this.scene.add(this.zombieModel.root);
     this.pistolModel.root.position.copy(this.layout.weaponRest);
     this.pistolModel.root.rotation.set(-0.02, -0.04, -0.08);
@@ -999,11 +987,11 @@ export class GamePresentation {
   private createProjectile(ammoType: AmmoType): THREE.Group {
     const group = new THREE.Group();
     const color = AMMO_DEFINITIONS[ammoType].color;
-    const radius = ammoType === 'magnum' ? 0.065 : 0.042;
+    const radius = AMMO_DEFINITIONS[ammoType].recoil >= 3 ? 0.065 : 0.042;
     const projectile = new THREE.Mesh(new THREE.SphereGeometry(radius, 7, 7), new THREE.MeshBasicMaterial({ color }));
     group.add(projectile);
-    if (ammoType === 'stagger' || ammoType === 'incendiary') {
-      const trail = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.35, radius, ammoType === 'stagger' ? 0.85 : 0.42, 6), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.68 }));
+    if (AMMO_DEFINITIONS[ammoType].actionShock > 0 || AMMO_DEFINITIONS[ammoType].wound > 0) {
+      const trail = new THREE.Mesh(new THREE.CylinderGeometry(radius * 0.35, radius, AMMO_DEFINITIONS[ammoType].actionShock > 0 ? 0.85 : 0.42, 6), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.68 }));
       trail.rotation.x = Math.PI / 2;
       trail.position.z = 0.3;
       group.add(trail);
@@ -1015,10 +1003,10 @@ export class GamePresentation {
     const effect = new THREE.Group();
     effect.position.copy(position);
     const color = AMMO_DEFINITIONS[ammoType].color;
-    const count = ammoType === 'magnum' ? 7 : ammoType === 'incendiary' ? 5 : 3;
+    const count = AMMO_DEFINITIONS[ammoType].recoil >= 3 ? 7 : AMMO_DEFINITIONS[ammoType].wound > 0 ? 5 : 3;
     const pieces: THREE.Mesh[] = [];
     for (let index = 0; index < count; index += 1) {
-      const geometry = ammoType === 'incendiary' ? new THREE.SphereGeometry(0.045, 5, 4) : new THREE.TetrahedronGeometry(0.04);
+      const geometry = AMMO_DEFINITIONS[ammoType].wound > 0 ? new THREE.SphereGeometry(0.045, 5, 4) : new THREE.TetrahedronGeometry(0.04);
       const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9 });
       const piece = new THREE.Mesh(geometry, material);
       piece.userData.direction = new THREE.Vector3(Math.cos(index * 2.4), Math.sin(index * 1.8), Math.sin(index) * 0.4).normalize();
@@ -1029,7 +1017,7 @@ export class GamePresentation {
     await this.gunTween(PRESENTATION_TIMING.impact, (progress) => {
       for (const piece of pieces) {
         const direction = piece.userData.direction as THREE.Vector3;
-        piece.position.copy(direction).multiplyScalar(progress * (ammoType === 'magnum' ? 0.42 : 0.25));
+        piece.position.copy(direction).multiplyScalar(progress * (AMMO_DEFINITIONS[ammoType].recoil >= 3 ? 0.42 : 0.25));
         (piece.material as THREE.MeshBasicMaterial).opacity = 1 - progress;
       }
     });
@@ -1037,7 +1025,7 @@ export class GamePresentation {
   }
 
   private async animateHitReaction(ammoType: AmmoType): Promise<void> {
-    const strength = PRESENTATION_MOTION.hitLean * (ammoType === 'magnum' ? 1.5 : 1);
+    const strength = PRESENTATION_MOTION.hitLean * (AMMO_DEFINITIONS[ammoType].recoil >= 3 ? 1.5 : 1);
     await this.gunTween(PRESENTATION_TIMING.hitReaction, (progress) => {
       const impulse = Math.sin(progress * Math.PI);
       this.zombieModel.root.rotation.z = impulse * strength;
@@ -1064,7 +1052,7 @@ export class GamePresentation {
       const material = witness.material as THREE.MeshStandardMaterial;
       material.color.setHex(AMMO_DEFINITIONS[ammo].color);
       material.emissive.setHex(AMMO_DEFINITIONS[ammo].color);
-      material.emissiveIntensity = ammo === 'incendiary' ? 0.32 : 0.12;
+      material.emissiveIntensity = AMMO_DEFINITIONS[ammo].wound > 0 ? 0.32 : 0.12;
       witness.userData.ammoType = ammo;
       witness.userData.sequenceIndex = index;
     }
