@@ -1,7 +1,9 @@
 import type { EnemyIntentState, EnemyState, EnemyType } from '../combat/types';
+import { COMBAT_BALANCE } from './ammoDefinitions';
 export interface EnemyDefinition {
   id: EnemyType; name: string; role: string; hp: number; distance: number;
   advancePerTurn: number; shockResistance: number; special: boolean;
+  woundThreshold?: number;
   intent?: Omit<EnemyIntentState, 'countdown'> & { initialCountdown: number };
 }
 export const ENEMY_DEFINITIONS: Record<EnemyType, EnemyDefinition> = {
@@ -18,7 +20,9 @@ export const createEnemyState = (type: EnemyType): EnemyState => {
   const intent = definition.intent ? { type: definition.intent.type, name: definition.intent.name,
     description: definition.intent.description, countdown: definition.intent.initialCountdown,
     cooldown: definition.intent.cooldown } : undefined;
-  return { type, hp: definition.hp, maxHp: definition.hp, wound: 0, distance: definition.distance,
+  return { type, hp: definition.hp, maxHp: definition.hp, wound: 0,
+    woundThreshold: definition.woundThreshold ?? COMBAT_BALANCE.woundThreshold,
+    vulnerableTurns: 0, distance: definition.distance,
     advancePerTurn: definition.advancePerTurn, shockResistance: definition.shockResistance,
     actionShock: 0, special: definition.special, turnsElapsed: 0, intent };
 };

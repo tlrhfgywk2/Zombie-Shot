@@ -14,7 +14,7 @@ export interface FiringOrderStatEntry {
 }
 export function firingOrderStatEntries(round: RoundPreview): FiringOrderStatEntry[] {
   const entries: FiringOrderStatEntry[] = [
-    { kind: 'firepower', label: '화력', value: round.effectiveFirepower, modified: round.followUpBonus > 0 },
+    { kind: 'firepower', label: '화력', value: round.effectiveFirepower, modified: round.followUpBonus > 0 || round.vulnerableDamageBonus > 0 },
     { kind: 'wound', label: '상처', value: round.wound, modified: false },
     { kind: 'shock', label: '충격', value: round.effectiveActionShock, modified: false },
     { kind: 'recoil', label: '누적 반동', value: round.recoil, modified: false },

@@ -29,7 +29,7 @@ export const getEffectiveRangeBand = (band: RangeBand, steps: number): RangeBand
 export const formatRangePenalty = (percent: number): string => percent === 0 ? '거리 감소 없음' : `화력 -${percent}%`;
 export const isNearestValidTarget = (target: EnemyState, targets: readonly EnemyState[] = [target]): boolean =>
   target.hp > 0 && !targets.some(other => other.hp > 0 && other.distance < target.distance);
-export const isVulnerable = (enemy: EnemyState): boolean => enemy.wound > 0;
+export const isVulnerable = (enemy: EnemyState): boolean => enemy.vulnerableTurns > 0;
 
 export const ACTION_SHOCK_THRESHOLDS: Record<EnemyActionType, number> = {
   approach: 4, attack: 8, contaminate: 6, groundShock: 7, sonicPulse: 6,
@@ -99,7 +99,8 @@ export class CombatResolver {
       previewCursor = resolved.next;
       return { ammoType, index, effectiveFirepower: shot.breakdown.effectiveFirepower,
         wound: shot.woundApplied, effectiveActionShock: shot.breakdown.projectedShock,
-        recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus, movement: shot.movement };
+        recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus,
+        vulnerableDamageBonus: shot.breakdown.vulnerableDamageBonus, movement: shot.movement };
     });
     const unfiredRounds = rounds.slice(shots.length);
     return { shots, roundPreviews, finalState: current,
@@ -134,12 +135,22 @@ export class CombatResolver {
     const woundBonus = definition.woundScale ? Math.min(definition.woundScale.cap, Math.floor(before.wound / definition.woundScale.divisor)) : 0;
     const kickbackBonus = definition.recoilScale ? Math.min(definition.recoilScale.cap, cursor.recoil) : 0;
     const conditionalBonus = vulnerableBonus + suppressedBonus + executionBonus + healthBonus + woundBonus + kickbackBonus;
-    const effectiveFirepower = Math.max(0, definition.firepower + conditionalBonus + followUpBonus - recoilPenalty);
+    const baseFirepower = Math.max(0, definition.firepower + conditionalBonus + followUpBonus - recoilPenalty);
+    // 취약은 사격 시작 시 상태로 HP 화력에만 적용한다. 이번 탄의 상처 발동은 후속 탄부터 유효하다.
+    const vulnerableDamageBonus = isVulnerable(before)
+      ? roundPositiveFirepower(baseFirepower * COMBAT_BALANCE.vulnerableDamagePercent / 100) : 0;
+    const effectiveFirepower = baseFirepower + vulnerableDamageBonus;
     const finalFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent);
     const hpDamage = Math.min(after.hp, finalFirepower);
     after.hp -= hpDamage;
     const woundApplied = after.hp > 0 ? definition.wound : 0;
     after.wound += woundApplied;
+    const vulnerableTriggered = woundApplied > 0 && after.wound >= after.woundThreshold;
+    if (vulnerableTriggered) {
+      // 임계치 단위로 소비하고 초과분 보존. 재발동은 지속 시간을 갱신하며 중첩하지 않는다.
+      after.wound %= after.woundThreshold;
+      after.vulnerableTurns = COMBAT_BALANCE.vulnerableTurns;
+    }
     const projectedShock = definition.actionShock > 0
       ? definition.actionShock + this.modifier(context, 'impact', range.band) : 0;
     const actionShockApplied = after.hp > 0 ? projectedShock : 0;
@@ -156,14 +167,15 @@ export class CombatResolver {
     if (definition.moveBefore) detail.push(`사격 전 ${Math.abs(movement)}m 전진`);
     if (hpDamage) detail.push(`체력 -${hpDamage}`);
     if (woundApplied) detail.push(`상처 +${woundApplied}`);
+    if (vulnerableTriggered) detail.push(`취약 ${after.vulnerableTurns}턴 발동`);
     if (actionShockApplied) detail.push(`충격 +${actionShockApplied}`);
     if (followUpBonus) detail.push(`후속 강화 +${followUpBonus}`);
     if (definition.moveAfter) detail.push(`사격 후 ${movement}m 후퇴`);
     const breakdown = { ammoFirepower: definition.firepower, effectiveFirepower,
       rangeBand: range.band, effectiveRangeBand: range.effective, recoilBefore: cursor.recoil,
-      recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, followUpBonus, conditionalBonus,
+      recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, followUpBonus, conditionalBonus, vulnerableDamageBonus,
       rangePenaltyPercent: range.percent, projectedShock, finalFirepower };
-    return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, actionShockApplied,
+    return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, vulnerableTriggered, actionShockApplied,
       killed: after.hp <= 0, description: detail.join(' · '), breakdown,
       before, after, shotDistance, movement }, next };
   }
@@ -195,6 +207,8 @@ export class CombatResolver {
         after.distance = this.clampDistance(after.distance - movement);
       }
     }
+    // 한 탄창이 한 플레이어 턴이다. 발동 턴을 포함하며, 행동이 중단되어도 턴은 끝난다.
+    after.vulnerableTurns = Math.max(0, after.vulnerableTurns - 1);
     after.turnsElapsed += 1;
     return { before, after, playerBefore, playerAfter, movement,
       selectedAction: action.selectedAction, threshold: action.threshold, interrupted,

@@ -28,7 +28,7 @@ export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   laceration: ammo('laceration', '열상탄', '열상', '기존 상처 1당 피해 +1, 최대 +10', ['health'], 0xe5799a, 2, 0, 0, 1, { woundScale: { divisor: 1, cap: 10 } }),
   retreat: ammo('retreat', '후퇴탄', '후퇴', '현재 거리에서 사격 후 2m 후퇴', ['health'], 0x9cc8a2, 3, 0, 0, 1, { moveAfter: 2 }),
   advance: ammo('advance', '전진탄', '전진', '2m 전진한 거리에서 강한 사격', ['health'], 0xe49b73, 6, 0, 0, 2, { moveBefore: -2 }),
-  wounding: ammo('wounding', '상처탄', '상처', '피해 2 · 상처 +3 · 취약 상태 형성', ['wound'], 0xe48ba9, 2, 3),
+  wounding: ammo('wounding', '상처탄', '상처', '피해 2 · 상처 +3 · 임계치 도달 시 취약', ['wound'], 0xe48ba9, 2, 3),
   serrated: ammo('serrated', '톱니탄', '톱니', '피해 2 · 상처 +5 · 반동 3', ['wound'], 0xcf6a8d, 2, 5, 0, 3),
   retreatCutter: ammo('retreatCutter', '후퇴 절단탄', '후절', '피해 1 · 상처 +2 · 사격 후 2m 후퇴', ['wound'], 0xa37b9c, 1, 2, 0, 1, { moveAfter: 2 }),
   advanceCutter: ammo('advanceCutter', '전진 절단탄', '전절', '2m 전진한 거리에서 피해 2 · 상처 +4', ['wound'], 0xd4698d, 2, 4, 0, 2, { moveBefore: -2 }),
@@ -56,5 +56,6 @@ export const COMBAT_BALANCE = {
   maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
   minimumMagazineCapacity: SERVICE_45.baseMagazineCapacity,
   minimumFirepower: 0, recoilThreshold: 3, maxDistance: 12,
+  woundThreshold: 6, vulnerableTurns: 2, vulnerableDamagePercent: 50,
   rangeThresholds: { near: 4, mid: 8 },
 } as const;
