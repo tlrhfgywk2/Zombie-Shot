@@ -21,6 +21,8 @@ export interface EnemyState {
   hp: number;
   maxHp: number;
   wound: number;
+  woundThreshold: number;
+  vulnerableTurns: number;
   distance: number;
   advancePerTurn: number;
   shockResistance: number;
@@ -47,6 +49,7 @@ export interface ShotBreakdown {
   recoilPenalty: number;
   followUpBonus: number;
   conditionalBonus: number;
+  vulnerableDamageBonus: number;
   rangePenaltyPercent: number;
   projectedShock: number;
   finalFirepower: number;
@@ -57,6 +60,7 @@ export interface ShotResult {
   damage: number;
   hpDamage: number;
   woundApplied: number;
+  vulnerableTriggered: boolean;
   actionShockApplied: number;
   killed: boolean;
   description: string;
@@ -74,6 +78,7 @@ export interface RoundPreview {
   effectiveActionShock: number;
   recoil: number;
   followUpBonus: number;
+  vulnerableDamageBonus: number;
   movement: number;
 }
 export interface SequenceResult {

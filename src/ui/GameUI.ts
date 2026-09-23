@@ -1,5 +1,5 @@
 import { ammoRewardOwnedCount, ammoStatsMarkup, firingOrderStatEntries } from './AmmoView';
-import { ACTION_NAMES, getRangeBand } from '../combat/CombatResolver';
+import { ACTION_NAMES, getRangeBand, isVulnerable } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, PlayerCombatState, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
@@ -104,10 +104,10 @@ export class GameUI {
           <header class="top-hud">
             <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong></div>
             <div class="enemy-card" tabindex="0" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">22 / 22</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
-              <div class="enemy-stat enemy-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong id="wound-text">0</strong></span></div>
+              <div class="enemy-stat enemy-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong id="wound-text">0/${COMBAT_BALANCE.woundThreshold}</strong></span></div>
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
               <div id="enemy-action" class="enemy-action"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span><small>다음 행동</small><strong id="next-action-name">접근 2.0 m</strong></span><em id="next-action-shock" aria-label="중단 충격 4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><b>4</b></em></div>
-            </div><div id="enemy-status" class="enemy-status-list" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
+            </div><div id="enemy-status" class="enemy-status-list" aria-live="polite" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
             <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label><label class="presentation-speed-control"><span>연출</span><strong id="presentation-speed-value">1×</strong><input id="presentation-speed" type="range" min="0.5" max="2" step="0.25" value="1" aria-label="총기 연출 속도" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><section id="player-debuffs" class="player-debuffs" aria-label="플레이어 약화 효과" aria-live="polite" hidden></section></aside>
@@ -438,14 +438,14 @@ export class GameUI {
   updateEnemy(enemy: EnemyState, action: EnemyActionPreview, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
     this.hpFill.style.width = `${Math.max(0, enemy.hp / enemy.maxHp) * 100}%`;
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
-    this.woundText.textContent = String(enemy.wound);
+    this.woundText.textContent = `${enemy.wound}/${enemy.woundThreshold}`;
     this.woundText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.wound === 0);
     this.impactText.textContent = String(enemy.actionShock);
     this.impactThreshold.textContent = `/${action.threshold}`;
     this.impactFill.style.width = `${Math.min(100, enemy.actionShock / action.threshold * 100)}%`;
     this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.actionShock === 0);
     const statuses: string[] = [];
-    if (enemy.wound > 0) statuses.push('<span data-status="vulnerable">취약</span>');
+    if (isVulnerable(enemy)) statuses.push(`<span data-status="vulnerable">취약 ${enemy.vulnerableTurns}턴 · 체력 피해 +${COMBAT_BALANCE.vulnerableDamagePercent}%</span>`);
     this.enemyStatus.innerHTML = statuses.join('');
     this.enemyStatus.hidden = statuses.length === 0;
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
@@ -458,8 +458,8 @@ export class GameUI {
       : ACTION_NAMES[action.selectedAction];
     this.nextActionShock.querySelector<HTMLElement>('b')!.textContent = String(action.threshold);
     this.nextActionShock.setAttribute('aria-label', `중단 충격 ${action.threshold}`);
-    this.enemyContext.innerHTML = '<span><b>상처</b>가 있으면 취약합니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span>';
-    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
+    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}%.</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span>`;
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
   }
 
   renderPreview(sequence: SequenceResult | undefined): void {

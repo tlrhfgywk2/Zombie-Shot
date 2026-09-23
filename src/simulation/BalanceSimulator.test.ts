@@ -44,7 +44,8 @@ describe('초기 밸런스 감사', () => {
     console.table(rows);
     expect(rows.find(row => row.name === '기본')?.hpDamage).toBe(20);
     expect(rows.find(row => row.name === '상처 연계')?.wound).toBe(6);
-    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBeGreaterThan(14);
+    // 임계치가 세 번째 탄에서 상처 6을 소비하므로 마지막 열상탄은 남은 상처 0을 읽는다.
+    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBe(12);
     expect(rows.find(row => row.name === '반동 전환')?.killed).toBe(true);
     expect(rows.find(row => row.name === '기본')?.killed).toBe(false);
     expect(rows.find(row => row.name === '충격 제압')?.impact).toBeGreaterThan(0);
@@ -57,7 +58,7 @@ describe('초기 밸런스 감사', () => {
     expect(controlled.shots[3]!.hpDamage).toBeGreaterThan(uncontrolled.shots[3]!.hpDamage);
   });
   it('상처는 긴 표적전에서 후속 열상탄과 파쇄탄의 선택 가치를 만든다', () => {
-    const enemy = { ...durable(3), wound: 6 };
+    const enemy = { ...durable(3), wound: 5, vulnerableTurns: 1 };
     expect(resolver.resolveShot('laceration', 0, enemy).hpDamage).toBeGreaterThan(shot('ball').hpDamage);
     expect(resolver.resolveShot('frangible', 0, enemy).hpDamage).toBeGreaterThan(shot('ball').hpDamage);
     expect(volley(['serrated', 'laceration', 'laceration', 'laceration']).totalHpDamage).toBeGreaterThanOrEqual(volley(['ball', 'ball', 'ball', 'ball']).totalHpDamage);

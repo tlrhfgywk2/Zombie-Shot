@@ -26,7 +26,7 @@ describe('새 탄약과 전투 상태', () => {
   });
   it('상처는 적 행동 뒤에도 남고, 새 적에서는 0부터 시작한다', () => {
     const wounded = resolver.resolveShot('wounding', 0, target()).after;
-    expect(isVulnerable(wounded)).toBe(true);
+    expect(isVulnerable(wounded)).toBe(false);
     expect(resolver.resolveEnemyAction(wounded).after.wound).toBe(3);
     expect(createEnemyState('normal').wound).toBe(0);
   });
@@ -35,7 +35,7 @@ describe('새 탄약과 전투 상태', () => {
     const sequence = resolver.resolveSequence(['wounding', 'laceration', 'laceration'], target());
     expect(sequence.shots.map(shot => shot.hpDamage)).toEqual([2, 5, 5]);
     expect(sequence.finalState.wound).toBe(3);
-    expect(resolver.resolveSequence(['wounding', 'wounding', 'laceration'], target()).shots[2]?.hpDamage).toBe(8);
+    expect(resolver.resolveSequence(['wounding', 'wounding', 'laceration'], target()).shots[2]?.hpDamage).toBe(3);
   });
   it('릴레이는 바로 다음 한 발만 강화하며 연속 릴레이는 덮어써 이어 간다', () => {
     expect(resolver.resolveSequence(['relay', 'ball', 'ball'], target()).shots.map(s => s.breakdown.followUpBonus)).toEqual([0, 4, 0]);
@@ -54,10 +54,11 @@ describe('새 탄약과 전투 상태', () => {
     expect(sequence.shots[3]?.breakdown.recoilPenalty).toBe(1);
     expect(resolver.resolveSequence(['plusP', 'plusP', 'ball', 'ball'], target()).shots[3]?.breakdown.recoilPenalty).toBe(4);
   });
-  it('취약은 상처에서 파생되고, 제압은 기존 충격 중단 조건을 사용한다', () => {
+  it('취약은 지속 시간으로 판정하고, 제압은 기존 충격 중단 조건을 사용한다', () => {
     const enemy = target();
     expect(damage('frangible', enemy)).toBe(4);
-    expect(damage('frangible', { ...enemy, wound: 1 })).toBe(6);
+    expect(damage('frangible', { ...enemy, wound: 1 })).toBe(4);
+    expect(damage('frangible', { ...enemy, vulnerableTurns: 1 })).toBe(9);
     expect(damage('suppression', enemy)).toBe(3);
     expect(damage('suppression', { ...enemy, actionShock: getActionShockThreshold(enemy) })).toBe(6);
   });
@@ -114,9 +115,9 @@ describe('최종 부착물과 런 진행', () => {
     expect(damage('plusP', far, { barrel: 'extendedBarrel' })).toBeGreaterThan(damage('plusP', far));
   });
   it('레이저는 취약 효과, 조명은 근거리 충격, 결합형은 각 효과가 약하다', () => {
-    const wounded = { ...target(), wound: 3 };
-    expect(damage('frangible', wounded, { rail: 'laserSight' })).toBe(8);
-    expect(damage('frangible', wounded, { rail: 'laserLightModule' })).toBe(7);
+    const wounded = { ...target(), wound: 3, vulnerableTurns: 1 };
+    expect(damage('frangible', wounded, { rail: 'laserSight' })).toBe(12);
+    expect(damage('frangible', wounded, { rail: 'laserLightModule' })).toBe(11);
     const impact = (rail: 'tacticalLight' | 'laserLightModule') =>
       resolver.resolveShot('flatNose', 0, target(), { loadout: { rail } }).actionShockApplied;
     expect(impact('tacticalLight')).toBe(6);

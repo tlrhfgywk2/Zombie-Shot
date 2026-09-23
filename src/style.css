@@ -54,6 +54,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-action > em b { font-size: var(--combat-value-prominent); font-variant-numeric: tabular-nums; line-height: 1; }
 .enemy-status-list { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .enemy-status-list span { padding: .18rem .35rem; border: 1px solid rgba(255,255,255,.13); color: #dce5de; background: rgba(0,0,0,.28); font-size: .56rem; font-weight: 800; }
+.enemy-status-list [data-status="vulnerable"] { border-color: #e5799a; color: #ffb6cf; font-size: .75rem; }
 .enemy-status-list [data-status="slow"] { border-color: rgba(111,220,255,.45); color: #8fe5ff; }
 .enemy-context { position: absolute; z-index: 6; top: calc(100% + 7px); left: 0; right: 0; display: grid; gap: .28rem; padding: .6rem .7rem; border: 1px solid rgba(200,255,77,.3); color: #b9c4bb; background: rgba(7,12,9,.96); box-shadow: 0 12px 36px rgba(0,0,0,.5); font-size: .61rem; line-height: 1.4; opacity: 0; visibility: hidden; transform: translateY(-4px); transition: opacity .14s ease, transform .14s ease, visibility .14s; pointer-events: none; }
 .enemy-context b { color: #e6ffb0; }
