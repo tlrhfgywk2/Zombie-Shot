@@ -1,77 +1,60 @@
 import { SERVICE_45 } from './attachmentDefinitions';
-import { DORMANT_AMMO_DEFINITIONS } from './dormantAmmoDefinitions';
-import type { AmmoRarity, AmmoType, BuildTag, RangeBand, StatusType } from '../combat/types';
+import type { AmmoRarity, AmmoType, BuildTag, RangeBand } from '../combat/types';
 
 export interface AmmoDefinition {
-  id: AmmoType;
-  name: string;
-  shortName: string;
-  role: string;
-  rarity: AmmoRarity;
-  tags: readonly BuildTag[];
-  color: number;
-  cssColor: string;
-  supply?: 'infinite';
-  firepower: number;
-  sequenceTrait?: 'heavyKick' | 'stable' | 'shockSaturation';
-  unarmoredFirepowerModifier?: number;
-  armorBreak: number;
-  actionShock: number;
-  buildup?: { type: StatusType; amount: number };
-  specialEnemyFirepowerBonus?: number;
-  recoverOnKill?: boolean;
+  id: AmmoType; name: string; shortName: string; role: string; rarity: AmmoRarity;
+  tags: readonly BuildTag[]; color: number; cssColor: string; supply?: 'infinite';
+  firepower: number; wound: number; actionShock: number; recoil: number; recoilRecovery?: number;
+  followUp?: number; healthScale?: { divisor: number; cap: number };
+  woundScale?: { divisor: number; cap: number }; recoilScale?: { cap: number };
+  vulnerableBonus?: number; suppressedBonus?: number;
+  execution?: { percent: number; bonus: number }; moveBefore?: number; moveAfter?: number;
 }
-
+const ammo = (id: AmmoType, name: string, shortName: string, role: string, tags: readonly BuildTag[], color: number,
+  firepower: number, wound = 0, actionShock = 0, recoil = 1, extra: Partial<AmmoDefinition> = {}): AmmoDefinition => ({
+  id, name, shortName, role, rarity: 'common', tags, color, cssColor: `#${color.toString(16).padStart(6, '0')}`,
+  firepower, wound, actionShock, recoil, ...extra,
+});
 export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
-  ...DORMANT_AMMO_DEFINITIONS,
-  wadcutter: { id: 'wadcutter', name: '와드커터탄', shortName: '와드', role: '충격을 다음 턴까지 축적', rarity: 'common', tags: ['ballistic'], color: 0xa9d9ae, cssColor: '#a9d9ae', firepower: 3, armorBreak: 0, actionShock: 2 },
-  flatPoint: { id: 'flatPoint', name: '평두탄', shortName: '평두', role: '충격 포화 · 바로 다음 충격 -2', rarity: 'common', tags: ['ballistic'], color: 0x70e6d2, cssColor: '#70e6d2', firepower: 4, armorBreak: 0, actionShock: 5, sequenceTrait: 'shockSaturation' },
-  overpressure: { id: 'overpressure', name: '고압탄', shortName: '고압', role: '강한 반동 · 바로 다음 화력 -2', rarity: 'uncommon', tags: ['ballistic'], color: 0xe9a065, cssColor: '#e9a065', firepower: 8, armorBreak: 0, actionShock: 0, sequenceTrait: 'heavyKick' },
-  subsonic: { id: 'subsonic', name: '저소음탄', shortName: '저소음', role: '안정 · 앞 탄의 강한 반동 흡수', rarity: 'uncommon', tags: ['ballistic'], color: 0xa3c6ce, cssColor: '#a3c6ce', firepower: 4, sequenceTrait: 'stable', armorBreak: 0, actionShock: 0 },
-  bonded: { id: 'bonded', name: '본디드탄', shortName: '본디드', role: '무장갑이면 화력 -2', rarity: 'uncommon', tags: ['ballistic'], color: 0x7eb5df, cssColor: '#7eb5df', firepower: 5, armorBreak: 5, actionShock: 0, unarmoredFirepowerModifier: -2 },
-  match: { id: 'match', name: '매치탄', shortName: '매치', role: '거리 화력 감소 -3%p · 발사 순서 전체 적용', rarity: 'uncommon', tags: ['ballistic'], color: 0xcfb9ee, cssColor: '#cfb9ee', firepower: 3, armorBreak: 0, actionShock: 0 },
-  standard: { id: 'standard', name: '표준탄', shortName: '표준', role: '안정적인 기준 탄약', rarity: 'common', tags: ['ballistic'], color: 0xd8c6a2, cssColor: '#d8c6a2', firepower: 4, armorBreak: 0, actionShock: 0, supply: 'infinite' },
-  armorPiercing: { id: 'armorPiercing', name: '철갑탄', shortName: '철갑', role: '방어를 먼저 제거하는 준비탄', rarity: 'common', tags: ['ballistic'], color: 0x78b7ff, cssColor: '#78b7ff', firepower: 3, armorBreak: 4, actionShock: 0 },
-  hollowPoint: { id: 'hollowPoint', name: '확장탄', shortName: '확장', role: '사격 전 무장갑이면 화력 +3', rarity: 'common', tags: ['ballistic'], color: 0xff8ca1, cssColor: '#ff8ca1', firepower: 4, unarmoredFirepowerModifier: 3, armorBreak: 0, actionShock: 0 },
+  ball: ammo('ball', '볼탄', '볼탄', '기준 체력 피해', ['health'], 0xd8c6a2, 5, 0, 0, 1, { supply: 'infinite' }),
+  hollowPoint: ammo('hollowPoint', '할로 포인트', '할로', '현재 체력 10당 피해 +1, 최대 +3', ['health'], 0xff8ca1, 3, 0, 0, 1, { healthScale: { divisor: 10, cap: 3 } }),
+  lowRecoil: ammo('lowRecoil', '저반동탄', '저반동', '낮은 피해 · 반동 없음 · 기존 반동 2 회복', ['health'], 0xa3c6ce, 3, 0, 0, 0, { recoilRecovery: 2 }),
+  plusP: ammo('plusP', '+P탄', '+P', '높은 피해 · 반동 3', ['health'], 0xe9a065, 8, 0, 0, 3),
+  relay: ammo('relay', '릴레이탄', '릴레이', '낮은 피해 · 바로 다음 탄 피해 +4', ['health'], 0xcfb9ee, 2, 0, 0, 1, { followUp: 4 }),
+  frangible: ammo('frangible', '파쇄탄', '파쇄', '취약한 적에게 피해 +2', ['health'], 0xf19aad, 4, 0, 0, 1, { vulnerableBonus: 2 }),
+  suppression: ammo('suppression', '제압탄', '제압', '충격으로 다음 행동이 중단될 적에게 피해 +3', ['health'], 0x8cb4cc, 3, 0, 0, 1, { suppressedBonus: 3 }),
+  execution: ammo('execution', '처형탄', '처형', '체력 30% 이하 적에게 피해 +4', ['health'], 0xe67877, 3, 0, 0, 1, { execution: { percent: 30, bonus: 4 } }),
+  kickback: ammo('kickback', '반동 전환탄', '전환', '누적 반동만큼 피해 증가, 반동 전부 소모', ['health'], 0xf6b76d, 2, 0, 0, 0, { recoilScale: { cap: 6 } }),
+  laceration: ammo('laceration', '열상탄', '열상', '기존 상처 1당 피해 +1, 최대 +10', ['health'], 0xe5799a, 2, 0, 0, 1, { woundScale: { divisor: 1, cap: 10 } }),
+  retreat: ammo('retreat', '후퇴탄', '후퇴', '현재 거리에서 사격 후 2m 후퇴', ['health'], 0x9cc8a2, 3, 0, 0, 1, { moveAfter: 2 }),
+  advance: ammo('advance', '전진탄', '전진', '2m 전진한 거리에서 강한 사격', ['health'], 0xe49b73, 6, 0, 0, 2, { moveBefore: -2 }),
+  wounding: ammo('wounding', '상처탄', '상처', '피해 2 · 상처 +3 · 취약 상태 형성', ['wound'], 0xe48ba9, 2, 3),
+  serrated: ammo('serrated', '톱니탄', '톱니', '피해 2 · 상처 +5 · 반동 3', ['wound'], 0xcf6a8d, 2, 5, 0, 3),
+  retreatCutter: ammo('retreatCutter', '후퇴 절단탄', '후절', '피해 1 · 상처 +2 · 사격 후 2m 후퇴', ['wound'], 0xa37b9c, 1, 2, 0, 1, { moveAfter: 2 }),
+  advanceCutter: ammo('advanceCutter', '전진 절단탄', '전절', '2m 전진한 거리에서 피해 2 · 상처 +4', ['wound'], 0xd4698d, 2, 4, 0, 2, { moveBefore: -2 }),
+  flatNose: ammo('flatNose', '평두탄', '평두', '충격 +4', ['impact'], 0x70e6d2, 1, 0, 4),
+  heavy: ammo('heavy', '중량탄', '중량', '피해 3 · 충격 +2 · 반동 2', ['impact', 'health'], 0xc895ff, 3, 0, 2, 2),
 };
-
-// 이 목록만 일반 플레이와 보상에 노출한다. 기존 원소/신화 정의는 실험용으로만 보존한다.
-export const AMMO_ORDER: AmmoType[] = ['standard', 'hollowPoint', 'armorPiercing', 'wadcutter', 'flatPoint', 'overpressure', 'subsonic', 'bonded', 'match'];
-export type SpecialAmmoType = Exclude<AmmoType, 'standard'>;
+export const AMMO_ORDER = Object.keys(AMMO_DEFINITIONS) as AmmoType[];
+export type SpecialAmmoType = Exclude<AmmoType, 'ball'>;
 export type AmmoBuild = Record<SpecialAmmoType, number>;
-export type AmmoStock = AmmoBuild & { standard: 'infinite' };
+export type AmmoStock = AmmoBuild & { ball: 'infinite' };
 export const AMMO_BUILD_BALANCE = {
-  specialCapacity: 14,
-  initialAllocations: { hollowPoint: 3, armorPiercing: 3 } as Partial<AmmoBuild>,
-  rewardAmount: 1,
-  rewardAmounts: {} as Partial<AmmoBuild>,
-  rewardChoices: 3,
-  rarityWeights: { common: 75, uncommon: 25 },
+  specialCapacity: 14, initialAllocations: { wounding: 3, laceration: 3 } as Partial<AmmoBuild>,
+  rewardAmount: 1, rewardChoices: 3, rarityWeights: { common: 75, uncommon: 25 },
 };
 export const createAmmoBuild = (allocations: Partial<AmmoBuild> = AMMO_BUILD_BALANCE.initialAllocations): AmmoBuild =>
-  Object.fromEntries(Object.keys(AMMO_DEFINITIONS).filter(id => id !== 'standard').map(id => [id, allocations[id as SpecialAmmoType] ?? 0])) as AmmoBuild;
-export const createStageStock = (build: AmmoBuild): AmmoStock => ({ ...build, standard: 'infinite' });
+  Object.fromEntries(AMMO_ORDER.filter(id => id !== 'ball').map(id => [id, allocations[id as SpecialAmmoType] ?? 0])) as AmmoBuild;
+export const createStageStock = (build: AmmoBuild): AmmoStock => ({ ...build, ball: 'infinite' });
 export const countAllocations = (build: AmmoBuild): number => Object.values(build).reduce((sum, value) => sum + value, 0);
-export const rewardAmount = (ammo: SpecialAmmoType): number => AMMO_BUILD_BALANCE.rewardAmounts[ammo] ?? AMMO_BUILD_BALANCE.rewardAmount;
-
-export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', uncommon: '고급', rare: '희귀', mythic: '신화' };
-export const BUILD_TAG_NAMES: Record<BuildTag, string> = { ballistic: '탄도', elemental: '원소', sacred: '신성', occult: '오컬트' };
+export const rewardAmount = (ammo: SpecialAmmoType): number => { void ammo; return AMMO_BUILD_BALANCE.rewardAmount; };
+export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', uncommon: '고급' };
+export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', impact: '충격' };
 export const RANGE_NAMES: Record<RangeBand, string> = { near: '근거리', mid: '중거리', far: '원거리' };
-
 export const COMBAT_BALANCE = {
   baseMagazineCapacity: SERVICE_45.baseMagazineCapacity,
-  magazineCapacity: 4,
-  minimumMagazineCapacity: 4,
   maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
-  minimumFirepower: 1,
-  heavyKickPenalty: 2,
-  shockSaturationPenalty: 2,
-  matchRangePenaltyReductionPercent: 3,
-  corruptedSpecialFirepowerBonus: 2,
-  burnDamagePerTurn: 3,
-  burnTurnsApplied: 2,
-  slowTurnsApplied: 2,
-  slowMovementMultiplier: 0.55,
-  statusThreshold: 4,
+  minimumMagazineCapacity: SERVICE_45.baseMagazineCapacity,
+  minimumFirepower: 0, recoilThreshold: 3, maxDistance: 12,
   rangeThresholds: { near: 4, mid: 8 },
 } as const;

@@ -6,7 +6,7 @@ export const createPlayerCombatState = (): PlayerCombatState => ({ heavyKickPena
 
 export const getEnabledAttachmentIds = (loadout: LoadoutSnapshot, playerState: PlayerCombatState = createPlayerCombatState()): AttachmentId[] => ATTACHMENT_SLOT_ORDER.flatMap((slot) => {
   const id = loadout[slot];
-  return id && isAttachmentCompatible(id, 'service45', slot) && !playerState.disabledSlots[slot] ? [id] : [];
+  return id && Object.hasOwn(ATTACHMENT_DEFINITIONS, id) && isAttachmentCompatible(id, 'service45', slot) && !playerState.disabledSlots[slot] ? [id] : [];
 });
 
 export const getMagazineCapacity = (loadout: LoadoutSnapshot, playerState: PlayerCombatState = createPlayerCombatState()): number => {

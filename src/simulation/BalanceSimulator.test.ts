@@ -1,56 +1,65 @@
 import { describe, expect, it } from 'vitest';
-import { Player } from '../entities/Player';
-import { formatBalanceReport, runBalanceSimulation, simulateEncounter } from './BalanceSimulator';
-import { auditFiniteShockLock } from './ShockLockAudit';
-import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
-import type { EnemyType } from '../combat/types';
 import { CombatResolver } from '../combat/CombatResolver';
+import { AMMO_ORDER } from '../data/ammoDefinitions';
 import { createEnemyState } from '../data/enemyDefinitions';
+import type { AmmoType, EnemyState } from '../combat/types';
 
-describe('현실 탄약 밸런스 표본', () => {
-  const report = runBalanceSimulation();
-  it('6개 전략과 4개 장착 구성, 7종 적, 16개 경로를 비교한다', () => {
-    expect(report.encounters).toHaveLength(6 * 4 * 7);
-    expect(report.routes).toHaveLength(6 * 4 * 16);
-    expect(report.encounters.some(row => row.armorBroken > 0)).toBe(true);
-    expect(report.encounters.some(row => row.interruptions > 0)).toBe(true);
-    expect(report.encounters.some(row => row.normalMovement > 0)).toBe(true);
+const resolver = new CombatResolver();
+const durable = (distance: number): EnemyState => ({ ...createEnemyState('normal'), hp: 100, maxHp: 100, distance });
+const shot = (ammo: AmmoType, distance = 3) => resolver.resolveShot(ammo, 0, durable(distance));
+const volley = (rounds: readonly AmmoType[], distance = 3) => resolver.resolveSequence(rounds, durable(distance));
+
+describe('초기 밸런스 감사', () => {
+  it('모든 탄약을 기본 권총의 세 거리에서 비교한다', () => {
+    const rows = AMMO_ORDER.map(ammo => ({ ammo,
+      near: shot(ammo, 3).hpDamage, mid: shot(ammo, 7).hpDamage, far: shot(ammo, 11).hpDamage,
+      wound: shot(ammo, 3).woundApplied, impact: shot(ammo, 3).actionShockApplied,
+      recoil: shot(ammo, 3).breakdown.recoilGenerated }));
+    console.table(rows);
+    expect(rows.every(row => row.near >= row.mid && row.mid >= row.far)).toBe(true);
+    expect(shot('lowRecoil').hpDamage).toBeLessThan(shot('ball').hpDamage);
+    expect(shot('plusP').hpDamage).toBeGreaterThan(shot('ball').hpDamage);
+    expect(shot('frangible').hpDamage).toBeLessThan(shot('ball').hpDamage);
+    expect(shot('suppression').hpDamage).toBeLessThan(shot('ball').hpDamage);
+    expect(shot('execution').hpDamage).toBeLessThan(shot('ball').hpDamage);
+    expect(shot('heavy').hpDamage).toBeLessThan(shot('ball').hpDamage);
+    expect(shot('heavy').actionShockApplied).toBeLessThan(shot('flatNose').actionShockApplied);
+    expect(shot('retreat').hpDamage).toBeLessThan(shot('ball').hpDamage);
   });
-  it('표준탄만으로 장갑 적을 처치할 수 있다', () => {
-    expect(simulateEncounter(['standard'], 'armored', new Player()).won).toBe(true);
-  });
-  it('모든 경로 조합에 실제 완주 가능한 구성이 있다', () => {
-    for (let mask = 0; mask < 16; mask += 1) expect(report.routes.some(row => row.mask === mask && row.completed)).toBe(true);
-  });
-  it('현재 규칙의 재현 가능한 보고서를 출력한다', () => {
-    expect(formatBalanceReport(report)).toContain('전략별 완주율');
-    console.info(formatBalanceReport(report));
-  });
-  it('충격탄 14발을 전부 투자해도 재보급 없이 영구 봉쇄되지 않는다', () => {
-    const rows = (Object.keys(ENEMY_DEFINITIONS) as EnemyType[]).flatMap(type =>
-      (['flatPoint', 'wadcutter'] as const).flatMap(ammo =>
-        (['single', 'consecutive', 'spaced'] as const).map(spacing => auditFiniteShockLock(type, ammo, spacing))));
-    expect(rows).toHaveLength(42);
-    expect(rows.every(row => row.escapedLock)).toBe(true);
-    expect(rows.every(row => row.consumed <= 14)).toBe(true);
-    console.info('충격 봉쇄 감사', { samples: rows.length, maxInterruptions: Math.max(...rows.map(row => row.interruptions)),
-      maxTurns: Math.max(...rows.map(row => row.turns)) });
-  });
-  it('요청 수치에서 나타나는 탄종 우열의 한계를 기록한다', () => {
-    const resolver = new CombatResolver();
-    const rows = [3, 7, 11].flatMap(distance => [0, 1, 4, 5, 8].map(armor => {
-      const enemy = { ...createEnemyState('normal'), hp: 1000, maxHp: 1000, distance, armor };
-      const shot = (ammo: 'standard' | 'match' | 'bonded' | 'armorPiercing') => resolver.resolveShot(ammo, 0, enemy);
-      return { distance, armor, standard: shot('standard').hpDamage, match: shot('match').hpDamage,
-        bonded: shot('bonded'), armorPiercing: shot('armorPiercing') };
-    }));
-    expect(rows.every(row => row.standard >= row.match)).toBe(true);
-    expect(rows.every(row => row.bonded.hpDamage >= row.armorPiercing.hpDamage
-      && row.bonded.after.armor <= row.armorPiercing.after.armor)).toBe(true);
-    console.info('탄종 한계 감사', {
-      samples: rows.length,
-      matchBeatsStandard: rows.filter(row => row.match > row.standard).length,
-      bondedLosesToArmorPiercing: rows.filter(row => row.bonded.hpDamage < row.armorPiercing.hpDamage).length,
+  it('일반 적의 시작 거리와 체력에서 대표 탄창의 처치 시점을 비교한다', () => {
+    const enemy = createEnemyState('normal');
+    const plans = [
+      { name: '기본', rounds: ['ball', 'ball', 'ball', 'ball'] },
+      { name: '상처 연계', rounds: ['wounding', 'laceration', 'wounding', 'laceration'] },
+      { name: '반동 전환', rounds: ['plusP', 'plusP', 'kickback', 'ball'] },
+      { name: '충격 제압', rounds: ['flatNose', 'suppression', 'ball', 'ball'] },
+      { name: '이동 연계', rounds: ['advance', 'ball', 'retreat', 'ball'] },
+    ] as const;
+    const rows = plans.map(plan => {
+      const result = resolver.resolveSequence(plan.rounds, enemy);
+      return { name: plan.name, hpDamage: result.totalHpDamage, wound: result.totalWoundApplied,
+        impact: result.totalActionShockApplied, shots: result.shots.length, killed: result.killed,
+        distance: result.finalState.distance };
     });
+    console.table(rows);
+    expect(rows.find(row => row.name === '기본')?.hpDamage).toBe(20);
+    expect(rows.find(row => row.name === '상처 연계')?.wound).toBe(6);
+    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBeGreaterThan(14);
+    expect(rows.find(row => row.name === '반동 전환')?.killed).toBe(true);
+    expect(rows.find(row => row.name === '기본')?.killed).toBe(false);
+    expect(rows.find(row => row.name === '충격 제압')?.impact).toBeGreaterThan(0);
+    expect(rows.find(row => row.name === '이동 연계')?.distance).toBe(8);
+  });
+  it('저반동탄은 고압탄 뒤에 놓을 때 다음 탄의 피해를 회복한다', () => {
+    const controlled = volley(['plusP', 'plusP', 'lowRecoil', 'ball']);
+    const uncontrolled = volley(['plusP', 'plusP', 'ball', 'ball']);
+    expect(controlled.totalHpDamage).toBeGreaterThan(uncontrolled.totalHpDamage);
+    expect(controlled.shots[3]!.hpDamage).toBeGreaterThan(uncontrolled.shots[3]!.hpDamage);
+  });
+  it('상처는 긴 표적전에서 후속 열상탄과 파쇄탄의 선택 가치를 만든다', () => {
+    const enemy = { ...durable(3), wound: 6 };
+    expect(resolver.resolveShot('laceration', 0, enemy).hpDamage).toBeGreaterThan(shot('ball').hpDamage);
+    expect(resolver.resolveShot('frangible', 0, enemy).hpDamage).toBeGreaterThan(shot('ball').hpDamage);
+    expect(volley(['serrated', 'laceration', 'laceration', 'laceration']).totalHpDamage).toBeGreaterThanOrEqual(volley(['ball', 'ball', 'ball', 'ball']).totalHpDamage);
   });
 });

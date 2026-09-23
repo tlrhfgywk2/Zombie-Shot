@@ -2,7 +2,7 @@ import { AMMO_BUILD_BALANCE, AMMO_DEFINITIONS, AMMO_ORDER, type SpecialAmmoType 
 
 /** 등급을 먼저 추첨하고 중복 없이 고른다. 소유 탄약도 후보에 남긴다. */
 export function generateAmmoRewards(random: () => number = Math.random): SpecialAmmoType[] {
-  const pool = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'standard');
+  const pool = AMMO_ORDER.filter((ammo): ammo is SpecialAmmoType => ammo !== 'ball');
   const result: SpecialAmmoType[] = [];
   while (result.length < AMMO_BUILD_BALANCE.rewardChoices && pool.length) {
     const rarities = (['common', 'uncommon'] as const).filter(rarity => pool.some(ammo => AMMO_DEFINITIONS[ammo].rarity === rarity));

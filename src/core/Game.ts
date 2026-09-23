@@ -44,6 +44,7 @@ export class Game {
       onChooseAmmoReward: (ammo) => this.chooseAmmoReward(ammo),
       onReplaceReward: (ammo) => this.replaceReward(ammo),
       onSkipAmmoReward: () => this.skipAmmoReward(),
+      onUpgradeAmmoCapacity: () => this.upgradeAmmoCapacity(),
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
@@ -124,15 +125,16 @@ export class Game {
     this.state.transition('FIRING');
     this.ui.setPhase('FIRING');
     for (const shot of sequence.shots) {
+      if (shot.shotDistance !== shot.before.distance) await this.presentation.animateDistanceChange(shot.shotDistance);
       this.ui.showShot(shot);
       await this.presentation.animateShot(shot.ammoType);
       this.player.fireRound(shot);
       this.zombie.applyState(shot.after);
       this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
       const hasNextShot = shot !== sequence.shots.at(-1);
-      if (hasNextShot) {
-        await this.presentation.animateReacquisition(shot.ammoType === 'overpressure', getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
-      }
+      if (shot.after.distance !== shot.shotDistance) await this.presentation.animateDistanceChange(shot.after.distance);
+      if (hasNextShot) await this.presentation.animateReacquisition(shot.breakdown.recoilGenerated >= 3,
+        getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
       this.syncEnemy();
     }
     await this.presentation.animateMagazineDiscard();
@@ -150,13 +152,6 @@ export class Game {
     const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), this.player.getCombatState(), this.player.loadout.getSnapshot());
     this.zombie.applyState(action.after);
     this.player.applyCombatState(action.playerAfter);
-    if (action.burnDamage > 0) {
-      await this.presentation.animateBurn();
-      this.syncEnemy();
-      await this.pause(350);
-    }
-    if (action.killedByBurn) { await this.handleZombieDeath(); return; }
-
     if (action.intentDetail) {
       this.syncEnemy();
       await this.pause(420);
@@ -255,6 +250,11 @@ export class Game {
     this.advanceAfterAmmoReward();
   }
 
+  private upgradeAmmoCapacity(): void {
+    if (this.state.phase !== 'AMMO_REWARD' || this.pendingReward || !this.player.upgradeAmmoCapacity()) return;
+    this.advanceAfterAmmoReward();
+  }
+
   private advanceAfterAmmoReward(): void {
     this.ui.hideAmmoRewards();
     this.pendingReward = undefined;
@@ -313,7 +313,7 @@ export class Game {
     this.ui.showEndState('', false);
     this.ui.hideRouteChoice();
     this.ui.setLocked(false);
-    this.presentation.setZombie(this.zombie.distance, 1, false, 1, this.zombie.type);
+    this.presentation.setZombie(this.zombie.distance, 1, 1, this.zombie.type);
     this.sync();
   }
 
@@ -338,7 +338,7 @@ export class Game {
     this.ui.renderPlayerDebuffs(this.player.getCombatState());
     this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
-    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.zombie.statuses.burnTurns > 0, this.waveIndex + 1, this.zombie.type);
+    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.waveIndex + 1, this.zombie.type);
   }
 
   private pause(milliseconds: number): Promise<void> { return this.presentation.wait(milliseconds); }

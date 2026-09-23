@@ -1,32 +1,23 @@
-import type { AmmoType, RoundPreview } from '../combat/types';
 import { AMMO_DEFINITIONS, type AmmoBuild, type SpecialAmmoType } from '../data/ammoDefinitions';
+import type { AmmoType, RoundPreview } from '../combat/types';
 
 export function ammoRewardOwnedCount(ammo: SpecialAmmoType, build: AmmoBuild, replacements: readonly SpecialAmmoType[] = []): number {
-  const pendingReplacements = replacements.filter(value => value === ammo).length;
-  return Math.max(0, build[ammo] - pendingReplacements);
+  return Math.max(0, build[ammo] - replacements.filter(value => value === ammo).length);
 }
-
 export function ammoStatsMarkup(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];
-  const values: (string | number)[][] = [['화력', item.firepower], ['방어 파괴', item.armorBreak], ['충격', item.actionShock]];
-  if (ammo === 'match') values.push(['거리 화력 감소', '-3%p']);
-  if (item.sequenceTrait) values.push(['특성', { heavyKick: '강한 반동', stable: '안정', shockSaturation: '충격 포화' }[item.sequenceTrait]]);
-  if (item.unarmoredFirepowerModifier) values.push(['무장갑', `${item.unarmoredFirepowerModifier > 0 ? '+' : ''}${item.unarmoredFirepowerModifier}`]);
-  return `<span class="ammo-stats">${values.map(([name, value]) => `<span>${name}<b>${value}</b></span>`).join('')}</span>`;
+  const values: [string, number][] = [['화력', item.firepower], ['상처', item.wound], ['충격', item.actionShock], ['반동', item.recoil]];
+  return `<span class="ammo-stats">${values.filter(([, value]) => value > 0).map(([name, value]) => `<span>${name}<b>${value}</b></span>`).join('')}</span>`;
 }
-
 export interface FiringOrderStatEntry {
-  kind: 'firepower' | 'armor' | 'shock';
-  label: string;
-  value: number;
-  modified: boolean;
+  kind: 'firepower' | 'wound' | 'shock' | 'recoil'; label: string; value: number; modified: boolean;
 }
-
 export function firingOrderStatEntries(round: RoundPreview): FiringOrderStatEntry[] {
   const entries: FiringOrderStatEntry[] = [
-    { kind: 'firepower', label: '화력', value: round.effectiveFirepower, modified: round.heavyKickPenalty > 0 },
-    { kind: 'armor', label: '방어 파괴', value: round.armorBreak, modified: false },
-    { kind: 'shock', label: '충격', value: round.effectiveActionShock, modified: round.shockSaturationPenalty > 0 },
+    { kind: 'firepower', label: '화력', value: round.effectiveFirepower, modified: round.followUpBonus > 0 },
+    { kind: 'wound', label: '상처', value: round.wound, modified: false },
+    { kind: 'shock', label: '충격', value: round.effectiveActionShock, modified: false },
+    { kind: 'recoil', label: '누적 반동', value: round.recoil, modified: false },
   ];
-  return entries.filter((stat) => stat.value > 0);
+  return entries.filter(row => row.value > 0);
 }

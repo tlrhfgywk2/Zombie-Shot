@@ -1,6 +1,5 @@
 import type { PlayerCombatState } from '../combat/types';
 import { ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER } from '../data/attachmentDefinitions';
-import { COMBAT_BALANCE } from '../data/ammoDefinitions';
 
 export type PlayerDebuffKind = 'recoil' | 'range' | 'attachment';
 
@@ -18,7 +17,7 @@ export function playerDebuffEntries(state: PlayerCombatState): PlayerDebuffView[
     entries.push({
       kind: 'recoil',
       label: '반동 교란',
-      value: `강한 반동 후속 화력 -${COMBAT_BALANCE.heavyKickPenalty + state.heavyKickPenaltyBonus}`,
+      value: `반동 화력 감소 +${state.heavyKickPenaltyBonus}`,
       turns: state.heavyKickPenaltyTurns,
     });
   }
