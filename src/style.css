@@ -65,6 +65,11 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .distance-card { display: grid; grid-template-columns: auto 1fr; align-items: baseline; width: 100%; gap: .5rem; padding-right: .8rem; border-right: 2px solid var(--acid); text-align: right; }
 .distance-card small { white-space: nowrap; }
 .distance-card strong { display: block; margin-top: 0; font-family: "Arial Narrow", sans-serif; font-size: 1.25rem; white-space: nowrap; }
+.weapon-readout { display: grid; gap: 1px; padding: .26rem .46rem; border: 1px solid var(--line); background: rgba(10, 15, 12, .84); backdrop-filter: blur(8px); }
+.weapon-readout > div { display: flex; align-items: baseline; justify-content: space-between; min-width: 0; gap: .25rem; }
+.weapon-readout span { color: #aebbb0; font-size: .58rem; font-weight: 800; white-space: nowrap; }
+.weapon-readout strong { color: var(--acid); font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1.25; white-space: nowrap; }
+.weapon-readout > div:last-child strong { color: #ffbd66; }
 .audio-controls { display: grid; grid-template-columns: 50px 1fr; min-height: 44px; border: 1px solid var(--line); background: rgba(10, 15, 12, .8); pointer-events: auto; backdrop-filter: blur(8px); }
 .audio-controls button { display: grid; place-content: center; min-width: 0; min-height: 44px; padding: .25rem; border: 0; border-right: 1px solid var(--line); background: transparent; cursor: pointer; touch-action: manipulation; }
 .audio-controls button span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .08em; }
@@ -73,10 +78,6 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .audio-controls label { position: relative; display: grid; align-items: center; min-height: 44px; padding: 0 .45rem; }
 .audio-controls input { width: 100%; min-width: 0; height: 28px; margin: 0; accent-color: var(--acid); cursor: pointer; touch-action: manipulation; }
 .audio-controls input:disabled { opacity: .35; cursor: default; }
-.audio-controls .presentation-speed-control { grid-column: 1 / -1; grid-template-columns: auto auto 1fr; min-height: 34px; gap: .32rem; padding: 0 .42rem; border-top: 1px solid var(--line); }
-.presentation-speed-control span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .06em; }
-.presentation-speed-control strong { color: var(--acid); font-size: .58rem; font-variant-numeric: tabular-nums; }
-.presentation-speed-control input { height: 24px; }
 .inventory-open-button { display: flex; align-items: center; justify-content: center; min-height: 38px; gap: .4rem; padding: .45rem .6rem; border: 1px solid var(--line); color: #dfe8e1; background: rgba(10,15,12,.8); font-size: .62rem; font-weight: 850; cursor: pointer; pointer-events: auto; backdrop-filter: blur(8px); }
 .inventory-open-button:hover, .inventory-open-button:focus-visible { border-color: rgba(200,255,77,.55); color: var(--acid); }
 .inventory-open-button svg { width: 17px; height: 17px; fill: currentColor; }
@@ -269,9 +270,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   grid-column: 2;
   position: relative;
   width: 116px;
-  height: 84px;
+  height: 140px;
   grid-template-columns: 54px 56px;
-  grid-template-rows: 36px 42px;
+  grid-template-rows: 36px 42px 50px;
   gap: 6px;
 }
 .game-shell[data-layout="portrait"] .distance-card {
@@ -282,10 +283,12 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 }
 .game-shell[data-layout="portrait"] .distance-card small { font-size: .5rem; letter-spacing: .1em; }
 .game-shell[data-layout="portrait"] .distance-card strong { margin-top: .08rem; font-size: .94rem; }
+.game-shell[data-layout="portrait"] .weapon-readout { grid-column: 1 / -1; grid-row: 3; padding: .24rem .3rem; }
+.game-shell[data-layout="portrait"] .weapon-readout span { font-size: .5rem; }
+.game-shell[data-layout="portrait"] .weapon-readout strong { font-size: var(--combat-value-size); }
 .game-shell[data-layout="portrait"] .audio-controls { display: block; position: relative; min-height: 42px; overflow: visible; }
 .game-shell[data-layout="portrait"] .audio-controls button { width: 100%; min-height: 42px; border-right: 0; }
-.game-shell[data-layout="portrait"] .audio-controls > label:not(.presentation-speed-control) { display: none; }
-.game-shell[data-layout="portrait"] .audio-controls .presentation-speed-control { position: absolute; top: calc(100% + 6px); left: 0; display: grid; width: 116px; min-height: 34px; border: 1px solid var(--line); background: rgba(10,15,12,.88); }
+.game-shell[data-layout="portrait"] .audio-controls > label { display: none; }
 .game-shell[data-layout="portrait"] .inventory-open-button { min-height: 42px; padding: 0; }
 .game-shell[data-layout="portrait"] .inventory-open-button span { display: none; }
 .game-shell[data-layout="portrait"] .phase-panel {

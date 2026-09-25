@@ -69,11 +69,22 @@ export class CombatResolver {
     return this.modifiers(context).filter(mod => mod.kind === kind && (!mod.condition?.range || mod.condition.range === band))
       .reduce((sum, mod) => sum + mod.value, 0);
   }
+  private recoilThreshold(context: CombatContext): number {
+    return COMBAT_BALANCE.recoilThreshold + this.modifier(context, 'recoilThreshold');
+  }
   private rangePenalty(distance: number, context: CombatContext): { band: RangeBand; effective: RangeBand; percent: number } {
     const band = getRangeBand(distance);
     const effective = getEffectiveRangeBand(band, context.playerState?.rangePenaltySteps ?? 0);
     return { band, effective, percent: Math.max(0, SERVICE_45.rangePenaltyPercentages[effective]
       - this.modifier(context, 'rangePenaltyReductionPercent', effective)) };
+  }
+  getWeaponReadout(distance: number, context: CombatContext = {}): { recoilThreshold: number; effectiveRangeBand: RangeBand; rangePenaltyPercent: number } {
+    const range = this.rangePenalty(distance, context);
+    return {
+      recoilThreshold: this.recoilThreshold(context),
+      effectiveRangeBand: range.effective,
+      rangePenaltyPercent: range.percent,
+    };
   }
   resolveShot(ammoType: AmmoType, index: number, enemyState: EnemyState, context: CombatContext = {}): ShotResult {
     return this.resolveRound(ammoType, index, enemyState, context, { recoil: 0, followUp: 0 }).shot;
@@ -121,7 +132,7 @@ export class CombatResolver {
     const shotDistance = after.distance;
     const range = this.rangePenalty(shotDistance, context);
     const effectiveRecoil = Math.max(0, cursor.recoil - (definition.recoilRecovery ?? 0));
-    const threshold = COMBAT_BALANCE.recoilThreshold + this.modifier(context, 'recoilThreshold');
+    const threshold = this.recoilThreshold(context);
     // 반동 전환탄은 쌓인 반동을 피해로 바꾸면서 전부 소비한다.
     const recoilPenalty = definition.recoilScale ? 0 : Math.max(0, effectiveRecoil - threshold)
       + (effectiveRecoil > 0 ? context.playerState?.heavyKickPenaltyBonus ?? 0 : 0);

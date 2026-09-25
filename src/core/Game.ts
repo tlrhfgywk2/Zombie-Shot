@@ -9,7 +9,6 @@ import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
 import { type AudioPreferences, loadAudioPreferences, saveAudioPreferences } from '../presentation/AudioPreferences';
-import { type PresentationPreferences, loadPresentationPreferences, savePresentationPreferences } from '../presentation/PresentationPreferences';
 import { GameUI } from '../ui/GameUI';
 import { GameStateMachine } from './GameStateMachine';
 
@@ -20,7 +19,6 @@ export class Game {
   private readonly ui: GameUI;
   private readonly presentation: GamePresentation;
   private audioPreferences: AudioPreferences = loadAudioPreferences();
-  private presentationPreferences: PresentationPreferences = loadPresentationPreferences();
   private waveIndex = 0;
   private enemyIndex = 0;
   private currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
@@ -48,13 +46,11 @@ export class Game {
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
-      onPresentationSpeedChange: (speed) => this.setPresentationPreferences({ speed }),
       onLoad: () => void this.beginCombat(),
       onRestart: () => this.restart(),
     });
     this.presentation = new GamePresentation(this.ui.canvasHost);
     this.setAudioPreferences(this.audioPreferences);
-    this.setPresentationPreferences(this.presentationPreferences);
     this.sync();
   }
 
@@ -98,13 +94,6 @@ export class Game {
     saveAudioPreferences(preferences);
     this.ui.renderAudioPreferences(preferences);
     this.presentation.setAudioPreferences(preferences);
-  }
-
-  private setPresentationPreferences(preferences: PresentationPreferences): void {
-    this.presentationPreferences = preferences;
-    savePresentationPreferences(preferences);
-    this.ui.renderPresentationPreferences(preferences);
-    this.presentation.setPlaybackSpeed(preferences.speed);
   }
 
   private async beginCombat(): Promise<void> {
@@ -333,11 +322,13 @@ export class Game {
 
   private syncEnemy(): void {
     const enemy = this.zombie.snapshot();
+    const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
-    this.ui.renderPlayerDebuffs(this.player.getCombatState());
-    this.ui.renderLoadout(this.player.loadout.getSnapshot(), this.player.getCombatState(), this.player.magazine.capacity, this.player.getOwnedAttachments());
-    this.presentation.setAttachments(this.player.loadout.getSnapshot(), this.player.getCombatState());
+    this.ui.updateWeaponReadout(this.resolver.getWeaponReadout(enemy.distance, context));
+    this.ui.renderPlayerDebuffs(context.playerState);
+    this.ui.renderLoadout(context.loadout, context.playerState, this.player.magazine.capacity, this.player.getOwnedAttachments());
+    this.presentation.setAttachments(context.loadout, context.playerState);
     this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.waveIndex + 1, this.zombie.type);
   }
 
