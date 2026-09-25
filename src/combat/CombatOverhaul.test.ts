@@ -114,6 +114,15 @@ describe('최종 부착물과 런 진행', () => {
     expect(damage('plusP', far, { optic: 'pistolScope' })).toBeGreaterThan(damage('plusP', far));
     expect(damage('plusP', far, { barrel: 'extendedBarrel' })).toBeGreaterThan(damage('plusP', far));
   });
+  it('총기 수치 표시는 부착물 봉쇄와 거리 교란을 포함한 실제 사격 기준을 따른다', () => {
+    const loadout = { muzzle: 'compensator' as const, optic: 'reflexSight' as const };
+    expect(resolver.getWeaponReadout(7, { loadout })).toEqual({ recoilThreshold: 5, effectiveRangeBand: 'mid', rangePenaltyPercent: 0 });
+    const disrupted = { ...createPlayerCombatState(), rangePenaltySteps: 1, disabledSlots: { muzzle: 1 } };
+    const context = { loadout, playerState: disrupted };
+    const readout = resolver.getWeaponReadout(7, context);
+    expect(readout).toEqual({ recoilThreshold: 3, effectiveRangeBand: 'far', rangePenaltyPercent: 25 });
+    expect(resolver.resolveShot('plusP', 0, target(100, 7), context).breakdown.rangePenaltyPercent).toBe(readout.rangePenaltyPercent);
+  });
   it('레이저는 취약 효과, 조명은 근거리 충격, 결합형은 각 효과가 약하다', () => {
     const wounded = { ...target(), wound: 3, vulnerableTurns: 1 };
     expect(damage('frangible', wounded, { rail: 'laserSight' })).toBe(12);
