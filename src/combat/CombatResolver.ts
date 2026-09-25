@@ -143,13 +143,12 @@ export class CombatResolver {
     const executionBonus = definition.execution && before.hp * 100 <= before.maxHp * definition.execution.percent
       ? definition.execution.bonus : 0;
     const healthBonus = definition.healthScale ? Math.min(definition.healthScale.cap, Math.floor(before.hp / definition.healthScale.divisor)) : 0;
-    const woundBonus = definition.woundScale ? Math.min(definition.woundScale.cap, Math.floor(before.wound / definition.woundScale.divisor)) : 0;
     const kickbackBonus = definition.recoilScale ? Math.min(definition.recoilScale.cap, cursor.recoil) : 0;
-    const conditionalBonus = vulnerableBonus + suppressedBonus + executionBonus + healthBonus + woundBonus + kickbackBonus;
+    const conditionalBonus = vulnerableBonus + suppressedBonus + executionBonus + healthBonus + kickbackBonus;
     const baseFirepower = Math.max(0, definition.firepower + conditionalBonus + followUpBonus - recoilPenalty);
     // 취약은 사격 시작 시 상태로 HP 화력에만 적용한다. 이번 탄의 상처 발동은 후속 탄부터 유효하다.
     const vulnerableDamageBonus = isVulnerable(before)
-      ? roundPositiveFirepower(baseFirepower * COMBAT_BALANCE.vulnerableDamagePercent / 100) : 0;
+      ? roundPositiveFirepower(baseFirepower * (COMBAT_BALANCE.vulnerableDamagePercent + (definition.vulnerableDamagePercentBonus ?? 0)) / 100) : 0;
     const effectiveFirepower = baseFirepower + vulnerableDamageBonus;
     const finalFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent);
     const hpDamage = Math.min(after.hp, finalFirepower);

@@ -30,12 +30,12 @@ describe('새 탄약과 전투 상태', () => {
     expect(resolver.resolveEnemyAction(wounded).after.wound).toBe(3);
     expect(createEnemyState('normal').wound).toBe(0);
   });
-  it('열상탄은 그 탄 이전 상처만 읽고 준비 없이는 볼탄보다 약하다', () => {
-    expect(damage('laceration')).toBe(2);
+  it('열상탄은 일반 피해를 주고 취약 대상에게 강화된 피해 증가를 적용한다', () => {
+    expect(damage('laceration')).toBe(5);
     const sequence = resolver.resolveSequence(['wounding', 'laceration', 'laceration'], target());
     expect(sequence.shots.map(shot => shot.hpDamage)).toEqual([2, 5, 5]);
     expect(sequence.finalState.wound).toBe(3);
-    expect(resolver.resolveSequence(['wounding', 'wounding', 'laceration'], target()).shots[2]?.hpDamage).toBe(3);
+    expect(resolver.resolveSequence(['wounding', 'wounding', 'laceration'], target()).shots[2]?.hpDamage).toBe(10);
   });
   it('릴레이는 바로 다음 한 발만 강화하며 연속 릴레이는 덮어써 이어 간다', () => {
     expect(resolver.resolveSequence(['relay', 'ball', 'ball'], target()).shots.map(s => s.breakdown.followUpBonus)).toEqual([0, 4, 0]);
@@ -178,10 +178,10 @@ describe('데이터와 완성 탄창', () => {
     expect(player.claimAttachment('rubberGrip' as keyof typeof ATTACHMENT_DEFINITIONS)).toBe(false);
     expect(player.applyAmmoReward('match' as keyof ReturnType<Player['getBuild']>)).toBe(false);
   });
-  it('상처→열상, 충격→제압, 전진→후속 탄은 반대 순서와 결과가 다르다', () => {
+  it('취약→열상, 충격→제압, 전진→후속 탄은 반대 순서와 결과가 다르다', () => {
     const enemy = target(100, 5);
-    expect(resolver.resolveSequence(['wounding', 'laceration'], enemy).totalHpDamage)
-      .toBeGreaterThan(resolver.resolveSequence(['laceration', 'wounding'], enemy).totalHpDamage);
+    expect(resolver.resolveSequence(['wounding', 'wounding', 'laceration'], enemy).totalHpDamage)
+      .toBeGreaterThan(resolver.resolveSequence(['laceration', 'wounding', 'wounding'], enemy).totalHpDamage);
     expect(resolver.resolveSequence(['flatNose', 'suppression'], enemy).totalHpDamage)
       .toBeGreaterThan(resolver.resolveSequence(['suppression', 'flatNose'], enemy).totalHpDamage);
     expect(resolver.resolveSequence(['advance', 'plusP'], enemy).totalHpDamage)

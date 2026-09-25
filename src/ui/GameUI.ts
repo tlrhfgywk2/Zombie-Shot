@@ -455,7 +455,7 @@ export class GameUI {
       : ACTION_NAMES[action.selectedAction];
     this.nextActionShock.querySelector<HTMLElement>('b')!.textContent = String(action.threshold);
     this.nextActionShock.setAttribute('aria-label', `중단 충격 ${action.threshold}`);
-    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}%.</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span>`;
+    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span>`;
     this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
   }
 

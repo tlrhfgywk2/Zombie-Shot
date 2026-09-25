@@ -6,8 +6,8 @@ export interface AmmoDefinition {
   tags: readonly BuildTag[]; color: number; cssColor: string; supply?: 'infinite';
   firepower: number; wound: number; actionShock: number; recoil: number; recoilRecovery?: number;
   followUp?: number; healthScale?: { divisor: number; cap: number };
-  woundScale?: { divisor: number; cap: number }; recoilScale?: { cap: number };
-  vulnerableBonus?: number; suppressedBonus?: number;
+  recoilScale?: { cap: number };
+  vulnerableBonus?: number; vulnerableDamagePercentBonus?: number; suppressedBonus?: number;
   execution?: { percent: number; bonus: number }; moveBefore?: number; moveAfter?: number;
 }
 const ammo = (id: AmmoType, name: string, shortName: string, role: string, tags: readonly BuildTag[], color: number,
@@ -25,7 +25,7 @@ export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   suppression: ammo('suppression', '제압탄', '제압', '충격으로 다음 행동이 중단될 적에게 피해 +3', ['health'], 0x8cb4cc, 3, 0, 0, 1, { suppressedBonus: 3 }),
   execution: ammo('execution', '처형탄', '처형', '체력 30% 이하 적에게 피해 +4', ['health'], 0xe67877, 3, 0, 0, 1, { execution: { percent: 30, bonus: 4 } }),
   kickback: ammo('kickback', '반동 전환탄', '전환', '누적 반동만큼 피해 증가, 반동 전부 소모', ['health'], 0xf6b76d, 2, 0, 0, 0, { recoilScale: { cap: 6 } }),
-  laceration: ammo('laceration', '열상탄', '열상', '기존 상처 1당 피해 +1, 최대 +10', ['health'], 0xe5799a, 2, 0, 0, 1, { woundScale: { divisor: 1, cap: 10 } }),
+  laceration: ammo('laceration', '열상탄', '열상', '기본 화력 5 · 취약 대상 체력 피해 +100%', ['health'], 0xe5799a, 5, 0, 0, 1, { vulnerableDamagePercentBonus: 50 }),
   retreat: ammo('retreat', '후퇴탄', '후퇴', '현재 거리에서 사격 후 2m 후퇴', ['health'], 0x9cc8a2, 3, 0, 0, 1, { moveAfter: 2 }),
   advance: ammo('advance', '전진탄', '전진', '2m 전진한 거리에서 강한 사격', ['health'], 0xe49b73, 6, 0, 0, 2, { moveBefore: -2 }),
   wounding: ammo('wounding', '상처탄', '상처', '피해 2 · 상처 +3 · 임계치 도달 시 취약', ['wound'], 0xe48ba9, 2, 3),

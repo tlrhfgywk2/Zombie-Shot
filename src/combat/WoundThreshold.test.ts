@@ -97,12 +97,14 @@ describe('상처 임계치와 취약 창', () => {
     expect(resolver.resolveEnemyAction(shocked).interrupted).toBe(true);
   });
 
-  it('열상탄은 취약과 무관하게 현재 남은 상처만 읽는다', () => {
+  it('열상탄은 남은 상처와 무관하게 취약 효과를 두 배로 적용한다', () => {
     expect(resolver.resolveShot('laceration', 0, target({ wound: 3 })).hpDamage).toBe(5);
-    expect(resolver.resolveShot('laceration', 0, target({ wound: 3, vulnerableTurns: 1 })).hpDamage).toBe(8);
+    expect(resolver.resolveShot('laceration', 0, target({ wound: 3, vulnerableTurns: 1 })).hpDamage).toBe(10);
+    expect(resolver.resolveShot('laceration', 0, target({ vulnerableTurns: 1 })).hpDamage).toBe(10);
     const triggered = resolver.resolveShot('serrated', 0, target({ wound: 4 })).after;
     expect(triggered.wound).toBe(3);
-    expect(resolver.resolveShot('laceration', 0, triggered).breakdown.conditionalBonus).toBe(3);
+    expect(resolver.resolveShot('laceration', 0, triggered).breakdown.vulnerableDamageBonus).toBe(5);
+    expect(resolver.resolveShot('laceration', 0, triggered).breakdown.conditionalBonus).toBe(0);
     expect(resolver.resolveShot('ball', 0, target({ wound: 3 })).breakdown.conditionalBonus).toBe(0);
   });
 
