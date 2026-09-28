@@ -40,6 +40,7 @@ export interface PlayerCombatState {
 }
 export interface ShotBreakdown {
   ammoFirepower: number;
+  prePenaltyFirepower: number;
   effectiveFirepower: number;
   rangeBand: RangeBand;
   effectiveRangeBand: RangeBand;
@@ -47,11 +48,20 @@ export interface ShotBreakdown {
   recoilGenerated: number;
   recoilAfter: number;
   recoilPenalty: number;
+  recoilFirepowerReduction: number;
   followUpBonus: number;
   conditionalBonus: number;
   vulnerableDamageBonus: number;
   rangePenaltyPercent: number;
+  distanceFirepowerReduction: number;
   projectedShock: number;
+  finalFirepower: number;
+}
+export interface FirepowerBreakdown {
+  prePenaltyFirepower: number;
+  recoilReduction: number;
+  distanceReduction: number;
+  distancePenaltyPercents: number[];
   finalFirepower: number;
 }
 export interface ShotResult {
@@ -85,8 +95,7 @@ export interface SequenceResult {
   shots: ShotResult[];
   roundPreviews: RoundPreview[];
   finalState: EnemyState;
-  finalRangePenaltyPercent: number;
-  finalVolleyFirepower: number;
+  firepowerBreakdown: FirepowerBreakdown;
   totalHpDamage: number;
   totalWoundApplied: number;
   totalActionShockApplied: number;

@@ -69,7 +69,6 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .weapon-readout > div { display: flex; align-items: baseline; justify-content: space-between; min-width: 0; gap: .25rem; }
 .weapon-readout span { color: #aebbb0; font-size: .58rem; font-weight: 800; white-space: nowrap; }
 .weapon-readout strong { color: var(--acid); font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1.25; white-space: nowrap; }
-.weapon-readout > div:last-child strong { color: #ffbd66; }
 .audio-controls { display: grid; grid-template-columns: 50px 1fr; min-height: 44px; border: 1px solid var(--line); background: rgba(10, 15, 12, .8); pointer-events: auto; backdrop-filter: blur(8px); }
 .audio-controls button { display: grid; place-content: center; min-width: 0; min-height: 44px; padding: .25rem; border: 0; border-right: 1px solid var(--line); background: transparent; cursor: pointer; touch-action: manipulation; }
 .audio-controls button span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .08em; }
@@ -121,6 +120,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .forecast-stat strong b { color: inherit; font-size: inherit; }
 .forecast-stat strong em { color: #78938e; font-size: .55rem; font-style: normal; }
 .forecast-damage { color: #ff6756; }
+.forecast-damage { width: 100%; text-align: left; cursor: pointer; pointer-events: auto; touch-action: manipulation; }
+.forecast-damage:hover, .forecast-damage[aria-expanded="true"] { background: rgba(75, 24, 20, .94); }
 .forecast-wound { color: #e5799a; }
 .forecast-impact { color: #70e6d2; }
 .forecast-range { color: #ffbd66; }
@@ -270,9 +271,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   grid-column: 2;
   position: relative;
   width: 116px;
-  height: 140px;
+  height: 126px;
   grid-template-columns: 54px 56px;
-  grid-template-rows: 36px 42px 50px;
+  grid-template-rows: 36px 42px 36px;
   gap: 6px;
 }
 .game-shell[data-layout="portrait"] .distance-card {
@@ -721,3 +722,23 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .sequence-stat b { font-size: var(--combat-value-size); }
 .game-shell[data-layout="portrait"] .sequence-move { font-size: .75rem; }
 .game-shell[data-layout="desktop"] .tactical-console .mag-slot { height: 100px; min-height: 100px; }
+
+.game-shell .ammo-tooltip.is-firepower {
+  left: max(12px, calc(50% - 280px));
+  bottom: 64px;
+  width: min(310px, calc(100% - 24px));
+  padding: .64rem .72rem;
+  transform: none;
+  pointer-events: auto;
+}
+.game-shell .ammo-tooltip.is-firepower header { align-items: center; padding-bottom: .35rem; border-bottom: 1px solid rgba(255,103,86,.25); }
+.game-shell .ammo-tooltip.is-firepower header span { font-size: .68rem; }
+.game-shell .ammo-tooltip.is-firepower header strong { color: #ff8b7e; font-size: var(--combat-value-prominent); font-variant-numeric: tabular-nums; }
+.game-shell .ammo-tooltip.is-firepower > .firepower-breakdown { display: grid; grid-template-columns: 1fr; gap: 2px; margin-top: .3rem; }
+.game-shell .ammo-tooltip.is-firepower .firepower-breakdown > span { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .27rem .35rem; color: #b6c2b8; font-size: .65rem; font-weight: 750; }
+.game-shell .ammo-tooltip.is-firepower .firepower-breakdown b { display: inline; margin: 0; color: #e8efe9; font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.game-shell .ammo-tooltip.is-firepower .firepower-breakdown > .distance-reduction b { color: #ffbd66; }
+.game-shell .ammo-tooltip.is-firepower .firepower-breakdown > .recoil-reduction b { color: #ff8b7e; }
+.game-shell[data-layout="portrait"] .ammo-tooltip.is-firepower { left: 8px; bottom: 48px; width: min(290px, calc(100% - 16px)); padding: .5rem .56rem; }
+.game-shell[data-layout="portrait"] .ammo-tooltip.is-firepower .firepower-breakdown > span { font-size: .61rem; }
+.game-shell[data-layout="portrait"] .ammo-tooltip.is-firepower .firepower-breakdown b { font-size: .82rem; }
