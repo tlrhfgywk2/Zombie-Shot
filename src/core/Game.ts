@@ -325,7 +325,7 @@ export class Game {
     const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
-    this.ui.updateWeaponReadout(this.resolver.getWeaponReadout(enemy.distance, context));
+    this.ui.updateRecoilThreshold(this.resolver.getRecoilThreshold(context));
     this.ui.renderPlayerDebuffs(context.playerState);
     this.ui.renderLoadout(context.loadout, context.playerState, this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(context.loadout, context.playerState);
