@@ -92,6 +92,7 @@ export class GameUI {
   private inspectedAmmoButton?: HTMLButtonElement;
   private rounds: readonly AmmoType[] = [];
   private roundPreviews: readonly RoundPreview[] = [];
+  private ammoOptionPreviews: Partial<Record<AmmoType, RoundPreview>> = {};
   private build = createAmmoBuild();
   private stock: AmmoStock = createStageStock(this.build);
   private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
@@ -257,8 +258,8 @@ export class GameUI {
         this.callbacks.onAddAmmo(ammo);
       });
       this.bindPointerDrag(button, () => this.isAmmoSelectable(ammo) ? ({ ammo }) : undefined);
-      this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button));
-      this.bindTouchTooltip(button, () => this.showAmmoTooltip(ammo, button));
+      this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button, this.ammoOptionPreviews[ammo], true));
+      this.bindTouchTooltip(button, () => this.showAmmoTooltip(ammo, button, this.ammoOptionPreviews[ammo], true));
     });
 
     this.slots.forEach((slot, index) => {
@@ -555,8 +556,10 @@ export class GameUI {
     this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
   }
 
-  renderPreview(sequence: SequenceResult | undefined): void {
+  renderPreview(sequence: SequenceResult | undefined,
+    ammoOptionPreviews: Partial<Record<AmmoType, RoundPreview>> = this.ammoOptionPreviews): void {
     this.roundPreviews = sequence?.roundPreviews ?? [];
+    this.ammoOptionPreviews = ammoOptionPreviews;
     this.slots.forEach((slot, index) => {
       const content = slot.querySelector<HTMLElement>('.slot-content');
       content?.querySelector('.sequence-stats')?.remove();
@@ -788,13 +791,13 @@ export class GameUI {
     }, 140);
   }
 
-  private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement, round?: RoundPreview): void {
+  private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement, round?: RoundPreview, assumedAppend = false): void {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
     const firepower = ammoTooltipFirepower(ammo, round);
     const firepowerLabel = firepower.change === 'weakened' ? '반동 감소 반영 화력'
       : firepower.change === 'strengthened' ? '강화 반영 화력' : '화력';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">화력 <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>충격 <b>${definition.actionShock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>충격 <b>${definition.actionShock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
