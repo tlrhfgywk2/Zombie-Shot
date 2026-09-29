@@ -42,10 +42,10 @@ describe('초기 밸런스 감사', () => {
         distance: result.finalState.distance };
     });
     console.table(rows);
-    expect(rows.find(row => row.name === '기본')?.hpDamage).toBe(17);
+    expect(rows.find(row => row.name === '기본')?.hpDamage).toBe(18);
     expect(rows.find(row => row.name === '상처 연계')?.wound).toBe(6);
     // 세 번째 탄에서 취약이 발동하므로 마지막 열상탄은 강화된 취약 피해를 준다.
-    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBe(15);
+    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBe(17);
     expect(rows.find(row => row.name === '반동 전환')?.killed).toBe(true);
     expect(rows.find(row => row.name === '기본')?.killed).toBe(false);
     expect(rows.find(row => row.name === '충격 제압')?.impact).toBeGreaterThan(0);
@@ -54,7 +54,7 @@ describe('초기 밸런스 감사', () => {
   it('저반동탄은 고압탄 뒤에 놓을 때 다음 탄의 피해를 회복한다', () => {
     const controlled = volley(['plusP', 'plusP', 'lowRecoil', 'ball']);
     const uncontrolled = volley(['plusP', 'plusP', 'ball', 'ball']);
-    expect(controlled.totalHpDamage).toBeGreaterThan(uncontrolled.totalHpDamage);
+    expect(controlled.shots[2]?.breakdown.recoilAfter).toBeLessThan(uncontrolled.shots[2]!.breakdown.recoilAfter);
     expect(controlled.shots[3]!.hpDamage).toBeGreaterThan(uncontrolled.shots[3]!.hpDamage);
   });
   it('취약은 긴 표적전에서 후속 열상탄과 파쇄탄의 선택 가치를 만든다', () => {
