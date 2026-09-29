@@ -107,6 +107,8 @@ export class CombatResolver {
       previewState = cloneState({ ...shot.after, hp: Math.max(1, shot.after.hp) });
       previewCursor = resolved.next;
       return { ammoType, index, effectiveFirepower: shot.breakdown.effectiveFirepower,
+        recoilFirepowerReduction: shot.breakdown.recoilFirepowerReduction,
+        playerDebuffFirepowerReduction: shot.breakdown.playerDebuffFirepowerReduction,
         wound: shot.woundApplied, effectiveActionShock: shot.breakdown.projectedShock,
         recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus,
         vulnerableDamageBonus: shot.breakdown.vulnerableDamageBonus, movement: shot.movement };

@@ -46,7 +46,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-impact strong em { color: #8aa8a2; font-size: .72rem; font-style: normal; font-weight: 800; }
 .enemy-impact > i { position: absolute; left: 4px; right: 4px; bottom: 3px; height: 2px; overflow: hidden; background: rgba(112,230,210,.13); }
 .enemy-impact > i b { display: block; width: 0; height: 100%; background: #70e6d2; box-shadow: 0 0 8px #70e6d2; transition: width .25s ease; }
-.enemy-action { position: relative; display: flex; align-items: center; min-width: 0; min-height: 46px; gap: .42rem; padding: .35rem .42rem; border: 1px solid rgba(255,174,58,.42); color: #ffd68f; background: rgba(67,39,13,.48); }
+.enemy-action { position: relative; display: flex; align-items: center; width: 100%; min-width: 0; min-height: 46px; gap: .42rem; padding: .35rem .42rem; border: 1px solid rgba(255,174,58,.42); color: #ffd68f; background: rgba(67,39,13,.48); text-align: left; cursor: help; touch-action: manipulation; }
+.enemy-action:hover, .enemy-action:focus-visible, .enemy-action[aria-expanded="true"] { border-color: rgba(255,198,106,.82); background: rgba(83,49,17,.68); }
 .enemy-action > span { flex: 1; }
 .enemy-action strong { overflow: hidden; font-size: .82rem; text-overflow: ellipsis; }
 .enemy-action > em { display: inline-flex; flex: 0 0 auto; align-items: center; gap: .18rem; padding-left: .36rem; border-left: 1px solid rgba(112,230,210,.28); color: #70e6d2; font-style: normal; }
@@ -60,7 +61,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .enemy-context b { color: #e6ffb0; }
 .enemy-context .intent-detail { padding-top: .28rem; border-top: 1px solid rgba(255,174,58,.25); color: #e2c291; }
 .enemy-context .intent-detail b { color: #ffd68f; }
-.enemy-card:hover .enemy-context, .enemy-card:focus .enemy-context, .enemy-card:focus-within .enemy-context { opacity: 1; visibility: visible; transform: translateY(0); }
+.enemy-card:hover .enemy-context, .enemy-card:focus-within .enemy-context, .enemy-card[data-action-tooltip-open] .enemy-context { opacity: 1; visibility: visible; transform: translateY(0); }
 .utility-stack { justify-self: end; width: 140px; display: grid; gap: .38rem; }
 .distance-card { display: grid; grid-template-columns: auto 1fr; align-items: baseline; width: 100%; gap: .5rem; padding-right: .8rem; border-right: 2px solid var(--acid); text-align: right; }
 .distance-card small { white-space: nowrap; }
@@ -161,6 +162,8 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .ammo-tooltip > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
 .ammo-tooltip > div span { padding: .38rem .45rem; color: var(--muted); background: rgba(255,255,255,.04); font-size: .61rem; }
 .ammo-tooltip > div b { display: block; margin-top: .08rem; color: #edf3ee; font-size: .68rem; }
+.ammo-tooltip .tooltip-firepower b[data-firepower-change="weakened"] { color: #ff6756; }
+.ammo-tooltip .tooltip-firepower b[data-firepower-change="strengthened"] { color: #75d9ec; }
 .ammo-tooltip > small { display: block; margin-top: .55rem; color: #aeb9b0; font-size: .61rem; line-height: 1.45; }
 .attachment-drawer { position: absolute; z-index: 9; inset: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) auto; width: min(520px, calc(100% - 28px)); overflow: auto; padding: 1rem; border: 1px solid rgba(200,255,77,.3); background: rgba(8,13,10,.97); box-shadow: -24px 0 90px rgba(0,0,0,.6); backdrop-filter: blur(18px); }
 .attachment-drawer > header { position: sticky; top: -1rem; z-index: 1; display: flex; justify-content: space-between; align-items: center; margin: -1rem -1rem .75rem; padding: 1rem; border-bottom: 1px solid var(--line); background: rgba(8,13,10,.98); }
@@ -709,7 +712,6 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .sequence-stat { display: inline-flex; align-items: center; min-width: 0; gap: .16rem; color: #eef4ee; }
 .sequence-stat svg { flex: 0 0 17px; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .sequence-stat b { font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
-.sequence-firepower { color: #ff8b7e; }
 .sequence-wound { color: #e5799a; }
 .sequence-shock { color: #70e6d2; }
 .sequence-recoil { color: #ffbd66; }
