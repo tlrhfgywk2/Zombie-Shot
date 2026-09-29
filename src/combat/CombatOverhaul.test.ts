@@ -51,9 +51,9 @@ describe('새 탄약과 전투 상태', () => {
   it('저반동탄은 피해를 지불하고 누적 반동을 회복한다', () => {
     const sequence = resolver.resolveSequence(['plusP', 'plusP', 'lowRecoil', 'ball'], target());
     expect(sequence.shots[2]?.breakdown.recoilAfter).toBe(4);
-    expect(sequence.shots[2]?.breakdown.recoilPenalty).toBe(2);
+    expect(sequence.shots[2]?.breakdown.recoilPenalty).toBe(1);
     expect(sequence.shots[3]?.breakdown.recoilPenalty).toBe(1);
-    expect(resolver.resolveSequence(['plusP', 'plusP', 'ball', 'ball'], target()).shots[3]?.breakdown.recoilPenalty).toBe(2);
+    expect(resolver.resolveSequence(['plusP', 'plusP', 'ball', 'ball'], target()).shots[3]?.breakdown.recoilPenalty).toBe(3);
   });
   it('취약은 지속 시간으로 판정하고, 제압은 기존 충격 중단 조건을 사용한다', () => {
     const enemy = target();
