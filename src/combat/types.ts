@@ -87,6 +87,8 @@ export interface RoundPreview {
   ammoType: AmmoType;
   index: number;
   effectiveFirepower: number;
+  recoilFirepowerReduction: number;
+  playerDebuffFirepowerReduction: number;
   wound: number;
   effectiveActionShock: number;
   recoil: number;
