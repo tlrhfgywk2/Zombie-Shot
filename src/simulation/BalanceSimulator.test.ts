@@ -42,10 +42,10 @@ describe('초기 밸런스 감사', () => {
         distance: result.finalState.distance };
     });
     console.table(rows);
-    expect(rows.find(row => row.name === '기본')?.hpDamage).toBe(18);
+    expect(rows.find(row => row.name === '기본')?.hpDamage).toBe(17);
     expect(rows.find(row => row.name === '상처 연계')?.wound).toBe(6);
     // 세 번째 탄에서 취약이 발동하므로 마지막 열상탄은 강화된 취약 피해를 준다.
-    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBe(17);
+    expect(rows.find(row => row.name === '상처 연계')?.hpDamage).toBe(15);
     expect(rows.find(row => row.name === '반동 전환')?.killed).toBe(true);
     expect(rows.find(row => row.name === '기본')?.killed).toBe(false);
     expect(rows.find(row => row.name === '충격 제압')?.impact).toBeGreaterThan(0);
