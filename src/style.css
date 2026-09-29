@@ -65,10 +65,16 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .distance-card { display: grid; grid-template-columns: auto 1fr; align-items: baseline; width: 100%; gap: .5rem; padding-right: .8rem; border-right: 2px solid var(--acid); text-align: right; }
 .distance-card small { white-space: nowrap; }
 .distance-card strong { display: block; margin-top: 0; font-family: "Arial Narrow", sans-serif; font-size: 1.25rem; white-space: nowrap; }
-.weapon-readout { display: grid; gap: 1px; padding: .26rem .46rem; border: 1px solid var(--line); background: rgba(10, 15, 12, .84); backdrop-filter: blur(8px); }
-.weapon-readout > div { display: flex; align-items: baseline; justify-content: space-between; min-width: 0; gap: .25rem; }
-.weapon-readout span { color: #aebbb0; font-size: .58rem; font-weight: 800; white-space: nowrap; }
-.weapon-readout strong { color: var(--acid); font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1.25; white-space: nowrap; }
+.recoil-gauge { display: grid; align-content: center; gap: .22rem; min-height: 36px; padding: .24rem .46rem; border: 1px solid var(--line); background: rgba(10, 15, 12, .84); backdrop-filter: blur(8px); }
+.recoil-gauge-head { display: flex; align-items: baseline; justify-content: space-between; min-width: 0; }
+.recoil-gauge-head span { color: #aebbb0; font-size: .62rem; font-weight: 800; }
+.recoil-gauge-head strong { color: #ffbd66; font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
+.recoil-track { position: relative; height: 5px; background: rgba(255,189,102,.14); }
+.recoil-track i { display: block; width: 0; height: 100%; background: #ffbd66; box-shadow: 0 0 7px rgba(255,189,102,.55); transition: width .18s ease; }
+.recoil-track b { position: absolute; top: -3px; bottom: -3px; left: var(--recoil-threshold-position, 50%); width: 2px; background: #f0e8cf; box-shadow: 0 0 5px rgba(255,255,255,.5); }
+.recoil-gauge[data-exceeded] { border-color: rgba(255,103,86,.65); background: rgba(52,18,15,.85); }
+.recoil-gauge[data-exceeded] .recoil-gauge-head strong { color: #ff8b7e; }
+.recoil-gauge[data-exceeded] .recoil-track i { background: #ff6756; box-shadow: 0 0 8px rgba(255,103,86,.7); }
 .audio-controls { display: grid; grid-template-columns: 50px 1fr; min-height: 44px; border: 1px solid var(--line); background: rgba(10, 15, 12, .8); pointer-events: auto; backdrop-filter: blur(8px); }
 .audio-controls button { display: grid; place-content: center; min-width: 0; min-height: 44px; padding: .25rem; border: 0; border-right: 1px solid var(--line); background: transparent; cursor: pointer; touch-action: manipulation; }
 .audio-controls button span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .08em; }
@@ -284,9 +290,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 }
 .game-shell[data-layout="portrait"] .distance-card small { font-size: .5rem; letter-spacing: .1em; }
 .game-shell[data-layout="portrait"] .distance-card strong { margin-top: .08rem; font-size: .94rem; }
-.game-shell[data-layout="portrait"] .weapon-readout { grid-column: 1 / -1; grid-row: 3; padding: .24rem .3rem; }
-.game-shell[data-layout="portrait"] .weapon-readout span { font-size: .5rem; }
-.game-shell[data-layout="portrait"] .weapon-readout strong { font-size: var(--combat-value-size); }
+.game-shell[data-layout="portrait"] .recoil-gauge { grid-column: 1 / -1; grid-row: 3; padding: .18rem .3rem; }
+.game-shell[data-layout="portrait"] .recoil-gauge-head span { font-size: .56rem; }
+.game-shell[data-layout="portrait"] .recoil-track { height: 4px; }
 .game-shell[data-layout="portrait"] .audio-controls { display: block; position: relative; min-height: 42px; overflow: visible; }
 .game-shell[data-layout="portrait"] .audio-controls button { width: 100%; min-height: 42px; border-right: 0; }
 .game-shell[data-layout="portrait"] .audio-controls > label { display: none; }

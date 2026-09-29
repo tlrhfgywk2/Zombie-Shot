@@ -22,11 +22,11 @@ describe('화력 계산 내역', () => {
       distanceReduction: 2, distancePenaltyPercents: [25], finalFirepower: 6 });
 
     const recoilOnly = resolver.resolveSequence(['plusP', 'plusP', 'ball'], target()).shots[2]!.breakdown;
-    expect(recoilOnly).toMatchObject({ prePenaltyFirepower: 5, recoilPenalty: 3,
-      recoilFirepowerReduction: 3, distanceFirepowerReduction: 0, finalFirepower: 2 });
+    expect(recoilOnly).toMatchObject({ prePenaltyFirepower: 5, recoilPenalty: 4,
+      recoilFirepowerReduction: 4, distanceFirepowerReduction: 0, finalFirepower: 1 });
 
     const both = resolver.resolveSequence(['plusP', 'plusP', 'plusP'], target({ distance: 11 }));
-    expect(both.shots[2]?.breakdown).toMatchObject({ prePenaltyFirepower: 8,
+    expect(both.shots[1]?.breakdown).toMatchObject({ prePenaltyFirepower: 8,
       recoilFirepowerReduction: 3, rangePenaltyPercent: 25, distanceFirepowerReduction: 1, finalFirepower: 4 });
     const total = both.firepowerBreakdown;
     expect(total.prePenaltyFirepower - total.recoilReduction - total.distanceReduction).toBe(total.finalFirepower);
@@ -38,7 +38,7 @@ describe('화력 계산 내역', () => {
     expect(reset.shots[3]?.breakdown.recoilFirepowerReduction).toBe(0);
     const vulnerable = resolver.resolveSequence(['plusP', 'plusP', 'laceration'], target({ vulnerableTurns: 1 }));
     expect(vulnerable.shots[2]?.breakdown).toMatchObject({ prePenaltyFirepower: 10,
-      recoilPenalty: 3, recoilFirepowerReduction: 6, finalFirepower: 4 });
+      recoilPenalty: 4, recoilFirepowerReduction: 8, finalFirepower: 2 });
   });
 
   it('탄별 이동 거리와 활성 부착물의 감쇠율을 사용한다', () => {
@@ -53,6 +53,16 @@ describe('화력 계산 내역', () => {
       { loadout: { optic: 'reflexSight' }, playerState: { ...createPlayerCombatState(), rangePenaltySteps: 1 } })
       .firepowerBreakdown.distancePenaltyPercents).toEqual([25]);
     expect(resolver.resolveSequence(['plusP', 'plusP', 'plusP'], target(),
-      { loadout: { muzzle: 'compensator' } }).shots[2]?.breakdown.recoilFirepowerReduction).toBe(1);
+      { loadout: { muzzle: 'compensator' } }).shots[2]?.breakdown.recoilFirepowerReduction).toBe(4);
+  });
+
+  it('임계치를 넘긴 바로 그 탄에 반동 감소를 적용한다', () => {
+    const sequence = resolver.resolveSequence(['wounding', 'wounding', 'laceration', 'laceration'], target({ distance: 6 }));
+    expect(sequence.shots.map(shot => shot.breakdown.recoilAfter)).toEqual([1, 2, 3, 4]);
+    expect(sequence.shots.map(shot => shot.breakdown.recoilPenalty)).toEqual([0, 0, 0, 1]);
+    expect(sequence.shots[3]?.breakdown).toMatchObject({ prePenaltyFirepower: 10,
+      recoilFirepowerReduction: 2, rangePenaltyPercent: 10, finalFirepower: 7 });
+    expect(sequence.firepowerBreakdown.prePenaltyFirepower - sequence.firepowerBreakdown.recoilReduction
+      - sequence.firepowerBreakdown.distanceReduction).toBe(sequence.firepowerBreakdown.finalFirepower);
   });
 });
