@@ -71,10 +71,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .recoil-gauge-head strong { color: #ffbd66; font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
 .recoil-track { position: relative; height: 5px; background: rgba(255,189,102,.14); }
 .recoil-track i { display: block; width: 0; height: 100%; background: #ffbd66; box-shadow: 0 0 7px rgba(255,189,102,.55); transition: width .18s ease; }
-.recoil-track b { position: absolute; top: -3px; bottom: -3px; left: var(--recoil-threshold-position, 50%); width: 2px; background: #f0e8cf; box-shadow: 0 0 5px rgba(255,255,255,.5); }
-.recoil-gauge[data-exceeded] { border-color: rgba(255,103,86,.65); background: rgba(52,18,15,.85); }
-.recoil-gauge[data-exceeded] .recoil-gauge-head strong { color: #ff8b7e; }
-.recoil-gauge[data-exceeded] .recoil-track i { background: #ff6756; box-shadow: 0 0 8px rgba(255,103,86,.7); }
+.recoil-gauge[data-full] { border-color: rgba(255,103,86,.65); background: rgba(52,18,15,.85); }
+.recoil-gauge[data-full] .recoil-gauge-head strong { color: #ff8b7e; }
+.recoil-gauge[data-full] .recoil-track i { background: #ff6756; box-shadow: 0 0 8px rgba(255,103,86,.7); }
 .audio-controls { display: grid; grid-template-columns: 50px 1fr; min-height: 44px; border: 1px solid var(--line); background: rgba(10, 15, 12, .8); pointer-events: auto; backdrop-filter: blur(8px); }
 .audio-controls button { display: grid; place-content: center; min-width: 0; min-height: 44px; padding: .25rem; border: 0; border-right: 1px solid var(--line); background: transparent; cursor: pointer; touch-action: manipulation; }
 .audio-controls button span { color: var(--muted); font-size: .5rem; font-weight: 800; letter-spacing: .08em; }

@@ -10,7 +10,7 @@ export interface CombatContext {
   playerState?: PlayerCombatState;
   targets?: readonly EnemyState[];
 }
-interface SequenceCursor { recoil: number; followUp: number }
+interface SequenceCursor { recoil: number; followUp: number; distanceLossHundredths: number }
 const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined });
 const clonePlayerState = (state: PlayerCombatState): PlayerCombatState => ({ ...state, disabledSlots: { ...state.disabledSlots } });
 const rangeOrder: readonly RangeBand[] = ['near', 'mid', 'far'];
@@ -18,9 +18,14 @@ export const roundPositiveFirepower = (value: number): number => {
   if (!Number.isFinite(value) || value < 0) throw new Error('화력은 0 이상의 유한한 값이어야 합니다.');
   return Math.floor(value + 0.5 + Number.EPSILON);
 };
-export const calculateFinalVolleyFirepower = (raw: number, penalty: number, minimum = COMBAT_BALANCE.minimumFirepower): number => {
-  if (!Number.isInteger(raw) || raw < 0 || !Number.isInteger(penalty) || penalty < 0 || penalty > 100) throw new Error('잘못된 화력 또는 거리 감소입니다.');
-  return raw === 0 ? 0 : Math.max(minimum, roundPositiveFirepower(raw * (100 - penalty) / 100));
+export const calculateFinalVolleyFirepower = (raw: number, penalty: number, minimum = COMBAT_BALANCE.minimumFirepower,
+  previousLossHundredths = 0): number => {
+  if (!Number.isInteger(raw) || raw < 0 || !Number.isInteger(penalty) || penalty < 0 || penalty > 100
+    || !Number.isInteger(previousLossHundredths) || previousLossHundredths < 0) throw new Error('잘못된 화력 또는 거리 감소입니다.');
+  if (raw === 0) return 0;
+  const totalLoss = roundPositiveFirepower((previousLossHundredths + raw * penalty) / 100);
+  const previousLoss = roundPositiveFirepower(previousLossHundredths / 100);
+  return Math.max(minimum, raw - (totalLoss - previousLoss));
 };
 export const getRangeBand = (distance: number): RangeBand => distance <= COMBAT_BALANCE.rangeThresholds.near
   ? 'near' : distance <= COMBAT_BALANCE.rangeThresholds.mid ? 'mid' : 'far';
@@ -79,11 +84,11 @@ export class CombatResolver {
       - this.modifier(context, 'rangePenaltyReductionPercent', effective)) };
   }
   resolveShot(ammoType: AmmoType, index: number, enemyState: EnemyState, context: CombatContext = {}): ShotResult {
-    return this.resolveRound(ammoType, index, enemyState, context, { recoil: 0, followUp: 0 }).shot;
+    return this.resolveRound(ammoType, index, enemyState, context, { recoil: 0, followUp: 0, distanceLossHundredths: 0 }).shot;
   }
   resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
     let current = cloneState(enemyState);
-    let cursor: SequenceCursor = { recoil: 0, followUp: 0 };
+    let cursor: SequenceCursor = { recoil: 0, followUp: 0, distanceLossHundredths: 0 };
     const shots: ShotResult[] = [];
     for (const [index, ammoType] of rounds.entries()) {
       if (current.hp <= 0) break;
@@ -94,7 +99,7 @@ export class CombatResolver {
     }
     // 사망 뒤의 슬롯도 배치를 읽을 수 있도록, 높은 체력의 동일 상태에서 순서 수치를 생성한다.
     let previewState = cloneState(enemyState);
-    let previewCursor: SequenceCursor = { recoil: 0, followUp: 0 };
+    let previewCursor: SequenceCursor = { recoil: 0, followUp: 0, distanceLossHundredths: 0 };
     const roundPreviews: RoundPreview[] = rounds.map((ammoType, index) => {
       const resolved = this.resolveRound(ammoType, index, previewState, context, previewCursor);
       const shot = resolved.shot;
@@ -110,8 +115,8 @@ export class CombatResolver {
       prePenaltyFirepower: shots.reduce((sum, shot) => sum + shot.breakdown.prePenaltyFirepower, 0),
       recoilReduction: shots.reduce((sum, shot) => sum + shot.breakdown.recoilFirepowerReduction, 0),
       distanceReduction: shots.reduce((sum, shot) => sum + shot.breakdown.distanceFirepowerReduction, 0),
-      distancePenaltyPercents: [...new Set(shots.filter(shot => shot.breakdown.distanceFirepowerReduction > 0)
-        .map(shot => shot.breakdown.rangePenaltyPercent))],
+      distancePenaltyPercents: [...new Set(shots.map(shot => shot.breakdown.rangePenaltyPercent)
+        .filter(percent => percent > 0))],
       finalFirepower: shots.reduce((sum, shot) => sum + shot.breakdown.finalFirepower, 0),
     };
     return { shots, roundPreviews, finalState: current,
@@ -158,7 +163,9 @@ export class CombatResolver {
     const vulnerableDamageBonus = applyVulnerability(baseFirepower) - baseFirepower;
     const effectiveFirepower = baseFirepower + vulnerableDamageBonus;
     const recoilFirepowerReduction = prePenaltyFirepower - effectiveFirepower;
-    const finalFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent);
+    // 거리 손실의 소수 부분은 탄창 안에서 이월해 작은 탄의 손실이 모두 반올림으로 사라지지 않게 한다.
+    const finalFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
+      COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths);
     const distanceFirepowerReduction = effectiveFirepower - finalFirepower;
     const hpDamage = Math.min(after.hp, finalFirepower);
     after.hp -= hpDamage;
@@ -177,7 +184,8 @@ export class CombatResolver {
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
     const movement = after.distance - before.distance;
     const next = { recoil: recoilAfter, followUp: definition.followUp
-      ? definition.followUp + this.modifier(context, 'followUpEffect') : 0 };
+      ? definition.followUp + this.modifier(context, 'followUpEffect') : 0,
+    distanceLossHundredths: cursor.distanceLossHundredths + effectiveFirepower * range.percent };
     const detail = [`${definition.name}`, `${RANGE_NAMES[range.effective]} ${formatRangePenalty(range.percent)}`];
     if (definition.moveBefore) detail.push(`사격 전 ${Math.abs(movement)}m 전진`);
     if (hpDamage) detail.push(`체력 -${hpDamage}`);
