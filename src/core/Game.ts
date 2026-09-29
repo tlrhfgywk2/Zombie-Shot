@@ -117,6 +117,7 @@ export class Game {
       if (shot.shotDistance !== shot.before.distance) await this.presentation.animateDistanceChange(shot.shotDistance);
       this.ui.showShot(shot);
       await this.presentation.animateShot(shot.ammoType);
+      this.ui.showRecoilAfterShot(shot.breakdown.recoilAfter);
       this.player.fireRound(shot);
       this.zombie.applyState(shot.after);
       this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
@@ -325,7 +326,7 @@ export class Game {
     const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
-    this.ui.updateRecoilThreshold(this.resolver.getRecoilThreshold(context));
+    this.ui.updateRecoilThreshold(this.resolver.getRecoilThreshold(context), context.playerState.heavyKickPenaltyBonus);
     this.ui.renderPlayerDebuffs(context.playerState);
     this.ui.renderLoadout(context.loadout, context.playerState, this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(context.loadout, context.playerState);

@@ -2,6 +2,7 @@ import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, S
   type AttachmentModifier, type LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE, RANGE_NAMES } from '../data/ammoDefinitions';
 import { getEnabledAttachmentIds, createPlayerCombatState } from './AttachmentLoadout';
+import { recoilFirepowerPenalty } from './RecoilPenalty';
 import type { AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState,
   FirepowerBreakdown, PlayerCombatState, RangeBand, RoundPreview, SequenceResult, ShotResult } from './types';
 
@@ -114,6 +115,7 @@ export class CombatResolver {
     const firepowerBreakdown: FirepowerBreakdown = {
       prePenaltyFirepower: shots.reduce((sum, shot) => sum + shot.breakdown.prePenaltyFirepower, 0),
       recoilReduction: shots.reduce((sum, shot) => sum + shot.breakdown.recoilFirepowerReduction, 0),
+      playerDebuffReduction: shots.reduce((sum, shot) => sum + shot.breakdown.playerDebuffFirepowerReduction, 0),
       distanceReduction: shots.reduce((sum, shot) => sum + shot.breakdown.distanceFirepowerReduction, 0),
       distancePenaltyPercents: [...new Set(shots.map(shot => shot.breakdown.rangePenaltyPercent)
         .filter(percent => percent > 0))],
@@ -135,16 +137,15 @@ export class CombatResolver {
     if (definition.moveBefore) after.distance = this.clampDistance(after.distance + definition.moveBefore);
     const shotDistance = after.distance;
     const range = this.rangePenalty(shotDistance, context);
-    const effectiveRecoil = Math.max(0, cursor.recoil - (definition.recoilRecovery ?? 0));
+    const recoilBefore = cursor.recoil;
     const reducedRecoil = Math.max(0, definition.recoil - this.modifier(context, 'recoilReduction')
       - (definition.recoil >= 3 ? this.modifier(context, 'highRecoilReduction') : 0));
-    const recoilBefore = definition.recoilScale ? 0 : effectiveRecoil;
-    const recoilAfter = recoilBefore + reducedRecoil;
     const threshold = this.getRecoilThreshold(context);
     // 반동 전환탄은 쌓인 반동을 피해로 바꾸면서 전부 소비한다.
-    // 이번 탄으로 누적 반동이 임계치를 넘으면 같은 탄의 화력부터 감소한다.
-    const recoilPenalty = definition.recoilScale ? 0 : Math.max(0, recoilAfter - threshold)
-      + (effectiveRecoil > 0 ? context.playerState?.heavyKickPenaltyBonus ?? 0 : 0);
+    // 현재 탄의 반동 생성과 회복은 다음 탄부터 화력에 영향을 준다.
+    const recoilPenalty = definition.recoilScale ? 0 : recoilFirepowerPenalty(recoilBefore, threshold);
+    const playerDebuffFirepowerPenalty = definition.recoilScale || recoilBefore === 0
+      ? 0 : context.playerState?.heavyKickPenaltyBonus ?? 0;
     const followUpBonus = cursor.followUp;
     const vulnerableBonus = isVulnerable(before) && definition.vulnerableBonus
       ? definition.vulnerableBonus + this.modifier(context, 'vulnerableEffect') : 0;
@@ -155,14 +156,16 @@ export class CombatResolver {
     const kickbackBonus = definition.recoilScale ? Math.min(definition.recoilScale.cap, cursor.recoil) : 0;
     const conditionalBonus = vulnerableBonus + suppressedBonus + executionBonus + healthBonus + kickbackBonus;
     const preRecoilFirepower = Math.max(0, definition.firepower + conditionalBonus + followUpBonus);
-    const baseFirepower = Math.max(0, preRecoilFirepower - recoilPenalty);
+    const afterRecoilFirepower = Math.max(0, preRecoilFirepower - recoilPenalty);
+    const baseFirepower = Math.max(0, afterRecoilFirepower - playerDebuffFirepowerPenalty);
     // 취약은 사격 시작 시 상태로 HP 화력에만 적용한다. 이번 탄의 상처 발동은 후속 탄부터 유효하다.
     const applyVulnerability = (firepower: number): number => firepower + (isVulnerable(before)
       ? roundPositiveFirepower(firepower * (COMBAT_BALANCE.vulnerableDamagePercent + (definition.vulnerableDamagePercentBonus ?? 0)) / 100) : 0);
     const prePenaltyFirepower = applyVulnerability(preRecoilFirepower);
     const vulnerableDamageBonus = applyVulnerability(baseFirepower) - baseFirepower;
     const effectiveFirepower = baseFirepower + vulnerableDamageBonus;
-    const recoilFirepowerReduction = prePenaltyFirepower - effectiveFirepower;
+    const recoilFirepowerReduction = prePenaltyFirepower - applyVulnerability(afterRecoilFirepower);
+    const playerDebuffFirepowerReduction = applyVulnerability(afterRecoilFirepower) - effectiveFirepower;
     // 거리 손실의 소수 부분은 탄창 안에서 이월해 작은 탄의 손실이 모두 반올림으로 사라지지 않게 한다.
     const finalFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
       COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths);
@@ -183,6 +186,7 @@ export class CombatResolver {
     after.actionShock += actionShockApplied;
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
     const movement = after.distance - before.distance;
+    const recoilAfter = (definition.recoilScale ? 0 : Math.max(0, recoilBefore - (definition.recoilRecovery ?? 0))) + reducedRecoil;
     const next = { recoil: recoilAfter, followUp: definition.followUp
       ? definition.followUp + this.modifier(context, 'followUpEffect') : 0,
     distanceLossHundredths: cursor.distanceLossHundredths + effectiveFirepower * range.percent };
@@ -195,8 +199,9 @@ export class CombatResolver {
     if (followUpBonus) detail.push(`후속 강화 +${followUpBonus}`);
     if (definition.moveAfter) detail.push(`사격 후 ${movement}m 후퇴`);
     const breakdown = { ammoFirepower: definition.firepower, prePenaltyFirepower, effectiveFirepower,
-      rangeBand: range.band, effectiveRangeBand: range.effective, recoilBefore: cursor.recoil,
+      rangeBand: range.band, effectiveRangeBand: range.effective, recoilBefore,
       recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, recoilFirepowerReduction,
+      playerDebuffFirepowerPenalty, playerDebuffFirepowerReduction,
       followUpBonus, conditionalBonus, vulnerableDamageBonus,
       rangePenaltyPercent: range.percent, distanceFirepowerReduction, projectedShock, finalFirepower };
     return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, vulnerableTriggered, actionShockApplied,

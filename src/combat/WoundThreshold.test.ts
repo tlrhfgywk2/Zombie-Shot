@@ -56,7 +56,7 @@ describe('상처 임계치와 취약 창', () => {
     const nextTurn = resolver.resolveEnemyAction(triggered).after;
     expect(nextTurn.vulnerableTurns).toBe(1);
     const volley = resolver.resolveSequence(['ball', 'ball', 'ball', 'ball'], nextTurn);
-    expect(volley.shots.map(shot => shot.hpDamage)).toEqual([8, 8, 8, 6]);
+    expect(volley.shots.map(shot => shot.hpDamage)).toEqual([8, 8, 8, 8]);
     expect(volley.finalState.vulnerableTurns).toBe(1);
     const expired = resolver.resolveEnemyAction(volley.finalState).after;
     expect(expired.vulnerableTurns).toBe(0);

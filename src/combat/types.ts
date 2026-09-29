@@ -49,6 +49,8 @@ export interface ShotBreakdown {
   recoilAfter: number;
   recoilPenalty: number;
   recoilFirepowerReduction: number;
+  playerDebuffFirepowerPenalty: number;
+  playerDebuffFirepowerReduction: number;
   followUpBonus: number;
   conditionalBonus: number;
   vulnerableDamageBonus: number;
@@ -60,6 +62,7 @@ export interface ShotBreakdown {
 export interface FirepowerBreakdown {
   prePenaltyFirepower: number;
   recoilReduction: number;
+  playerDebuffReduction: number;
   distanceReduction: number;
   distancePenaltyPercents: number[];
   finalFirepower: number;

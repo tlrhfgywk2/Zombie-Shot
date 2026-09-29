@@ -69,10 +69,14 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .recoil-gauge-head { display: flex; align-items: baseline; justify-content: space-between; min-width: 0; }
 .recoil-gauge-head span { color: #aebbb0; font-size: .62rem; font-weight: 800; }
 .recoil-gauge-head strong { color: #ffbd66; font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
+.recoil-next { display: flex; align-items: baseline; justify-content: space-between; gap: .25rem; }
+.recoil-next span { color: #aebbb0; font-size: var(--combat-label-size); font-weight: 800; white-space: nowrap; }
+.recoil-next strong { color: #ffbd66; font-size: var(--combat-value-size); font-variant-numeric: tabular-nums; line-height: 1; }
 .recoil-track { position: relative; height: 5px; background: rgba(255,189,102,.14); }
 .recoil-track i { display: block; width: 0; height: 100%; background: #ffbd66; box-shadow: 0 0 7px rgba(255,189,102,.55); transition: width .18s ease; }
 .recoil-gauge[data-full] { border-color: rgba(255,103,86,.65); background: rgba(52,18,15,.85); }
 .recoil-gauge[data-full] .recoil-gauge-head strong { color: #ff8b7e; }
+.recoil-gauge[data-full] .recoil-next strong { color: #ff8b7e; }
 .recoil-gauge[data-full] .recoil-track i { background: #ff6756; box-shadow: 0 0 8px rgba(255,103,86,.7); }
 .audio-controls { display: grid; grid-template-columns: 50px 1fr; min-height: 44px; border: 1px solid var(--line); background: rgba(10, 15, 12, .8); pointer-events: auto; backdrop-filter: blur(8px); }
 .audio-controls button { display: grid; place-content: center; min-width: 0; min-height: 44px; padding: .25rem; border: 0; border-right: 1px solid var(--line); background: transparent; cursor: pointer; touch-action: manipulation; }
@@ -276,9 +280,9 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
   grid-column: 2;
   position: relative;
   width: 116px;
-  height: 126px;
+  height: 134px;
   grid-template-columns: 54px 56px;
-  grid-template-rows: 36px 42px 36px;
+  grid-template-rows: 36px 42px 44px;
   gap: 6px;
 }
 .game-shell[data-layout="portrait"] .distance-card {
@@ -289,7 +293,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 }
 .game-shell[data-layout="portrait"] .distance-card small { font-size: .5rem; letter-spacing: .1em; }
 .game-shell[data-layout="portrait"] .distance-card strong { margin-top: .08rem; font-size: .94rem; }
-.game-shell[data-layout="portrait"] .recoil-gauge { grid-column: 1 / -1; grid-row: 3; padding: .18rem .3rem; }
+.game-shell[data-layout="portrait"] .recoil-gauge { grid-column: 1 / -1; grid-row: 3; gap: .12rem; padding: .12rem .3rem; }
 .game-shell[data-layout="portrait"] .recoil-gauge-head span { font-size: .56rem; }
 .game-shell[data-layout="portrait"] .recoil-track { height: 4px; }
 .game-shell[data-layout="portrait"] .audio-controls { display: block; position: relative; min-height: 42px; overflow: visible; }
@@ -714,7 +718,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .mag-slot.will-not-fire .round-visual, .mag-slot.will-not-fire .slot-content { opacity: .38; }
 .mag-slot.will-not-fire::after { content: '미발사'; position: absolute; right: 3px; bottom: 2px; color: #b0b9af; font-size: .5rem; font-weight: 800; }
 
-.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 142px; }
+.game-shell[data-layout="portrait"] { --portrait-top-hud-height: 150px; }
 .game-shell[data-layout="portrait"] .enemy-vitals { grid-template-columns: .86fr 1fr 1.45fr; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 94px; min-height: 94px; }
 .game-shell[data-layout="portrait"] .tactical-console .mag-slot.filled { grid-template-columns: 9px minmax(0, 1fr); column-gap: .15rem; padding: .34rem .18rem .22rem .2rem; }
