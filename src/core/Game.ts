@@ -1,7 +1,7 @@
 import { CombatResolver, getVisualKickScale, previewEnemyAction } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
-import { countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
+import { AMMO_ORDER, countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
 import { generateAttachmentReward } from '../progression/AttachmentRewards';
 import { generateAmmoRewards } from '../progression/AmmoRewards';
 import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
@@ -317,8 +317,10 @@ export class Game {
     const rounds = this.player.magazine.getRounds();
     this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity, this.player.getBuild(), this.player.getSpecialCapacity());
     const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
-    const sequence = rounds.length > 0 ? this.resolver.resolveSequence(rounds, this.zombie.snapshot(), context) : undefined;
-    this.ui.renderPreview(sequence);
+    const enemy = this.zombie.snapshot();
+    const sequence = rounds.length > 0 ? this.resolver.resolveSequence(rounds, enemy, context) : undefined;
+    const ammoOptionPreviews = this.resolver.previewAppendedAmmo(rounds, AMMO_ORDER, enemy, context);
+    this.ui.renderPreview(sequence, ammoOptionPreviews);
   }
 
   private syncEnemy(): void {

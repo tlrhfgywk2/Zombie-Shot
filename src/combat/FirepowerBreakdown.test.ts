@@ -82,4 +82,12 @@ describe('화력 계산 내역', () => {
     expect(sequence.firepowerBreakdown.prePenaltyFirepower - sequence.firepowerBreakdown.recoilReduction
       - sequence.firepowerBreakdown.distanceReduction).toBe(sequence.firepowerBreakdown.finalFirepower);
   });
+
+  it('탄약 패널 후보는 현재 발사 순서 맨 뒤에 추가한 화력을 미리 계산한다', () => {
+    const rounds = ['serrated', 'wounding', 'laceration'] as const;
+    const previews = resolver.previewAppendedAmmo(rounds, ['laceration', 'ball'], target(),
+      { loadout: { muzzle: 'muzzleBrake' } });
+    expect(previews.laceration).toMatchObject({ effectiveFirepower: 8, recoilFirepowerReduction: 2 });
+    expect(previews.ball).toMatchObject({ effectiveFirepower: 6, recoilFirepowerReduction: 2 });
+  });
 });

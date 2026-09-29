@@ -130,6 +130,13 @@ export class CombatResolver {
       totalActionShockApplied: shots.reduce((sum, shot) => sum + shot.actionShockApplied, 0),
       unfiredRounds: [...unfiredRounds], killed: current.hp <= 0 };
   }
+  previewAppendedAmmo(rounds: readonly AmmoType[], candidates: readonly AmmoType[], enemyState: EnemyState,
+    context: CombatContext = {}): Partial<Record<AmmoType, RoundPreview>> {
+    return Object.fromEntries(candidates.map((ammo): [AmmoType, RoundPreview | undefined] => {
+      const preview = this.resolveSequence([...rounds, ammo], enemyState, context).roundPreviews.at(-1);
+      return [ammo, preview];
+    }).filter((entry): entry is [AmmoType, RoundPreview] => entry[1] !== undefined));
+  }
   private resolveRound(ammoType: AmmoType, index: number, enemy: EnemyState, context: CombatContext,
     cursor: SequenceCursor): { shot: ShotResult; next: SequenceCursor } {
     const definition = AMMO_DEFINITIONS[ammoType];
