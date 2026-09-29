@@ -131,9 +131,14 @@ export class CombatResolver {
     const shotDistance = after.distance;
     const range = this.rangePenalty(shotDistance, context);
     const effectiveRecoil = Math.max(0, cursor.recoil - (definition.recoilRecovery ?? 0));
+    const reducedRecoil = Math.max(0, definition.recoil - this.modifier(context, 'recoilReduction')
+      - (definition.recoil >= 3 ? this.modifier(context, 'highRecoilReduction') : 0));
+    const recoilBefore = definition.recoilScale ? 0 : effectiveRecoil;
+    const recoilAfter = recoilBefore + reducedRecoil;
     const threshold = this.getRecoilThreshold(context);
     // 반동 전환탄은 쌓인 반동을 피해로 바꾸면서 전부 소비한다.
-    const recoilPenalty = definition.recoilScale ? 0 : Math.max(0, effectiveRecoil - threshold)
+    // 이번 탄으로 누적 반동이 임계치를 넘으면 같은 탄의 화력부터 감소한다.
+    const recoilPenalty = definition.recoilScale ? 0 : Math.max(0, recoilAfter - threshold)
       + (effectiveRecoil > 0 ? context.playerState?.heavyKickPenaltyBonus ?? 0 : 0);
     const followUpBonus = cursor.followUp;
     const vulnerableBonus = isVulnerable(before) && definition.vulnerableBonus
@@ -171,10 +176,6 @@ export class CombatResolver {
     after.actionShock += actionShockApplied;
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
     const movement = after.distance - before.distance;
-    const reducedRecoil = Math.max(0, definition.recoil - this.modifier(context, 'recoilReduction')
-      - (definition.recoil >= 3 ? this.modifier(context, 'highRecoilReduction') : 0));
-    const recoilBefore = definition.recoilScale ? 0 : effectiveRecoil;
-    const recoilAfter = recoilBefore + reducedRecoil;
     const next = { recoil: recoilAfter, followUp: definition.followUp
       ? definition.followUp + this.modifier(context, 'followUpEffect') : 0 };
     const detail = [`${definition.name}`, `${RANGE_NAMES[range.effective]} ${formatRangePenalty(range.percent)}`];

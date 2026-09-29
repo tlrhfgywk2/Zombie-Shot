@@ -61,7 +61,9 @@ export class GameUI {
   private readonly nextActionShock: HTMLElement;
   private readonly distanceText: HTMLElement;
   private readonly rangeBandText: HTMLElement;
-  private readonly recoilThresholdText: HTMLElement;
+  private readonly recoilGauge: HTMLElement;
+  private readonly recoilValue: HTMLElement;
+  private readonly recoilFill: HTMLElement;
   private readonly levelText: HTMLElement;
   private readonly waveText: HTMLElement;
   private readonly phaseText: HTMLElement;
@@ -98,6 +100,8 @@ export class GameUI {
   private firepowerTooltipMode?: 'mouse' | 'focus' | 'touch';
   private firepowerLeaveTimer?: number;
   private firepowerPointerType?: string;
+  private recoilThreshold: number = COMBAT_BALANCE.recoilThreshold;
+  private recoilAmount = 0;
   private readonly shell: HTMLElement;
 
   constructor(root: HTMLElement, private readonly callbacks: GameUICallbacks) {
@@ -112,7 +116,7 @@ export class GameUI {
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
               <div id="enemy-action" class="enemy-action"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span><small>다음 행동</small><strong id="next-action-name">접근 2.0 m</strong></span><em id="next-action-shock" aria-label="중단 충격 4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><b>4</b></em></div>
             </div><div id="enemy-status" class="enemy-status-list" aria-live="polite" hidden></div><div id="enemy-context" class="enemy-context" role="note"></div></div>
-            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div class="weapon-readout" aria-label="반동 상태"><div><span>반동 임계치</span><strong id="recoil-threshold-text">3</strong></div></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
+            <div class="utility-stack"><div class="distance-card"><small id="range-band-text">중거리</small><strong id="distance-text">8.0 m</strong></div><div id="recoil-gauge" class="recoil-gauge" role="meter" aria-label="예상 반동" aria-valuemin="0" aria-valuenow="0" aria-valuemax="6" aria-valuetext="반동 0, 임계치 3"><div class="recoil-gauge-head"><span>반동</span><strong id="recoil-value">0</strong></div><div class="recoil-track"><i id="recoil-fill"></i><b></b></div></div><div class="audio-controls" aria-label="오디오 설정"><button id="audio-mute" type="button" aria-pressed="false"><span>음향</span><strong id="audio-state">켜짐</strong></button><label><span class="sr-only">전체 음량</span><input id="audio-volume" type="range" min="0" max="1" step="0.05" value="0.65" aria-label="전체 음량" /></label></div><button id="inventory-button" class="inventory-open-button" type="button" data-open-ammo-inventory aria-label="보유 탄약" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg><span>보유 탄약</span></button></div>
           </header>
           <aside class="phase-panel"><span id="wave-text" class="eyebrow">조우 1/5 · 표적 1/1</span><strong id="phase-text">전투 준비</strong><section id="player-debuffs" class="player-debuffs" aria-label="플레이어 약화 효과" aria-live="polite" hidden></section></aside>
           <aside id="preview-outcome" class="combat-forecast" aria-label="발사 결과 예상" aria-live="polite" hidden>
@@ -159,7 +163,9 @@ export class GameUI {
     this.nextActionShock = this.required(root, '#next-action-shock');
     this.distanceText = this.required(root, '#distance-text');
     this.rangeBandText = this.required(root, '#range-band-text');
-    this.recoilThresholdText = this.required(root, '#recoil-threshold-text');
+    this.recoilGauge = this.required(root, '#recoil-gauge');
+    this.recoilValue = this.required(root, '#recoil-value');
+    this.recoilFill = this.required(root, '#recoil-fill');
     this.levelText = this.required(root, '#level-text');
     this.waveText = this.required(root, '#wave-text');
     this.phaseText = this.required(root, '#phase-text');
@@ -473,7 +479,8 @@ export class GameUI {
   }
 
   updateRecoilThreshold(threshold: number): void {
-    this.recoilThresholdText.textContent = String(threshold);
+    this.recoilThreshold = threshold;
+    this.renderRecoilGauge();
   }
 
   setPhase(phase: GamePhase): void {
@@ -524,9 +531,11 @@ export class GameUI {
     if (!sequence) {
       this.previewOutcome.hidden = true;
       this.firepowerBreakdown = undefined;
+      this.setRecoilAmount(0, '예상 반동');
       if (this.firepowerTooltipMode) this.hideTooltip();
       return;
     }
+    this.setRecoilAmount(sequence.shots.at(-1)?.breakdown.recoilAfter ?? 0, '예상 반동');
     this.updateFirepowerPanel(sequence.firepowerBreakdown, '총 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${sequence.totalWoundApplied}`;
     this.required(this.previewOutcome, '#forecast-impact-value').textContent = String(sequence.totalActionShockApplied);
@@ -538,6 +547,7 @@ export class GameUI {
   showShot(result: ShotResult): void {
     this.slots.forEach((slot, index) => slot.classList.toggle('is-firing', index === result.index));
     const shot = result.breakdown;
+    this.setRecoilAmount(shot.recoilAfter, '현재 반동');
     this.updateFirepowerPanel({
       prePenaltyFirepower: shot.prePenaltyFirepower,
       recoilReduction: shot.recoilFirepowerReduction,
@@ -677,6 +687,24 @@ export class GameUI {
     if (this.firepowerTooltipMode) this.renderFirepowerTooltip();
   }
 
+  private setRecoilAmount(amount: number, label: string): void {
+    this.recoilAmount = amount;
+    this.recoilGauge.setAttribute('aria-label', label);
+    this.renderRecoilGauge();
+  }
+
+  private renderRecoilGauge(): void {
+    const scale = Math.max(this.recoilThreshold + 3, this.recoilAmount, 1);
+    const exceeded = this.recoilAmount > this.recoilThreshold;
+    this.recoilGauge.style.setProperty('--recoil-threshold-position', `${this.recoilThreshold / scale * 100}%`);
+    this.recoilFill.style.width = `${this.recoilAmount / scale * 100}%`;
+    this.recoilValue.textContent = String(this.recoilAmount);
+    this.recoilGauge.toggleAttribute('data-exceeded', exceeded);
+    this.recoilGauge.setAttribute('aria-valuenow', String(this.recoilAmount));
+    this.recoilGauge.setAttribute('aria-valuemax', String(scale));
+    this.recoilGauge.setAttribute('aria-valuetext', `반동 ${this.recoilAmount}, 임계치 ${this.recoilThreshold}${exceeded ? ', 화력 감소' : ''}`);
+  }
+
   private renderFirepowerTooltip(): void {
     const breakdown = this.firepowerBreakdown;
     if (!breakdown) return;
@@ -684,7 +712,7 @@ export class GameUI {
     const hasPenalty = breakdown.recoilReduction > 0 || breakdown.distanceReduction > 0;
     this.ammoTooltip.innerHTML = `<header><span>화력 상세</span><strong>${breakdown.finalFirepower}</strong></header><div class="firepower-breakdown">
       ${hasPenalty ? `<span>감쇠 전 화력 <b>${breakdown.prePenaltyFirepower}</b></span>
-      ${breakdown.distanceReduction > 0 ? `<span class="distance-reduction">거리 감소 <b>-${breakdown.distanceReduction} · ${distancePercents}</b></span>` : ''}
+      ${breakdown.distanceReduction > 0 ? `<span class="distance-reduction">거리 감소 <b>${distancePercents}</b></span>` : ''}
       ${breakdown.recoilReduction > 0 ? `<span class="recoil-reduction">반동 감소 <b>-${breakdown.recoilReduction}</b></span>` : ''}` : '<span>적용된 화력 감소 없음</span>'}
     </div>`;
   }
