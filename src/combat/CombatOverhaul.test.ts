@@ -37,12 +37,12 @@ describe('새 탄약과 전투 상태', () => {
     expect(sequence.finalState.wound).toBe(3);
     expect(resolver.resolveSequence(['wounding', 'wounding', 'laceration'], target()).shots[2]?.hpDamage).toBe(10);
   });
-  it('릴레이는 바로 다음 한 발만 강화하며 연속 릴레이는 덮어써 이어 간다', () => {
+  it('연계탄는 바로 다음 한 발만 강화하며 연속 연계탄는 덮어써 이어 간다', () => {
     expect(resolver.resolveSequence(['relay', 'ball', 'ball'], target()).shots.map(s => s.breakdown.followUpBonus)).toEqual([0, 4, 0]);
     expect(resolver.resolveSequence(['relay', 'relay', 'ball'], target()).shots.map(s => s.breakdown.followUpBonus)).toEqual([0, 4, 4]);
     expect(damage('relay')).toBeLessThan(damage('ball'));
   });
-  it('반동 전환탄은 누적 반동을 피해로 바꾸고 모두 소비한다', () => {
+  it('반동탄은 누적 반동을 피해로 바꾸고 모두 소비한다', () => {
     const sequence = resolver.resolveSequence(['plusP', 'plusP', 'kickback', 'ball'], target());
     expect(sequence.shots[2]).toMatchObject({ hpDamage: 8, breakdown: { recoilBefore: 6, recoilAfter: 0, conditionalBonus: 6 } });
     expect(sequence.shots[3]?.breakdown.recoilPenalty).toBe(0);
@@ -63,7 +63,7 @@ describe('새 탄약과 전투 상태', () => {
     expect(damage('suppression', enemy)).toBe(3);
     expect(damage('suppression', { ...enemy, actionShock: getActionShockThreshold(enemy) })).toBe(6);
   });
-  it('할로 포인트와 처형탄은 서로 다른 체력 조건을 사용한다', () => {
+  it('중공탄와 처형탄은 서로 다른 체력 조건을 사용한다', () => {
     expect(damage('hollowPoint', target(100))).toBe(6);
     expect(damage('hollowPoint', target(9))).toBe(3);
     expect(damage('execution', { ...target(100), hp: 31 })).toBe(3);
@@ -146,7 +146,7 @@ describe('최종 부착물과 런 진행', () => {
     expect(brake.breakdown.recoilBefore).toBe(4);
     expect(resolver.resolveSequence(['ball', 'ball'], target(), { loadout: { grip: 'texturedGrip' } }).shots[1]?.breakdown.recoilBefore).toBe(0);
   });
-  it('인체공학 손잡이는 릴레이 후속 효과만 키운다', () => {
+  it('인체공학 손잡이는 연계탄 후속 효과만 키운다', () => {
     const base = resolver.resolveSequence(['relay', 'ball'], target()).shots[1]!.hpDamage;
     const boosted = resolver.resolveSequence(['relay', 'ball'], target(), { loadout: { grip: 'ergonomicGrip' } }).shots[1]!.hpDamage;
     expect(boosted).toBe(base + 1);
@@ -155,8 +155,8 @@ describe('최종 부착물과 런 진행', () => {
 });
 
 describe('데이터와 완성 탄창', () => {
-  it('최종 18종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
-    expect(AMMO_ORDER).toHaveLength(18);
+  it('최종 21종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
+    expect(AMMO_ORDER).toHaveLength(21);
     expect(ATTACHMENT_ORDER).toHaveLength(11);
     expect(new Set(AMMO_ORDER)).toEqual(new Set(Object.keys(AMMO_DEFINITIONS)));
     expect(new Set(ATTACHMENT_ORDER)).toEqual(new Set(Object.keys(ATTACHMENT_DEFINITIONS)));

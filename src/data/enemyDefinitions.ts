@@ -20,7 +20,7 @@ export const createEnemyState = (type: EnemyType): EnemyState => {
   const intent = definition.intent ? { type: definition.intent.type, name: definition.intent.name,
     description: definition.intent.description, countdown: definition.intent.initialCountdown,
     cooldown: definition.intent.cooldown } : undefined;
-  return { type, hp: definition.hp, maxHp: definition.hp, wound: 0,
+  return { type, hp: definition.hp, maxHp: definition.hp, wound: 0, explosive: 0,
     woundThreshold: definition.woundThreshold ?? COMBAT_BALANCE.woundThreshold,
     vulnerableTurns: 0, distance: definition.distance,
     advancePerTurn: definition.advancePerTurn, shockResistance: definition.shockResistance,

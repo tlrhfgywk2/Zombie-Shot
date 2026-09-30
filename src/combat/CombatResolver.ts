@@ -109,7 +109,7 @@ export class CombatResolver {
       return { ammoType, index, effectiveFirepower: shot.breakdown.effectiveFirepower,
         recoilFirepowerReduction: shot.breakdown.recoilFirepowerReduction,
         playerDebuffFirepowerReduction: shot.breakdown.playerDebuffFirepowerReduction,
-        wound: shot.woundApplied, effectiveActionShock: shot.breakdown.projectedShock,
+        wound: shot.woundApplied, explosive: shot.explosiveApplied, effectiveActionShock: shot.breakdown.projectedShock,
         recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus,
         vulnerableDamageBonus: shot.breakdown.vulnerableDamageBonus, movement: shot.movement };
     });
@@ -121,12 +121,14 @@ export class CombatResolver {
       distanceReduction: shots.reduce((sum, shot) => sum + shot.breakdown.distanceFirepowerReduction, 0),
       distancePenaltyPercents: [...new Set(shots.map(shot => shot.breakdown.rangePenaltyPercent)
         .filter(percent => percent > 0))],
+      detonationDamage: shots.reduce((sum, shot) => sum + shot.breakdown.detonationDamage, 0),
       finalFirepower: shots.reduce((sum, shot) => sum + shot.breakdown.finalFirepower, 0),
     };
     return { shots, roundPreviews, finalState: current,
       firepowerBreakdown,
       totalHpDamage: shots.reduce((sum, shot) => sum + shot.hpDamage, 0),
       totalWoundApplied: shots.reduce((sum, shot) => sum + shot.woundApplied, 0),
+      totalExplosiveApplied: shots.reduce((sum, shot) => sum + shot.explosiveApplied, 0),
       totalActionShockApplied: shots.reduce((sum, shot) => sum + shot.actionShockApplied, 0),
       unfiredRounds: [...unfiredRounds], killed: current.hp <= 0 };
   }
@@ -152,7 +154,7 @@ export class CombatResolver {
     const recoilAfter = (definition.recoilScale ? 0
       : Math.max(0, recoilBefore - (definition.recoilRecovery ?? 0))) + reducedRecoil;
     const threshold = this.getRecoilThreshold(context);
-    // 반동 전환탄은 쌓인 반동을 피해로 바꾸면서 전부 소비한다.
+    // 반동탄은 쌓인 반동을 피해로 바꾸면서 전부 소비한다.
     // 이번 탄으로 누적 반동이 임계치를 넘으면 같은 탄의 화력부터 감소한다.
     const recoilPenalty = definition.recoilScale ? 0 : recoilFirepowerPenalty(recoilAfter, threshold);
     const playerDebuffFirepowerPenalty = definition.recoilScale || recoilBefore === 0
@@ -172,15 +174,26 @@ export class CombatResolver {
     // 취약은 사격 시작 시 상태로 HP 화력에만 적용한다. 이번 탄의 상처 발동은 후속 탄부터 유효하다.
     const applyVulnerability = (firepower: number): number => firepower + (isVulnerable(before)
       ? roundPositiveFirepower(firepower * (COMBAT_BALANCE.vulnerableDamagePercent + (definition.vulnerableDamagePercentBonus ?? 0)) / 100) : 0);
-    const prePenaltyFirepower = applyVulnerability(preRecoilFirepower);
+    const directPrePenaltyFirepower = applyVulnerability(preRecoilFirepower);
     const vulnerableDamageBonus = applyVulnerability(baseFirepower) - baseFirepower;
     const effectiveFirepower = baseFirepower + vulnerableDamageBonus;
-    const recoilFirepowerReduction = prePenaltyFirepower - applyVulnerability(afterRecoilFirepower);
+    const recoilFirepowerReduction = directPrePenaltyFirepower - applyVulnerability(afterRecoilFirepower);
     const playerDebuffFirepowerReduction = applyVulnerability(afterRecoilFirepower) - effectiveFirepower;
     // 거리 손실의 소수 부분은 탄창 안에서 이월해 작은 탄의 손실이 모두 반올림으로 사라지지 않게 한다.
-    const finalFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
+    const directFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
       COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths);
-    const distanceFirepowerReduction = effectiveFirepower - finalFirepower;
+    const distanceFirepowerReduction = effectiveFirepower - directFirepower;
+    const projectedShock = definition.actionShock > 0
+      ? definition.actionShock + this.modifier(context, 'impact', range.band) : 0;
+    // 폭발은 턴/거리/반동/취약과 무관하게 유지된다. 이번 명중의 충격만 기폭하며 기존 충격은 기폭하지 않는다.
+    const explosiveApplied = after.hp > directFirepower ? definition.explosive : 0;
+    after.explosive += explosiveApplied;
+    const explosiveConsumed = before.hp > 0 && projectedShock > 0 ? after.explosive : 0;
+    const detonationDamage = explosiveConsumed * COMBAT_BALANCE.explosionDamagePerStack;
+    after.explosive -= explosiveConsumed;
+    const explosionDamage = Math.min(Math.max(0, after.hp - directFirepower), detonationDamage);
+    const prePenaltyFirepower = directPrePenaltyFirepower + detonationDamage;
+    const finalFirepower = directFirepower + detonationDamage;
     const hpDamage = Math.min(after.hp, finalFirepower);
     after.hp -= hpDamage;
     const woundApplied = after.hp > 0 ? definition.wound : 0;
@@ -191,8 +204,6 @@ export class CombatResolver {
       after.wound %= after.woundThreshold;
       after.vulnerableTurns = COMBAT_BALANCE.vulnerableTurns;
     }
-    const projectedShock = definition.actionShock > 0
-      ? definition.actionShock + this.modifier(context, 'impact', range.band) : 0;
     const actionShockApplied = after.hp > 0 ? projectedShock : 0;
     after.actionShock += actionShockApplied;
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
@@ -204,6 +215,8 @@ export class CombatResolver {
     if (definition.moveBefore) detail.push(`사격 전 ${Math.abs(movement)}m 전진`);
     if (hpDamage) detail.push(`체력 -${hpDamage}`);
     if (woundApplied) detail.push(`상처 +${woundApplied}`);
+    if (explosiveApplied) detail.push(`폭발 +${explosiveApplied}`);
+    if (explosiveConsumed) detail.push(`기폭 ${explosiveConsumed} · 폭발 피해 ${explosionDamage}`);
     if (vulnerableTriggered) detail.push(`취약 ${after.vulnerableTurns}턴 발동`);
     if (actionShockApplied) detail.push(`충격 +${actionShockApplied}`);
     if (followUpBonus) detail.push(`후속 강화 +${followUpBonus}`);
@@ -213,8 +226,8 @@ export class CombatResolver {
       recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, recoilFirepowerReduction,
       playerDebuffFirepowerPenalty, playerDebuffFirepowerReduction,
       followUpBonus, conditionalBonus, vulnerableDamageBonus,
-      rangePenaltyPercent: range.percent, distanceFirepowerReduction, projectedShock, finalFirepower };
-    return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, vulnerableTriggered, actionShockApplied,
+      rangePenaltyPercent: range.percent, distanceFirepowerReduction, projectedShock, detonationDamage, finalFirepower };
+    return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, explosiveApplied, explosiveConsumed, explosionDamage, vulnerableTriggered, actionShockApplied,
       killed: after.hp <= 0, description: detail.join(' · '), breakdown,
       before, after, shotDistance, movement }, next };
   }

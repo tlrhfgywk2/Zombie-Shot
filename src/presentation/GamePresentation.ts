@@ -289,7 +289,7 @@ export class GamePresentation {
     this.presentationState = '사격 준비';
   }
 
-  async animateShot(ammoType: AmmoType): Promise<void> {
+  async animateShot(ammoType: AmmoType, explosiveConsumed = 0): Promise<void> {
     this.presentationState = `발사 · ${AMMO_DEFINITIONS[ammoType].name}`;
     this.animationInProgress = true;
     const definition = AMMO_DEFINITIONS[ammoType];
@@ -322,7 +322,9 @@ export class GamePresentation {
     });
     this.disposeObject(projectile);
     this.audio.impact(ammoType);
-    await Promise.all([this.animateImpact(ammoType, target), this.animateHitReaction(ammoType)]);
+    if (explosiveConsumed > 0) this.audio.explosion();
+    await Promise.all([this.animateImpact(ammoType, target), this.animateHitReaction(ammoType),
+      ...(explosiveConsumed > 0 ? [this.animateExplosion(target, explosiveConsumed)] : [])]);
     const recoilPosition = this.pistolModel.root.position.clone();
     const recoilQuaternion = this.pistolModel.root.quaternion.clone();
     await this.gunTween(PRESENTATION_TIMING.shotSettle, (progress) => {
@@ -997,6 +999,26 @@ export class GamePresentation {
       group.add(trail);
     }
     return group;
+  }
+
+  private async animateExplosion(position: THREE.Vector3, stacks: number): Promise<void> {
+    const effect = new THREE.Group();
+    effect.position.copy(position);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffac42, transparent: true, opacity: 0.8, depthWrite: false });
+    const flash = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 12), material);
+    const ringMaterial = new THREE.MeshBasicMaterial({ color: 0xffd68b, transparent: true, opacity: 1, side: THREE.DoubleSide, depthWrite: false });
+    const ring = new THREE.Mesh(new THREE.RingGeometry(0.26, 0.32, 32), ringMaterial);
+    ring.quaternion.copy(this.camera.quaternion);
+    effect.add(flash, ring);
+    this.scene.add(effect);
+    const scale = 1 + Math.min(2, stacks / 8);
+    await this.gunTween(360, progress => {
+      flash.scale.setScalar(1 + progress * scale * 3);
+      ring.scale.setScalar(1 + progress * scale * 5);
+      material.opacity = 0.8 * (1 - progress) ** 2;
+      ringMaterial.opacity = 1 - progress;
+    });
+    this.disposeObject(effect);
   }
 
   private async animateImpact(ammoType: AmmoType, position: THREE.Vector3): Promise<void> {

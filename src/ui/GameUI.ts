@@ -38,6 +38,7 @@ const PHASE_LABELS: Record<GamePhase, string> = {
 
 const COMBAT_STAT_ICONS = {
   wound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg>',
+  explosive: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m13 2-2 6-6-2 3 6-6 3 7 1 2 6 3-6 7-2-6-3 2-6-4 3Z"/></svg>',
   shock: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg>',
   recoil: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 15 4-4 3 3 5-7 4 3"/></svg>',
 } as const;
@@ -120,6 +121,7 @@ export class GameUI {
             <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong></div>
             <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">22 / 22</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
               <div class="enemy-stat enemy-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong id="wound-text">0/${COMBAT_BALANCE.woundThreshold}</strong></span></div>
+              <div class="enemy-stat enemy-explosive">${COMBAT_STAT_ICONS.explosive}<span><small>폭발</small><strong id="explosive-text">0</strong></span></div>
               <div class="enemy-stat enemy-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong><b id="impact-text">0</b><em id="impact-threshold">/5</em></strong></span><i><b id="impact-fill"></b></i></div>
               <button id="enemy-action" type="button" class="enemy-action" aria-controls="enemy-context" aria-describedby="enemy-context" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span><small>다음 행동</small><strong id="next-action-name">접근 2.0 m</strong></span><em id="next-action-shock" aria-label="중단 충격 4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><b>4</b></em></button>
             </div><div id="enemy-status" class="enemy-status-list" aria-live="polite" hidden></div><div id="enemy-context" class="enemy-context" role="tooltip"></div></div>
@@ -129,6 +131,7 @@ export class GameUI {
           <aside id="preview-outcome" class="combat-forecast" aria-label="발사 결과 예상" aria-live="polite" hidden>
             <button id="firepower-button" type="button" class="forecast-stat forecast-damage" aria-controls="ammo-tooltip" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg><span><small id="firepower-label">총 화력</small><strong id="firepower-value">0</strong></span></button>
             <div class="forecast-stat forecast-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong id="forecast-wound-value">+0</strong></span></div>
+            <div class="forecast-stat forecast-explosive">${COMBAT_STAT_ICONS.explosive}<span><small>폭발 잔량</small><strong id="forecast-explosive-value">0</strong></span></div>
             <div class="forecast-stat forecast-impact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.2 6.1L20 5.4l-2.7 5.4 4.7 1.3-5.2 2.2 2 5.7-5.1-3.2L12 22l-1.8-5.2L5.1 20l2-5.7L2 12.1l4.7-1.3L4 5.4l5.8 2.7L12 2Z"/></svg><span><small>충격</small><strong id="forecast-impact-value">0</strong></span></div>
             <div class="forecast-stat forecast-range"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M17 7l4-4M17 3h4v4"/></svg><span><small>최종 거리</small><strong id="forecast-range-value">0.0 m</strong></span></div>
           </aside>
@@ -343,10 +346,13 @@ export class GameUI {
     this.magazineCapacity = capacity;
     const slotHost = this.slots[0]?.parentElement;
     slotHost?.style.setProperty('--mag-capacity', String(capacity));
+    slotHost?.parentElement?.toggleAttribute('data-expanded', capacity > 4);
     this.slots.forEach((slot, index) => {
       slot.hidden = index >= capacity;
       const ammo = rounds[index];
       slot.className = `mag-slot${ammo ? ` filled ammo-${ammo}` : ''}`;
+      if (ammo) slot.style.setProperty('--bullet', AMMO_DEFINITIONS[ammo].cssColor);
+      else slot.style.removeProperty('--bullet');
       slot.innerHTML = ammo ? `<span class="slot-index">0${index + 1}</span><span class="round-visual"><i></i></span><span class="slot-content"><strong>${AMMO_DEFINITIONS[ammo].shortName}</strong></span>` : `<span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span>`;
       slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}, 탭하여 즉시 제거` : `${index + 1}번 빈 슬롯`);
       slot.setAttribute('aria-pressed', 'false');
@@ -529,6 +535,9 @@ export class GameUI {
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
     this.woundText.textContent = `${enemy.wound}/${enemy.woundThreshold}`;
     this.woundText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.wound === 0);
+    const explosiveText = this.required(this.shell, '#explosive-text');
+    explosiveText.textContent = String(enemy.explosive);
+    explosiveText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.explosive === 0);
     this.impactText.textContent = String(enemy.actionShock);
     this.impactThreshold.textContent = `/${action.threshold}`;
     this.impactFill.style.width = `${Math.min(100, enemy.actionShock / action.threshold * 100)}%`;
@@ -552,8 +561,8 @@ export class GameUI {
       : action.selectedAction === 'attack'
         ? '방어선을 돌파해 전투를 끝냅니다.'
         : enemy.intent?.description ?? '특수 행동을 사용합니다.';
-    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span><span class="intent-detail"><b>${ACTION_NAMES[action.selectedAction]}</b> · ${actionDescription}</span>`;
-    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
+    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span><span class="intent-detail"><b>${ACTION_NAMES[action.selectedAction]}</b> · ${actionDescription}</span>`;
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 폭발 ${enemy.explosive}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
   }
 
   renderPreview(sequence: SequenceResult | undefined,
@@ -581,10 +590,11 @@ export class GameUI {
     this.setRecoilAmount(sequence.shots.at(-1)?.breakdown.recoilAfter ?? 0, '예상 반동');
     this.updateFirepowerPanel(sequence.firepowerBreakdown, '총 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${sequence.totalWoundApplied}`;
+    this.required(this.previewOutcome, '#forecast-explosive-value').textContent = String(sequence.finalState.explosive);
     this.required(this.previewOutcome, '#forecast-impact-value').textContent = String(sequence.totalActionShockApplied);
     this.required(this.previewOutcome, '#forecast-range-value').textContent = `${sequence.finalState.distance.toFixed(1)} m`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${sequence.firepowerBreakdown.finalFirepower}, 상처 ${sequence.totalWoundApplied}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 ${sequence.finalState.distance.toFixed(1)}미터`);
+    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${sequence.firepowerBreakdown.finalFirepower}, 상처 ${sequence.totalWoundApplied}, 폭발 잔량 ${sequence.finalState.explosive}, 기폭 피해 ${sequence.firepowerBreakdown.detonationDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 ${sequence.finalState.distance.toFixed(1)}미터`);
   }
 
   showShot(result: ShotResult): void {
@@ -596,12 +606,14 @@ export class GameUI {
       playerDebuffReduction: shot.playerDebuffFirepowerReduction,
       distanceReduction: shot.distanceFirepowerReduction,
       distancePenaltyPercents: shot.distanceFirepowerReduction > 0 ? [shot.rangePenaltyPercent] : [],
+      detonationDamage: shot.detonationDamage,
       finalFirepower: shot.finalFirepower,
     }, '현재 탄 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${result.woundApplied}`;
+    this.required(this.previewOutcome, '#forecast-explosive-value').textContent = String(result.after.explosive);
     this.required(this.previewOutcome, '#forecast-impact-value').textContent = String(result.actionShockApplied);
     this.required(this.previewOutcome, '#forecast-range-value').textContent = `${result.after.distance.toFixed(1)} m`;
-    this.previewOutcome.setAttribute('aria-label', `현재 탄 화력 ${shot.finalFirepower}, 상처 ${result.woundApplied}, 충격 ${result.actionShockApplied}, 거리 ${result.after.distance.toFixed(1)}미터`);
+    this.previewOutcome.setAttribute('aria-label', `현재 탄 화력 ${shot.finalFirepower}, 상처 ${result.woundApplied}, 폭발 잔량 ${result.after.explosive}, 기폭 피해 ${shot.detonationDamage}, 충격 ${result.actionShockApplied}, 거리 ${result.after.distance.toFixed(1)}미터`);
   }
 
   showRecoilAfterShot(recoilAfter: number): void {
@@ -759,7 +771,8 @@ export class GameUI {
     if (!breakdown) return;
     const hasPenalty = breakdown.recoilReduction > 0 || breakdown.playerDebuffReduction > 0 || breakdown.distanceReduction > 0;
     this.ammoTooltip.innerHTML = `<header><span>화력 상세</span><strong>${breakdown.finalFirepower}</strong></header><div class="firepower-breakdown">
-      ${hasPenalty ? `<span>감쇠 전 화력 <b>${breakdown.prePenaltyFirepower}</b></span>
+      ${breakdown.detonationDamage > 0 ? `<span>기폭 피해 <b>+${breakdown.detonationDamage}</b></span>` : ''}
+      ${hasPenalty ? `<span>감쇠 전 탄약 화력 <b>${breakdown.prePenaltyFirepower - breakdown.detonationDamage}</b></span>
       ${breakdown.distanceReduction > 0 ? `<span class="distance-reduction">거리 감소 <b>-${breakdown.distanceReduction}</b></span>` : ''}
       ${breakdown.recoilReduction > 0 ? `<span class="recoil-reduction">반동 <b>-${breakdown.recoilReduction}</b></span>` : ''}
       ${breakdown.playerDebuffReduction > 0 ? `<span>반동 교란 <b>-${breakdown.playerDebuffReduction}</b></span>` : ''}` : '<span>적용된 화력 감소 없음</span>'}
@@ -797,7 +810,7 @@ export class GameUI {
     const firepower = ammoTooltipFirepower(ammo, round);
     const firepowerLabel = firepower.change === 'weakened' ? '반동 감소 반영 화력'
       : firepower.change === 'strengthened' ? '강화 반영 화력' : '화력';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>충격 <b>${definition.actionShock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>폭발 <b>${definition.explosive}</b></span><span>충격 <b>${definition.actionShock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
