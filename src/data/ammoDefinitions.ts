@@ -5,6 +5,7 @@ export interface AmmoDefinition {
   id: AmmoType; name: string; shortName: string; role: string; rarity: AmmoRarity;
   tags: readonly BuildTag[]; color: number; cssColor: string; supply?: 'infinite';
   firepower: number; wound: number; explosive: number; actionShock: number; recoil: number; recoilRecovery?: number;
+  shockFollowUp?: number; shockScale?: { divisor: number; cap: number };
   followUp?: number; healthScale?: { divisor: number; cap: number };
   recoilScale?: { cap: number };
   vulnerableBonus?: number; vulnerableDamagePercentBonus?: number; suppressedBonus?: number;
@@ -36,6 +37,10 @@ export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   highExplosive: ammo('highExplosive', '고폭탄', '고폭탄', '폭발 +3 · 높은 화력과 반동 · 충격 탄약으로 기폭', ['explosive'], 0xff713d, 4, 0, 0, 3, { explosive: 3 }),
   stickyCharge: ammo('stickyCharge', '접착폭약탄', '접착폭약탄', '폭발 +4 · 낮은 화력 · 충격 탄약으로 기폭', ['explosive'], 0xffcd63, 1, 0, 0, 2, { explosive: 4 }),
   flatNose: ammo('flatNose', '평두탄', '평두', '충격 +4', ['impact'], 0x70e6d2, 1, 0, 4),
+  reducedImpact: ammo('reducedImpact', '저충격탄', '저충격탄', '충격 +2 · 반동 없음', ['impact'], 0xa7d8cf, 1, 0, 2, 0),
+  hammer: ammo('hammer', '강타탄', '강타탄', '충격 +6 · 반동 3', ['impact'], 0x49c4b3, 1, 0, 6, 3),
+  impactRelay: ammo('impactRelay', '연쇄충격탄', '연쇄충격탄', '충격 +1 · 바로 다음 탄 충격 +3 (일반탄도 적용)', ['impact'], 0x83c5ff, 1, 0, 1, 1, { shockFollowUp: 3 }),
+  resonance: ammo('resonance', '충격증폭탄', '충격증폭탄', '충격 +2 · 현재 충격 2당 추가 +1, 추가 최대 +4', ['impact'], 0xacb7ff, 1, 0, 2, 1, { shockScale: { divisor: 2, cap: 4 } }),
   heavy: ammo('heavy', '중량탄', '중량', '피해 3 · 충격 +2 · 반동 2', ['impact', 'health'], 0xc895ff, 3, 0, 2, 2),
 };
 export const AMMO_ORDER = Object.keys(AMMO_DEFINITIONS) as AmmoType[];

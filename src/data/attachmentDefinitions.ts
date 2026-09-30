@@ -54,7 +54,7 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
     [{ kind: 'vulnerableEffect', value: 1 }, { kind: 'impact', value: 1, condition: { range: 'near' } }]),
   texturedGrip: item('texturedGrip', '텍스처 손잡이', 'grip', 'common', '모든 탄 반동 -1',
     [{ kind: 'recoilReduction', value: 1 }]),
-  ergonomicGrip: item('ergonomicGrip', '인체공학 손잡이', 'grip', 'advanced', '다음 탄 강화 효과 +1',
+  ergonomicGrip: item('ergonomicGrip', '인체공학 손잡이', 'grip', 'advanced', '다음 탄 화력·충격 강화 효과 +1',
     [{ kind: 'followUpEffect', value: 1 }]),
 };
 export const ATTACHMENT_ORDER = Object.keys(ATTACHMENT_DEFINITIONS) as AttachmentId[];

@@ -1,7 +1,8 @@
 export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' | 'frangible'
   | 'suppression' | 'execution' | 'kickback' | 'laceration' | 'retreat' | 'advance'
   | 'explosive' | 'highExplosive' | 'stickyCharge'
-  | 'wounding' | 'serrated' | 'retreatCutter' | 'advanceCutter' | 'flatNose' | 'heavy';
+  | 'wounding' | 'serrated' | 'retreatCutter' | 'advanceCutter' | 'flatNose' | 'heavy'
+  | 'reducedImpact' | 'hammer' | 'impactRelay' | 'resonance';
 export type AmmoRarity = 'common' | 'uncommon';
 export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact';
 export type RangeBand = 'near' | 'mid' | 'far';
@@ -58,6 +59,8 @@ export interface ShotBreakdown {
   vulnerableDamageBonus: number;
   rangePenaltyPercent: number;
   distanceFirepowerReduction: number;
+  shockFollowUpBonus: number;
+  shockScaleBonus: number;
   projectedShock: number;
   detonationDamage: number;
   finalFirepower: number;
@@ -99,6 +102,7 @@ export interface RoundPreview {
   wound: number;
   explosive: number;
   effectiveActionShock: number;
+  shockBonus: number;
   recoil: number;
   followUpBonus: number;
   vulnerableDamageBonus: number;
