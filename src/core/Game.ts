@@ -116,7 +116,7 @@ export class Game {
     for (const shot of sequence.shots) {
       if (shot.shotDistance !== shot.before.distance) await this.presentation.animateDistanceChange(shot.shotDistance);
       this.ui.showShot(shot);
-      await this.presentation.animateShot(shot.ammoType);
+      await this.presentation.animateShot(shot.ammoType, shot.explosiveConsumed);
       this.ui.showRecoilAfterShot(shot.breakdown.recoilAfter);
       this.player.fireRound(shot);
       this.zombie.applyState(shot.after);

@@ -4,7 +4,7 @@ import type { AmmoRarity, AmmoType, BuildTag, RangeBand } from '../combat/types'
 export interface AmmoDefinition {
   id: AmmoType; name: string; shortName: string; role: string; rarity: AmmoRarity;
   tags: readonly BuildTag[]; color: number; cssColor: string; supply?: 'infinite';
-  firepower: number; wound: number; actionShock: number; recoil: number; recoilRecovery?: number;
+  firepower: number; wound: number; explosive: number; actionShock: number; recoil: number; recoilRecovery?: number;
   followUp?: number; healthScale?: { divisor: number; cap: number };
   recoilScale?: { cap: number };
   vulnerableBonus?: number; vulnerableDamagePercentBonus?: number; suppressedBonus?: number;
@@ -13,25 +13,28 @@ export interface AmmoDefinition {
 const ammo = (id: AmmoType, name: string, shortName: string, role: string, tags: readonly BuildTag[], color: number,
   firepower: number, wound = 0, actionShock = 0, recoil = 1, extra: Partial<AmmoDefinition> = {}): AmmoDefinition => ({
   id, name, shortName, role, rarity: 'common', tags, color, cssColor: `#${color.toString(16).padStart(6, '0')}`,
-  firepower, wound, actionShock, recoil, ...extra,
+  firepower, wound, explosive: 0, actionShock, recoil, ...extra,
 });
 export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
-  ball: ammo('ball', '볼탄', '볼탄', '기준 체력 피해', ['health'], 0xd8c6a2, 5, 0, 0, 1, { supply: 'infinite' }),
-  hollowPoint: ammo('hollowPoint', '할로 포인트', '할로', '현재 체력 10당 피해 +1, 최대 +3', ['health'], 0xff8ca1, 3, 0, 0, 1, { healthScale: { divisor: 10, cap: 3 } }),
+  ball: ammo('ball', '표준탄', '표준탄', '기준 체력 피해', ['health'], 0xd8c6a2, 5, 0, 0, 1, { supply: 'infinite' }),
+  hollowPoint: ammo('hollowPoint', '중공탄', '중공탄', '현재 체력 10당 피해 +1, 최대 +3', ['health'], 0xff8ca1, 3, 0, 0, 1, { healthScale: { divisor: 10, cap: 3 } }),
   lowRecoil: ammo('lowRecoil', '저반동탄', '저반동', '낮은 피해 · 반동 없음 · 사격 후 누적 반동 2 회복', ['health'], 0xa3c6ce, 3, 0, 0, 0, { recoilRecovery: 2 }),
-  plusP: ammo('plusP', '+P탄', '+P', '높은 피해 · 반동 3', ['health'], 0xe9a065, 8, 0, 0, 3),
-  relay: ammo('relay', '릴레이탄', '릴레이', '낮은 피해 · 바로 다음 탄 피해 +4', ['health'], 0xcfb9ee, 2, 0, 0, 1, { followUp: 4 }),
+  plusP: ammo('plusP', '고압탄', '고압탄', '높은 피해 · 반동 3', ['health'], 0xe9a065, 8, 0, 0, 3),
+  relay: ammo('relay', '연계탄', '연계탄', '낮은 피해 · 바로 다음 탄 피해 +4', ['health'], 0xcfb9ee, 2, 0, 0, 1, { followUp: 4 }),
   frangible: ammo('frangible', '파쇄탄', '파쇄', '취약한 적에게 피해 +2', ['health'], 0xf19aad, 4, 0, 0, 1, { vulnerableBonus: 2 }),
   suppression: ammo('suppression', '제압탄', '제압', '충격으로 다음 행동이 중단될 적에게 피해 +3', ['health'], 0x8cb4cc, 3, 0, 0, 1, { suppressedBonus: 3 }),
   execution: ammo('execution', '처형탄', '처형', '체력 30% 이하 적에게 피해 +4', ['health'], 0xe67877, 3, 0, 0, 1, { execution: { percent: 30, bonus: 4 } }),
-  kickback: ammo('kickback', '반동 전환탄', '전환', '누적 반동만큼 피해 증가, 반동 전부 소모', ['health'], 0xf6b76d, 2, 0, 0, 0, { recoilScale: { cap: 6 } }),
+  kickback: ammo('kickback', '반동탄', '반동탄', '누적 반동만큼 피해 증가, 반동 전부 소모', ['health'], 0xf6b76d, 2, 0, 0, 0, { recoilScale: { cap: 6 } }),
   laceration: ammo('laceration', '열상탄', '열상', '기본 화력 5 · 취약 대상 체력 피해 +100%', ['health'], 0xe5799a, 5, 0, 0, 1, { vulnerableDamagePercentBonus: 50 }),
   retreat: ammo('retreat', '후퇴탄', '후퇴', '현재 거리에서 사격 후 2m 후퇴', ['health'], 0x9cc8a2, 3, 0, 0, 1, { moveAfter: 2 }),
-  advance: ammo('advance', '전진탄', '전진', '2m 전진한 거리에서 강한 사격', ['health'], 0xe49b73, 6, 0, 0, 2, { moveBefore: -2 }),
-  wounding: ammo('wounding', '상처탄', '상처', '피해 2 · 상처 +3 · 임계치 도달 시 취약', ['wound'], 0xe48ba9, 2, 3),
+  advance: ammo('advance', '돌진탄', '돌진탄', '2m 전진한 거리에서 강한 사격', ['health'], 0xe49b73, 6, 0, 0, 2, { moveBefore: -2 }),
+  wounding: ammo('wounding', '절개탄', '절개탄', '피해 2 · 상처 +3 · 임계치 도달 시 취약', ['wound'], 0xe48ba9, 2, 3),
   serrated: ammo('serrated', '톱니탄', '톱니', '피해 2 · 상처 +5 · 반동 3', ['wound'], 0xcf6a8d, 2, 5, 0, 3),
-  retreatCutter: ammo('retreatCutter', '후퇴 절단탄', '후절', '피해 1 · 상처 +2 · 사격 후 2m 후퇴', ['wound'], 0xa37b9c, 1, 2, 0, 1, { moveAfter: 2 }),
-  advanceCutter: ammo('advanceCutter', '전진 절단탄', '전절', '2m 전진한 거리에서 피해 2 · 상처 +4', ['wound'], 0xd4698d, 2, 4, 0, 2, { moveBefore: -2 }),
+  retreatCutter: ammo('retreatCutter', '후퇴 절개탄', '후퇴 절개', '피해 1 · 상처 +2 · 사격 후 2m 후퇴', ['wound'], 0xa37b9c, 1, 2, 0, 1, { moveAfter: 2 }),
+  advanceCutter: ammo('advanceCutter', '돌진 절개탄', '돌진 절개', '2m 전진한 거리에서 피해 2 · 상처 +4', ['wound'], 0xd4698d, 2, 4, 0, 2, { moveBefore: -2 }),
+  explosive: ammo('explosive', '폭발탄', '폭발탄', '폭발 +2 · 충격 탄약 명중 시 전량 기폭', ['explosive'], 0xffa34d, 3, 0, 0, 1, { explosive: 2 }),
+  highExplosive: ammo('highExplosive', '고폭탄', '고폭탄', '폭발 +3 · 높은 화력과 반동 · 충격 탄약으로 기폭', ['explosive'], 0xff713d, 4, 0, 0, 3, { explosive: 3 }),
+  stickyCharge: ammo('stickyCharge', '접착폭약탄', '접착폭약탄', '폭발 +4 · 낮은 화력 · 충격 탄약으로 기폭', ['explosive'], 0xffcd63, 1, 0, 0, 2, { explosive: 4 }),
   flatNose: ammo('flatNose', '평두탄', '평두', '충격 +4', ['impact'], 0x70e6d2, 1, 0, 4),
   heavy: ammo('heavy', '중량탄', '중량', '피해 3 · 충격 +2 · 반동 2', ['impact', 'health'], 0xc895ff, 3, 0, 2, 2),
 };
@@ -49,13 +52,14 @@ export const createStageStock = (build: AmmoBuild): AmmoStock => ({ ...build, ba
 export const countAllocations = (build: AmmoBuild): number => Object.values(build).reduce((sum, value) => sum + value, 0);
 export const rewardAmount = (ammo: SpecialAmmoType): number => { void ammo; return AMMO_BUILD_BALANCE.rewardAmount; };
 export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', uncommon: '고급' };
-export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', impact: '충격' };
+export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', explosive: '폭발', impact: '충격' };
 export const RANGE_NAMES: Record<RangeBand, string> = { near: '근거리', mid: '중거리', far: '원거리' };
 export const COMBAT_BALANCE = {
   baseMagazineCapacity: SERVICE_45.baseMagazineCapacity,
   maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
   minimumMagazineCapacity: SERVICE_45.baseMagazineCapacity,
   minimumFirepower: 0, recoilThreshold: 3, maxDistance: 12,
+  explosionDamagePerStack: 2,
   woundThreshold: 6, vulnerableTurns: 2, vulnerableDamagePercent: 50,
   rangeThresholds: { near: 4, mid: 8 },
 } as const;

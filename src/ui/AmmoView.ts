@@ -6,15 +6,16 @@ export function ammoRewardOwnedCount(ammo: SpecialAmmoType, build: AmmoBuild, re
 }
 export function ammoStatsMarkup(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];
-  const values: [string, number][] = [['화력', item.firepower], ['상처', item.wound], ['충격', item.actionShock], ['반동', item.recoil]];
+  const values: [string, number][] = [['화력', item.firepower], ['상처', item.wound], ['폭발', item.explosive], ['충격', item.actionShock], ['반동', item.recoil]];
   return `<span class="ammo-stats">${values.filter(([, value]) => value > 0).map(([name, value]) => `<span>${name}<b>${value}</b></span>`).join('')}</span>`;
 }
 export interface FiringOrderStatEntry {
-  kind: 'wound' | 'shock' | 'recoil'; label: string; value: number; modified: boolean;
+  kind: 'wound' | 'explosive' | 'shock' | 'recoil'; label: string; value: number; modified: boolean;
 }
 export function firingOrderStatEntries(round: RoundPreview): FiringOrderStatEntry[] {
   const entries: FiringOrderStatEntry[] = [
     { kind: 'wound', label: '상처', value: round.wound, modified: false },
+    { kind: 'explosive', label: '폭발', value: round.explosive, modified: false },
     { kind: 'shock', label: '충격', value: round.effectiveActionShock, modified: false },
     { kind: 'recoil', label: '누적 반동', value: round.recoil, modified: false },
   ];

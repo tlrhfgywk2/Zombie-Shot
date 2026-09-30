@@ -68,6 +68,11 @@ export class AudioManager {
     if (definition.actionShock > 0) this.tone(880, 0.055, 0.025, 'sine', 0.015);
   }
 
+  explosion(): void {
+    this.noise(0.3, 0.18, 550);
+    this.tone(70, 0.24, 0.12, 'sine');
+  }
+
   impact(ammoType: AmmoType): void {
     if (AMMO_DEFINITIONS[ammoType].recoil >= 3) {
       this.noise(0.09, 0.065, 2100);

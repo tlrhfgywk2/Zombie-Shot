@@ -1,8 +1,9 @@
 export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' | 'frangible'
   | 'suppression' | 'execution' | 'kickback' | 'laceration' | 'retreat' | 'advance'
+  | 'explosive' | 'highExplosive' | 'stickyCharge'
   | 'wounding' | 'serrated' | 'retreatCutter' | 'advanceCutter' | 'flatNose' | 'heavy';
 export type AmmoRarity = 'common' | 'uncommon';
-export type BuildTag = 'health' | 'wound' | 'impact';
+export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact';
 export type RangeBand = 'near' | 'mid' | 'far';
 export type AttachmentSlot = 'barrel' | 'muzzle' | 'magazine' | 'optic' | 'rail' | 'grip';
 export type EnemyType = 'normal' | 'brute' | 'fast' | 'tough' | 'contaminator' | 'groundshaker' | 'screecher';
@@ -21,6 +22,7 @@ export interface EnemyState {
   hp: number;
   maxHp: number;
   wound: number;
+  explosive: number;
   woundThreshold: number;
   vulnerableTurns: number;
   distance: number;
@@ -57,6 +59,7 @@ export interface ShotBreakdown {
   rangePenaltyPercent: number;
   distanceFirepowerReduction: number;
   projectedShock: number;
+  detonationDamage: number;
   finalFirepower: number;
 }
 export interface FirepowerBreakdown {
@@ -65,6 +68,7 @@ export interface FirepowerBreakdown {
   playerDebuffReduction: number;
   distanceReduction: number;
   distancePenaltyPercents: number[];
+  detonationDamage: number;
   finalFirepower: number;
 }
 export interface ShotResult {
@@ -73,6 +77,9 @@ export interface ShotResult {
   damage: number;
   hpDamage: number;
   woundApplied: number;
+  explosiveApplied: number;
+  explosiveConsumed: number;
+  explosionDamage: number;
   vulnerableTriggered: boolean;
   actionShockApplied: number;
   killed: boolean;
@@ -90,6 +97,7 @@ export interface RoundPreview {
   recoilFirepowerReduction: number;
   playerDebuffFirepowerReduction: number;
   wound: number;
+  explosive: number;
   effectiveActionShock: number;
   recoil: number;
   followUpBonus: number;
@@ -103,6 +111,7 @@ export interface SequenceResult {
   firepowerBreakdown: FirepowerBreakdown;
   totalHpDamage: number;
   totalWoundApplied: number;
+  totalExplosiveApplied: number;
   totalActionShockApplied: number;
   unfiredRounds: AmmoType[];
   killed: boolean;
