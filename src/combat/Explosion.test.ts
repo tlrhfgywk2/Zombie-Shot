@@ -92,6 +92,14 @@ describe('폭발 누적과 충격 명중 기폭', () => {
     expect(resolver.resolveShot('explosive', 0, target({ hp: 1 })).explosiveApplied).toBe(0);
   });
 
+  it('예상 미발사 탄약의 폭발 수치는 표시하되 실제 누적량에 포함하지 않는다', () => {
+    const result = resolver.resolveSequence(['heavy', 'highExplosive', 'stickyCharge'], target({ hp: 1 }));
+    expect(result.unfiredRounds).toEqual(['highExplosive', 'stickyCharge']);
+    expect(result.roundPreviews.map(round => round.explosive)).toEqual([0, 3, 4]);
+    expect(result.totalExplosiveApplied).toBe(0);
+    expect(result.finalState.explosive).toBe(0);
+  });
+
   it('프리뷰는 원본 상태를 변경하지 않으며 기폭을 포함한 화력 합산이 일치한다', () => {
     const enemy = target({ distance: 11, vulnerableTurns: 2 });
     const saved = structuredClone(enemy);

@@ -109,7 +109,8 @@ export class CombatResolver {
       return { ammoType, index, effectiveFirepower: shot.breakdown.effectiveFirepower,
         recoilFirepowerReduction: shot.breakdown.recoilFirepowerReduction,
         playerDebuffFirepowerReduction: shot.breakdown.playerDebuffFirepowerReduction,
-        wound: shot.woundApplied, explosive: shot.explosiveApplied, effectiveActionShock: shot.breakdown.projectedShock,
+        // 미발사 슬롯도 폭발탄의 누적 능력은 표시한다. 실제 잔량과 기폭 피해는 shots에서만 합산한다.
+        wound: shot.woundApplied, explosive: AMMO_DEFINITIONS[ammoType].explosive, effectiveActionShock: shot.breakdown.projectedShock,
         recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus,
         vulnerableDamageBonus: shot.breakdown.vulnerableDamageBonus, movement: shot.movement };
     });
