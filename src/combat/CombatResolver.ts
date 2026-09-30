@@ -11,7 +11,7 @@ export interface CombatContext {
   playerState?: PlayerCombatState;
   targets?: readonly EnemyState[];
 }
-interface SequenceCursor { recoil: number; followUp: number; distanceLossHundredths: number }
+interface SequenceCursor { recoil: number; followUp: number; shockFollowUp: number; distanceLossHundredths: number }
 const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined });
 const clonePlayerState = (state: PlayerCombatState): PlayerCombatState => ({ ...state, disabledSlots: { ...state.disabledSlots } });
 const rangeOrder: readonly RangeBand[] = ['near', 'mid', 'far'];
@@ -85,11 +85,11 @@ export class CombatResolver {
       - this.modifier(context, 'rangePenaltyReductionPercent', effective)) };
   }
   resolveShot(ammoType: AmmoType, index: number, enemyState: EnemyState, context: CombatContext = {}): ShotResult {
-    return this.resolveRound(ammoType, index, enemyState, context, { recoil: 0, followUp: 0, distanceLossHundredths: 0 }).shot;
+    return this.resolveRound(ammoType, index, enemyState, context, { recoil: 0, followUp: 0, shockFollowUp: 0, distanceLossHundredths: 0 }).shot;
   }
   resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
     let current = cloneState(enemyState);
-    let cursor: SequenceCursor = { recoil: 0, followUp: 0, distanceLossHundredths: 0 };
+    let cursor: SequenceCursor = { recoil: 0, followUp: 0, shockFollowUp: 0, distanceLossHundredths: 0 };
     const shots: ShotResult[] = [];
     for (const [index, ammoType] of rounds.entries()) {
       if (current.hp <= 0) break;
@@ -100,7 +100,7 @@ export class CombatResolver {
     }
     // 사망 뒤의 슬롯도 배치를 읽을 수 있도록, 높은 체력의 동일 상태에서 순서 수치를 생성한다.
     let previewState = cloneState(enemyState);
-    let previewCursor: SequenceCursor = { recoil: 0, followUp: 0, distanceLossHundredths: 0 };
+    let previewCursor: SequenceCursor = { recoil: 0, followUp: 0, shockFollowUp: 0, distanceLossHundredths: 0 };
     const roundPreviews: RoundPreview[] = rounds.map((ammoType, index) => {
       const resolved = this.resolveRound(ammoType, index, previewState, context, previewCursor);
       const shot = resolved.shot;
@@ -111,6 +111,7 @@ export class CombatResolver {
         playerDebuffFirepowerReduction: shot.breakdown.playerDebuffFirepowerReduction,
         // 미발사 슬롯도 폭발탄의 누적 능력은 표시한다. 실제 잔량과 기폭 피해는 shots에서만 합산한다.
         wound: shot.woundApplied, explosive: AMMO_DEFINITIONS[ammoType].explosive, effectiveActionShock: shot.breakdown.projectedShock,
+        shockBonus: shot.breakdown.projectedShock - AMMO_DEFINITIONS[ammoType].actionShock,
         recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus,
         vulnerableDamageBonus: shot.breakdown.vulnerableDamageBonus, movement: shot.movement };
     });
@@ -184,8 +185,12 @@ export class CombatResolver {
     const directFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
       COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths);
     const distanceFirepowerReduction = effectiveFirepower - directFirepower;
-    const projectedShock = definition.actionShock > 0
-      ? definition.actionShock + this.modifier(context, 'impact', range.band) : 0;
+    const shockFollowUpBonus = cursor.shockFollowUp;
+    const shockScaleBonus = definition.shockScale
+      ? Math.min(definition.shockScale.cap, Math.floor(before.actionShock / definition.shockScale.divisor)) : 0;
+    const baseShock = definition.actionShock + shockFollowUpBonus + shockScaleBonus;
+    // 연쇄는 바로 다음 한 발만 강화한다. 강화로 충격을 얻은 일반탄도 조명과 폭발 기폭을 적용한다.
+    const projectedShock = baseShock > 0 ? baseShock + this.modifier(context, 'impact', range.band) : 0;
     // 폭발은 턴/거리/반동/취약과 무관하게 유지된다. 이번 명중의 충격만 기폭하며 기존 충격은 기폭하지 않는다.
     const explosiveApplied = after.hp > directFirepower ? definition.explosive : 0;
     after.explosive += explosiveApplied;
@@ -211,6 +216,8 @@ export class CombatResolver {
     const movement = after.distance - before.distance;
     const next = { recoil: recoilAfter, followUp: definition.followUp
       ? definition.followUp + this.modifier(context, 'followUpEffect') : 0,
+    shockFollowUp: definition.shockFollowUp
+      ? definition.shockFollowUp + this.modifier(context, 'followUpEffect') : 0,
     distanceLossHundredths: cursor.distanceLossHundredths + effectiveFirepower * range.percent };
     const detail = [`${definition.name}`, `${RANGE_NAMES[range.effective]} ${formatRangePenalty(range.percent)}`];
     if (definition.moveBefore) detail.push(`사격 전 ${Math.abs(movement)}m 전진`);
@@ -220,6 +227,8 @@ export class CombatResolver {
     if (explosiveConsumed) detail.push(`기폭 ${explosiveConsumed} · 폭발 피해 ${explosionDamage}`);
     if (vulnerableTriggered) detail.push(`취약 ${after.vulnerableTurns}턴 발동`);
     if (actionShockApplied) detail.push(`충격 +${actionShockApplied}`);
+    if (shockFollowUpBonus) detail.push(`후속 충격 강화 +${shockFollowUpBonus}`);
+    if (shockScaleBonus) detail.push(`누적 충격 증폭 +${shockScaleBonus}`);
     if (followUpBonus) detail.push(`후속 강화 +${followUpBonus}`);
     if (definition.moveAfter) detail.push(`사격 후 ${movement}m 후퇴`);
     const breakdown = { ammoFirepower: definition.firepower, prePenaltyFirepower, effectiveFirepower,
@@ -227,7 +236,7 @@ export class CombatResolver {
       recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, recoilFirepowerReduction,
       playerDebuffFirepowerPenalty, playerDebuffFirepowerReduction,
       followUpBonus, conditionalBonus, vulnerableDamageBonus,
-      rangePenaltyPercent: range.percent, distanceFirepowerReduction, projectedShock, detonationDamage, finalFirepower };
+      rangePenaltyPercent: range.percent, distanceFirepowerReduction, shockFollowUpBonus, shockScaleBonus, projectedShock, detonationDamage, finalFirepower };
     return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, explosiveApplied, explosiveConsumed, explosionDamage, vulnerableTriggered, actionShockApplied,
       killed: after.hp <= 0, description: detail.join(' · '), breakdown,
       before, after, shotDistance, movement }, next };

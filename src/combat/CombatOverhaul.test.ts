@@ -155,8 +155,8 @@ describe('최종 부착물과 런 진행', () => {
 });
 
 describe('데이터와 완성 탄창', () => {
-  it('최종 21종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
-    expect(AMMO_ORDER).toHaveLength(21);
+  it('최종 25종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
+    expect(AMMO_ORDER).toHaveLength(25);
     expect(ATTACHMENT_ORDER).toHaveLength(11);
     expect(new Set(AMMO_ORDER)).toEqual(new Set(Object.keys(AMMO_DEFINITIONS)));
     expect(new Set(ATTACHMENT_ORDER)).toEqual(new Set(Object.keys(ATTACHMENT_DEFINITIONS)));
@@ -168,8 +168,9 @@ describe('데이터와 완성 탄창', () => {
       expect(AMMO_ORDER).not.toContain(id);
       expect(ATTACHMENT_ORDER).not.toContain(id);
     }
-    for (const [index, ammo] of AMMO_ORDER.filter(value => value !== 'ball').entries()) {
-      expect(generateAmmoRewards(() => index / 17)).toContain(ammo);
+    const rewardPool = AMMO_ORDER.filter(value => value !== 'ball');
+    for (const [index, ammo] of rewardPool.entries()) {
+      expect(generateAmmoRewards(() => (index + 0.5) / rewardPool.length)).toContain(ammo);
     }
     expect(ATTACHMENT_ORDER.every(id => generateAttachmentReward(ATTACHMENT_ORDER.filter(other => other !== id), 'service45', () => 0) === id)).toBe(true);
   });

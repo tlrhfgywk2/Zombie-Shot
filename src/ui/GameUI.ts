@@ -808,9 +808,10 @@ export class GameUI {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
     const firepower = ammoTooltipFirepower(ammo, round);
+    const shock = round?.effectiveActionShock ?? definition.actionShock;
     const firepowerLabel = firepower.change === 'weakened' ? '반동 감소 반영 화력'
       : firepower.change === 'strengthened' ? '강화 반영 화력' : '화력';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>폭발 <b>${definition.explosive}</b></span><span>충격 <b>${definition.actionShock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>폭발 <b>${definition.explosive}</b></span><span>${assumedAppend ? '추가 시 충격' : '충격'} <b ${round && round.shockBonus > 0 ? 'data-shock-boosted' : ''}>${shock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;

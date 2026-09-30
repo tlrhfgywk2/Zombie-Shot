@@ -771,3 +771,6 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .enemy-stat strong { font-size: .82rem; }
 .game-shell[data-layout="portrait"] .tactical-console .magazine-row[data-expanded] { grid-template-columns: minmax(0, 1fr); }
 .game-shell[data-layout="portrait"] .magazine-row[data-expanded] .load-button { width: 100%; min-height: 36px; height: 36px; }
+
+.ammo-stats > .ammo-special-effect { grid-column: 1 / -1; display: block; margin-top: 4px; color: var(--bullet); line-height: 1.5; overflow-wrap: anywhere; }
+.ammo-tooltip b[data-shock-boosted] { color: #ffd68f; }
