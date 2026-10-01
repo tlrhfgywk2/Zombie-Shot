@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
-import { SERVICE_45, ATTACHMENT_DEFINITIONS, type AttachmentId } from '../data/attachmentDefinitions';
+import { ATTACHMENT_DEFINITIONS, type AttachmentId } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 
 export interface PistolModel {
@@ -47,7 +47,7 @@ const mesh = (geometry: THREE.BufferGeometry, material: THREE.Material, castShad
 export const createPistolModel = (): PistolModel => {
   const root = new THREE.Group();
   root.name = 'pistolRoot';
-  root.userData.weapon = SERVICE_45.internalName;
+  root.userData.weapon = 'P220';
   const stageAnchor = new THREE.Object3D();
   stageAnchor.name = 'pistolStageAnchor';
   stageAnchor.position.set(-0.46, -0.92, 0);

@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:balance": "vitest run src/simulation/BalanceSimulator.test.ts --reporter=verbose",
+    "test:weapon-balance": "vitest run src/simulation/WeaponBalance.test.ts --reporter=verbose",
     "test:watch": "vitest"
   },
   "dependencies": {

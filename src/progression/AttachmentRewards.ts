@@ -2,7 +2,7 @@ import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITIES, ATTACHME
 
 /** 먼저 미소유 호환 풀을 만들고 등급 추첨 후 빈 등급만 대체한다. */
 export function generateAttachmentReward(
-  owned: readonly AttachmentId[], weapon: WeaponId = 'service45', random: () => number = Math.random,
+  owned: readonly AttachmentId[], weapon: WeaponId = 'p220', random: () => number = Math.random,
   weights: Record<AttachmentRarity, number> = ATTACHMENT_REWARD_WEIGHTS,
 ): AttachmentId | undefined {
   const pool = ATTACHMENT_ORDER.filter(id => !owned.includes(id) && isAttachmentCompatible(id, weapon));

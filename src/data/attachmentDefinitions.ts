@@ -1,11 +1,7 @@
 import type { AttachmentSlot, RangeBand } from '../combat/types';
 
-export type WeaponId = 'service45';
-export const SERVICE_45 = {
-  id: 'service45' as WeaponId, internalName: 'Service .45', name: '서비스 .45',
-  baseFirepower: 0, rangePenaltyPercentages: { near: 0, mid: 10, far: 25 } as Record<RangeBand, number>,
-  baseMagazineCapacity: 4, maximumMagazineCapacity: 6,
-};
+import { WEAPON_ORDER, type WeaponId } from './weaponDefinitions';
+export type { WeaponId } from './weaponDefinitions';
 export type AttachmentRarity = 'common' | 'advanced' | 'rare' | 'epic';
 export const ATTACHMENT_RARITIES: readonly AttachmentRarity[] = ['common', 'advanced', 'rare', 'epic'];
 export const ATTACHMENT_RARITY_NAMES: Record<AttachmentRarity, string> = {
@@ -26,7 +22,7 @@ export interface AttachmentDefinition {
 }
 const item = (id: AttachmentId, name: string, slot: AttachmentSlot, rarity: AttachmentRarity,
   summary: string, modifiers: readonly AttachmentModifier[]): AttachmentDefinition =>
-  ({ id, name, slot, rarity, compatibleWeapons: ['service45'], summary, modifiers });
+  ({ id, name, slot, rarity, compatibleWeapons: id === 'extendedMagazine' ? WEAPON_ORDER.filter(weapon => weapon !== 'm500') : WEAPON_ORDER, summary, modifiers });
 export const ATTACHMENT_SLOT_ORDER: readonly AttachmentSlot[] = ['barrel', 'muzzle', 'magazine', 'optic', 'rail', 'grip'];
 export const ATTACHMENT_SLOT_NAMES: Record<AttachmentSlot, string> = {
   barrel: '총열', muzzle: '총구', magazine: '탄창', optic: '조준 장치', rail: '전술 레일', grip: '손잡이',
@@ -38,11 +34,11 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
     [{ kind: 'recoilThreshold', value: 2 }]),
   muzzleBrake: item('muzzleBrake', '총구 제퇴기', 'muzzle', 'advanced', '원래 반동 3 이상인 탄의 반동 -1',
     [{ kind: 'highRecoilReduction', value: 1 }]),
-  extendedMagazine: item('extendedMagazine', '확장 탄창', 'magazine', 'advanced', '탄창 +2발 · 휴대 탄약 그대로',
+  extendedMagazine: item('extendedMagazine', '확장 탄창', 'magazine', 'advanced', '탄창 최대 +2발 · 휴대 탄약 그대로',
     [{ kind: 'capacity', value: 2 }]),
-  reflexSight: item('reflexSight', '반사 조준기', 'optic', 'common', '중거리 화력 감소 제거',
+  reflexSight: item('reflexSight', '반사 조준기', 'optic', 'common', '중거리 화력 감소 10%p 완화',
     [{ kind: 'rangePenaltyReductionPercent', value: 10, condition: { range: 'mid' } }]),
-  pistolScope: item('pistolScope', '저배율 권총 조준경', 'optic', 'advanced', '근거리 화력 -10% · 중거리 감소 제거 · 원거리 감소 10%p 완화',
+  pistolScope: item('pistolScope', '저배율 권총 조준경', 'optic', 'advanced', '근거리 화력 -10% · 중·원거리 감소 10%p 완화',
     [{ kind: 'rangePenaltyReductionPercent', value: -10, condition: { range: 'near' } },
       { kind: 'rangePenaltyReductionPercent', value: 10, condition: { range: 'mid' } },
       { kind: 'rangePenaltyReductionPercent', value: 10, condition: { range: 'far' } }]),

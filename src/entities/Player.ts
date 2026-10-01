@@ -1,3 +1,4 @@
+import { WEAPON_DEFINITIONS, type WeaponId } from '../data/weaponDefinitions';
 import { Magazine } from '../combat/Magazine';
 import { AttachmentLoadout, createPlayerCombatState, getMagazineCapacity } from '../combat/AttachmentLoadout';
 import type { AmmoType, AttachmentSlot, PlayerCombatState, ShotResult } from '../combat/types';
@@ -15,6 +16,10 @@ export class Player {
   private combatState: PlayerCombatState = createPlayerCombatState();
 
   constructor() { this.syncMagazineCapacity(); }
+  get weapon() { return WEAPON_DEFINITIONS[this.loadout.weapon]; }
+  selectWeapon(id: WeaponId): void {
+    this.loadout.reset(); this.loadout.weapon = id; this.magazine.setWeapon(id); this.syncMagazineCapacity();
+  }
   getStock(): AmmoStock { return { ...this.stock }; }
   getBuild(): AmmoBuild { return { ...this.build }; }
   getSpecialCapacity(): number { return this.specialCapacity; }
@@ -90,7 +95,7 @@ export class Player {
   clearCombatDisruptions(): void { this.combatState = createPlayerCombatState(); this.syncMagazineCapacity(); }
   reset(): void {
     this.build = createAmmoBuild(); this.specialCapacity = AMMO_BUILD_BALANCE.specialCapacity;
-    this.ownedAttachments.clear(); this.loadout.reset(); this.startStage(); this.isAlive = true;
+    this.ownedAttachments.clear(); this.selectWeapon('p220'); this.startStage(); this.isAlive = true;
   }
-  private syncMagazineCapacity(): void { this.magazine.setCapacity(getMagazineCapacity(this.loadout.getSnapshot(), this.combatState)); }
+  private syncMagazineCapacity(): void { this.magazine.setCapacity(getMagazineCapacity(this.loadout.getSnapshot(), this.combatState, this.loadout.weapon)); }
 }

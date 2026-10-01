@@ -1,3 +1,5 @@
+export type AmmoFamily = 'HEALTH' | 'WOUND' | 'EXPLOSION' | 'IMPACT';
+export type PrimaryPayload = 'firepower' | 'wound' | 'explosive' | 'actionShock';
 export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' | 'frangible'
   | 'suppression' | 'execution' | 'kickback' | 'laceration' | 'retreat' | 'advance'
   | 'explosive' | 'highExplosive' | 'stickyCharge'
@@ -42,6 +44,10 @@ export interface PlayerCombatState {
   disabledSlots: Partial<Record<AttachmentSlot, number>>;
 }
 export interface ShotBreakdown {
+  weaponFirepowerAdjustment: number;
+  traitBonus: number;
+  primaryPayload: PrimaryPayload;
+  primaryPayloadValue: number;
   ammoFirepower: number;
   prePenaltyFirepower: number;
   effectiveFirepower: number;
@@ -94,6 +100,9 @@ export interface ShotResult {
   movement: number;
 }
 export interface RoundPreview {
+  traitBonus?: number;
+  recoilGenerated?: number;
+  finalFirepower?: number;
   ammoType: AmmoType;
   index: number;
   effectiveFirepower: number;

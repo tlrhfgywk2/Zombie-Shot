@@ -23,7 +23,7 @@ describe('탄약 전투 수치 표시', () => {
       { loadout: { muzzle: 'muzzleBrake' } },
     ).roundPreviews;
 
-    expect(ammoTooltipFirepower('laceration', previews[2])).toEqual({ value: 8, change: 'weakened' });
+    expect(ammoTooltipFirepower('laceration', previews[2])).toEqual({ value: 10, change: 'strengthened' });
     expect(ammoTooltipFirepower('laceration', previews[3])).toEqual({ value: 8, change: 'weakened' });
     expect(ammoTooltipFirepower('laceration')).toEqual({ value: 5, change: 'neutral' });
   });

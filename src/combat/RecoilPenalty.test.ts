@@ -17,19 +17,19 @@ describe('누적 반동 단계', () => {
   });
 
   it('임계치를 넘긴 바로 그 탄부터 감점한다', () => {
-    const byOne = resolver.resolveSequence(['ball', 'ball', 'ball', 'ball', 'ball'], target());
+    const byOne = resolver.resolveSequence(['laceration', 'laceration', 'laceration', 'laceration', 'laceration'], target());
     expect(byOne.shots.map(shot => shot.breakdown.recoilAfter)).toEqual([1, 2, 3, 4, 5]);
-    expect(byOne.shots.map(shot => shot.breakdown.recoilPenalty)).toEqual([0, 0, 0, 1, 1]);
+    expect(byOne.shots.map(shot => shot.breakdown.recoilPenalty)).toEqual([0, 0, 0, 0, 1]);
 
-    const byTwo = resolver.resolveSequence(['ball', 'ball', 'ball', 'heavy', 'ball'], target());
+    const byTwo = resolver.resolveSequence(['laceration', 'laceration', 'laceration', 'heavy', 'laceration'], target());
     expect(byTwo.shots[3]?.breakdown).toMatchObject({ recoilBefore: 3, recoilAfter: 5, recoilPenalty: 1 });
-    expect(byTwo.shots[4]?.breakdown).toMatchObject({ recoilBefore: 5, recoilAfter: 6, recoilPenalty: 2 });
+    expect(byTwo.shots[4]?.breakdown).toMatchObject({ recoilBefore: 5, recoilAfter: 6, recoilPenalty: 1 });
     expect(penalties(['plusP', 'plusP', 'plusP', 'plusP', 'plusP', 'plusP']))
-      .toEqual([0, 2, 3, 3, 3, 3]);
+      .toEqual([0, 1, 3, 3, 3, 3]);
   });
 
   it('보정기와 봉쇄는 유효 임계치를 사용하고 제퇴기와 손잡이는 저장할 반동을 줄인다', () => {
-    const rounds: AmmoType[] = ['plusP', 'plusP', 'ball'];
+    const rounds: AmmoType[] = ['plusP', 'plusP', 'laceration'];
     expect(resolver.resolveSequence(rounds, target(), { loadout: { muzzle: 'compensator' } })
       .shots[2]?.breakdown.recoilPenalty).toBe(1);
     expect(resolver.resolveSequence(rounds, target(), { loadout: { muzzle: 'compensator' },
@@ -38,15 +38,15 @@ describe('누적 반동 단계', () => {
     expect(resolver.resolveSequence(rounds, target(), { loadout: { muzzle: 'muzzleBrake' } })
       .shots[2]?.breakdown).toMatchObject({ recoilBefore: 4, recoilPenalty: 1 });
     expect(resolver.resolveSequence(rounds, target(), { loadout: { grip: 'texturedGrip' } })
-      .shots[2]?.breakdown).toMatchObject({ recoilBefore: 4, recoilPenalty: 1 });
+      .shots[2]?.breakdown).toMatchObject({ recoilBefore: 4, recoilPenalty: 0 });
     expect(recoilFirepowerPenalty(4, 2)).toBe(1);
     expect(recoilFirepowerPenalty(5, 2)).toBe(2);
   });
 
   it('저반동탄 회복은 해당 탄의 감점부터 적용하고 반동 전환탄은 누적치를 소모한다', () => {
     const recovered = resolver.resolveSequence(['plusP', 'plusP', 'lowRecoil', 'ball'], target());
-    expect(recovered.shots[2]?.breakdown).toMatchObject({ recoilBefore: 6, recoilPenalty: 1, recoilAfter: 4 });
-    expect(recovered.shots[3]?.breakdown.recoilPenalty).toBe(1);
+    expect(recovered.shots[2]?.breakdown).toMatchObject({ recoilBefore: 6, recoilPenalty: 0, recoilAfter: 4 });
+    expect(recovered.shots[3]?.breakdown.recoilPenalty).toBe(0);
     const converted = resolver.resolveSequence(['plusP', 'plusP', 'kickback', 'ball'], target());
     expect(converted.shots[2]?.breakdown).toMatchObject({ recoilBefore: 6, recoilPenalty: 0, recoilAfter: 0 });
     expect(converted.shots[3]?.breakdown.recoilPenalty).toBe(0);
@@ -56,8 +56,8 @@ describe('누적 반동 단계', () => {
     const first = resolver.resolveSequence(['plusP', 'plusP', 'ball'], target(11), {
       playerState: { ...createPlayerCombatState(), heavyKickPenaltyBonus: 1, heavyKickPenaltyTurns: 2 },
     });
-    expect(first.shots[2]?.breakdown).toMatchObject({ recoilPenalty: 2, playerDebuffFirepowerPenalty: 1,
-      rangePenaltyPercent: 25, recoilFirepowerReduction: 2, playerDebuffFirepowerReduction: 1 });
+    expect(first.shots[2]?.breakdown).toMatchObject({ recoilPenalty: 1, playerDebuffFirepowerPenalty: 1,
+      rangePenaltyPercent: 20, recoilFirepowerReduction: 1, playerDebuffFirepowerReduction: 1 });
     expect(first.firepowerBreakdown.prePenaltyFirepower - first.firepowerBreakdown.recoilReduction
       - first.firepowerBreakdown.playerDebuffReduction - first.firepowerBreakdown.distanceReduction)
       .toBe(first.firepowerBreakdown.finalFirepower);
@@ -68,7 +68,7 @@ describe('누적 반동 단계', () => {
   it('같은 탄약도 발사 순서에 따라 뒤쪽 탄의 감점이 달라진다', () => {
     const lowFirst = penalties(['lowRecoil', 'lowRecoil', 'plusP', 'plusP']);
     const highFirst = penalties(['plusP', 'plusP', 'lowRecoil', 'lowRecoil']);
-    expect(lowFirst).toEqual([0, 0, 0, 2]);
-    expect(highFirst).toEqual([0, 2, 1, 0]);
+    expect(lowFirst).toEqual([0, 0, 0, 1]);
+    expect(highFirst).toEqual([0, 1, 0, 0]);
   });
 });
