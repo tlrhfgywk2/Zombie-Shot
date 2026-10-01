@@ -32,7 +32,7 @@ export const WEAPON_DEFINITIONS: Record<WeaponId, WeaponDefinition> = {
   },
   m500: {
     id: 'm500', name: 'S&W M500', role: '4발 고정 · 강한 한 발과 실린더 도박', trait: 'cylinder',
-    traitLabel: '실린더 회전 · 첫 탄 주효과 +50%', traitDetail: '장전 뒤 순서 유지 또는 회전 선택. 회전은 다른 시작 칸을 고르고 원형 순서를 보존합니다. 결과를 확인한 뒤 발사하며 첫 탄 주효과만 1.5배 반올림합니다.',
+    traitLabel: '실린더 회전 · 첫 탄 주효과 +50%', traitDetail: '장전 뒤 수정할 수 없으며 순서 유지 또는 회전을 한 번만 선택합니다. 회전은 다른 시작 칸을 고르고 원형 순서를 보존합니다. 결과를 확인한 뒤 발사하며 첫 탄 주효과만 1.5배 반올림합니다.',
     baseMagazineCapacity: 4, maximumMagazineCapacity: 4, firepowerAdjustment: 2,
     rangePenaltyPercentages: { near: 0, mid: 15, far: 25 }, recoilThreshold: 3, recoilAdjustment: 2,
     ratings: { magazine: '●●', firepower: '●●●●●', range: '●●○', recoil: '●●●●', difficulty: '●●●●' },

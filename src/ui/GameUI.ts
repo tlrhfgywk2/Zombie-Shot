@@ -18,7 +18,6 @@ export interface GameUICallbacks {
   onChooseWeapon: (id: WeaponId) => void;
   onCylinderDecision: (spin: boolean) => void;
   onFireCylinder: () => void;
-  onEditCylinder: () => void;
   onAddAmmo: (ammo: AmmoType) => void;
   onRemoveAmmo: (index: number) => void;
   onReplaceAmmo: (index: number, ammo: AmmoType) => void;
@@ -391,11 +390,9 @@ export class GameUI {
     host.innerHTML = decided
       ? `<span>${spun ? '회전 완료 · 첫 탄 주효과 +50%' : '선택한 순서 유지'}</span><button type="button" data-cylinder-fire>발사</button>`
       : `<button type="button" data-cylinder-keep>순서 유지</button><button type="button" data-cylinder-spin ${size < 2 ? 'disabled' : ''}>실린더 회전</button>`;
-    host.insertAdjacentHTML('beforeend', '<button type="button" data-cylinder-edit>장전 수정</button>');
     host.querySelector<HTMLButtonElement>('[data-cylinder-keep]')?.addEventListener('click', () => this.callbacks.onCylinderDecision(false));
     host.querySelector<HTMLButtonElement>('[data-cylinder-spin]')?.addEventListener('click', () => this.callbacks.onCylinderDecision(true));
     host.querySelector<HTMLButtonElement>('[data-cylinder-fire]')?.addEventListener('click', this.callbacks.onFireCylinder);
-    host.querySelector<HTMLButtonElement>('[data-cylinder-edit]')?.addEventListener('click', this.callbacks.onEditCylinder);
     host.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
   }
 
@@ -413,7 +410,8 @@ export class GameUI {
       if (ammo) slot.style.setProperty('--bullet', AMMO_DEFINITIONS[ammo].cssColor);
       else slot.style.removeProperty('--bullet');
       slot.innerHTML = ammo ? `<span class="slot-index">0${index + 1}</span><span class="round-visual"><i></i></span><span class="slot-content"><strong>${AMMO_DEFINITIONS[ammo].shortName}</strong></span>` : `<span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span>`;
-      slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}, 탭하여 즉시 제거` : `${index + 1}번 빈 슬롯`);
+      slot.setAttribute('aria-disabled', String(this.locked));
+      slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}${this.locked ? ', 수정 불가' : ', 탭하여 즉시 제거'}` : `${index + 1}번 빈 슬롯`);
       slot.setAttribute('aria-pressed', 'false');
     });
     this.loadButton.disabled = this.locked || rounds.length === 0;
@@ -641,7 +639,7 @@ export class GameUI {
       const visibleStats = firingOrderStatEntries(round);
       content.insertAdjacentHTML('beforeend', `<span class="trait-bonus" ${round.traitBonus ? 'title="주효과 강화"' : 'aria-hidden="true"'}>${round.traitBonus ? `${({ firepower: '화력', wound: '상처', explosive: '폭발', actionShock: '충격' })[AMMO_DEFINITIONS[round.ammoType].primaryPayload]} +${round.traitBonus}` : ''}</span>`);
       content.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}${round.movement ? `<span class="sequence-move" aria-label="${round.movement < 0 ? '사격 전 전진' : '사격 후 후퇴'} ${Math.abs(round.movement)}m">${round.movement < 0 ? '←' : '→'}${Math.abs(round.movement)}</span>` : ''}</span>`);
-      slot.setAttribute('aria-label', `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[round.ammoType].name}, 탭하여 즉시 제거, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}${predictedUnfired ? ', 예상 미발사' : ''}`);
+      slot.setAttribute('aria-label', `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[round.ammoType].name}${this.locked ? ', 수정 불가' : ', 탭하여 즉시 제거'}, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}${predictedUnfired ? ', 예상 미발사' : ''}`);
     });
     if (!sequence) {
       this.previewOutcome.hidden = true;

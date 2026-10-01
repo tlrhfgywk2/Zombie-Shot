@@ -38,7 +38,6 @@ export class Game {
       onChooseWeapon: id => this.chooseWeapon(id),
       onCylinderDecision: spin => this.chooseCylinder(spin),
       onFireCylinder: () => void this.fireLoadedMagazine(),
-      onEditCylinder: () => this.editCylinder(),
       onAddAmmo: (ammo) => this.addAmmo(ammo),
       onRemoveAmmo: (index) => this.removeAmmo(index),
       onReplaceAmmo: (index, ammo) => this.replaceAmmo(index, ammo),
@@ -87,16 +86,6 @@ export class Game {
     this.cylinderDecided = true;
     this.syncMagazine();
     this.ui.renderCylinderChoice(this.player.magazine.size, true, spin);
-  }
-
-  private editCylinder(): void {
-    if (this.state.phase !== 'CYLINDER_CHOICE') return;
-    this.boostedOpening = false;
-    this.cylinderDecided = false;
-    this.state.transition('AMMO_SELECTION');
-    this.ui.renderCylinderChoice(0, false, false);
-    this.ui.setLocked(false);
-    this.sync();
   }
 
   private addAmmo(ammo: AmmoType): void {
