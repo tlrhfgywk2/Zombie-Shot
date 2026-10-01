@@ -774,3 +774,36 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 
 .ammo-stats > .ammo-special-effect { grid-column: 1 / -1; display: block; margin-top: 4px; color: var(--bullet); line-height: 1.5; overflow-wrap: anywhere; }
 .ammo-tooltip b[data-shock-boosted] { color: #ffd68f; }
+.weapon-selection { overflow-y: auto; }
+.weapon-selection-card { width: min(1160px, 100%); max-height: 100%; overflow-y: auto; }
+.weapon-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
+.weapon-option { min-width: 0; display: flex; flex-direction: column; padding: 1rem; border: 1px solid var(--line); background: #17201a; }
+.weapon-option h3 { margin: 0; font-size: var(--combat-value-prominent); }
+.weapon-option > p { min-height: 2.5em; color: var(--muted); font-size: .82rem; }
+.weapon-option dl { margin: .4rem 0 1rem; }
+.weapon-option dl > div { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .3rem; margin: .65rem 0; }
+.weapon-option dt { font-size: .8rem; }
+.weapon-option dd { margin: 0; color: #e8efe9; font-size: var(--combat-value-size); font-weight: 800; }
+.weapon-option details { flex: 1; margin-bottom: 1rem; font-size: .82rem; }
+.weapon-option summary, .weapon-panel summary { cursor: pointer; }
+.weapon-option details p, .weapon-panel p { color: var(--muted); line-height: 1.5; }
+.weapon-option button, .cylinder-choice button { padding: .7rem; border: 1px solid var(--acid); background: #22311c; color: #e8efe9; cursor: pointer; font-weight: 800; }
+.weapon-panel { margin-bottom: .5rem; font-size: .8rem; }
+.weapon-panel summary { display: flex; flex-wrap: wrap; gap: .25rem .6rem; }
+.weapon-panel summary strong { font-size: var(--combat-value-size); }
+.weapon-panel summary span { color: var(--acid); }
+.weapon-panel p { margin: .4rem 0; }
+.cylinder-choice { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; margin-top: .5rem; }
+.cylinder-choice span { font-size: .8rem; color: var(--acid); }
+.cylinder-choice button:disabled { opacity: .35; cursor: default; }
+.trait-bonus { min-height: 1.2em; line-height: 1.2; color: var(--acid); font-size: .65rem; font-weight: 800; }
+.game-shell .slot-content { justify-content: flex-start; gap: .2rem; }
+.game-shell .slot-content > strong { min-height: 2.3em; line-height: 1.15; }
+.game-shell[data-layout="portrait"] .tactical-console .mag-slot { height: 114px; min-height: 114px; }
+.game-shell[data-layout="desktop"] .tactical-console .mag-slot { height: 120px; min-height: 120px; }
+.game-shell[data-layout="portrait"] .weapon-options { grid-template-columns: 1fr; }
+.game-shell[data-layout="portrait"] .weapon-option { padding: .75rem; }
+.game-shell[data-layout="portrait"] .weapon-option > p { min-height: 0; margin: .45rem 0; }
+.game-shell[data-layout="portrait"] .weapon-option dl > div { margin: .35rem 0; }
+.game-shell[data-layout="portrait"] .weapon-panel { font-size: .68rem; }
+.game-shell[data-layout="portrait"] .cylinder-choice button { padding: .65rem .5rem; }

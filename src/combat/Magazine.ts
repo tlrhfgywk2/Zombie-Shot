@@ -1,15 +1,22 @@
 import { COMBAT_BALANCE } from '../data/ammoDefinitions';
+import { WEAPON_DEFINITIONS, type WeaponId } from '../data/weaponDefinitions';
 import type { AmmoType } from './types';
 
 export class Magazine {
   private rounds: AmmoType[] = [];
   private currentCapacity: number = COMBAT_BALANCE.baseMagazineCapacity;
+  constructor(private weapon: WeaponId = 'p220') { this.setCapacity(WEAPON_DEFINITIONS[weapon].baseMagazineCapacity); }
+  setWeapon(weapon: WeaponId): void { this.clear(); this.weapon = weapon; this.setCapacity(WEAPON_DEFINITIONS[weapon].baseMagazineCapacity); }
+  setRounds(rounds: readonly AmmoType[]): void {
+    if (rounds.length > this.capacity) throw new Error('탄창 용량을 초과했습니다.');
+    this.rounds = [...rounds];
+  }
   get capacity(): number { return this.currentCapacity; }
   get size(): number { return this.rounds.length; }
   getRounds(): readonly AmmoType[] { return [...this.rounds]; }
 
   setCapacity(capacity: number): AmmoType[] {
-    this.currentCapacity = Math.max(COMBAT_BALANCE.minimumMagazineCapacity, Math.min(COMBAT_BALANCE.maximumMagazineCapacity, Math.floor(capacity)));
+    this.currentCapacity = Math.max(WEAPON_DEFINITIONS[this.weapon].baseMagazineCapacity, Math.min(WEAPON_DEFINITIONS[this.weapon].maximumMagazineCapacity, Math.floor(capacity)));
     return this.rounds.splice(this.currentCapacity);
   }
 

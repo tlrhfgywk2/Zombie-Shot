@@ -1,17 +1,21 @@
-import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, SERVICE_45,
+import { WEAPON_DEFINITIONS, type WeaponId } from '../data/weaponDefinitions';
+import { weaponPayload } from './WeaponTraits';
+import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER,
   type AttachmentModifier, type LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE, RANGE_NAMES } from '../data/ammoDefinitions';
 import { getEnabledAttachmentIds, createPlayerCombatState } from './AttachmentLoadout';
 import { recoilFirepowerPenalty } from './RecoilPenalty';
-import type { AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState,
+import type { AmmoFamily, AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState,
   FirepowerBreakdown, PlayerCombatState, RangeBand, RoundPreview, SequenceResult, ShotResult } from './types';
 
 export interface CombatContext {
+  weaponId?: WeaponId;
+  boostedOpening?: boolean;
   loadout?: LoadoutSnapshot;
   playerState?: PlayerCombatState;
   targets?: readonly EnemyState[];
 }
-interface SequenceCursor { recoil: number; followUp: number; shockFollowUp: number; distanceLossHundredths: number }
+interface SequenceCursor { previousFamily?: AmmoFamily; recoil: number; followUp: number; shockFollowUp: number; distanceLossHundredths: number }
 const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined });
 const clonePlayerState = (state: PlayerCombatState): PlayerCombatState => ({ ...state, disabledSlots: { ...state.disabledSlots } });
 const rangeOrder: readonly RangeBand[] = ['near', 'mid', 'far'];
@@ -68,7 +72,7 @@ const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
 
 export class CombatResolver {
   private modifiers(context: CombatContext): AttachmentModifier[] {
-    return getEnabledAttachmentIds(context.loadout ?? {}, context.playerState ?? createPlayerCombatState())
+    return getEnabledAttachmentIds(context.loadout ?? {}, context.playerState ?? createPlayerCombatState(), context.weaponId)
       .flatMap(id => ATTACHMENT_DEFINITIONS[id].modifiers);
   }
   private modifier(context: CombatContext, kind: AttachmentModifier['kind'], band?: RangeBand): number {
@@ -76,12 +80,12 @@ export class CombatResolver {
       .reduce((sum, mod) => sum + mod.value, 0);
   }
   getRecoilThreshold(context: CombatContext = {}): number {
-    return COMBAT_BALANCE.recoilThreshold + this.modifier(context, 'recoilThreshold');
+    return WEAPON_DEFINITIONS[context.weaponId ?? 'p220'].recoilThreshold + this.modifier(context, 'recoilThreshold');
   }
   private rangePenalty(distance: number, context: CombatContext): { band: RangeBand; effective: RangeBand; percent: number } {
     const band = getRangeBand(distance);
     const effective = getEffectiveRangeBand(band, context.playerState?.rangePenaltySteps ?? 0);
-    return { band, effective, percent: Math.max(0, SERVICE_45.rangePenaltyPercentages[effective]
+    return { band, effective, percent: Math.max(0, WEAPON_DEFINITIONS[context.weaponId ?? 'p220'].rangePenaltyPercentages[effective]
       - this.modifier(context, 'rangePenaltyReductionPercent', effective)) };
   }
   resolveShot(ammoType: AmmoType, index: number, enemyState: EnemyState, context: CombatContext = {}): ShotResult {
@@ -110,7 +114,8 @@ export class CombatResolver {
         recoilFirepowerReduction: shot.breakdown.recoilFirepowerReduction,
         playerDebuffFirepowerReduction: shot.breakdown.playerDebuffFirepowerReduction,
         // 미발사 슬롯도 폭발탄의 누적 능력은 표시한다. 실제 잔량과 기폭 피해는 shots에서만 합산한다.
-        wound: shot.woundApplied, explosive: AMMO_DEFINITIONS[ammoType].explosive, effectiveActionShock: shot.breakdown.projectedShock,
+        traitBonus: shot.breakdown.traitBonus, recoilGenerated: shot.breakdown.recoilGenerated, finalFirepower: shot.breakdown.finalFirepower,
+        wound: shot.woundApplied, explosive: shot.breakdown.primaryPayload === 'explosive' ? shot.breakdown.primaryPayloadValue : AMMO_DEFINITIONS[ammoType].explosive, effectiveActionShock: shot.breakdown.projectedShock,
         shockBonus: shot.breakdown.projectedShock - AMMO_DEFINITIONS[ammoType].actionShock,
         recoil: shot.breakdown.recoilAfter, followUpBonus: shot.breakdown.followUpBonus,
         vulnerableDamageBonus: shot.breakdown.vulnerableDamageBonus, movement: shot.movement };
@@ -145,20 +150,22 @@ export class CombatResolver {
     cursor: SequenceCursor): { shot: ShotResult; next: SequenceCursor } {
     const definition = AMMO_DEFINITIONS[ammoType];
     if (!definition) throw new Error('존재하지 않는 탄약입니다.');
+    const weapon = WEAPON_DEFINITIONS[context.weaponId ?? 'p220'];
+    const payload = weaponPayload(definition, weapon, cursor.previousFamily, Boolean(context.boostedOpening && index === 0));
     const before = cloneState(enemy);
     const after = cloneState(enemy);
     if (definition.moveBefore) after.distance = this.clampDistance(after.distance + definition.moveBefore);
     const shotDistance = after.distance;
     const range = this.rangePenalty(shotDistance, context);
     const recoilBefore = cursor.recoil;
-    const reducedRecoil = Math.max(0, definition.recoil - this.modifier(context, 'recoilReduction')
+    const reducedRecoil = Math.max(0, (weapon.trait === 'standardBall' && ammoType === 'ball' ? 0 : definition.recoil + (definition.recoil > 0 ? weapon.recoilAdjustment : 0)) - this.modifier(context, 'recoilReduction')
       - (definition.recoil >= 3 ? this.modifier(context, 'highRecoilReduction') : 0));
-    const recoilAfter = (definition.recoilScale ? 0
-      : Math.max(0, recoilBefore - (definition.recoilRecovery ?? 0))) + reducedRecoil;
+    const recoveredRecoil = definition.recoilScale ? 0 : Math.max(0, recoilBefore - (definition.recoilRecovery ?? 0));
+    const recoilAfter = recoveredRecoil + reducedRecoil;
     const threshold = this.getRecoilThreshold(context);
     // 반동탄은 쌓인 반동을 피해로 바꾸면서 전부 소비한다.
-    // 이번 탄으로 누적 반동이 임계치를 넘으면 같은 탄의 화력부터 감소한다.
-    const recoilPenalty = definition.recoilScale ? 0 : recoilFirepowerPenalty(recoilAfter, threshold);
+    // 일반 권총은 이번 탄 반동도 포함하고, 지연 반동 특성은 회복 후 기존 반동만 사용한다.
+    const recoilPenalty = definition.recoilScale ? 0 : recoilFirepowerPenalty(weapon.trait === 'deferredRecoil' ? recoveredRecoil : recoilAfter, threshold);
     const playerDebuffFirepowerPenalty = definition.recoilScale || recoilBefore === 0
       ? 0 : context.playerState?.heavyKickPenaltyBonus ?? 0;
     const followUpBonus = cursor.followUp;
@@ -170,7 +177,7 @@ export class CombatResolver {
     const healthBonus = definition.healthScale ? Math.min(definition.healthScale.cap, Math.floor(before.hp / definition.healthScale.divisor)) : 0;
     const kickbackBonus = definition.recoilScale ? Math.min(definition.recoilScale.cap, cursor.recoil) : 0;
     const conditionalBonus = vulnerableBonus + suppressedBonus + executionBonus + healthBonus + kickbackBonus;
-    const preRecoilFirepower = Math.max(0, definition.firepower + conditionalBonus + followUpBonus);
+    const preRecoilFirepower = Math.max(0, payload.firepower + conditionalBonus + followUpBonus);
     const afterRecoilFirepower = Math.max(0, preRecoilFirepower - recoilPenalty);
     const baseFirepower = Math.max(0, afterRecoilFirepower - playerDebuffFirepowerPenalty);
     // 취약은 사격 시작 시 상태로 HP 화력에만 적용한다. 이번 탄의 상처 발동은 후속 탄부터 유효하다.
@@ -188,11 +195,11 @@ export class CombatResolver {
     const shockFollowUpBonus = cursor.shockFollowUp;
     const shockScaleBonus = definition.shockScale
       ? Math.min(definition.shockScale.cap, Math.floor(before.actionShock / definition.shockScale.divisor)) : 0;
-    const baseShock = definition.actionShock + shockFollowUpBonus + shockScaleBonus;
+    const baseShock = payload.actionShock + shockFollowUpBonus + shockScaleBonus;
     // 연쇄는 바로 다음 한 발만 강화한다. 강화로 충격을 얻은 일반탄도 조명과 폭발 기폭을 적용한다.
     const projectedShock = baseShock > 0 ? baseShock + this.modifier(context, 'impact', range.band) : 0;
     // 폭발은 턴/거리/반동/취약과 무관하게 유지된다. 이번 명중의 충격만 기폭하며 기존 충격은 기폭하지 않는다.
-    const explosiveApplied = after.hp > directFirepower ? definition.explosive : 0;
+    const explosiveApplied = after.hp > directFirepower ? payload.explosive : 0;
     after.explosive += explosiveApplied;
     const explosiveConsumed = before.hp > 0 && projectedShock > 0 ? after.explosive : 0;
     const detonationDamage = explosiveConsumed * COMBAT_BALANCE.explosionDamagePerStack;
@@ -202,7 +209,7 @@ export class CombatResolver {
     const finalFirepower = directFirepower + detonationDamage;
     const hpDamage = Math.min(after.hp, finalFirepower);
     after.hp -= hpDamage;
-    const woundApplied = after.hp > 0 ? definition.wound : 0;
+    const woundApplied = after.hp > 0 ? payload.wound : 0;
     after.wound += woundApplied;
     const vulnerableTriggered = woundApplied > 0 && after.wound >= after.woundThreshold;
     if (vulnerableTriggered) {
@@ -214,7 +221,7 @@ export class CombatResolver {
     after.actionShock += actionShockApplied;
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
     const movement = after.distance - before.distance;
-    const next = { recoil: recoilAfter, followUp: definition.followUp
+    const next = { previousFamily: definition.family, recoil: recoilAfter, followUp: definition.followUp
       ? definition.followUp + this.modifier(context, 'followUpEffect') : 0,
     shockFollowUp: definition.shockFollowUp
       ? definition.shockFollowUp + this.modifier(context, 'followUpEffect') : 0,
@@ -231,7 +238,8 @@ export class CombatResolver {
     if (shockScaleBonus) detail.push(`누적 충격 증폭 +${shockScaleBonus}`);
     if (followUpBonus) detail.push(`후속 강화 +${followUpBonus}`);
     if (definition.moveAfter) detail.push(`사격 후 ${movement}m 후퇴`);
-    const breakdown = { ammoFirepower: definition.firepower, prePenaltyFirepower, effectiveFirepower,
+    const breakdown = { weaponFirepowerAdjustment: weapon.firepowerAdjustment, traitBonus: payload.traitBonus,
+      primaryPayload: definition.primaryPayload, primaryPayloadValue: payload[definition.primaryPayload], ammoFirepower: definition.firepower, prePenaltyFirepower, effectiveFirepower,
       rangeBand: range.band, effectiveRangeBand: range.effective, recoilBefore,
       recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, recoilFirepowerReduction,
       playerDebuffFirepowerPenalty, playerDebuffFirepowerReduction,
@@ -296,7 +304,7 @@ export class CombatResolver {
 }
 
 export const getVisualKickScale = (enemy: EnemyState, context: CombatContext = {}): number => {
-  const ids = getEnabledAttachmentIds(context.loadout ?? {}, context.playerState ?? createPlayerCombatState());
+  const ids = getEnabledAttachmentIds(context.loadout ?? {}, context.playerState ?? createPlayerCombatState(), context.weaponId);
   const reduction = ids.flatMap(id => ATTACHMENT_DEFINITIONS[id].modifiers)
     .filter(mod => mod.kind === 'recoilReduction').reduce((sum, mod) => sum + mod.value, 0);
   void enemy;

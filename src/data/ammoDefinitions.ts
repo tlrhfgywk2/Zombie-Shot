@@ -1,7 +1,8 @@
-import { SERVICE_45 } from './attachmentDefinitions';
-import type { AmmoRarity, AmmoType, BuildTag, RangeBand } from '../combat/types';
+import { WEAPON_DEFINITIONS } from './weaponDefinitions';
+import type { AmmoFamily, PrimaryPayload, AmmoRarity, AmmoType, BuildTag, RangeBand } from '../combat/types';
 
 export interface AmmoDefinition {
+  family: AmmoFamily; primaryPayload: PrimaryPayload;
   id: AmmoType; name: string; shortName: string; role: string; rarity: AmmoRarity;
   tags: readonly BuildTag[]; color: number; cssColor: string; supply?: 'infinite';
   firepower: number; wound: number; explosive: number; actionShock: number; recoil: number; recoilRecovery?: number;
@@ -11,9 +12,36 @@ export interface AmmoDefinition {
   vulnerableBonus?: number; vulnerableDamagePercentBonus?: number; suppressedBonus?: number;
   execution?: { percent: number; bonus: number }; moveBefore?: number; moveAfter?: number;
 }
+export const AMMO_FAMILIES: Record<AmmoType, { family: AmmoFamily; primaryPayload: PrimaryPayload }> = {
+  ball: { family: 'HEALTH', primaryPayload: 'firepower' },
+  hollowPoint: { family: 'HEALTH', primaryPayload: 'firepower' },
+  lowRecoil: { family: 'HEALTH', primaryPayload: 'firepower' },
+  plusP: { family: 'HEALTH', primaryPayload: 'firepower' },
+  relay: { family: 'HEALTH', primaryPayload: 'firepower' },
+  frangible: { family: 'HEALTH', primaryPayload: 'firepower' },
+  suppression: { family: 'HEALTH', primaryPayload: 'firepower' },
+  execution: { family: 'HEALTH', primaryPayload: 'firepower' },
+  kickback: { family: 'HEALTH', primaryPayload: 'firepower' },
+  laceration: { family: 'HEALTH', primaryPayload: 'firepower' },
+  retreat: { family: 'HEALTH', primaryPayload: 'firepower' },
+  advance: { family: 'HEALTH', primaryPayload: 'firepower' },
+  wounding: { family: 'WOUND', primaryPayload: 'wound' },
+  serrated: { family: 'WOUND', primaryPayload: 'wound' },
+  retreatCutter: { family: 'WOUND', primaryPayload: 'wound' },
+  advanceCutter: { family: 'WOUND', primaryPayload: 'wound' },
+  explosive: { family: 'EXPLOSION', primaryPayload: 'explosive' },
+  highExplosive: { family: 'EXPLOSION', primaryPayload: 'explosive' },
+  stickyCharge: { family: 'EXPLOSION', primaryPayload: 'explosive' },
+  flatNose: { family: 'IMPACT', primaryPayload: 'actionShock' },
+  reducedImpact: { family: 'IMPACT', primaryPayload: 'actionShock' },
+  hammer: { family: 'IMPACT', primaryPayload: 'actionShock' },
+  impactRelay: { family: 'IMPACT', primaryPayload: 'actionShock' },
+  resonance: { family: 'IMPACT', primaryPayload: 'actionShock' },
+  heavy: { family: 'IMPACT', primaryPayload: 'actionShock' },
+};
 const ammo = (id: AmmoType, name: string, shortName: string, role: string, tags: readonly BuildTag[], color: number,
   firepower: number, wound = 0, actionShock = 0, recoil = 1, extra: Partial<AmmoDefinition> = {}): AmmoDefinition => ({
-  id, name, shortName, role, rarity: 'common', tags, color, cssColor: `#${color.toString(16).padStart(6, '0')}`,
+  ...AMMO_FAMILIES[id], id, name, shortName, role, rarity: 'common', tags, color, cssColor: `#${color.toString(16).padStart(6, '0')}`,
   firepower, wound, explosive: 0, actionShock, recoil, ...extra,
 });
 export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
@@ -60,10 +88,9 @@ export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', unco
 export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', explosive: '폭발', impact: '충격' };
 export const RANGE_NAMES: Record<RangeBand, string> = { near: '근거리', mid: '중거리', far: '원거리' };
 export const COMBAT_BALANCE = {
-  baseMagazineCapacity: SERVICE_45.baseMagazineCapacity,
-  maximumMagazineCapacity: SERVICE_45.maximumMagazineCapacity,
-  minimumMagazineCapacity: SERVICE_45.baseMagazineCapacity,
-  minimumFirepower: 0, recoilThreshold: 3, maxDistance: 12,
+  baseMagazineCapacity: WEAPON_DEFINITIONS.p220.baseMagazineCapacity,
+  maximumMagazineCapacity: WEAPON_DEFINITIONS.p220.maximumMagazineCapacity,
+  minimumFirepower: 0, recoilThreshold: WEAPON_DEFINITIONS.p220.recoilThreshold, maxDistance: 12,
   explosionDamagePerStack: 2,
   woundThreshold: 6, vulnerableTurns: 2, vulnerableDamagePercent: 50,
   rangeThresholds: { near: 4, mid: 8 },

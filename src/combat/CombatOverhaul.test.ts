@@ -51,9 +51,9 @@ describe('새 탄약과 전투 상태', () => {
   it('저반동탄은 피해를 지불하고 누적 반동을 회복한다', () => {
     const sequence = resolver.resolveSequence(['plusP', 'plusP', 'lowRecoil', 'ball'], target());
     expect(sequence.shots[2]?.breakdown.recoilAfter).toBe(4);
-    expect(sequence.shots[2]?.breakdown.recoilPenalty).toBe(1);
-    expect(sequence.shots[3]?.breakdown.recoilPenalty).toBe(1);
-    expect(resolver.resolveSequence(['plusP', 'plusP', 'ball', 'ball'], target()).shots[3]?.breakdown.recoilPenalty).toBe(3);
+    expect(sequence.shots[2]?.breakdown.recoilPenalty).toBe(0);
+    expect(sequence.shots[3]?.breakdown.recoilPenalty).toBe(0);
+    expect(resolver.resolveSequence(['plusP', 'plusP', 'ball', 'ball'], target()).shots[3]?.breakdown.recoilPenalty).toBe(1);
   });
   it('취약은 지속 시간으로 판정하고, 제압은 기존 충격 중단 조건을 사용한다', () => {
     const enemy = target();
@@ -117,12 +117,12 @@ describe('최종 부착물과 런 진행', () => {
   });
   it('반동 임계치와 거리 감쇠는 부착물 봉쇄와 거리 교란을 포함한 실제 사격 기준을 따른다', () => {
     const loadout = { muzzle: 'compensator' as const, optic: 'reflexSight' as const };
-    expect(resolver.getRecoilThreshold({ loadout })).toBe(5);
+    expect(resolver.getRecoilThreshold({ loadout })).toBe(6);
     expect(resolver.resolveShot('plusP', 0, target(100, 7), { loadout }).breakdown.rangePenaltyPercent).toBe(0);
     const disrupted = { ...createPlayerCombatState(), rangePenaltySteps: 1, disabledSlots: { muzzle: 1 } };
     const context = { loadout, playerState: disrupted };
-    expect(resolver.getRecoilThreshold(context)).toBe(3);
-    expect(resolver.resolveShot('plusP', 0, target(100, 7), context).breakdown.rangePenaltyPercent).toBe(25);
+    expect(resolver.getRecoilThreshold(context)).toBe(4);
+    expect(resolver.resolveShot('plusP', 0, target(100, 7), context).breakdown.rangePenaltyPercent).toBe(20);
   });
   it('레이저는 취약 효과, 조명은 근거리 충격, 결합형은 각 효과가 약하다', () => {
     const wounded = { ...target(), wound: 3, vulnerableTurns: 1 };
@@ -172,7 +172,7 @@ describe('데이터와 완성 탄창', () => {
     for (const [index, ammo] of rewardPool.entries()) {
       expect(generateAmmoRewards(() => (index + 0.5) / rewardPool.length)).toContain(ammo);
     }
-    expect(ATTACHMENT_ORDER.every(id => generateAttachmentReward(ATTACHMENT_ORDER.filter(other => other !== id), 'service45', () => 0) === id)).toBe(true);
+    expect(ATTACHMENT_ORDER.every(id => generateAttachmentReward(ATTACHMENT_ORDER.filter(other => other !== id), 'p220', () => 0) === id)).toBe(true);
   });
   it('구 저장 ID를 보상·소유·장전으로 되살리지 않는다', () => {
     const player = new Player();

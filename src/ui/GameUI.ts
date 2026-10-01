@@ -1,3 +1,5 @@
+import { WEAPON_DEFINITIONS, WEAPON_ORDER, type WeaponDefinition, type WeaponId } from '../data/weaponDefinitions';
+import { isAttachmentCompatible } from '../data/attachmentDefinitions';
 import { ammoRewardOwnedCount, ammoStatsMarkup, ammoTooltipFirepower, firingOrderStatEntries } from './AmmoView';
 import { ACTION_NAMES, getRangeBand, isVulnerable } from '../combat/CombatResolver';
 import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
@@ -13,6 +15,10 @@ import { applyResponsiveLayoutMode } from '../presentation/ResponsiveLayout';
 import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
 
 export interface GameUICallbacks {
+  onChooseWeapon: (id: WeaponId) => void;
+  onCylinderDecision: (spin: boolean) => void;
+  onFireCylinder: () => void;
+  onEditCylinder: () => void;
   onAddAmmo: (ammo: AmmoType) => void;
   onRemoveAmmo: (index: number) => void;
   onReplaceAmmo: (index: number, ammo: AmmoType) => void;
@@ -33,7 +39,7 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  ATTACHMENT_REWARD: '부착물 획득', AMMO_REWARD: '탄약 보급', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
+  WEAPON_SELECTION: '권총 선택', CYLINDER_CHOICE: '실린더 준비', ATTACHMENT_REWARD: '부착물 획득', AMMO_REWARD: '탄약 보급', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
 const COMBAT_STAT_ICONS = {
@@ -98,6 +104,7 @@ export class GameUI {
   private stock: AmmoStock = createStageStock(this.build);
   private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
   private locked = false;
+  private weapon: WeaponDefinition = WEAPON_DEFINITIONS.p220;
   private magazineCapacity: number = COMBAT_BALANCE.baseMagazineCapacity;
   private suppressClick = false;
   private gestureVersion = 0;
@@ -142,14 +149,15 @@ export class GameUI {
           <div class="ammo-rack"><div class="section-label"><span>탄약</span><small id="ammo-capacity">휴대 6/14</small></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
           </div></div>
-          <div class="magazine-panel"><div class="section-label"><span>발사 순서</span></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
+          <div class="magazine-panel"><details id="weapon-panel" class="weapon-panel"><summary><strong data-weapon-name>P220</strong><span data-weapon-trait>표준탄 반동 0</span></summary><p data-weapon-detail></p></details><div class="section-label"><span>발사 순서</span></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
-          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div></div>
+          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div><div id="cylinder-choice" class="cylinder-choice" hidden aria-label="실린더 시작 순서 선택"></div></div>
           <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/11</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
             <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
         </div></section>
+        <section id="weapon-selection" class="route-choice weapon-selection" hidden role="dialog" aria-modal="true" aria-labelledby="weapon-selection-title"></section>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
         <section id="ammo-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-reward-title"></section>
@@ -340,6 +348,57 @@ export class GameUI {
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
 
+  showWeaponSelection(show: boolean): void {
+    const host = this.required(this.shell, '#weapon-selection');
+    host.hidden = !show;
+    this.required(this.shell, '.game-stage').inert = show;
+    this.required(this.shell, '.tactical-console').inert = show;
+    if (!show) { this.shell.querySelector<HTMLButtonElement>('.ammo-token')?.focus(); return; }
+    host.innerHTML = `<div class="route-card weapon-selection-card"><h2 id="weapon-selection-title">권총 선택</h2><div class="weapon-options">${WEAPON_ORDER.map(id => {
+      const weapon = WEAPON_DEFINITIONS[id];
+      const rating = weapon.ratings;
+      return `<article class="weapon-option"><h3>${weapon.name}</h3><p>${weapon.role}</p><dl>
+        <div><dt>탄창 ${rating.magazine}</dt><dd>${weapon.baseMagazineCapacity} / ${weapon.maximumMagazineCapacity}발</dd></div>
+        <div><dt>화력 ${rating.firepower}</dt><dd title="탄약 기본 화력에 더하는 정수">기본 ${weapon.firepowerAdjustment >= 0 ? '+' : ''}${weapon.firepowerAdjustment}</dd></div>
+        <div><dt>거리 ${rating.range}</dt><dd>0 / −${weapon.rangePenaltyPercentages.mid} / −${weapon.rangePenaltyPercentages.far}%</dd></div>
+        <div><dt>반동 ${rating.recoil}</dt><dd title="원래 반동 0인 탄에는 추가 반동이 없습니다.">${weapon.recoilAdjustment ? `발생 +${weapon.recoilAdjustment} · ` : ''}허용 ${weapon.recoilThreshold}</dd></div>
+        <div><dt>난도</dt><dd>${rating.difficulty}</dd></div>
+      </dl><details><summary>${weapon.traitLabel}</summary><p>${weapon.traitDetail}</p></details><button type="button" data-choose-weapon="${id}">${weapon.name} 선택</button></article>`;
+    }).join('')}</div></div>`;
+    host.querySelectorAll<HTMLButtonElement>('[data-choose-weapon]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseWeapon(button.dataset.chooseWeapon as WeaponId)));
+    host.onkeydown = event => {
+      if (event.key !== 'Tab') return;
+      const elements = [...host.querySelectorAll<HTMLElement>('button, summary')];
+      if (event.shiftKey && document.activeElement === elements[0]) { event.preventDefault(); elements.at(-1)?.focus(); }
+      else if (!event.shiftKey && document.activeElement === elements.at(-1)) { event.preventDefault(); elements[0]?.focus(); }
+    };
+    host.querySelector<HTMLButtonElement>('button')?.focus();
+  }
+
+  renderWeapon(weapon: WeaponDefinition): void {
+    this.weapon = weapon;
+    this.required(this.shell, '[data-weapon-name]').textContent = weapon.name;
+    this.required(this.shell, '[data-weapon-trait]').textContent = weapon.traitLabel;
+    this.required(this.shell, '[data-weapon-detail]').textContent = `${weapon.traitDetail} 기본 화력 ${weapon.firepowerAdjustment >= 0 ? '+' : ''}${weapon.firepowerAdjustment} · 거리 감소 ${weapon.rangePenaltyPercentages.near}/${weapon.rangePenaltyPercentages.mid}/${weapon.rangePenaltyPercentages.far}% · 발생 반동 ${weapon.recoilAdjustment ? `+${weapon.recoilAdjustment} (원래 반동 0인 탄 제외)` : '추가 없음'} · 탄창 ${weapon.baseMagazineCapacity}~${weapon.maximumMagazineCapacity}발`;
+    this.recoilGauge.title = `${weapon.traitDetail} 반동 허용치를 넘으면 초과량 2마다 화력 −1, 최대 −3. 새 탄창에서 초기화됩니다.`;
+  }
+
+  renderCylinderChoice(size: number, decided: boolean, spun: boolean): void {
+    const host = this.required(this.shell, '#cylinder-choice');
+    host.hidden = size === 0;
+    this.loadButton.hidden = size > 0;
+    if (!size) return;
+    host.innerHTML = decided
+      ? `<span>${spun ? '회전 완료 · 첫 탄 주효과 +50%' : '선택한 순서 유지'}</span><button type="button" data-cylinder-fire>발사</button>`
+      : `<button type="button" data-cylinder-keep>순서 유지</button><button type="button" data-cylinder-spin ${size < 2 ? 'disabled' : ''}>실린더 회전</button>`;
+    host.insertAdjacentHTML('beforeend', '<button type="button" data-cylinder-edit>장전 수정</button>');
+    host.querySelector<HTMLButtonElement>('[data-cylinder-keep]')?.addEventListener('click', () => this.callbacks.onCylinderDecision(false));
+    host.querySelector<HTMLButtonElement>('[data-cylinder-spin]')?.addEventListener('click', () => this.callbacks.onCylinderDecision(true));
+    host.querySelector<HTMLButtonElement>('[data-cylinder-fire]')?.addEventListener('click', this.callbacks.onFireCylinder);
+    host.querySelector<HTMLButtonElement>('[data-cylinder-edit]')?.addEventListener('click', this.callbacks.onEditCylinder);
+    host.querySelector<HTMLButtonElement>('button:not(:disabled)')?.focus();
+  }
+
   renderMagazine(rounds: readonly AmmoType[], stock: AmmoStock = this.stock, capacity: number = this.magazineCapacity, build: AmmoBuild = this.build, specialCapacity: number = this.specialCapacity): void {
     this.rounds = [...rounds];
     this.stock = { ...stock };
@@ -440,16 +499,16 @@ export class GameUI {
   setLocked(locked: boolean): void {
     this.locked = locked;
     this.attachmentTabs.forEach((button) => {
-      button.disabled = locked || button.dataset.sealed === 'true';
+      button.disabled = locked || button.dataset.compatible === 'false' || button.dataset.sealed === 'true';
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
-      button.disabled = locked || button.dataset.sealed === 'true' || button.dataset.owned !== 'true';
+      button.disabled = locked || button.dataset.compatible === 'false' || button.dataset.sealed === 'true' || button.dataset.owned !== 'true';
     });
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
   }
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number, owned: readonly AttachmentId[] = []): void {
-    this.required(this.shell, '#attachment-count').textContent = `보유 ${owned.length}/${ATTACHMENT_ORDER.length}`;
+    this.required(this.shell, '#attachment-count').textContent = `보유 ${owned.filter(id => isAttachmentCompatible(id, this.weapon.id)).length}/${ATTACHMENT_ORDER.filter(id => isAttachmentCompatible(id, this.weapon.id)).length}`;
     this.magazineCapacity = capacity;
     ATTACHMENT_SLOT_ORDER.forEach((slot) => {
       const id = loadout[slot];
@@ -472,12 +531,14 @@ export class GameUI {
       const sealed = Boolean(playerState.disabledSlots[slot]);
       button.classList.toggle('is-equipped', selected);
       button.setAttribute('aria-pressed', String(selected));
+      const compatible = isAttachmentCompatible(id, this.weapon.id);
+      button.dataset.compatible = String(compatible);
       button.dataset.sealed = String(sealed);
       button.dataset.owned = String(owned.includes(id));
       const ownership = button.querySelector('[data-ownership]');
-      if (ownership) ownership.textContent = selected ? '장착 중 · 다시 눌러 해제' : owned.includes(id) ? '보유' : '미획득';
+      if (ownership) ownership.textContent = !compatible ? '장착 불가' : selected ? '장착 중 · 다시 눌러 해제' : owned.includes(id) ? '보유' : '미획득';
       button.setAttribute('aria-label', `${ATTACHMENT_DEFINITIONS[id].name}: ${selected ? '장착 중, 다시 눌러 해제' : ATTACHMENT_DEFINITIONS[id].summary}`);
-      button.disabled = this.locked || sealed || !owned.includes(id);
+      button.disabled = this.locked || !compatible || sealed || !owned.includes(id);
     });
     this.updateAttachmentPanel();
   }
@@ -572,11 +633,13 @@ export class GameUI {
     this.slots.forEach((slot, index) => {
       const content = slot.querySelector<HTMLElement>('.slot-content');
       content?.querySelector('.sequence-stats')?.remove();
+      content?.querySelector('.trait-bonus')?.remove();
       const predictedUnfired = Boolean(sequence?.killed && index >= sequence.shots.length && index < sequence.roundPreviews.length);
       slot.classList.toggle('will-not-fire', predictedUnfired);
       const round = sequence?.roundPreviews[index];
       if (!round || !content) return;
       const visibleStats = firingOrderStatEntries(round);
+      content.insertAdjacentHTML('beforeend', `<span class="trait-bonus" ${round.traitBonus ? 'title="주효과 강화"' : 'aria-hidden="true"'}>${round.traitBonus ? `${({ firepower: '화력', wound: '상처', explosive: '폭발', actionShock: '충격' })[AMMO_DEFINITIONS[round.ammoType].primaryPayload]} +${round.traitBonus}` : ''}</span>`);
       content.insertAdjacentHTML('beforeend', `<span class="sequence-stats">${visibleStats.map((stat) => `<span class="sequence-stat sequence-${stat.kind}" ${stat.modified ? 'data-modified' : ''} aria-label="${stat.label} ${stat.value}">${COMBAT_STAT_ICONS[stat.kind]}<b>${stat.value}</b></span>`).join('')}${round.movement ? `<span class="sequence-move" aria-label="${round.movement < 0 ? '사격 전 전진' : '사격 후 후퇴'} ${Math.abs(round.movement)}m">${round.movement < 0 ? '←' : '→'}${Math.abs(round.movement)}</span>` : ''}</span>`);
       slot.setAttribute('aria-label', `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[round.ammoType].name}, 탭하여 즉시 제거, ${visibleStats.map((stat) => `${stat.label} ${stat.value}`).join(', ')}${predictedUnfired ? ', 예상 미발사' : ''}`);
     });
@@ -710,7 +773,7 @@ export class GameUI {
 
   private updateLoadButton(): void {
     const label = this.loadButton.querySelector<HTMLElement>('span')!;
-    label.textContent = '탄창 장전';
+    label.textContent = this.weapon.trait === 'cylinder' ? '실린더 장전' : '탄창 장전';
     this.loadButton.disabled = this.locked || this.rounds.length === 0;
     this.loadButton.setAttribute('aria-label', this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '탄창 장전, 탄약 1발 이상 필요');
   }
@@ -811,7 +874,7 @@ export class GameUI {
     const shock = round?.effectiveActionShock ?? definition.actionShock;
     const firepowerLabel = firepower.change === 'weakened' ? '반동 감소 반영 화력'
       : firepower.change === 'strengthened' ? '강화 반영 화력' : '화력';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${definition.wound}</b></span><span>폭발 <b>${definition.explosive}</b></span><span>${assumedAppend ? '추가 시 충격' : '충격'} <b ${round && round.shockBonus > 0 ? 'data-shock-boosted' : ''}>${shock}</b></span><span>반동 <b>${definition.recoil}</b></span></div>`;
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${round?.wound ?? definition.wound}</b></span><span>폭발 <b>${round?.explosive ?? definition.explosive}</b></span><span>${assumedAppend ? '추가 시 충격' : '충격'} <b ${round && round.shockBonus > 0 ? 'data-shock-boosted' : ''}>${shock}</b></span><span>반동 <b>${round?.recoilGenerated ?? definition.recoil}</b></span></div>`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;

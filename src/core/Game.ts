@@ -1,3 +1,5 @@
+import { type WeaponId } from '../data/weaponDefinitions';
+import { spinCylinder } from '../combat/WeaponTraits';
 import { CombatResolver, getVisualKickScale, previewEnemyAction } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
@@ -24,6 +26,8 @@ export class Game {
   private currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
   private zombie = new Zombie(this.currentRoster[0] ?? 'normal');
   private busy = false;
+  private boostedOpening = false;
+  private cylinderDecided = false;
   private rewardOptions: SpecialAmmoType[] = [];
   private pendingReward?: SpecialAmmoType;
   private pendingAttachment?: AttachmentId;
@@ -31,6 +35,10 @@ export class Game {
 
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
+      onChooseWeapon: id => this.chooseWeapon(id),
+      onCylinderDecision: spin => this.chooseCylinder(spin),
+      onFireCylinder: () => void this.fireLoadedMagazine(),
+      onEditCylinder: () => this.editCylinder(),
       onAddAmmo: (ammo) => this.addAmmo(ammo),
       onRemoveAmmo: (index) => this.removeAmmo(index),
       onReplaceAmmo: (index, ammo) => this.replaceAmmo(index, ammo),
@@ -51,6 +59,43 @@ export class Game {
     });
     this.presentation = new GamePresentation(this.ui.canvasHost);
     this.setAudioPreferences(this.audioPreferences);
+    this.sync();
+    this.ui.showWeaponSelection(true);
+    this.ui.setLocked(true);
+  }
+
+  private chooseWeapon(id: WeaponId): void {
+    if (this.state.phase !== 'WEAPON_SELECTION') return;
+    this.player.selectWeapon(id);
+    this.state.transition('AMMO_SELECTION');
+    this.ui.showWeaponSelection(false);
+    this.ui.setLocked(false);
+    this.sync();
+  }
+
+  private combatContext() {
+    return { weaponId: this.player.weapon.id, boostedOpening: this.boostedOpening,
+      loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+  }
+
+  private chooseCylinder(spin: boolean): void {
+    if (this.state.phase !== 'CYLINDER_CHOICE' || this.cylinderDecided) return;
+    const rounds = this.player.magazine.getRounds();
+    if (spin && rounds.length < 2) return;
+    if (spin) this.player.magazine.setRounds(spinCylinder(rounds));
+    this.boostedOpening = spin;
+    this.cylinderDecided = true;
+    this.syncMagazine();
+    this.ui.renderCylinderChoice(this.player.magazine.size, true, spin);
+  }
+
+  private editCylinder(): void {
+    if (this.state.phase !== 'CYLINDER_CHOICE') return;
+    this.boostedOpening = false;
+    this.cylinderDecided = false;
+    this.state.transition('AMMO_SELECTION');
+    this.ui.renderCylinderChoice(0, false, false);
+    this.ui.setLocked(false);
     this.sync();
   }
 
@@ -99,18 +144,31 @@ export class Game {
   private async beginCombat(): Promise<void> {
     if (this.busy || this.state.phase !== 'AMMO_SELECTION' || this.player.magazine.size === 0) return;
     this.busy = true;
+    this.boostedOpening = false;
+    this.cylinderDecided = false;
     const rounds = this.player.magazine.getRounds();
-    const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), {
-      loadout: this.player.loadout.getSnapshot(),
-      playerState: this.player.getCombatState(),
-    });
+    const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), this.combatContext());
     this.state.transition('LOADING');
     this.ui.setLocked(true);
-    // 잠금 처리에서 슬롯 DOM을 다시 그리므로, 장전한 탄창의 계산 프리뷰를 즉시 복원한다.
     this.ui.renderPreview(sequence);
     this.ui.setPhase('LOADING');
     await this.presentation.animateLoading(rounds);
     if (this.presentation.isDestroyed()) return;
+    if (this.player.weapon.trait === 'cylinder') {
+      this.state.transition('CYLINDER_CHOICE');
+      this.ui.setPhase('CYLINDER_CHOICE');
+      this.ui.renderCylinderChoice(rounds.length, false, false);
+      this.busy = false;
+      return;
+    }
+    await this.fireLoadedMagazine();
+  }
+
+  private async fireLoadedMagazine(): Promise<void> {
+    if (this.state.phase !== 'LOADING' && (this.state.phase !== 'CYLINDER_CHOICE' || !this.cylinderDecided || this.busy)) return;
+    this.busy = true;
+    this.ui.renderCylinderChoice(0, false, false);
+    const sequence = this.resolver.resolveSequence(this.player.magazine.getRounds(), this.zombie.snapshot(), this.combatContext());
     this.state.transition('FIRING');
     this.ui.setPhase('FIRING');
     for (const shot of sequence.shots) {
@@ -129,6 +187,8 @@ export class Game {
     }
     await this.presentation.animateMagazineDiscard();
     this.player.magazine.clear();
+    this.boostedOpening = false;
+    this.cylinderDecided = false;
     this.syncMagazine();
     await this.resolveEnemyAction();
     this.busy = false;
@@ -291,8 +351,10 @@ export class Game {
 
   private restart(): void {
     if (this.state.phase !== 'GAME_OVER' && this.state.phase !== 'VICTORY') return;
-    this.state.transition('AMMO_SELECTION');
+    this.state.transition('WEAPON_SELECTION');
     this.player.reset();
+    this.boostedOpening = false;
+    this.cylinderDecided = false;
     this.pendingAttachment = undefined;
     this.ui.hideAttachmentReward();
     this.waveIndex = 0;
@@ -305,6 +367,8 @@ export class Game {
     this.ui.setLocked(false);
     this.presentation.setZombie(this.zombie.distance, 1, 1, this.zombie.type);
     this.sync();
+    this.ui.showWeaponSelection(true);
+    this.ui.setLocked(true);
   }
 
   private sync(): void {
@@ -316,7 +380,7 @@ export class Game {
   private syncMagazine(): void {
     const rounds = this.player.magazine.getRounds();
     this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity, this.player.getBuild(), this.player.getSpecialCapacity());
-    const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+    const context = this.combatContext();
     const enemy = this.zombie.snapshot();
     const sequence = rounds.length > 0 ? this.resolver.resolveSequence(rounds, enemy, context) : undefined;
     const ammoOptionPreviews = this.resolver.previewAppendedAmmo(rounds, AMMO_ORDER, enemy, context);
@@ -325,9 +389,10 @@ export class Game {
 
   private syncEnemy(): void {
     const enemy = this.zombie.snapshot();
-    const context = { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+    const context = this.combatContext();
     const waveSize = this.currentRoster.length || 1;
     this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.waveIndex + 1, ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
+    this.ui.renderWeapon(this.player.weapon);
     this.ui.updateRecoilThreshold(this.resolver.getRecoilThreshold(context), context.playerState.heavyKickPenaltyBonus);
     this.ui.renderPlayerDebuffs(context.playerState);
     this.ui.renderLoadout(context.loadout, context.playerState, this.player.magazine.capacity, this.player.getOwnedAttachments());
