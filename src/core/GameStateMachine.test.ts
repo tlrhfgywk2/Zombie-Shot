@@ -61,12 +61,18 @@ describe('GameStateMachine', () => {
     state.transition('WEAPON_SELECTION');
     expect(state.canTransition('FIRING')).toBe(false);
   });
-  it('장전 뒤 실린더 선택에서 발사하거나 장전을 수정한다', () => {
+  it('실린더 장전 뒤에는 준비 단계로 돌아갈 수 없고 발사를 거쳐야 한다', () => {
     const state = new GameStateMachine();
     state.transition('AMMO_SELECTION'); state.transition('LOADING'); state.transition('CYLINDER_CHOICE');
-    state.transition('AMMO_SELECTION'); state.transition('LOADING'); state.transition('CYLINDER_CHOICE');
+    expect(state.canTransition('AMMO_SELECTION')).toBe(false);
+    expect(state.canTransition('LOADING')).toBe(false);
+    expect(() => state.transition('AMMO_SELECTION')).toThrow('허용되지 않은 상태 전환');
+    expect(state.phase).toBe('CYLINDER_CHOICE');
     state.transition('FIRING');
     expect(state.phase).toBe('FIRING');
+    state.transition('ENEMY_ACTION'); state.transition('AMMO_SELECTION'); state.transition('LOADING');
+    state.transition('CYLINDER_CHOICE');
+    expect(state.phase).toBe('CYLINDER_CHOICE');
   });
 
 });
