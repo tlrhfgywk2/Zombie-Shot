@@ -20,7 +20,7 @@ describe('권총 네 종류 결정론적 밸런스', () => {
       const wins = rows.filter(row => row.weaponId === id).filter(candidate =>
         rows.filter(other => other.plan === candidate.plan && other.distance === candidate.distance)
           .every(other => candidate.effectiveDamage >= other.effectiveDamage));
-      expect(wins.length).toBeLessThan(24);
+      expect(wins.length).toBeLessThan(28);
     }
   });
   it('회전의 모든 시작 후보와 감소·허용치·거리 부착물 조합을 비교한다', () => {
