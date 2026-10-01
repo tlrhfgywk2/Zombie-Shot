@@ -1,0 +1,361 @@
+권총,탄창,표적,거리,플레이어턴,소모발수,처치,돌파,남은체력
+p220,표준탄,normal,3,2,5,true,false,0
+p220,표준탄,normal,7,2,5,true,false,0
+p220,표준탄,normal,11,2,6,true,false,0
+p220,표준탄,brute,3,2,7,true,false,0
+p220,표준탄,brute,7,2,8,true,false,0
+p220,표준탄,brute,11,2,8,true,false,0
+p220,표준탄,fast,3,1,4,true,false,0
+p220,표준탄,fast,7,2,5,true,false,0
+p220,표준탄,fast,11,2,5,true,false,0
+p220,고압 연사,normal,3,1,4,true,false,0
+p220,고압 연사,normal,7,1,4,true,false,0
+p220,고압 연사,normal,11,2,5,true,false,0
+p220,고압 연사,brute,3,2,5,true,false,0
+p220,고압 연사,brute,7,2,6,true,false,0
+p220,고압 연사,brute,11,2,6,true,false,0
+p220,고압 연사,fast,3,1,3,true,false,0
+p220,고압 연사,fast,7,1,4,true,false,0
+p220,고압 연사,fast,11,1,4,true,false,0
+p220,저반동 연사,normal,3,2,8,true,false,0
+p220,저반동 연사,normal,7,2,8,true,false,0
+p220,저반동 연사,normal,11,3,9,true,false,0
+p220,저반동 연사,brute,3,3,11,true,false,0
+p220,저반동 연사,brute,7,3,12,true,false,0
+p220,저반동 연사,brute,11,4,13,true,false,0
+p220,저반동 연사,fast,3,2,7,true,false,0
+p220,저반동 연사,fast,7,2,7,true,false,0
+p220,저반동 연사,fast,11,2,8,true,false,0
+p220,상처 연계,normal,3,1,4,true,false,0
+p220,상처 연계,normal,7,1,4,true,false,0
+p220,상처 연계,normal,11,2,6,true,false,0
+p220,상처 연계,brute,3,2,7,true,false,0
+p220,상처 연계,brute,7,2,7,true,false,0
+p220,상처 연계,brute,11,2,7,true,false,0
+p220,상처 연계,fast,3,1,4,true,false,0
+p220,상처 연계,fast,7,1,4,true,false,0
+p220,상처 연계,fast,11,2,5,true,false,0
+p220,고반동 상처,normal,3,2,7,true,false,0
+p220,고반동 상처,normal,7,2,7,true,false,0
+p220,고반동 상처,normal,11,2,8,true,false,0
+p220,고반동 상처,brute,3,2,8,true,false,0
+p220,고반동 상처,brute,7,3,10,true,false,0
+p220,고반동 상처,brute,11,3,11,true,false,0
+p220,고반동 상처,fast,3,2,6,true,false,0
+p220,고반동 상처,fast,7,2,7,true,false,0
+p220,고반동 상처,fast,11,2,7,true,false,0
+p220,폭발 기폭,normal,3,1,4,true,false,0
+p220,폭발 기폭,normal,7,2,5,true,false,0
+p220,폭발 기폭,normal,11,2,5,true,false,0
+p220,폭발 기폭,brute,3,2,8,true,false,0
+p220,폭발 기폭,brute,7,2,8,true,false,0
+p220,폭발 기폭,brute,11,2,8,true,false,0
+p220,폭발 기폭,fast,3,1,4,true,false,0
+p220,폭발 기폭,fast,7,1,4,true,false,0
+p220,폭발 기폭,fast,11,1,4,true,false,0
+p220,고폭 기폭,normal,3,1,4,true,false,0
+p220,고폭 기폭,normal,7,1,4,true,false,0
+p220,고폭 기폭,normal,11,1,4,true,false,0
+p220,고폭 기폭,brute,3,2,6,true,false,0
+p220,고폭 기폭,brute,7,2,7,true,false,0
+p220,고폭 기폭,brute,11,2,8,true,false,0
+p220,고폭 기폭,fast,3,1,4,true,false,0
+p220,고폭 기폭,fast,7,1,4,true,false,0
+p220,고폭 기폭,fast,11,1,4,true,false,0
+p220,충격 제어,normal,3,12,48,false,false,10
+p220,충격 제어,normal,7,12,48,false,false,10
+p220,충격 제어,normal,11,12,48,false,false,10
+p220,충격 제어,brute,3,12,48,false,false,20
+p220,충격 제어,brute,7,12,48,false,false,20
+p220,충격 제어,brute,11,12,48,false,false,20
+p220,충격 제어,fast,3,12,48,false,false,8
+p220,충격 제어,fast,7,12,48,false,false,8
+p220,충격 제어,fast,11,12,48,false,false,8
+p220,반동 전환,normal,3,1,3,true,false,0
+p220,반동 전환,normal,7,1,4,true,false,0
+p220,반동 전환,normal,11,1,4,true,false,0
+p220,반동 전환,brute,3,2,5,true,false,0
+p220,반동 전환,brute,7,2,5,true,false,0
+p220,반동 전환,brute,11,2,6,true,false,0
+p220,반동 전환,fast,3,1,3,true,false,0
+p220,반동 전환,fast,7,1,3,true,false,0
+p220,반동 전환,fast,11,1,4,true,false,0
+p220,혼합,normal,3,2,6,true,false,0
+p220,혼합,normal,7,2,7,true,false,0
+p220,혼합,normal,11,2,7,true,false,0
+p220,혼합,brute,3,2,7,true,false,0
+p220,혼합,brute,7,2,8,true,false,0
+p220,혼합,brute,11,3,9,true,false,0
+p220,혼합,fast,3,2,5,true,false,0
+p220,혼합,fast,7,2,6,true,false,0
+p220,혼합,fast,11,2,7,true,false,0
+m1911,표준탄,normal,3,1,5,true,false,0
+m1911,표준탄,normal,7,1,5,true,false,0
+m1911,표준탄,normal,11,2,6,true,false,0
+m1911,표준탄,brute,3,2,7,true,false,0
+m1911,표준탄,brute,7,2,8,true,false,0
+m1911,표준탄,brute,11,2,9,true,false,0
+m1911,표준탄,fast,3,1,5,true,false,0
+m1911,표준탄,fast,7,1,5,true,false,0
+m1911,표준탄,fast,11,2,6,true,false,0
+m1911,고압 연사,normal,3,1,4,true,false,0
+m1911,고압 연사,normal,7,1,4,true,false,0
+m1911,고압 연사,normal,11,1,5,true,false,0
+m1911,고압 연사,brute,3,2,6,true,false,0
+m1911,고압 연사,brute,7,2,6,true,false,0
+m1911,고압 연사,brute,11,2,7,true,false,0
+m1911,고압 연사,fast,3,1,3,true,false,0
+m1911,고압 연사,fast,7,1,4,true,false,0
+m1911,고압 연사,fast,11,1,4,true,false,0
+m1911,저반동 연사,normal,3,2,8,true,false,0
+m1911,저반동 연사,normal,7,2,9,true,false,0
+m1911,저반동 연사,normal,11,2,10,true,false,0
+m1911,저반동 연사,brute,3,3,12,true,false,0
+m1911,저반동 연사,brute,7,3,13,true,false,0
+m1911,저반동 연사,brute,11,3,14,true,false,0
+m1911,저반동 연사,fast,3,2,8,true,false,0
+m1911,저반동 연사,fast,7,2,8,true,false,0
+m1911,저반동 연사,fast,11,2,9,true,false,0
+m1911,상처 연계,normal,3,1,5,true,false,0
+m1911,상처 연계,normal,7,1,5,true,false,0
+m1911,상처 연계,normal,11,1,5,true,false,0
+m1911,상처 연계,brute,3,2,6,true,false,0
+m1911,상처 연계,brute,7,2,8,true,false,0
+m1911,상처 연계,brute,11,2,8,true,false,0
+m1911,상처 연계,fast,3,1,4,true,false,0
+m1911,상처 연계,fast,7,1,5,true,false,0
+m1911,상처 연계,fast,11,1,5,true,false,0
+m1911,고반동 상처,normal,3,2,8,true,false,0
+m1911,고반동 상처,normal,7,2,8,true,false,0
+m1911,고반동 상처,normal,11,2,9,true,false,0
+m1911,고반동 상처,brute,3,2,9,true,false,0
+m1911,고반동 상처,brute,7,2,10,true,false,0
+m1911,고반동 상처,brute,11,3,11,true,false,0
+m1911,고반동 상처,fast,3,2,6,true,false,0
+m1911,고반동 상처,fast,7,2,8,true,false,0
+m1911,고반동 상처,fast,11,2,8,true,false,0
+m1911,폭발 기폭,normal,3,1,4,true,false,0
+m1911,폭발 기폭,normal,7,2,6,true,false,0
+m1911,폭발 기폭,normal,11,2,6,true,false,0
+m1911,폭발 기폭,brute,3,2,9,true,false,0
+m1911,폭발 기폭,brute,7,2,9,true,false,0
+m1911,폭발 기폭,brute,11,2,9,true,false,0
+m1911,폭발 기폭,fast,3,1,4,true,false,0
+m1911,폭발 기폭,fast,7,1,4,true,false,0
+m1911,폭발 기폭,fast,11,1,4,true,false,0
+m1911,고폭 기폭,normal,3,1,4,true,false,0
+m1911,고폭 기폭,normal,7,1,4,true,false,0
+m1911,고폭 기폭,normal,11,1,4,true,false,0
+m1911,고폭 기폭,brute,3,2,7,true,false,0
+m1911,고폭 기폭,brute,7,2,8,true,false,0
+m1911,고폭 기폭,brute,11,2,8,true,false,0
+m1911,고폭 기폭,fast,3,1,4,true,false,0
+m1911,고폭 기폭,fast,7,1,4,true,false,0
+m1911,고폭 기폭,fast,11,1,4,true,false,0
+m1911,충격 제어,normal,3,12,60,false,false,22
+m1911,충격 제어,normal,7,12,60,false,false,22
+m1911,충격 제어,normal,11,12,60,false,false,22
+m1911,충격 제어,brute,3,12,60,false,false,32
+m1911,충격 제어,brute,7,12,60,false,false,32
+m1911,충격 제어,brute,11,12,60,false,false,32
+m1911,충격 제어,fast,3,12,60,false,false,20
+m1911,충격 제어,fast,7,12,60,false,false,20
+m1911,충격 제어,fast,11,12,60,false,false,20
+m1911,반동 전환,normal,3,1,3,true,false,0
+m1911,반동 전환,normal,7,1,4,true,false,0
+m1911,반동 전환,normal,11,1,4,true,false,0
+m1911,반동 전환,brute,3,1,5,true,false,0
+m1911,반동 전환,brute,7,2,6,true,false,0
+m1911,반동 전환,brute,11,2,6,true,false,0
+m1911,반동 전환,fast,3,1,3,true,false,0
+m1911,반동 전환,fast,7,1,3,true,false,0
+m1911,반동 전환,fast,11,1,4,true,false,0
+m1911,혼합,normal,3,2,6,true,false,0
+m1911,혼합,normal,7,2,8,true,false,0
+m1911,혼합,normal,11,2,8,true,false,0
+m1911,혼합,brute,3,2,9,true,false,0
+m1911,혼합,brute,7,2,9,true,false,0
+m1911,혼합,brute,11,2,10,true,false,0
+m1911,혼합,fast,3,2,6,true,false,0
+m1911,혼합,fast,7,2,6,true,false,0
+m1911,혼합,fast,11,2,8,true,false,0
+desertEagle,표준탄,normal,3,1,4,true,false,0
+desertEagle,표준탄,normal,7,2,5,true,false,0
+desertEagle,표준탄,normal,11,2,5,true,false,0
+desertEagle,표준탄,brute,3,2,6,true,false,0
+desertEagle,표준탄,brute,7,2,7,true,false,0
+desertEagle,표준탄,brute,11,2,8,true,false,0
+desertEagle,표준탄,fast,3,1,4,true,false,0
+desertEagle,표준탄,fast,7,1,4,true,false,0
+desertEagle,표준탄,fast,11,2,5,true,false,0
+desertEagle,고압 연사,normal,3,1,3,true,false,0
+desertEagle,고압 연사,normal,7,1,4,true,false,0
+desertEagle,고압 연사,normal,11,1,4,true,false,0
+desertEagle,고압 연사,brute,3,2,5,true,false,0
+desertEagle,고압 연사,brute,7,2,5,true,false,0
+desertEagle,고압 연사,brute,11,2,6,true,false,0
+desertEagle,고압 연사,fast,3,1,3,true,false,0
+desertEagle,고압 연사,fast,7,1,3,true,false,0
+desertEagle,고압 연사,fast,11,1,4,true,false,0
+desertEagle,저반동 연사,normal,3,2,6,true,false,0
+desertEagle,저반동 연사,normal,7,2,7,true,false,0
+desertEagle,저반동 연사,normal,11,2,8,true,false,0
+desertEagle,저반동 연사,brute,3,2,8,true,false,0
+desertEagle,저반동 연사,brute,7,3,9,true,false,0
+desertEagle,저반동 연사,brute,11,3,11,true,false,0
+desertEagle,저반동 연사,fast,3,2,5,true,false,0
+desertEagle,저반동 연사,fast,7,2,6,true,false,0
+desertEagle,저반동 연사,fast,11,2,7,true,false,0
+desertEagle,상처 연계,normal,3,1,4,true,false,0
+desertEagle,상처 연계,normal,7,1,4,true,false,0
+desertEagle,상처 연계,normal,11,1,4,true,false,0
+desertEagle,상처 연계,brute,3,2,5,true,false,0
+desertEagle,상처 연계,brute,7,2,6,true,false,0
+desertEagle,상처 연계,brute,11,2,7,true,false,0
+desertEagle,상처 연계,fast,3,1,4,true,false,0
+desertEagle,상처 연계,fast,7,1,4,true,false,0
+desertEagle,상처 연계,fast,11,1,4,true,false,0
+desertEagle,고반동 상처,normal,3,1,4,true,false,0
+desertEagle,고반동 상처,normal,7,2,5,true,false,0
+desertEagle,고반동 상처,normal,11,2,6,true,false,0
+desertEagle,고반동 상처,brute,3,2,6,true,false,0
+desertEagle,고반동 상처,brute,7,2,7,true,false,0
+desertEagle,고반동 상처,brute,11,2,8,true,false,0
+desertEagle,고반동 상처,fast,3,1,4,true,false,0
+desertEagle,고반동 상처,fast,7,2,5,true,false,0
+desertEagle,고반동 상처,fast,11,2,5,true,false,0
+desertEagle,폭발 기폭,normal,3,1,4,true,false,0
+desertEagle,폭발 기폭,normal,7,1,4,true,false,0
+desertEagle,폭발 기폭,normal,11,1,4,true,false,0
+desertEagle,폭발 기폭,brute,3,2,6,true,false,0
+desertEagle,폭발 기폭,brute,7,2,7,true,false,0
+desertEagle,폭발 기폭,brute,11,2,8,true,false,0
+desertEagle,폭발 기폭,fast,3,1,4,true,false,0
+desertEagle,폭발 기폭,fast,7,1,4,true,false,0
+desertEagle,폭발 기폭,fast,11,1,4,true,false,0
+desertEagle,고폭 기폭,normal,3,1,4,true,false,0
+desertEagle,고폭 기폭,normal,7,1,4,true,false,0
+desertEagle,고폭 기폭,normal,11,1,4,true,false,0
+desertEagle,고폭 기폭,brute,3,2,5,true,false,0
+desertEagle,고폭 기폭,brute,7,2,5,true,false,0
+desertEagle,고폭 기폭,brute,11,2,5,true,false,0
+desertEagle,고폭 기폭,fast,3,1,4,true,false,0
+desertEagle,고폭 기폭,fast,7,1,4,true,false,0
+desertEagle,고폭 기폭,fast,11,1,4,true,false,0
+desertEagle,충격 제어,normal,3,4,14,true,false,0
+desertEagle,충격 제어,normal,7,5,17,true,false,0
+desertEagle,충격 제어,normal,11,6,22,true,false,0
+desertEagle,충격 제어,brute,3,6,21,true,false,0
+desertEagle,충격 제어,brute,7,7,25,true,false,0
+desertEagle,충격 제어,brute,11,8,32,true,false,0
+desertEagle,충격 제어,fast,3,4,13,true,false,0
+desertEagle,충격 제어,fast,7,4,16,true,false,0
+desertEagle,충격 제어,fast,11,5,20,true,false,0
+desertEagle,반동 전환,normal,3,1,3,true,false,0
+desertEagle,반동 전환,normal,7,1,3,true,false,0
+desertEagle,반동 전환,normal,11,1,4,true,false,0
+desertEagle,반동 전환,brute,3,1,4,true,false,0
+desertEagle,반동 전환,brute,7,2,5,true,false,0
+desertEagle,반동 전환,brute,11,2,5,true,false,0
+desertEagle,반동 전환,fast,3,1,3,true,false,0
+desertEagle,반동 전환,fast,7,1,3,true,false,0
+desertEagle,반동 전환,fast,11,1,3,true,false,0
+desertEagle,혼합,normal,3,2,5,true,false,0
+desertEagle,혼합,normal,7,2,5,true,false,0
+desertEagle,혼합,normal,11,2,6,true,false,0
+desertEagle,혼합,brute,3,2,7,true,false,0
+desertEagle,혼합,brute,7,2,7,true,false,0
+desertEagle,혼합,brute,11,2,7,true,false,0
+desertEagle,혼합,fast,3,2,5,true,false,0
+desertEagle,혼합,fast,7,2,5,true,false,0
+desertEagle,혼합,fast,11,2,5,true,false,0
+m500,표준탄,normal,3,2,5,true,false,0
+m500,표준탄,normal,7,2,5,true,false,0
+m500,표준탄,normal,11,2,6,true,false,0
+m500,표준탄,brute,3,2,6,true,false,0
+m500,표준탄,brute,7,2,8,true,false,0
+m500,표준탄,brute,11,3,9,true,false,0
+m500,표준탄,fast,3,1,4,true,false,0
+m500,표준탄,fast,7,2,5,true,false,0
+m500,표준탄,fast,11,2,5,true,false,0
+m500,고압 연사,normal,3,1,3,true,false,0
+m500,고압 연사,normal,7,1,4,true,false,0
+m500,고압 연사,normal,11,1,4,true,false,0
+m500,고압 연사,brute,3,2,5,true,false,0
+m500,고압 연사,brute,7,2,5,true,false,0
+m500,고압 연사,brute,11,2,6,true,false,0
+m500,고압 연사,fast,3,1,3,true,false,0
+m500,고압 연사,fast,7,1,3,true,false,0
+m500,고압 연사,fast,11,1,4,true,false,0
+m500,저반동 연사,normal,3,2,5,true,false,0
+m500,저반동 연사,normal,7,2,6,true,false,0
+m500,저반동 연사,normal,11,2,6,true,false,0
+m500,저반동 연사,brute,3,2,7,true,false,0
+m500,저반동 연사,brute,7,2,8,true,false,0
+m500,저반동 연사,brute,11,3,9,true,false,0
+m500,저반동 연사,fast,3,1,4,true,false,0
+m500,저반동 연사,fast,7,2,5,true,false,0
+m500,저반동 연사,fast,11,2,6,true,false,0
+m500,상처 연계,normal,3,1,4,true,false,0
+m500,상처 연계,normal,7,2,5,true,false,0
+m500,상처 연계,normal,11,2,6,true,false,0
+m500,상처 연계,brute,3,2,7,true,false,0
+m500,상처 연계,brute,7,2,7,true,false,0
+m500,상처 연계,brute,11,2,8,true,false,0
+m500,상처 연계,fast,3,1,4,true,false,0
+m500,상처 연계,fast,7,2,5,true,false,0
+m500,상처 연계,fast,11,2,5,true,false,0
+m500,고반동 상처,normal,3,2,5,true,false,0
+m500,고반동 상처,normal,7,2,6,true,false,0
+m500,고반동 상처,normal,11,2,7,true,false,0
+m500,고반동 상처,brute,3,2,7,true,false,0
+m500,고반동 상처,brute,7,2,8,true,false,0
+m500,고반동 상처,brute,11,2,8,true,false,0
+m500,고반동 상처,fast,3,1,4,true,false,0
+m500,고반동 상처,fast,7,2,5,true,false,0
+m500,고반동 상처,fast,11,2,6,true,false,0
+m500,폭발 기폭,normal,3,1,4,true,false,0
+m500,폭발 기폭,normal,7,2,5,true,false,0
+m500,폭발 기폭,normal,11,2,5,true,false,0
+m500,폭발 기폭,brute,3,2,7,true,false,0
+m500,폭발 기폭,brute,7,2,8,true,false,0
+m500,폭발 기폭,brute,11,2,8,true,false,0
+m500,폭발 기폭,fast,3,1,4,true,false,0
+m500,폭발 기폭,fast,7,1,4,true,false,0
+m500,폭발 기폭,fast,11,2,5,true,false,0
+m500,고폭 기폭,normal,3,1,4,true,false,0
+m500,고폭 기폭,normal,7,1,4,true,false,0
+m500,고폭 기폭,normal,11,1,4,true,false,0
+m500,고폭 기폭,brute,3,2,5,true,false,0
+m500,고폭 기폭,brute,7,2,6,true,false,0
+m500,고폭 기폭,brute,11,2,6,true,false,0
+m500,고폭 기폭,fast,3,1,4,true,false,0
+m500,고폭 기폭,fast,7,1,4,true,false,0
+m500,고폭 기폭,fast,11,1,4,true,false,0
+m500,충격 제어,normal,3,6,21,true,false,0
+m500,충격 제어,normal,7,8,29,true,false,0
+m500,충격 제어,normal,11,8,29,true,false,0
+m500,충격 제어,brute,3,8,32,true,false,0
+m500,충격 제어,brute,7,11,41,true,false,0
+m500,충격 제어,brute,11,11,44,true,false,0
+m500,충격 제어,fast,3,5,20,true,false,0
+m500,충격 제어,fast,7,7,25,true,false,0
+m500,충격 제어,fast,11,7,28,true,false,0
+m500,반동 전환,normal,3,1,3,true,false,0
+m500,반동 전환,normal,7,1,3,true,false,0
+m500,반동 전환,normal,11,1,4,true,false,0
+m500,반동 전환,brute,3,1,4,true,false,0
+m500,반동 전환,brute,7,2,5,true,false,0
+m500,반동 전환,brute,11,2,5,true,false,0
+m500,반동 전환,fast,3,1,3,true,false,0
+m500,반동 전환,fast,7,1,3,true,false,0
+m500,반동 전환,fast,11,1,4,true,false,0
+m500,혼합,normal,3,2,5,true,false,0
+m500,혼합,normal,7,2,6,true,false,0
+m500,혼합,normal,11,2,7,true,false,0
+m500,혼합,brute,3,2,7,true,false,0
+m500,혼합,brute,7,2,8,true,false,0
+m500,혼합,brute,11,3,9,true,false,0
+m500,혼합,fast,3,2,5,true,false,0
+m500,혼합,fast,7,2,5,true,false,0
+m500,혼합,fast,11,2,7,true,false,0
