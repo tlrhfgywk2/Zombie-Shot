@@ -33,7 +33,6 @@ describe('GameStateMachine', () => {
     state.transition('LOADING');
     state.transition('FIRING');
     state.transition('ENEMY_ACTION');
-    state.transition('AMMO_REWARD');
     state.transition('VICTORY');
     state.transition('WEAPON_SELECTION');
     state.transition('AMMO_SELECTION');
@@ -46,12 +45,20 @@ describe('GameStateMachine', () => {
     state.transition('LOADING');
     state.transition('FIRING');
     state.transition('ENEMY_ACTION');
-    expect(state.canTransition('ROUTE_SELECTION')).toBe(false);
-    state.transition('AMMO_REWARD');
+    expect(state.canTransition('ROUTE_SELECTION')).toBe(true);
     state.transition('ROUTE_SELECTION');
     state.transition('AMMO_SELECTION');
     expect(state.phase).toBe('AMMO_SELECTION');
   });
+  it('특수 감염체의 부착물 획득 후에도 보급 화면 없이 경로 또는 완료로 이동한다', () => {
+    for (const next of ['ROUTE_SELECTION', 'VICTORY'] as const) {
+      const state = new GameStateMachine();
+      state.transition('AMMO_SELECTION'); state.transition('LOADING'); state.transition('FIRING');
+      state.transition('ENEMY_ACTION'); state.transition('ATTACHMENT_REWARD'); state.transition(next);
+      expect(state.phase).toBe(next);
+    }
+  });
+
   it('무기 선택 전에는 장전할 수 없고 재시작은 다시 무기를 고른다', () => {
     const state = new GameStateMachine();
     expect(state.phase).toBe('WEAPON_SELECTION');

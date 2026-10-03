@@ -3,9 +3,8 @@ import { spinCylinder } from '../combat/WeaponTraits';
 import { CombatResolver, getVisualKickScale, previewEnemyAction } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
-import { AMMO_ORDER, countAllocations, rewardAmount, type SpecialAmmoType } from '../data/ammoDefinitions';
+import { AMMO_ORDER, type SpecialAmmoType } from '../data/ammoDefinitions';
 import { generateAttachmentReward } from '../progression/AttachmentRewards';
-import { generateAmmoRewards } from '../progression/AmmoRewards';
 import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
 import { Player } from '../entities/Player';
 import { Zombie } from '../entities/Zombie';
@@ -28,10 +27,7 @@ export class Game {
   private busy = false;
   private boostedOpening = false;
   private cylinderDecided = false;
-  private rewardOptions: SpecialAmmoType[] = [];
-  private pendingReward?: SpecialAmmoType;
   private pendingAttachment?: AttachmentId;
-  private rewardReplacements: SpecialAmmoType[] = [];
 
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
@@ -46,10 +42,7 @@ export class Game {
       onEquipAttachment: (id) => this.equipAttachment(id),
       onUnequipAttachment: (slot) => this.unequipAttachment(slot),
       onClaimAttachment: (equip) => void this.claimAttachmentReward(equip),
-      onChooseAmmoReward: (ammo) => this.chooseAmmoReward(ammo),
-      onReplaceReward: (ammo) => this.replaceReward(ammo),
-      onSkipAmmoReward: () => this.skipAmmoReward(),
-      onUpgradeAmmoCapacity: () => this.upgradeAmmoCapacity(),
+      onSupplyAmmo: (ammo) => this.supplyAmmo(ammo),
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
@@ -92,6 +85,11 @@ export class Game {
     if (this.state.phase !== 'AMMO_SELECTION') return;
     this.player.addAmmo(ammo);
     this.syncMagazine();
+  }
+
+  private supplyAmmo(ammo: SpecialAmmoType): void {
+    if (['WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.supplyAmmo(ammo)) return;
+    this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
   }
 
   private removeAmmo(index: number): void {
@@ -249,55 +247,6 @@ export class Game {
       return;
     }
 
-    this.state.transition('AMMO_REWARD');
-    this.rewardOptions = generateAmmoRewards();
-    this.pendingReward = undefined;
-    this.rewardReplacements = [];
-    this.ui.setLocked(true);
-    this.ui.setPhase('AMMO_REWARD');
-    this.showAmmoRewards();
-  }
-
-  private showAmmoRewards(): void {
-    this.ui.showAmmoRewards(this.rewardOptions, this.player.getBuild(), this.player.getSpecialCapacity(), this.pendingReward, this.rewardReplacements);
-  }
-
-  private chooseAmmoReward(ammo: SpecialAmmoType): void {
-    if (this.state.phase !== 'AMMO_REWARD' || !this.rewardOptions.includes(ammo) || this.pendingReward) return;
-    this.pendingReward = ammo;
-    if (countAllocations(this.player.getBuild()) + rewardAmount(ammo) > this.player.getSpecialCapacity()) this.showAmmoRewards();
-    else this.finishAmmoReward();
-  }
-
-  private replaceReward(ammo: SpecialAmmoType): void {
-    if (this.state.phase !== 'AMMO_REWARD' || !this.pendingReward) return;
-    const used = this.rewardReplacements.filter(value => value === ammo).length;
-    if (this.player.getBuild()[ammo] <= used) return;
-    this.rewardReplacements.push(ammo);
-    const required = countAllocations(this.player.getBuild()) + rewardAmount(this.pendingReward) - this.player.getSpecialCapacity();
-    if (this.rewardReplacements.length === required) this.finishAmmoReward();
-    else this.showAmmoRewards();
-  }
-
-  private finishAmmoReward(): void {
-    if (!this.pendingReward || !this.player.applyAmmoReward(this.pendingReward, this.rewardReplacements)) return;
-    this.advanceAfterAmmoReward();
-  }
-
-  private skipAmmoReward(): void {
-    if (this.state.phase !== 'AMMO_REWARD') return;
-    this.advanceAfterAmmoReward();
-  }
-
-  private upgradeAmmoCapacity(): void {
-    if (this.state.phase !== 'AMMO_REWARD' || this.pendingReward || !this.player.upgradeAmmoCapacity()) return;
-    this.advanceAfterAmmoReward();
-  }
-
-  private advanceAfterAmmoReward(): void {
-    this.ui.hideAmmoRewards();
-    this.pendingReward = undefined;
-    this.rewardReplacements = [];
     if (this.waveIndex + 1 < ENCOUNTER_STAGES.length) {
       const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1]!;
       this.state.transition('ROUTE_SELECTION');

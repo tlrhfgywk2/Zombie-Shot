@@ -39,6 +39,14 @@ export class Player {
     return this.stock[ammo] - this.magazine.getRounds().filter(round => round === ammo).length;
   }
   getCombatState(): PlayerCombatState { return { ...this.combatState, disabledSlots: { ...this.combatState.disabledSlots } }; }
+  /** 테스트용 수동 보급은 현재 잔량과 다음 구간 배분에 즉시 반영한다. */
+  supplyAmmo(ammo: SpecialAmmoType): boolean {
+    if (!Object.hasOwn(this.build, ammo) || !AMMO_ORDER.includes(ammo)) return false;
+    this.build[ammo] += 1;
+    this.stock[ammo] += 1;
+    this.specialCapacity = Math.max(this.specialCapacity, countAllocations(this.build));
+    return true;
+  }
   addAmmo(ammo: AmmoType): boolean {
     if (!AMMO_ORDER.includes(ammo) || this.getAvailable(ammo) === 0) return false;
     return this.magazine.add(ammo);
