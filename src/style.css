@@ -773,6 +773,23 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .magazine-row[data-expanded] .load-button { width: 100%; min-height: 36px; height: 36px; }
 
 .ammo-stats > .ammo-special-effect { grid-column: 1 / -1; display: block; margin-top: 4px; color: var(--bullet); line-height: 1.5; overflow-wrap: anywhere; }
+
+/* 전투 중에도 열 수 있는 수동 탄약 보급 */
+.ammo-utility-buttons { display: grid; gap: .38rem; }
+.ammo-supply-open { color: var(--acid); border-color: rgba(200,255,77,.4); }
+.ammo-supply-open:disabled { opacity: .45; cursor: default; }
+.ammo-supply-card { grid-template-rows: auto 44px auto 1fr auto; align-content: start; gap: .35rem; }
+.ammo-supply-card > strong { margin: .2rem 0 .4rem; overflow-wrap: anywhere; }
+.supply-round { display: grid; place-items: center; padding-top: 8px; }
+.supply-action { margin-top: .5rem; padding: .4rem; color: var(--acid); background: rgba(200,255,77,.06); font-size: 1rem; font-style: normal; font-weight: 900; text-align: center; }
+.ammo-supply-card:disabled { cursor: default; }
+.ammo-supply-card:disabled .supply-action { color: var(--muted); background: rgba(255,255,255,.04); }
+.ammo-supply-dialog .ammo-stats { font-size: .78rem; }
+.ammo-supply-dialog .ammo-stats > span { gap: .5rem; }
+.ammo-supply-dialog .ammo-stats b { font-size: var(--combat-value-size); }
+.game-shell[data-layout="portrait"] .ammo-utility-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.game-shell[data-layout="portrait"] .ammo-supply-dialog .ammo-stats { font-size: .7rem; }
+.game-shell[data-layout="portrait"] .ammo-supply-dialog .ammo-stats b { font-size: .95rem; }
 .ammo-tooltip b[data-shock-boosted] { color: #ffd68f; }
 
 /* 화상은 잔량과 점화를 함께 읽고, 행동 예고는 기존 카드 안에서 교체한다. */

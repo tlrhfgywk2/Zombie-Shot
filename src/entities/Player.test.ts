@@ -4,6 +4,40 @@ import { CombatResolver } from '../combat/CombatResolver';
 import { createEnemyState } from '../data/enemyDefinitions';
 
 describe('런 탄약 소유와 소비', () => {
+  it('수동 보급은 소진된 탄과 미보유 탄을 즉시 지급하고 장전 예약을 유지한다', () => {
+    const player = new Player();
+    for (let i = 0; i < 3; i++) {
+      player.addAmmo('wounding');
+      player.fireRound({ ammoType: 'wounding' });
+    }
+    player.addAmmo('ball');
+    expect(player.supplyAmmo('wounding')).toBe(true);
+    expect(player.getAvailable('wounding')).toBe(1);
+    expect(player.supplyAmmo('stickyCharge')).toBe(true);
+    expect(player.getAvailable('stickyCharge')).toBe(1);
+    expect(player.magazine.getRounds()).toEqual(['ball']);
+    expect(player.addAmmo('stickyCharge')).toBe(true);
+    expect(player.getAvailable('stickyCharge')).toBe(0);
+    player.fireRound({ ammoType: 'ball' });
+    player.fireRound({ ammoType: 'stickyCharge' });
+    expect(player.getStock().stickyCharge).toBe(0);
+    player.startStage();
+    expect(player.getStock().stickyCharge).toBe(1);
+  });
+
+  it('수동 보급은 휴대 한도를 자동 확장하고 잘못된 탄약을 거부하며 재시작 때 초기화한다', () => {
+    const player = new Player();
+    for (let i = 0; i < 20; i++) expect(player.supplyAmmo('highHeat')).toBe(true);
+    expect(player.getSpecialCapacity()).toBe(26);
+    const stock = player.getStock();
+    expect(player.supplyAmmo('ball' as Parameters<Player['supplyAmmo']>[0])).toBe(false);
+    expect(player.supplyAmmo('invalid' as Parameters<Player['supplyAmmo']>[0])).toBe(false);
+    expect(player.getStock()).toEqual(stock);
+    player.reset();
+    expect(player.getStock().highHeat).toBe(0);
+    expect(player.getSpecialCapacity()).toBe(14);
+  });
+
   it('장전은 예약이며 실제 발사한 특수탄만 구간 잔량에서 차감한다', () => {
     const player = new Player();
     expect(player.addAmmo('wounding')).toBe(true);
