@@ -6,6 +6,7 @@ export interface AmmoDefinition {
   id: AmmoType; name: string; shortName: string; role: string; rarity: AmmoRarity;
   tags: readonly BuildTag[]; color: number; cssColor: string; supply?: 'infinite';
   firepower: number; wound: number; explosive: number; actionShock: number; recoil: number; recoilRecovery?: number;
+  burn: number; burnDamage: number; burnFollowUpPercent?: number; burnScalePercent?: number; ignitedBonus?: number;
   shockFollowUp?: number; shockScale?: { divisor: number; cap: number };
   followUp?: number; healthScale?: { divisor: number; cap: number };
   recoilScale?: { cap: number };
@@ -38,11 +39,17 @@ export const AMMO_FAMILIES: Record<AmmoType, { family: AmmoFamily; primaryPayloa
   impactRelay: { family: 'IMPACT', primaryPayload: 'actionShock' },
   resonance: { family: 'IMPACT', primaryPayload: 'actionShock' },
   heavy: { family: 'IMPACT', primaryPayload: 'actionShock' },
+  incendiary: { family: 'BURN', primaryPayload: 'burn' },
+  highHeat: { family: 'BURN', primaryPayload: 'burn' },
+  lowHeat: { family: 'BURN', primaryPayload: 'burn' },
+  accelerant: { family: 'BURN', primaryPayload: 'burn' },
+  ignition: { family: 'BURN', primaryPayload: 'burn' },
+  kindling: { family: 'BURN', primaryPayload: 'firepower' },
 };
 const ammo = (id: AmmoType, name: string, shortName: string, role: string, tags: readonly BuildTag[], color: number,
   firepower: number, wound = 0, actionShock = 0, recoil = 1, extra: Partial<AmmoDefinition> = {}): AmmoDefinition => ({
   ...AMMO_FAMILIES[id], id, name, shortName, role, rarity: 'common', tags, color, cssColor: `#${color.toString(16).padStart(6, '0')}`,
-  firepower, wound, explosive: 0, actionShock, recoil, ...extra,
+  firepower, wound, explosive: 0, burn: 0, burnDamage: 0, actionShock, recoil, ...extra,
 });
 export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   ball: ammo('ball', '표준탄', '표준탄', '기준 체력 피해', ['health'], 0xd8c6a2, 5, 0, 0, 1, { supply: 'infinite' }),
@@ -70,6 +77,12 @@ export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   impactRelay: ammo('impactRelay', '연쇄충격탄', '연쇄충격탄', '충격 +1 · 바로 다음 탄 충격 +3 (일반탄도 적용)', ['impact'], 0x83c5ff, 1, 0, 1, 1, { shockFollowUp: 3 }),
   resonance: ammo('resonance', '충격증폭탄', '충격증폭탄', '충격 +2 · 현재 충격 2당 추가 +1, 추가 최대 +4', ['impact'], 0xacb7ff, 1, 0, 2, 1, { shockScale: { divisor: 2, cap: 4 } }),
   heavy: ammo('heavy', '중량탄', '중량', '피해 3 · 충격 +2 · 반동 2', ['impact', 'health'], 0xc895ff, 3, 0, 2, 2),
+  incendiary: ammo('incendiary', '소이탄', '소이탄', '일반 화상 피해', ['burn'], 0xff994f, 3, 0, 0, 1, { burn: 8, burnDamage: 2 }),
+  highHeat: ammo('highHeat', '고열탄', '고열탄', '고반동 강한 화상 피해', ['burn'], 0xff633e, 2, 0, 0, 3, { rarity: 'uncommon', burn: 12, burnDamage: 3 }),
+  lowHeat: ammo('lowHeat', '저열탄', '저열탄', '저반동 약한 화상 피해', ['burn'], 0xffc47d, 2, 0, 0, 0, { burn: 4, burnDamage: 1, recoilRecovery: 1 }),
+  accelerant: ammo('accelerant', '연소촉진탄', '연소촉진탄', '낮은 피해, 후속탄 화상 증가', ['burn'], 0xeab85e, 1, 0, 0, 1, { rarity: 'uncommon', burn: 2, burnDamage: 1, burnFollowUpPercent: 50 }),
+  ignition: ammo('ignition', '점화탄', '점화탄', '낮은 피해, 누적 화상이 높을수록 강한 화상 피해', ['burn'], 0xf58857, 1, 0, 0, 1, { rarity: 'uncommon', burn: 2, burnDamage: 1, burnScalePercent: 50 }),
+  kindling: ammo('kindling', '발화탄', '발화탄', '점화 상태 추가 피해', ['burn'], 0xffd078, 3, 0, 0, 1, { rarity: 'uncommon', burn: 2, burnDamage: 1, ignitedBonus: 3 }),
 };
 export const AMMO_ORDER = Object.keys(AMMO_DEFINITIONS) as AmmoType[];
 export type SpecialAmmoType = Exclude<AmmoType, 'ball'>;
@@ -85,7 +98,7 @@ export const createStageStock = (build: AmmoBuild): AmmoStock => ({ ...build, ba
 export const countAllocations = (build: AmmoBuild): number => Object.values(build).reduce((sum, value) => sum + value, 0);
 export const rewardAmount = (ammo: SpecialAmmoType): number => { void ammo; return AMMO_BUILD_BALANCE.rewardAmount; };
 export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', uncommon: '고급' };
-export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', explosive: '폭발', impact: '충격' };
+export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', explosive: '폭발', impact: '충격', burn: '화상' };
 export const RANGE_NAMES: Record<RangeBand, string> = { near: '근거리', mid: '중거리', far: '원거리' };
 export const COMBAT_BALANCE = {
   baseMagazineCapacity: WEAPON_DEFINITIONS.p220.baseMagazineCapacity,
@@ -93,5 +106,6 @@ export const COMBAT_BALANCE = {
   minimumFirepower: 0, recoilThreshold: WEAPON_DEFINITIONS.p220.recoilThreshold, maxDistance: 12,
   explosionDamagePerStack: 2,
   woundThreshold: 6, vulnerableTurns: 2, vulnerableDamagePercent: 50,
+  burnThreshold: 20, ignitedActions: 1,
   rangeThresholds: { near: 4, mid: 8 },
 } as const;

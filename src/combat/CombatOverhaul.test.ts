@@ -155,22 +155,25 @@ describe('최종 부착물과 런 진행', () => {
 });
 
 describe('데이터와 완성 탄창', () => {
-  it('최종 25종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
-    expect(AMMO_ORDER).toHaveLength(25);
+  it('최종 31종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
+    expect(AMMO_ORDER).toHaveLength(31);
     expect(ATTACHMENT_ORDER).toHaveLength(11);
     expect(new Set(AMMO_ORDER)).toEqual(new Set(Object.keys(AMMO_DEFINITIONS)));
     expect(new Set(ATTACHMENT_ORDER)).toEqual(new Set(Object.keys(ATTACHMENT_DEFINITIONS)));
     const excluded = ['matchBarrel', 'threadedBarrel', 'heavyBarrel', 'flashSuppressor', 'linearCompensator',
       'suppressor', 'extraPowerSpringMagazine', 'lightweightMagazine', 'microRedDot', 'adjustableIronSight',
       'infraredAimingModule', 'laserRangefinder', 'rubberGrip', 'slimGrip', 'spareMagazineCarrier',
-      'armorPiercing', 'standard', 'incendiary', 'wadcutter', 'bonded', 'match'];
+      'armorPiercing', 'standard', 'wadcutter', 'bonded', 'match'];
     for (const id of excluded) {
       expect(AMMO_ORDER).not.toContain(id);
       expect(ATTACHMENT_ORDER).not.toContain(id);
     }
     const rewardPool = AMMO_ORDER.filter(value => value !== 'ball');
     for (const [index, ammo] of rewardPool.entries()) {
-      expect(generateAmmoRewards(() => (index + 0.5) / rewardPool.length)).toContain(ammo);
+      const rarityPool = rewardPool.filter(id => AMMO_DEFINITIONS[id].rarity === AMMO_DEFINITIONS[ammo].rarity);
+      const rolls = [AMMO_DEFINITIONS[ammo].rarity === 'common' ? 0 : 0.99, (rarityPool.indexOf(ammo) + 0.5) / rarityPool.length];
+      expect(generateAmmoRewards(() => rolls.shift() ?? 0)).toContain(ammo);
+      void index;
     }
     expect(ATTACHMENT_ORDER.every(id => generateAttachmentReward(ATTACHMENT_ORDER.filter(other => other !== id), 'p220', () => 0) === id)).toBe(true);
   });

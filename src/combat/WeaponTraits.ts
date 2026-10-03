@@ -4,9 +4,9 @@ import type { AmmoFamily, AmmoType } from './types';
 
 /** 탄약 원본을 변경하지 않고 명시된 주효과 하나만 조정한다. */
 export function weaponPayload(ammo: AmmoDefinition, weapon: WeaponDefinition, previousFamily?: AmmoFamily,
-  boostedOpening = false): { firepower: number; wound: number; explosive: number; actionShock: number; traitBonus: number } {
+  boostedOpening = false): { firepower: number; wound: number; explosive: number; burn: number; actionShock: number; traitBonus: number } {
   const payload = { firepower: Math.max(0, ammo.firepower + weapon.firepowerAdjustment),
-    wound: ammo.wound, explosive: ammo.explosive, actionShock: ammo.actionShock, traitBonus: 0 };
+    wound: ammo.wound, explosive: ammo.explosive, burn: ammo.burn, actionShock: ammo.actionShock, traitBonus: 0 };
   const key = ammo.primaryPayload;
   if (weapon.trait === 'familyChain' && previousFamily === ammo.family) {
     payload[key] += 1;

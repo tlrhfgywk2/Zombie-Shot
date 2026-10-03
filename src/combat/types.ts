@@ -1,12 +1,13 @@
-export type AmmoFamily = 'HEALTH' | 'WOUND' | 'EXPLOSION' | 'IMPACT';
-export type PrimaryPayload = 'firepower' | 'wound' | 'explosive' | 'actionShock';
+export type AmmoFamily = 'HEALTH' | 'WOUND' | 'EXPLOSION' | 'IMPACT' | 'BURN';
+export type PrimaryPayload = 'firepower' | 'wound' | 'explosive' | 'actionShock' | 'burn';
 export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' | 'frangible'
   | 'suppression' | 'execution' | 'kickback' | 'laceration' | 'retreat' | 'advance'
   | 'explosive' | 'highExplosive' | 'stickyCharge'
   | 'wounding' | 'serrated' | 'retreatCutter' | 'advanceCutter' | 'flatNose' | 'heavy'
-  | 'reducedImpact' | 'hammer' | 'impactRelay' | 'resonance';
+  | 'reducedImpact' | 'hammer' | 'impactRelay' | 'resonance'
+  | 'incendiary' | 'highHeat' | 'lowHeat' | 'accelerant' | 'ignition' | 'kindling';
 export type AmmoRarity = 'common' | 'uncommon';
-export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact';
+export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact' | 'burn';
 export type RangeBand = 'near' | 'mid' | 'far';
 export type AttachmentSlot = 'barrel' | 'muzzle' | 'magazine' | 'optic' | 'rail' | 'grip';
 export type EnemyType = 'normal' | 'brute' | 'fast' | 'tough' | 'contaminator' | 'groundshaker' | 'screecher';
@@ -26,6 +27,9 @@ export interface EnemyState {
   maxHp: number;
   wound: number;
   explosive: number;
+  burn: number;
+  burnThreshold: number;
+  ignitedActions: number;
   woundThreshold: number;
   vulnerableTurns: number;
   distance: number;
@@ -69,6 +73,13 @@ export interface ShotBreakdown {
   shockScaleBonus: number;
   projectedShock: number;
   detonationDamage: number;
+  burnBuildup: number;
+  burnFollowUpPercent: number;
+  burnScaleBonus: number;
+  burnDamage: number;
+  effectiveBurnDamage: number;
+  directFirepower: number;
+  ignitedBonus: number;
   finalFirepower: number;
 }
 export interface FirepowerBreakdown {
@@ -86,6 +97,9 @@ export interface ShotResult {
   damage: number;
   hpDamage: number;
   woundApplied: number;
+  burnApplied: number;
+  burnDamage: number;
+  ignitionTriggered: boolean;
   explosiveApplied: number;
   explosiveConsumed: number;
   explosionDamage: number;
@@ -109,6 +123,18 @@ export interface RoundPreview {
   recoilFirepowerReduction: number;
   playerDebuffFirepowerReduction: number;
   wound: number;
+  burn: number;
+  burnDamage: number;
+  burnBefore: number;
+  directFirepower: number;
+  burnAfter: number;
+  rangePenaltyPercent: number;
+  recoilPenalty: number;
+  burnThreshold: number;
+  ignitionTriggered: boolean;
+  ignited: boolean;
+  nextBurnPercent: number;
+  ignitedBonus: number;
   explosive: number;
   effectiveActionShock: number;
   shockBonus: number;
@@ -124,12 +150,17 @@ export interface SequenceResult {
   firepowerBreakdown: FirepowerBreakdown;
   totalHpDamage: number;
   totalWoundApplied: number;
+  totalBurnApplied: number;
+  totalBurnDamage: number;
   totalExplosiveApplied: number;
   totalActionShockApplied: number;
   unfiredRounds: AmmoType[];
   killed: boolean;
 }
-export interface EnemyActionPreview { selectedAction: EnemyActionType; threshold: number; movement: number }
+export interface EnemyActionPreview {
+  selectedAction: EnemyActionType; threshold: number; movement: number;
+  suppressedIntent?: EnemyIntentType;
+}
 export interface EnemyActionResult {
   selectedAction: EnemyActionType;
   threshold: number;
@@ -143,5 +174,6 @@ export interface EnemyActionResult {
   playerAfter: PlayerCombatState;
   movement: number;
   intentResolved?: EnemyIntentType;
+  suppressedIntent?: EnemyIntentType;
   intentDetail?: string;
 }

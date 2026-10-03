@@ -121,7 +121,10 @@ describe('신규 충격 탄약', () => {
 
   it('보상으로 획득한 네 탄약은 다음 스테이지에서 장전·소모·재보급된다', () => {
     const seen = new Set<string>();
-    for (let index = 0; index < 100; index++) generateAmmoRewards(() => index / 100).forEach(ammo => seen.add(ammo));
+    for (let index = 0; index < 100; index++) {
+      let roll = 0;
+      generateAmmoRewards(() => roll++ % 2 === 0 ? 0 : index / 100).forEach(ammo => seen.add(ammo));
+    }
     for (const ammo of ['reducedImpact', 'hammer', 'impactRelay', 'resonance'] as const) {
       expect(seen.has(ammo)).toBe(true);
       expect(AMMO_DEFINITIONS[ammo].name).toBeTruthy();

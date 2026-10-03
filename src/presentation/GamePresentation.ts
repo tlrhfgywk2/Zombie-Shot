@@ -166,15 +166,15 @@ export class GamePresentation {
     return this.tween(milliseconds, () => undefined);
   }
 
-  setZombie(distance: number, hpRatio: number, level: number, type: EnemyType = 'normal'): void {
+  setZombie(distance: number, hpRatio: number, level: number, type: EnemyType = 'normal', ignited = false): void {
     this.zombieTargetZ = 1.1 - distance * 0.72;
     const scale = 1 + Math.min(level - 1, 10) * 0.025;
     this.zombieModel.root.scale.setScalar(scale);
     const material = this.zombieModel.torso.material as THREE.MeshStandardMaterial;
     const specialColors: Partial<Record<EnemyType, number>> = { contaminator: 0x67543f, groundshaker: 0x5b4b42, screecher: 0x3d5261 };
     material.color.setHex(specialColors[type] ?? 0x30443c);
-    material.emissive.setHex(hpRatio < 0.35 ? 0x33110d : 0x08110a);
-    material.emissiveIntensity = 0.32;
+    material.emissive.setHex(ignited ? 0xff5b0a : hpRatio < 0.35 ? 0x33110d : 0x08110a);
+    material.emissiveIntensity = ignited ? 0.75 : 0.32;
     this.specialThreat = type === 'contaminator' || type === 'groundshaker' || type === 'screecher';
     this.zombieModel.threatHalo.visible = this.specialThreat;
     const haloMaterial = this.zombieModel.threatHalo.material as THREE.MeshBasicMaterial;

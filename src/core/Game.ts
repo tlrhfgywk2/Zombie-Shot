@@ -170,9 +170,9 @@ export class Game {
       this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
       const hasNextShot = shot !== sequence.shots.at(-1);
       if (shot.after.distance !== shot.shotDistance) await this.presentation.animateDistanceChange(shot.after.distance);
+      this.syncEnemy();
       if (hasNextShot) await this.presentation.animateReacquisition(shot.breakdown.recoilGenerated >= 3,
         getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
-      this.syncEnemy();
     }
     await this.presentation.animateMagazineDiscard();
     this.player.magazine.clear();
@@ -386,7 +386,7 @@ export class Game {
     this.ui.renderPlayerDebuffs(context.playerState);
     this.ui.renderLoadout(context.loadout, context.playerState, this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(context.loadout, context.playerState);
-    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.waveIndex + 1, this.zombie.type);
+    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.waveIndex + 1, this.zombie.type, enemy.ignitedActions > 0);
   }
 
   private pause(milliseconds: number): Promise<void> { return this.presentation.wait(milliseconds); }

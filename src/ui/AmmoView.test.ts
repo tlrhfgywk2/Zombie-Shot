@@ -42,4 +42,19 @@ describe('탄약 전투 수치 표시', () => {
     expect(ammoStatsMarkup('resonance')).toContain('현재 충격 2당 +1 · 추가 최대 +4');
     expect(ammoStatsMarkup('reducedImpact')).toContain('반동<b>0</b>');
   });
+  it('화상 보급 카드에는 별도 즉시 피해·정확한 공식·반동 0·충격 0을 표시한다', () => {
+    expect(ammoStatsMarkup('incendiary')).toContain('화상<b>8</b>');
+    expect(ammoStatsMarkup('incendiary')).toContain('즉시 화상 피해<b>2</b>');
+    expect(ammoStatsMarkup('incendiary')).toContain('충격<b>0</b>');
+    expect(ammoStatsMarkup('lowHeat')).toContain('반동<b>0</b>');
+    expect(ammoStatsMarkup('accelerant')).toContain('바로 다음 탄 화상 ×1.5');
+    expect(ammoStatsMarkup('ignition')).toContain('화상 2 + 현재 화상 ×0.5');
+    expect(ammoStatsMarkup('kindling')).toContain('점화 대상 직접 화력 +3');
+  });
+  it('발사 순서에는 촉진·누적 공식으로 수정된 정확한 화상 축적을 전달한다', () => {
+    const round = resolver.resolveSequence(['accelerant', 'highHeat', 'ignition'], target()).roundPreviews;
+    expect(firingOrderStatEntries(round[1]!).find(entry => entry.kind === 'burn')).toEqual({ kind: 'burn', label: '화상 축적', value: 18, modified: true });
+    expect(round[1]).toMatchObject({ ignitionTriggered: true, burnAfter: 0 });
+    expect(round[2]).toMatchObject({ burn: 2, ignitionTriggered: false, burnAfter: 2 });
+  });
 });
