@@ -3,7 +3,7 @@ import { isAttachmentCompatible } from '../data/attachmentDefinitions';
 import { ammoStatsMarkup, ammoTooltipFirepower, burnEffectText, firingOrderStatEntries } from './AmmoView';
 import { ACTION_NAMES, getRangeBand, isIgnited, isVulnerable, previewEnemyAction } from '../combat/CombatResolver';
 import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
-import type { AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, FirepowerBreakdown, PlayerCombatState, RoundPreview, SequenceResult, ShotResult } from '../combat/types';
+import type { AmmoFamily, AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, FirepowerBreakdown, PlayerCombatState, RoundPreview, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
@@ -36,6 +36,10 @@ export interface GameUICallbacks {
 
 const PHASE_LABELS: Record<GamePhase, string> = {
   WEAPON_SELECTION: '권총 선택', CYLINDER_CHOICE: '실린더 준비', ATTACHMENT_REWARD: '부착물 획득', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
+};
+
+const AMMO_FAMILY_LABELS: Record<AmmoFamily, string> = {
+  HEALTH: '일반 피해', WOUND: '상처', EXPLOSION: '폭발', IMPACT: '충격', BURN: '화상',
 };
 
 const COMBAT_STAT_ICONS = {
@@ -730,12 +734,24 @@ export class GameUI {
       sibling.inert = true;
     }
     const owned = supply ? AMMO_ORDER : AMMO_ORDER.filter(ammo => ammo === 'ball' || this.build[ammo] > 0);
-    const inventory = owned.map(ammo => this.ammoInventoryCardMarkup(ammo, supply)).join('');
+    const groups = Object.entries(AMMO_FAMILY_LABELS).map(([family, label]) => ({
+      family, label, ammo: owned.filter(ammo => AMMO_DEFINITIONS[ammo].family === family),
+    })).filter(group => group.ammo.length > 0);
+    const inventory = groups.map(group => `<section id="ammo-family-${group.family}" class="ammo-family-group" aria-labelledby="ammo-family-${group.family}-title">
+      <h3 id="ammo-family-${group.family}-title" class="ammo-family-heading">${group.label}</h3>
+      <div class="ammo-inventory-grid">${group.ammo.map(ammo => this.ammoInventoryCardMarkup(ammo, supply)).join('')}</div>
+    </section>`).join('');
     this.ammoInventory.innerHTML = `<div class="route-card ammo-inventory-dialog${supply ? ' ammo-supply-dialog' : ''}">
       <header class="ammo-screen-header"><h2 id="ammo-inventory-title">${supply ? '탄약 추가' : '보유 탄약'}</h2><button type="button" class="ammo-screen-close" data-close-ammo-inventory aria-label="${supply ? '탄약 추가' : '보유 탄약'} 닫기">×</button></header>
-      <div class="ammo-inventory-panel"><div class="ammo-inventory-grid">${inventory}</div></div>
+      <nav class="ammo-family-navigation" aria-label="탄약 계열 바로가기">${groups.map(group => `<button type="button" data-ammo-family-target="${group.family}" aria-controls="ammo-family-${group.family}">${group.label}</button>`).join('')}</nav>
+      <div class="ammo-inventory-panel">${inventory}</div>
       <button type="button" class="ammo-inspect-layer" data-ammo-inspect hidden aria-label="탄약 상세 닫기"></button>
     </div>`;
+    const panel = this.required(this.ammoInventory, '.ammo-inventory-panel');
+    this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-ammo-family-target]').forEach(button => button.addEventListener('click', () => {
+      const group = this.required(panel, `#ammo-family-${button.dataset.ammoFamilyTarget}`);
+      panel.scrollTo({ top: panel.scrollTop + group.getBoundingClientRect().top - panel.getBoundingClientRect().top });
+    }));
     const inspectLayer = this.required(this.ammoInventory, '[data-ammo-inspect]') as HTMLButtonElement;
     this.ammoInventory.querySelector<HTMLButtonElement>('[data-close-ammo-inventory]')?.addEventListener('click', () => this.closeAmmoInventory());
     this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-inspect-ammo]').forEach(button => button.addEventListener('click', () => {
