@@ -641,10 +641,15 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .reward-actions button { min-width: 120px; min-height: 44px; padding: .65rem .9rem; border: 1px solid rgba(255,255,255,.18); color: #dce5de; background: rgba(12,18,14,.92); font-size: .72rem; font-weight: 850; cursor: pointer; }
 .reward-actions button:hover, .reward-actions button:focus-visible { border-color: var(--acid); color: var(--acid); }
 .ammo-inventory-overlay { z-index: 12; }
-.ammo-inventory-dialog { width: min(1040px, 100%); max-height: 94dvh; overflow: hidden; padding: 1rem; background: rgba(10,15,12,.98); }
+.ammo-inventory-dialog { display: flex; flex-direction: column; width: min(1040px, 100%); max-height: 94dvh; overflow: hidden; padding: 1rem; background: rgba(10,15,12,.98); }
 .ammo-inventory-dialog .ammo-screen-header { margin-bottom: 10px; }
 .ammo-screen-header .ammo-screen-close { min-width: 40px; padding: .35rem; font-size: 1.2rem; line-height: 1; }
-.ammo-inventory-panel { max-height: min(72dvh, 690px); overflow-y: auto; scrollbar-color: var(--acid) rgba(255,255,255,.06); }
+.ammo-inventory-panel { min-height: 0; max-height: min(72dvh, 690px); overflow-y: auto; scrollbar-color: var(--acid) rgba(255,255,255,.06); }
+.ammo-family-navigation { display: flex; flex-shrink: 0; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.ammo-family-navigation button { min-height: 40px; padding: .4rem .8rem; border: 1px solid var(--line); color: #dfe8e1; background: rgba(255,255,255,.035); font-size: .85rem; font-weight: 800; cursor: pointer; }
+.ammo-family-navigation button:hover, .ammo-family-navigation button:focus-visible { color: var(--acid); border-color: var(--acid); }
+.ammo-family-group + .ammo-family-group { margin-top: 20px; }
+.ammo-family-heading { position: sticky; z-index: 1; top: 0; margin: 0 0 10px; padding: .6rem 0; border-bottom: 1px solid var(--line); color: var(--acid); background: #0a0f0c; font-size: 1rem; }
 .ammo-inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
 .ammo-inventory-card { display: grid; min-width: 0; min-height: 190px; padding: .9rem; border: 1px solid color-mix(in srgb, var(--bullet), transparent 65%); text-align: left; background: linear-gradient(145deg, color-mix(in srgb, var(--bullet), transparent 92%), rgba(255,255,255,.035)); cursor: pointer; }
 .ammo-inventory-card:hover, .ammo-inventory-card:focus-visible { border-color: var(--bullet); background: color-mix(in srgb, var(--bullet), transparent 88%); }
@@ -672,6 +677,8 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .reward-actions button { flex: 1; min-width: 0; min-height: 42px; }
 .game-shell[data-layout="portrait"] .ammo-inventory-dialog { max-height: calc(100dvh - 20px); padding: .7rem; }
 .game-shell[data-layout="portrait"] .ammo-inventory-panel { max-height: calc(100dvh - 92px); }
+.game-shell[data-layout="portrait"] .ammo-family-navigation { gap: 4px; }
+.game-shell[data-layout="portrait"] .ammo-family-navigation button { flex: 1; min-height: 42px; padding: .4rem .25rem; font-size: .73rem; white-space: nowrap; }
 .game-shell[data-layout="portrait"] .ammo-inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .game-shell[data-layout="portrait"] .ammo-inventory-card { min-height: 174px; padding: .65rem; }
 .game-shell[data-layout="portrait"] .ammo-inventory-card > strong { font-size: .82rem; }
