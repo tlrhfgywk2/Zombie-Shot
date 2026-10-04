@@ -643,6 +643,7 @@ export class GameUI {
       return;
     }
     this.setRecoilAmount(sequence.shots.at(-1)?.breakdown.recoilAfter ?? 0, '예상 반동');
+    this.updateForecastVisibility();
     this.updateFirepowerPanel(sequence.firepowerBreakdown, '총 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${sequence.totalWoundApplied}`;
     this.required(this.previewOutcome, '#forecast-explosive-value').textContent = String(sequence.finalState.explosive);
@@ -650,8 +651,7 @@ export class GameUI {
     this.required(this.previewOutcome, '#forecast-impact-value').textContent = String(sequence.totalActionShockApplied);
     this.required(this.previewOutcome, '#forecast-range-value').textContent = `${sequence.finalState.distance.toFixed(1)} m`;
     this.previewOutcome.hidden = false;
-    this.previewOutcome.setAttribute('aria-label', `예상 총 화력 ${sequence.firepowerBreakdown.finalFirepower}, 상처 ${sequence.totalWoundApplied}, 폭발 잔량 ${sequence.finalState.explosive}, 기폭 피해 ${sequence.firepowerBreakdown.detonationDamage}, 충격 ${sequence.totalActionShockApplied}, 최종 거리 ${sequence.finalState.distance.toFixed(1)}미터`);
-    this.previewOutcome.setAttribute('aria-label', `${this.previewOutcome.getAttribute('aria-label')}, 화상 축적 ${sequence.totalBurnApplied}, 즉시 화상 피해 ${sequence.totalBurnDamage}, 화상 잔량 ${sequence.finalState.burn}/${sequence.finalState.burnThreshold}${isIgnited(sequence.finalState) ? ', 점화' : ''}`);
+    this.updateForecastLabel();
   }
 
   showShot(result: ShotResult): void {
@@ -671,8 +671,27 @@ export class GameUI {
     this.renderBurnForecast(result.after);
     this.required(this.previewOutcome, '#forecast-impact-value').textContent = String(result.actionShockApplied);
     this.required(this.previewOutcome, '#forecast-range-value').textContent = `${result.after.distance.toFixed(1)} m`;
-    this.previewOutcome.setAttribute('aria-label', `현재 탄 화력 ${shot.finalFirepower}, 상처 ${result.woundApplied}, 폭발 잔량 ${result.after.explosive}, 기폭 피해 ${shot.detonationDamage}, 충격 ${result.actionShockApplied}, 거리 ${result.after.distance.toFixed(1)}미터`);
-    this.previewOutcome.setAttribute('aria-label', `${this.previewOutcome.getAttribute('aria-label')}, 화상 축적 ${result.burnApplied}, 즉시 화상 피해 ${result.burnDamage}, 화상 잔량 ${result.after.burn}/${result.after.burnThreshold}${isIgnited(result.after) ? ', 점화' : ''}`);
+    this.updateForecastLabel();
+  }
+
+  private updateForecastVisibility(): void {
+    // 예상 미발사 탄약도 선택된 순서에 포함되며, 소비 후 잔량 0과 효과 없음은 구분한다.
+    const effects = [
+      ['wound', 'wound'], ['explosive', 'explosive'], ['burn', 'burn'], ['impact', 'effectiveActionShock'],
+    ] as const;
+    for (const [kind, payload] of effects) {
+      const visible = this.roundPreviews.some(round =>
+        round[payload] > 0 || AMMO_DEFINITIONS[round.ammoType][kind === 'impact' ? 'actionShock' : kind] > 0);
+      this.required(this.previewOutcome, `.forecast-${kind}`).hidden = !visible;
+    }
+    const count = this.previewOutcome.querySelectorAll('.forecast-stat:not([hidden])').length;
+    this.previewOutcome.style.setProperty('--forecast-stat-count', String(count));
+  }
+
+  private updateForecastLabel(): void {
+    const entries = [...this.previewOutcome.querySelectorAll<HTMLElement>('.forecast-stat:not([hidden])')]
+      .map(card => `${card.querySelector('small')?.textContent} ${card.querySelector('strong')?.textContent}`);
+    this.previewOutcome.setAttribute('aria-label', `발사 결과 예상: ${entries.join(', ')}`);
   }
 
   showRecoilAfterShot(recoilAfter: number): void {
