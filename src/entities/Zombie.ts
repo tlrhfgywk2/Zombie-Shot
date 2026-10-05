@@ -1,10 +1,11 @@
 import type { EnemyState, EnemyType } from '../combat/types';
 import { createEnemyState } from '../data/enemyDefinitions';
+import { createTrainingEnemy } from '../data/trainingEnemy';
 
 export class Zombie {
   private state: EnemyState;
 
-  constructor(type: EnemyType = 'normal') { this.state = createEnemyState(type); }
+  constructor(type: EnemyType = 'normal', training = false) { this.state = training ? createTrainingEnemy() : createEnemyState(type); }
 
   get type(): EnemyType { return this.state.type; }
   get hp(): number { return this.state.hp; }

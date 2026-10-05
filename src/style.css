@@ -859,3 +859,12 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="portrait"] .weapon-option dl > div { margin: .35rem 0; }
 .game-shell[data-layout="portrait"] .weapon-panel { font-size: .68rem; }
 .game-shell[data-layout="portrait"] .cylinder-choice button { padding: .65rem .5rem; }
+.attachment-bay .section-label button { padding: .3rem .55rem; border: 1px solid var(--line); color: var(--acid); background: rgba(255,255,255,.04); cursor: pointer; }
+.attachment-bay .section-label button:disabled { opacity: .4; cursor: default; }
+.attachment-inventory-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.attachment-inventory-card { display: flex; flex-direction: column; gap: .6rem; padding: 1rem; border: 1px solid var(--line); background: rgba(255,255,255,.035); min-width: 0; }
+.attachment-inventory-card > strong { font-size: 1rem; overflow-wrap: anywhere; }
+.attachment-inventory-card p { flex: 1; margin: 0; font-size: var(--combat-value-size); line-height: 1.5; overflow-wrap: anywhere; }
+.attachment-inventory-card > small { color: var(--muted); }
+.game-shell[data-layout="portrait"] .attachment-inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.game-shell[data-layout="portrait"] .attachment-inventory-card { padding: .65rem; }

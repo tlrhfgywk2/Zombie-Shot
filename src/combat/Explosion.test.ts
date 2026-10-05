@@ -70,6 +70,7 @@ describe('폭발 누적과 충격 명중 기폭', () => {
 
   it('기폭 처치는 남은 탄을 발사·소모하지 않고 실제 피해는 남은 체력으로 제한한다', () => {
     const player = new Player();
+    for (let i = 0; i < 3; i++) { player.supplyAmmo('wounding'); player.supplyAmmo('laceration'); }
     player.applyAmmoReward('stickyCharge');
     player.applyAmmoReward('flatNose');
     player.startStage();

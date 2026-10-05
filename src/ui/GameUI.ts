@@ -28,6 +28,8 @@ export interface GameUICallbacks {
   onClaimAttachment: (equip: boolean) => void;
   onSupplyAmmo: (ammo: SpecialAmmoType) => void;
   onRemoveSupplyAmmo: (ammo: SpecialAmmoType) => void;
+  onSupplyAttachment: (id: AttachmentId) => void;
+  onRemoveSupplyAttachment: (id: AttachmentId) => void;
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
@@ -157,7 +159,7 @@ export class GameUI {
           <div class="magazine-panel"><details id="weapon-panel" class="weapon-panel"><summary><strong data-weapon-name>P220</strong><span data-weapon-trait>표준탄 반동 0</span></summary><p data-weapon-detail></p></details><div class="section-label"><span>발사 순서</span></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
           </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div><div id="cylinder-choice" class="cylinder-choice" hidden aria-label="실린더 시작 순서 선택"></div></div>
-          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><small id="attachment-count">보유 0/11</small></div><div class="attachment-workspace">
+          <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><button id="attachment-supply-button" type="button" aria-haspopup="dialog" aria-controls="attachment-inventory">부착물 추가</button><small id="attachment-count">보유 0/11</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
             <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
           </div></section>
@@ -166,6 +168,7 @@ export class GameUI {
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
         <section id="ammo-inventory" class="route-choice ammo-inventory-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-inventory-title"></section>
+        <section id="attachment-inventory" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-inventory-title"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><button id="restart-button">다시 시작</button></div></div>
       </div>`;
@@ -331,6 +334,7 @@ export class GameUI {
     this.loadButton.addEventListener('click', () => { if (!this.locked) this.callbacks.onLoad(); });
     this.required(root, '#ammo-supply-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement, true));
     this.required(root, '#inventory-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
+    this.required(root, '#attachment-supply-button').addEventListener('click', (event) => this.openAttachmentInventory(event.currentTarget as HTMLButtonElement));
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
     window.addEventListener('blur', this.resetDragVisuals);
     window.addEventListener('resize', this.resetDragVisuals);
@@ -485,16 +489,21 @@ export class GameUI {
 
   setLocked(locked: boolean): void {
     this.locked = locked;
+    (this.required(this.shell, '#attachment-supply-button') as HTMLButtonElement).disabled = locked;
     this.attachmentTabs.forEach((button) => {
-      button.disabled = locked || button.dataset.compatible === 'false' || button.dataset.sealed === 'true';
+      button.disabled = locked || button.dataset.compatible === 'false';
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
-      button.disabled = locked || button.dataset.compatible === 'false' || button.dataset.sealed === 'true' || button.dataset.owned !== 'true';
+      button.disabled = locked || button.dataset.compatible === 'false' || button.dataset.owned !== 'true';
     });
     this.renderMagazine(this.rounds, this.stock, this.magazineCapacity);
   }
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number, owned: readonly AttachmentId[] = []): void {
+    const inventory = this.required(this.shell, '#attachment-inventory');
+    inventory.querySelectorAll<HTMLButtonElement>('[data-supply-attachment]').forEach(button => { button.disabled = owned.includes(button.dataset.supplyAttachment as AttachmentId); });
+    inventory.querySelectorAll<HTMLButtonElement>('[data-remove-supply-attachment]').forEach(button => { button.disabled = !owned.includes(button.dataset.removeSupplyAttachment as AttachmentId); });
+    inventory.querySelectorAll<HTMLElement>('[data-attachment-quantity]').forEach(element => { element.textContent = owned.includes(element.dataset.attachmentQuantity as AttachmentId) ? '보유 1' : '보유 0'; });
     this.required(this.shell, '#attachment-count').textContent = `보유 ${owned.filter(id => isAttachmentCompatible(id, this.weapon.id)).length}/${ATTACHMENT_ORDER.filter(id => isAttachmentCompatible(id, this.weapon.id)).length}`;
     this.magazineCapacity = capacity;
     ATTACHMENT_SLOT_ORDER.forEach((slot) => {
@@ -508,7 +517,7 @@ export class GameUI {
       tab?.setAttribute('aria-label', `${ATTACHMENT_SLOT_NAMES[slot]}: ${disabledTurns ? `${disabledTurns}턴 봉쇄` : label}`);
       if (tab) {
         tab.dataset.sealed = String(disabledTurns > 0);
-        tab.disabled = this.locked || disabledTurns > 0;
+        tab.disabled = this.locked;
       }
     });
     this.attachmentBay.querySelectorAll<HTMLButtonElement>('[data-attachment]').forEach((button) => {
@@ -525,7 +534,7 @@ export class GameUI {
       const ownership = button.querySelector('[data-ownership]');
       if (ownership) ownership.textContent = !compatible ? '장착 불가' : selected ? '장착 중 · 다시 눌러 해제' : owned.includes(id) ? '보유' : '미획득';
       button.setAttribute('aria-label', `${ATTACHMENT_DEFINITIONS[id].name}: ${selected ? '장착 중, 다시 눌러 해제' : ATTACHMENT_DEFINITIONS[id].summary}`);
-      button.disabled = this.locked || !compatible || sealed || !owned.includes(id);
+      button.disabled = this.locked || !compatible || !owned.includes(id);
     });
     this.updateAttachmentPanel();
   }
@@ -601,7 +610,8 @@ export class GameUI {
     this.distanceText.textContent = `${enemy.distance.toFixed(1)} m`;
     const rangeBand = getRangeBand(enemy.distance);
     this.rangeBandText.textContent = RANGE_NAMES[rangeBand];
-    this.levelText.textContent = ENEMY_DEFINITIONS[enemy.type].name;
+    const enemyName = enemy.trainingActions ? '훈련 감염체' : ENEMY_DEFINITIONS[enemy.type].name;
+    this.levelText.textContent = enemyName;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
     this.nextActionName.textContent = action.selectedAction === 'approach'
       ? `${ACTION_NAMES[action.selectedAction]} ${action.movement.toFixed(1)} m`
@@ -616,9 +626,13 @@ export class GameUI {
       ? `${action.movement.toFixed(1)} m 접근합니다.`
       : action.selectedAction === 'attack'
         ? '방어선을 돌파해 전투를 끝냅니다.'
-        : enemy.intent?.description ?? '특수 행동을 사용합니다.';
+        : enemy.intent?.description ?? ({
+          contaminate: '장착물 슬롯 하나를 2턴 동안 봉쇄합니다.',
+          groundShock: '반동에 따른 화력 감소를 2턴 동안 강화합니다.',
+          sonicPulse: '유효 거리 판정을 2턴 동안 1단계 악화합니다.',
+        }[action.selectedAction]);
     this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span><span class="intent-detail"><b>${ACTION_NAMES[action.selectedAction]}</b> · ${actionDescription}</span>`;
-    this.enemyContext.parentElement?.setAttribute('aria-label', `${ENEMY_DEFINITIONS[enemy.type].name}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 폭발 ${enemy.explosive}, 화상 ${enemy.burn}/${enemy.burnThreshold}${isIgnited(enemy) ? ', 점화' : ''}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
+    this.enemyContext.parentElement?.setAttribute('aria-label', `${enemyName}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 폭발 ${enemy.explosive}, 화상 ${enemy.burn}/${enemy.burnThreshold}${isIgnited(enemy) ? ', 점화' : ''}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
     this.enemyContext.insertAdjacentHTML('beforeend', `<span><b>화상 ${enemy.burn}/${enemy.burnThreshold}</b> · 턴 사이에 유지되며 자동 피해는 없습니다. 한 발당 임계치를 한 번 소비해 초과분을 남기고 <b>점화</b>합니다. 다음 행동을 수행할 때 특수 행동을 일반 접근으로 바꾸고 점화가 해제됩니다. 충격으로 행동이 중단되면 점화는 유지됩니다.</span>`);
   }
 
@@ -717,6 +731,50 @@ export class GameUI {
   showEndState(title: string, show: boolean): void {
     this.endTitle.textContent = title;
     this.overlay.hidden = !show;
+  }
+
+  private openAttachmentInventory(opener: HTMLButtonElement): void {
+    if (this.locked) return;
+    this.hideTooltip();
+    const host = this.required(this.shell, '#attachment-inventory');
+    const background = new Map<HTMLElement, boolean>();
+    for (const sibling of host.parentElement?.children ?? []) {
+      if (!(sibling instanceof HTMLElement) || sibling === host) continue;
+      background.set(sibling, sibling.inert);
+      sibling.inert = true;
+    }
+    const owned = [...this.attachmentBay.querySelectorAll<HTMLElement>('[data-attachment][data-owned="true"]')].map(button => button.dataset.attachment);
+    host.innerHTML = `<div class="route-card ammo-inventory-dialog attachment-inventory-dialog">
+      <header class="ammo-screen-header"><h2 id="attachment-inventory-title">부착물 추가</h2><button type="button" class="ammo-screen-close" data-close-attachment-inventory aria-label="부착물 추가 닫기">×</button></header>
+      <div class="ammo-inventory-panel">${ATTACHMENT_SLOT_ORDER.map(slot => `<section class="ammo-family-group"><h3 class="ammo-family-heading">${ATTACHMENT_SLOT_NAMES[slot]}</h3><div class="attachment-inventory-grid">${ATTACHMENT_ORDER.filter(id => ATTACHMENT_DEFINITIONS[id].slot === slot).map(id => {
+        const item = ATTACHMENT_DEFINITIONS[id];
+        const has = owned.includes(id);
+        return `<article class="attachment-inventory-card"><div class="inventory-card-head"><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span><b data-attachment-quantity="${id}">보유 ${has ? 1 : 0}</b></div><strong>${item.name}</strong><p>${item.summary}</p>${!isAttachmentCompatible(id, this.weapon.id) ? '<small>현재 총기 장착 불가</small>' : ''}<div class="supply-actions"><button type="button" class="supply-action" data-remove-supply-attachment="${id}" ${has ? '' : 'disabled'} aria-label="${item.name} 제거">−</button><button type="button" class="supply-action" data-supply-attachment="${id}" ${has ? 'disabled' : ''} aria-label="${item.name} 추가">+</button></div></article>`;
+      }).join('')}</div></section>`).join('')}</div></div>`;
+    const close = () => {
+      host.hidden = true;
+      host.onkeydown = null;
+      for (const [element, wasInert] of background) element.inert = wasInert;
+      opener.focus();
+    };
+    host.querySelector('[data-close-attachment-inventory]')?.addEventListener('click', close);
+    host.querySelectorAll<HTMLButtonElement>('[data-supply-attachment]').forEach(button => button.addEventListener('click', () => {
+      this.callbacks.onSupplyAttachment(button.dataset.supplyAttachment as AttachmentId);
+      button.parentElement?.querySelector<HTMLButtonElement>('[data-remove-supply-attachment]')?.focus();
+    }));
+    host.querySelectorAll<HTMLButtonElement>('[data-remove-supply-attachment]').forEach(button => button.addEventListener('click', () => {
+      this.callbacks.onRemoveSupplyAttachment(button.dataset.removeSupplyAttachment as AttachmentId);
+      button.parentElement?.querySelector<HTMLButtonElement>('[data-supply-attachment]')?.focus();
+    }));
+    host.onkeydown = event => {
+      if (event.key === 'Escape') { event.preventDefault(); close(); }
+      if (event.key !== 'Tab') return;
+      const buttons = [...host.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')];
+      if (event.shiftKey && document.activeElement === buttons[0]) { event.preventDefault(); buttons.at(-1)?.focus(); }
+      else if (!event.shiftKey && document.activeElement === buttons.at(-1)) { event.preventDefault(); buttons[0]?.focus(); }
+    };
+    host.hidden = false;
+    host.querySelector<HTMLButtonElement>('[data-close-attachment-inventory]')?.focus();
   }
 
   private ammoRarityMarkup(ammo: AmmoType): string {

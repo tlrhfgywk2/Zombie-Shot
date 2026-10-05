@@ -23,7 +23,7 @@ export class Game {
   private waveIndex = 0;
   private enemyIndex = 0;
   private currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
-  private zombie = new Zombie(this.currentRoster[0] ?? 'normal');
+  private zombie = new Zombie(this.currentRoster[0] ?? 'normal', true);
   private busy = false;
   private boostedOpening = false;
   private cylinderDecided = false;
@@ -44,6 +44,8 @@ export class Game {
       onClaimAttachment: (equip) => void this.claimAttachmentReward(equip),
       onSupplyAmmo: (ammo) => this.supplyAmmo(ammo),
       onRemoveSupplyAmmo: (ammo) => this.removeSupplyAmmo(ammo),
+      onSupplyAttachment: id => this.supplyAttachment(id),
+      onRemoveSupplyAttachment: id => this.removeSupplyAttachment(id),
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
@@ -119,6 +121,16 @@ export class Game {
   private equipAttachment(id: AttachmentId): void {
     if (this.state.phase !== 'AMMO_SELECTION' || !this.player.getOwnedAttachments().includes(id)) return;
     this.player.equipAttachment(id);
+    this.sync();
+  }
+
+  private supplyAttachment(id: AttachmentId): void {
+    if (this.state.phase !== 'AMMO_SELECTION' || !this.player.claimAttachment(id)) return;
+    this.sync();
+  }
+
+  private removeSupplyAttachment(id: AttachmentId): void {
+    if (this.state.phase !== 'AMMO_SELECTION' || !this.player.removeAttachment(id)) return;
     this.sync();
   }
 
@@ -285,7 +297,7 @@ export class Game {
   private async spawnCurrentEnemy(): Promise<void> {
     const type = this.currentRoster[this.enemyIndex] ?? 'normal';
     this.player.clearCombatDisruptions();
-    this.zombie = new Zombie(type);
+    this.zombie = new Zombie(type, true);
     this.sync();
     await this.presentation.animateSpawn(this.zombie.distance);
     this.state.transition('AMMO_SELECTION');
@@ -304,7 +316,7 @@ export class Game {
     this.waveIndex = 0;
     this.enemyIndex = 0;
     this.currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
-    this.zombie = new Zombie(this.currentRoster[0] ?? 'normal');
+    this.zombie = new Zombie(this.currentRoster[0] ?? 'normal', true);
     this.busy = false;
     this.ui.showEndState('', false);
     this.ui.hideRouteChoice();
