@@ -159,9 +159,10 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .ammo-tooltip header span { color: var(--tooltip-color); font-size: .58rem; font-weight: 850; letter-spacing: .1em; }
 .ammo-tooltip header strong { font-size: 1rem; }
 .ammo-tooltip p { margin: .3rem 0 .65rem; color: #cbd5cd; font-size: .72rem; }
-.ammo-tooltip > div { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.ammo-tooltip > div { display: grid; grid-template-columns: repeat(var(--ammo-tooltip-columns, 3), 1fr); gap: 4px; }
+.ammo-tooltip header + div { margin-top: .6rem; }
 .ammo-tooltip > div span { padding: .38rem .45rem; color: var(--muted); background: rgba(255,255,255,.04); font-size: .61rem; }
-.ammo-tooltip > div b { display: block; margin-top: .08rem; color: #edf3ee; font-size: .68rem; }
+.ammo-tooltip > div b { display: block; margin-top: .08rem; color: #edf3ee; font-size: var(--combat-value-size); }
 .ammo-tooltip .tooltip-firepower b[data-firepower-change="weakened"] { color: #ff6756; }
 .ammo-tooltip .tooltip-firepower b[data-firepower-change="strengthened"] { color: #75d9ec; }
 .ammo-tooltip > small { display: block; margin-top: .55rem; color: #aeb9b0; font-size: .61rem; line-height: 1.45; }
@@ -385,7 +386,7 @@ button:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
 .game-shell[data-layout="portrait"] .route-option { min-height: 150px; padding: .75rem; }
 .game-shell[data-layout="portrait"] .hint { display: none; }
 .game-shell[data-layout="portrait"] .ammo-tooltip { bottom: calc(var(--portrait-edge) + env(safe-area-inset-bottom) + var(--portrait-loadout-height) + 8px); padding: .65rem .7rem; }
-.game-shell[data-layout="portrait"] .ammo-tooltip > div { grid-template-columns: repeat(3, 1fr); }
+.game-shell[data-layout="portrait"] .ammo-tooltip > div { grid-template-columns: repeat(var(--ammo-tooltip-columns, 3), 1fr); }
 .game-shell[data-layout="portrait"] .ammo-tooltip p { margin-bottom: .45rem; }
 .game-shell[data-layout="portrait"] .build-id { right: max(5px, env(safe-area-inset-right)); bottom: max(2px, env(safe-area-inset-bottom)); font-size: .46rem; }
 .game-shell[data-layout="portrait"] .presentation-debug { top: calc(var(--portrait-edge) + env(safe-area-inset-top) + var(--portrait-top-hud-height) + var(--portrait-phase-height) + 6px); right: max(6px, env(safe-area-inset-right)); width: min(330px, calc(100% - 12px)); max-height: 34vh; font-size: .5rem; }
@@ -552,7 +553,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-layout="desktop"] .ammo-tooltip p { margin: .4rem 0 .8rem; font-size: .88rem; }
 .game-shell[data-layout="desktop"] .ammo-tooltip > div { gap: 6px; }
 .game-shell[data-layout="desktop"] .ammo-tooltip > div span { padding: .56rem .62rem; font-size: .78rem; }
-.game-shell[data-layout="desktop"] .ammo-tooltip > div b { margin-top: .12rem; font-size: .96rem; }
+.game-shell[data-layout="desktop"] .ammo-tooltip > div b { margin-top: .12rem; font-size: var(--combat-value-prominent); }
 .game-shell[data-layout="desktop"] .ammo-tooltip > small { font-size: .73rem; }
 
 .game-shell[data-layout="tablet-landscape"] .top-hud { grid-template-columns: 1fr minmax(260px, 360px) 1fr; padding-top: max(10px, env(safe-area-inset-top)); }

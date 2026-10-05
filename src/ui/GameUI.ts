@@ -1,6 +1,6 @@
 import { WEAPON_DEFINITIONS, WEAPON_ORDER, type WeaponDefinition, type WeaponId } from '../data/weaponDefinitions';
 import { isAttachmentCompatible } from '../data/attachmentDefinitions';
-import { ammoStatsMarkup, ammoTooltipFirepower, burnEffectText, firingOrderStatEntries } from './AmmoView';
+import { ammoStatsMarkup, ammoTooltipStatsMarkup, firingOrderStatEntries } from './AmmoView';
 import { ACTION_NAMES, getRangeBand, isIgnited, isVulnerable, previewEnemyAction } from '../combat/CombatResolver';
 import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
 import type { AmmoFamily, AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, FirepowerBreakdown, PlayerCombatState, RoundPreview, SequenceResult, ShotResult } from '../combat/types';
@@ -276,8 +276,8 @@ export class GameUI {
         this.callbacks.onAddAmmo(ammo);
       });
       this.bindPointerDrag(button, () => this.isAmmoSelectable(ammo) ? ({ ammo }) : undefined);
-      this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button, this.ammoOptionPreviews[ammo], true));
-      this.bindTouchTooltip(button, () => this.showAmmoTooltip(ammo, button, this.ammoOptionPreviews[ammo], true));
+      this.bindHoverTooltip(button, () => this.showAmmoTooltip(ammo, button, this.ammoOptionPreviews[ammo]));
+      this.bindTouchTooltip(button, () => this.showAmmoTooltip(ammo, button, this.ammoOptionPreviews[ammo]));
     });
 
     this.slots.forEach((slot, index) => {
@@ -998,23 +998,12 @@ export class GameUI {
     }, 140);
   }
 
-  private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement, round?: RoundPreview, assumedAppend = false): void {
+  private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement, round?: RoundPreview): void {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
-    const firepower = ammoTooltipFirepower(ammo, round);
-    const shock = round?.effectiveActionShock ?? definition.actionShock;
-    const firepowerLabel = firepower.change === 'weakened' ? '반동 감소 반영 화력'
-      : firepower.change === 'strengthened' ? '강화 반영 화력' : '화력';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header><p>${definition.role}</p><div><span class="tooltip-firepower">${assumedAppend ? '추가 시 화력' : '화력'} <b data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}">${firepower.value}</b></span><span>상처 <b>${round?.wound ?? definition.wound}</b></span><span>폭발 <b>${round?.explosive ?? definition.explosive}</b></span><span>${assumedAppend ? '추가 시 충격' : '충격'} <b ${round && round.shockBonus > 0 ? 'data-shock-boosted' : ''}>${shock}</b></span><span>반동 <b>${round?.recoilGenerated ?? definition.recoil}</b></span></div>`;
+    const role = ammo !== 'ball' && definition.family !== 'BURN' ? `<p>${definition.role}</p>` : '';
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header>${role}${ammoTooltipStatsMarkup(ammo, round)}`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
-    if (definition.family === 'BURN' || round?.burn) {
-      const values = this.ammoTooltip.querySelector('div')!;
-      values.insertAdjacentHTML('beforeend', `<span>화상 축적 <b>${round?.burn ?? definition.burn}</b></span><span>즉시 화상 피해 <b>${round?.burnDamage ?? definition.burnDamage}</b></span>`);
-      if (round) values.insertAdjacentHTML('beforeend', `<span>사격 후 화상 <b>${round.burnAfter}/${round.burnThreshold}${round.ignitionTriggered ? ' · 점화' : ''}</b></span><span>직접 최종 화력 <b>${round.directFirepower}</b></span>`);
-      if (round) values.insertAdjacentHTML('beforeend', `<span>거리 감소 <b>${round.rangePenaltyPercent}%</b></span><span>반동 화력 감소 <b>${round.recoilPenalty}</b></span>`);
-      const effect = burnEffectText(ammo);
-      if (effect) this.ammoTooltip.insertAdjacentHTML('beforeend', `<small>${effect}</small>`);
-    }
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;
     anchor.setAttribute('aria-describedby', 'ammo-tooltip');

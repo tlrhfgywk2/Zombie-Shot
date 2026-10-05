@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { CombatResolver } from '../combat/CombatResolver';
 import { createEnemyState } from '../data/enemyDefinitions';
 import type { EnemyState } from '../combat/types';
-import { ammoStatsMarkup, ammoTooltipFirepower, firingOrderStatEntries } from './AmmoView';
+import { AMMO_ORDER } from '../data/ammoDefinitions';
+import { ammoStatsMarkup, ammoTooltipFirepower, ammoTooltipStatsMarkup, firingOrderStatEntries } from './AmmoView';
 
 const resolver = new CombatResolver();
 const target = (): EnemyState => ({ ...createEnemyState('normal'), hp: 100, maxHp: 100, distance: 3 });
@@ -62,5 +63,35 @@ describe('탄약 전투 수치 표시', () => {
     expect(firingOrderStatEntries(round[1]!).find(entry => entry.kind === 'burn')).toEqual({ kind: 'burn', label: '화상 축적', value: 18, modified: true });
     expect(round[1]).toMatchObject({ ignitionTriggered: true, burnAfter: 0 });
     expect(round[2]).toMatchObject({ burn: 2, ignitionTriggered: false, burnAfter: 2 });
+  });
+
+  it.each(AMMO_ORDER)('%s 툴팁에서는 모든 0인 수치를 숨긴다', ammo => {
+    expect(ammoTooltipStatsMarkup(ammo)).not.toMatch(/<b[^>]*>0<\/b>/);
+    const round = resolver.resolveSequence(['highHeat', 'highHeat', ammo], { ...target(), distance: 12 }).roundPreviews[2]!;
+    expect(ammoTooltipStatsMarkup(ammo, round)).not.toMatch(/<b[^>]*>0<\/b>/);
+  });
+
+  it('표준탄 툴팁에는 화력과 반동만 남긴다', () => {
+    const markup = ammoTooltipStatsMarkup('ball');
+    expect(markup).toMatch(/화력 <b[^>]*>5<\/b>/);
+    expect(markup).toMatch(/반동 <b[^>]*>1<\/b>/);
+    expect(markup).not.toMatch(/상처|폭발|충격|화상/);
+  });
+
+  it('화상 툴팁은 보정 후 화력과 즉시 화상 피해를 중복 합산 없이 따로 표시한다', () => {
+    const sequence = resolver.resolveSequence(['highHeat', 'highHeat', 'incendiary'], { ...target(), distance: 12 });
+    const round = sequence.roundPreviews[2]!;
+    expect(ammoTooltipFirepower('incendiary', round)).toEqual({ value: sequence.shots[2]!.breakdown.directFirepower, change: 'weakened' });
+    expect(ammoTooltipFirepower('incendiary')).toEqual({ value: 3, change: 'neutral' });
+    const markup = ammoTooltipStatsMarkup('incendiary', round);
+    expect(markup).toContain('화상 축적');
+    expect(markup).toContain(`즉시 화상 피해 <b>${round.burnDamage}</b>`);
+    expect(markup).not.toMatch(/최종 화력|거리 감소|반동 화력 감소|사격 후 화상|상처|폭발|충격/);
+  });
+
+  it('점화 보너스는 화력과 강화 색상에 반영하고 고유 효과 설명은 유지한다', () => {
+    const round = resolver.resolveSequence(['kindling'], { ...target(), ignitedActions: 1 }).roundPreviews[0]!;
+    expect(ammoTooltipFirepower('kindling', round)).toEqual({ value: 6, change: 'strengthened' });
+    expect(ammoTooltipStatsMarkup('kindling', round)).toContain('점화 대상 직접 화력 +3');
   });
 });
