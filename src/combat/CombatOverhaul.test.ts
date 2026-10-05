@@ -41,6 +41,7 @@ describe('새 탄약과 전투 상태', () => {
     expect(resolver.resolveSequence(['relay', 'ball', 'ball'], target()).shots.map(s => s.breakdown.followUpBonus)).toEqual([0, 4, 0]);
     expect(resolver.resolveSequence(['relay', 'relay', 'ball'], target()).shots.map(s => s.breakdown.followUpBonus)).toEqual([0, 4, 4]);
     expect(damage('relay')).toBeLessThan(damage('ball'));
+    expect(resolver.resolveSequence(['relay', 'relay', 'ball'], target()).shots.map(s => s.breakdown.recoilGenerated)).toEqual([0, 0, 0]);
   });
   it('반동탄은 누적 반동을 피해로 바꾸고 모두 소비한다', () => {
     const sequence = resolver.resolveSequence(['plusP', 'plusP', 'kickback', 'ball'], target());

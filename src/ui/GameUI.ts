@@ -27,6 +27,7 @@ export interface GameUICallbacks {
   onUnequipAttachment: (slot: AttachmentSlot) => void;
   onClaimAttachment: (equip: boolean) => void;
   onSupplyAmmo: (ammo: SpecialAmmoType) => void;
+  onRemoveSupplyAmmo: (ammo: SpecialAmmoType) => void;
   onChooseRoute: (kind: RouteKind) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
@@ -434,6 +435,10 @@ export class GameUI {
         const ammo = quantity.dataset.supplyQuantity as AmmoType;
         quantity.textContent = ammo === 'ball' ? '∞' : `×${stock[ammo]}`;
       });
+      this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-remove-supply-ammo]').forEach(button => {
+        const ammo = button.dataset.removeSupplyAmmo as AmmoType;
+        button.disabled = ammo === 'ball' || build[ammo] <= 0 || stock[ammo] - reserved.filter(value => value === ammo).length <= 0;
+      });
     }
     const visibleCount = AMMO_ORDER.filter(ammo => ammo === 'ball' || build[ammo] > 0).length;
     const options = this.required(this.shell, '.ammo-options');
@@ -754,12 +759,13 @@ export class GameUI {
     }));
     const inspectLayer = this.required(this.ammoInventory, '[data-ammo-inspect]') as HTMLButtonElement;
     this.ammoInventory.querySelector<HTMLButtonElement>('[data-close-ammo-inventory]')?.addEventListener('click', () => this.closeAmmoInventory());
+    this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-supply-ammo]').forEach(button => button.addEventListener('click', () => {
+      this.callbacks.onSupplyAmmo(button.dataset.supplyAmmo as SpecialAmmoType);
+    }));
+    this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-remove-supply-ammo]').forEach(button => button.addEventListener('click', () => {
+      this.callbacks.onRemoveSupplyAmmo(button.dataset.removeSupplyAmmo as SpecialAmmoType);
+    }));
     this.ammoInventory.querySelectorAll<HTMLButtonElement>('[data-inspect-ammo]').forEach(button => button.addEventListener('click', () => {
-      if (supply) {
-        const ammo = button.dataset.inspectAmmo as AmmoType;
-        if (ammo !== 'ball') this.callbacks.onSupplyAmmo(ammo);
-        return;
-      }
       this.inspectedAmmoButton = button;
       const ammo = button.dataset.inspectAmmo as AmmoType;
       const definition = AMMO_DEFINITIONS[ammo];
@@ -793,7 +799,7 @@ export class GameUI {
       }
     };
     this.ammoInventory.hidden = false;
-    this.ammoInventory.querySelector<HTMLButtonElement>('[data-inspect-ammo]:not(:disabled)')?.focus();
+    this.ammoInventory.querySelector<HTMLButtonElement>('[data-supply-ammo]:not(:disabled), [data-inspect-ammo]:not(:disabled)')?.focus();
   }
 
   private closeAmmoInventory(): void {
@@ -810,13 +816,19 @@ export class GameUI {
     const definition = AMMO_DEFINITIONS[ammo];
     const infinite = ammo === 'ball';
     const quantity = supply ? (infinite ? '∞' : `×${this.stock[ammo]}`) : this.ammoQuantity(ammo);
-    const action = supply ? (infinite ? '무제한' : '1발 추가') : `${quantity} 상세 보기`;
-    return `<button type="button" class="ammo-inventory-card ammo-${ammo}${supply ? ' ammo-supply-card' : ''}"
-      style="--bullet:${definition.cssColor}" data-inspect-ammo="${ammo}" ${supply && infinite ? 'disabled' : ''} aria-label="${definition.name} ${action}">
+    if (supply) {
+      const unavailable = infinite || this.build[ammo] <= 0 || (this.stock[ammo] as number) - this.rounds.filter(value => value === ammo).length <= 0;
+      return `<div class="ammo-inventory-card ammo-${ammo} ammo-supply-card" style="--bullet:${definition.cssColor}">
+        <span class="inventory-card-head">${this.ammoRarityMarkup(ammo)}<b data-supply-quantity="${ammo}">${quantity}</b></span>
+        <span class="supply-round"><span class="round-visual"><i></i></span></span>
+        <strong>${definition.name}</strong>${ammoStatsMarkup(ammo)}
+        <div class="supply-actions"><button type="button" class="supply-action" data-remove-supply-ammo="${ammo}" ${unavailable ? 'disabled' : ''} aria-label="${definition.name} 1발 제거">-1</button><button type="button" class="supply-action" data-supply-ammo="${ammo}" ${infinite ? 'disabled' : ''} aria-label="${definition.name} 1발 추가">+1</button></div>
+      </div>`;
+    }
+    return `<button type="button" class="ammo-inventory-card ammo-${ammo}"
+      style="--bullet:${definition.cssColor}" data-inspect-ammo="${ammo}" aria-label="${definition.name} ${quantity} 상세 보기">
       <span class="inventory-card-head">${this.ammoRarityMarkup(ammo)}<b data-supply-quantity="${ammo}">${quantity}</b></span>
-      ${supply ? '<span class="supply-round"><span class="round-visual"><i></i></span></span>' : ''}
       <strong>${definition.name}</strong>${ammoStatsMarkup(ammo)}
-      ${supply ? `<em class="supply-action">${infinite ? '무제한' : '+1'}</em>` : ''}
     </button>`;
   }
 

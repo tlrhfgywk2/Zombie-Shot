@@ -43,6 +43,7 @@ export class Game {
       onUnequipAttachment: (slot) => this.unequipAttachment(slot),
       onClaimAttachment: (equip) => void this.claimAttachmentReward(equip),
       onSupplyAmmo: (ammo) => this.supplyAmmo(ammo),
+      onRemoveSupplyAmmo: (ammo) => this.removeSupplyAmmo(ammo),
       onChooseRoute: (kind) => void this.chooseRoute(kind),
       onAudioMutedChange: (muted) => this.setAudioPreferences({ ...this.audioPreferences, muted }),
       onAudioVolumeChange: (volume) => this.setAudioPreferences({ ...this.audioPreferences, volume }),
@@ -89,6 +90,11 @@ export class Game {
 
   private supplyAmmo(ammo: SpecialAmmoType): void {
     if (['WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.supplyAmmo(ammo)) return;
+    this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
+  }
+
+  private removeSupplyAmmo(ammo: SpecialAmmoType): void {
+    if (['WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.removeSupplyAmmo(ammo)) return;
     this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
   }
 

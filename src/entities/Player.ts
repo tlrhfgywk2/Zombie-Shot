@@ -47,6 +47,13 @@ export class Player {
     this.specialCapacity = Math.max(this.specialCapacity, countAllocations(this.build));
     return true;
   }
+  removeSupplyAmmo(ammo: SpecialAmmoType): boolean {
+    if (!Object.hasOwn(this.build, ammo) || !AMMO_ORDER.includes(ammo)
+      || this.build[ammo] <= 0 || this.stock[ammo] - this.magazine.getRounds().filter(round => round === ammo).length <= 0) return false;
+    this.build[ammo] -= 1;
+    this.stock[ammo] -= 1;
+    return true;
+  }
   addAmmo(ammo: AmmoType): boolean {
     if (!AMMO_ORDER.includes(ammo) || this.getAvailable(ammo) === 0) return false;
     return this.magazine.add(ammo);

@@ -56,7 +56,7 @@ export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   hollowPoint: ammo('hollowPoint', '중공탄', '중공탄', '현재 체력 10당 피해 +1, 최대 +3', ['health'], 0xff8ca1, 3, 0, 0, 1, { healthScale: { divisor: 10, cap: 3 } }),
   lowRecoil: ammo('lowRecoil', '저반동탄', '저반동', '낮은 피해 · 반동 없음 · 사격 후 누적 반동 2 회복', ['health'], 0xa3c6ce, 3, 0, 0, 0, { recoilRecovery: 2 }),
   plusP: ammo('plusP', '고압탄', '고압탄', '높은 피해 · 반동 3', ['health'], 0xe9a065, 8, 0, 0, 3),
-  relay: ammo('relay', '연계탄', '연계탄', '낮은 피해 · 바로 다음 탄 피해 +4', ['health'], 0xcfb9ee, 2, 0, 0, 1, { followUp: 4 }),
+  relay: ammo('relay', '연계탄', '연계탄', '낮은 피해 · 바로 다음 탄 피해 +4', ['health'], 0xcfb9ee, 2, 0, 0, 0, { followUp: 4 }),
   frangible: ammo('frangible', '파쇄탄', '파쇄', '취약한 적에게 피해 +2', ['health'], 0xf19aad, 4, 0, 0, 1, { vulnerableBonus: 2 }),
   suppression: ammo('suppression', '제압탄', '제압', '충격으로 다음 행동이 중단될 적에게 피해 +3', ['health'], 0x8cb4cc, 3, 0, 0, 1, { suppressedBonus: 3 }),
   execution: ammo('execution', '처형탄', '처형', '체력 30% 이하 적에게 피해 +4', ['health'], 0xe67877, 3, 0, 0, 1, { execution: { percent: 30, bonus: 4 } }),
