@@ -44,11 +44,34 @@ export interface AmmoTooltipFirepower {
   change: 'neutral' | 'weakened' | 'strengthened';
 }
 export function ammoTooltipFirepower(ammo: AmmoType, round?: RoundPreview): AmmoTooltipFirepower {
-  const base = AMMO_DEFINITIONS[ammo].firepower;
+  const item = AMMO_DEFINITIONS[ammo];
+  const base = item.firepower;
   if (!round) return { value: base, change: 'neutral' };
-  const weakened = round.recoilFirepowerReduction > 0 || round.playerDebuffFirepowerReduction > 0;
+  const value = round.directFirepower;
+  const weakened = round.recoilFirepowerReduction > 0 || round.playerDebuffFirepowerReduction > 0
+    || round.directFirepower < round.effectiveFirepower;
   return {
-    value: round.effectiveFirepower,
-    change: weakened ? 'weakened' : round.effectiveFirepower > base ? 'strengthened' : 'neutral',
+    value,
+    change: weakened ? 'weakened' : value > base ? 'strengthened' : 'neutral',
   };
+}
+
+export function ammoTooltipStatsMarkup(ammo: AmmoType, round?: RoundPreview): string {
+  const item = AMMO_DEFINITIONS[ammo];
+  const firepower = ammoTooltipFirepower(ammo, round);
+  const firepowerLabel = firepower.change === 'weakened' ? '감소 반영 화력'
+    : firepower.change === 'strengthened' ? '강화 반영 화력' : '화력';
+  const values: { label: string; value: number; attributes?: string; className?: string }[] = [
+    { label: '화력', value: firepower.value, className: 'tooltip-firepower', attributes: `data-firepower-change="${firepower.change}" aria-label="${firepowerLabel} ${firepower.value}"` },
+    { label: '즉시 화상 피해', value: round?.burnDamage ?? item.burnDamage },
+    { label: '화상 축적', value: round?.burn ?? item.burn },
+    { label: '상처', value: round?.wound ?? item.wound },
+    { label: '폭발', value: round?.explosive ?? item.explosive },
+    { label: '충격', value: round?.effectiveActionShock ?? item.actionShock, attributes: round && round.shockBonus > 0 ? 'data-shock-boosted' : '' },
+    { label: '반동', value: round?.recoilGenerated ?? item.recoil },
+  ];
+  const visible = values.filter(({ value }) => value !== 0);
+  const effect = item.family === 'BURN' ? burnEffectText(ammo) : '';
+  return `<div style="--ammo-tooltip-columns: ${Math.min(3, visible.length) || 1}">${visible.map(({ label, value, className, attributes }) =>
+    `<span${className ? ` class="${className}"` : ''}>${label} <b${attributes ? ` ${attributes}` : ''}>${value}</b></span>`).join('')}</div>${effect ? `<small>${effect}</small>` : ''}`;
 }
