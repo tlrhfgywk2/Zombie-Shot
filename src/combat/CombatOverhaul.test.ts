@@ -83,10 +83,10 @@ describe('새 탄약과 전투 상태', () => {
     const retreat = resolver.resolveShot('retreat', 0, fromFive);
     expect(retreat).toMatchObject({ shotDistance: 5, movement: 2, after: { distance: 7 } });
     expect(resolver.resolveSequence(['retreat', 'ball'], fromFive).shots[1]?.shotDistance).toBe(7);
-    expect(resolver.resolveSequence(['advanceCutter', 'laceration'], fromFive).shots[1]?.shotDistance).toBe(3);
+    expect(resolver.resolveSequence(['advance', 'laceration'], fromFive).shots[1]?.shotDistance).toBe(3);
   });
   it('거리 경계를 넘지 않으며 컷터도 같은 이동 순서를 따른다', () => {
-    expect(resolver.resolveShot('advanceCutter', 0, target(100, 1)).after.distance).toBe(0);
+    expect(resolver.resolveShot('advance', 0, target(100, 1)).after.distance).toBe(0);
     expect(resolver.resolveShot('retreatCutter', 0, target(100, 11)).after.distance).toBe(12);
     expect(resolver.resolveShot('retreatCutter', 0, target(100, 11)).shotDistance).toBe(11);
   });
@@ -156,8 +156,8 @@ describe('최종 부착물과 런 진행', () => {
 });
 
 describe('데이터와 완성 탄창', () => {
-  it('최종 31종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
-    expect(AMMO_ORDER).toHaveLength(31);
+  it('최종 34종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
+    expect(AMMO_ORDER).toHaveLength(34);
     expect(ATTACHMENT_ORDER).toHaveLength(11);
     expect(new Set(AMMO_ORDER)).toEqual(new Set(Object.keys(AMMO_DEFINITIONS)));
     expect(new Set(ATTACHMENT_ORDER)).toEqual(new Set(Object.keys(ATTACHMENT_DEFINITIONS)));

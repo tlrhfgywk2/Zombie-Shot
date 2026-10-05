@@ -3,7 +3,7 @@ export type PrimaryPayload = 'firepower' | 'wound' | 'explosive' | 'actionShock'
 export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' | 'frangible'
   | 'suppression' | 'execution' | 'kickback' | 'laceration' | 'retreat' | 'advance'
   | 'explosive' | 'highExplosive' | 'stickyCharge'
-  | 'wounding' | 'serrated' | 'retreatCutter' | 'advanceCutter' | 'flatNose' | 'heavy'
+  | 'wounding' | 'serrated' | 'retreatCutter' | 'rupture' | 'deepCut' | 'reopening' | 'scar' | 'flatNose' | 'heavy'
   | 'reducedImpact' | 'hammer' | 'impactRelay' | 'resonance'
   | 'incendiary' | 'highHeat' | 'lowHeat' | 'accelerant' | 'ignition' | 'kindling';
 export type AmmoRarity = 'common' | 'uncommon';
@@ -74,6 +74,7 @@ export interface ShotBreakdown {
   shockScaleBonus: number;
   projectedShock: number;
   detonationDamage: number;
+  ruptureDamage: number;
   burnBuildup: number;
   burnFollowUpPercent: number;
   burnScaleBonus: number;
@@ -90,6 +91,7 @@ export interface FirepowerBreakdown {
   distanceReduction: number;
   distancePenaltyPercents: number[];
   detonationDamage: number;
+  ruptureDamage: number;
   finalFirepower: number;
 }
 export interface ShotResult {
@@ -105,6 +107,7 @@ export interface ShotResult {
   explosiveConsumed: number;
   explosionDamage: number;
   vulnerableTriggered: boolean;
+  ruptureDamage: number;
   actionShockApplied: number;
   killed: boolean;
   description: string;
