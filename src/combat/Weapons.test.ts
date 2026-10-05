@@ -23,9 +23,31 @@ describe('권총 공통 계산과 용량', () => {
     expect(player.magazine.capacity).toBe(weapon.baseMagazineCapacity);
     player.magazine.setCapacity(100);
     expect(player.magazine.capacity).toBe(weapon.maximumMagazineCapacity);
-    expect(getMagazineCapacity({ magazine: 'extendedMagazine' }, undefined, id)).toBe(weapon.maximumMagazineCapacity);
-    expect(getMagazineCapacity({ magazine: 'extendedMagazine' }, { ...createPlayerCombatState(), disabledSlots: { magazine: 1 } }, id))
-      .toBe(weapon.baseMagazineCapacity);
+    for (const [magazine, bonus] of [['extendedMagazine', 1], ['highCapacityMagazine', 2]] as const) {
+      expect(getMagazineCapacity({ magazine }, undefined, id))
+        .toBe(Math.min(weapon.maximumMagazineCapacity, weapon.baseMagazineCapacity + (id === 'm500' ? 0 : bonus)));
+      expect(getMagazineCapacity({ magazine }, { ...createPlayerCombatState(), disabledSlots: { magazine: 1 } }, id))
+        .toBe(weapon.baseMagazineCapacity);
+    }
+  });
+  it.each(WEAPON_ORDER)('%s에서 대용량 탄창의 반동 패널티와 봉쇄를 함께 적용한다', weaponId => {
+    const base = WEAPON_DEFINITIONS[weaponId].recoilThreshold;
+    const loadout = { magazine: 'highCapacityMagazine' as const, muzzle: 'compensator' as const };
+    expect(resolver.getRecoilThreshold({ weaponId, loadout })).toBe(base + (weaponId === 'm500' ? 2 : 1));
+    expect(resolver.getRecoilThreshold({ weaponId, loadout,
+      playerState: { ...createPlayerCombatState(), disabledSlots: { magazine: 1 } } })).toBe(base + 2);
+    expect(resolver.getRecoilThreshold({ weaponId, loadout: { magazine: 'extendedMagazine' } })).toBe(base);
+  });
+  it('대용량 탄창은 임계치 경계에서 후속 탄 화력을 낮추고 미리보기에도 반영한다', () => {
+    const rounds: AmmoType[] = ['plusP', 'plusP', 'ball'];
+    const extended = resolver.resolveSequence(rounds, target(), { loadout: { magazine: 'extendedMagazine' } });
+    const highCapacity = resolver.resolveSequence(rounds, target(), { loadout: { magazine: 'highCapacityMagazine' } });
+    expect(extended.shots[2]!.breakdown).toMatchObject({ recoilBefore: 6, recoilPenalty: 1, effectiveFirepower: 4 });
+    expect(highCapacity.shots[2]!.breakdown).toMatchObject({ recoilBefore: 6, recoilPenalty: 2, effectiveFirepower: 3 });
+    expect(highCapacity.roundPreviews[2]!.effectiveFirepower).toBe(3);
+    const blocked = resolver.resolveSequence(rounds, target(), { loadout: { magazine: 'highCapacityMagazine' },
+      playerState: { ...createPlayerCombatState(), disabledSlots: { magazine: 1 } } });
+    expect(blocked.shots[2]!.breakdown.recoilPenalty).toBe(1);
   });
   it.each(WEAPON_ORDER)('%s의 모든 탄약·거리·부착물 미리보기는 실제 사격 계산과 같다', weaponId => {
     for (const distance of [3, 7, 11]) for (const ammo of AMMO_ORDER) {
@@ -118,13 +140,14 @@ describe('데저트 이글 지연 반동', () => {
   });
 });
 describe('M500 실린더', () => {
-  it('확장 탄창은 장착·용량·보상·활성 효과 모든 경로에서 제외한다', () => {
-    const player = new Player(); player.selectWeapon('m500'); player.claimAttachment('extendedMagazine');
-    player.equipAttachment('extendedMagazine');
+  it.each(['extendedMagazine', 'highCapacityMagazine'] as const)('%s는 장착·용량·보상·활성 효과 모든 경로에서 제외한다', magazine => {
+    const player = new Player(); player.selectWeapon('m500'); player.claimAttachment(magazine);
+    player.equipAttachment(magazine);
     expect(player.loadout.getSnapshot()).toEqual({});
     expect(player.magazine.capacity).toBe(4);
-    expect(getEnabledAttachmentIds({ magazine: 'extendedMagazine' }, undefined, 'm500')).toEqual([]);
-    expect(generateAttachmentReward([], 'm500', () => .4)).not.toBe('extendedMagazine');
+    expect(getEnabledAttachmentIds({ magazine }, undefined, 'm500')).toEqual([]);
+    expect(resolver.getRecoilThreshold({ weaponId: 'm500', loadout: { magazine } })).toBe(3);
+    expect(generateAttachmentReward([], 'm500', () => .4)).not.toBe(magazine);
   });
   it('순서 유지는 원본 그대로이며 회전은 다른 시작 칸으로 원형 순서만 이동한다', () => {
     const original: AmmoType[] = ['ball', 'wounding', 'explosive', 'heavy'];

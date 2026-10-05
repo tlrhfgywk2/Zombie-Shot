@@ -24,18 +24,21 @@ describe('권총 네 종류 결정론적 밸런스', () => {
     }
   });
   it('회전의 모든 시작 후보와 감소·허용치·거리 부착물 조합을 비교한다', () => {
-    for (const loadout of [{}, { magazine: 'extendedMagazine' as const }, { grip: 'texturedGrip' as const }, { muzzle: 'muzzleBrake' as const },
+    for (const loadout of [{}, { magazine: 'extendedMagazine' as const }, { magazine: 'highCapacityMagazine' as const }, { grip: 'texturedGrip' as const }, { muzzle: 'muzzleBrake' as const },
       { muzzle: 'compensator' as const }, { muzzle: 'compensator' as const, grip: 'texturedGrip' as const },
       { barrel: 'extendedBarrel' as const, optic: 'pistolScope' as const }]) {
       const rows = simulateWeaponBalance(loadout, true);
       expect(rows.every(row => Number.isFinite(row.effectiveDamage) && row.bestDamage >= row.worstDamage)).toBe(true);
     }
   });
-  it('확장 탄창의 P220 표준탄 바닥 성능과 M500의 고정 용량을 구분한다', () => {
-    const rows = simulateWeaponBalance({ magazine: 'extendedMagazine' });
+  it('대용량 탄창의 P220 표준탄 바닥 성능과 M500의 고정 용량을 구분한다', () => {
+    const rows = simulateWeaponBalance({ magazine: 'highCapacityMagazine' });
     const at = (id: string) => rows.find(row => row.weaponId === id && row.plan === '표준탄' && row.distance === 11)!;
     expect(at('p220')).toMatchObject({ capacity: 6, effectiveDamage: 24 });
     expect(at('m500')).toMatchObject({ capacity: 4, effectiveDamage: 15 });
+    const extendedRows = simulateWeaponBalance({ magazine: 'extendedMagazine' });
+    expect(extendedRows.find(row => row.weaponId === 'p220' && row.plan === '표준탄' && row.distance === 11))
+      .toMatchObject({ capacity: 5, effectiveDamage: 20 });
     const recoilBuild = ['plusP', 'plusP', 'ball', 'ball', 'ball', 'ball'] as const;
     const p220 = simulateWeaponEncounter('p220', recoilBuild, 'brute', 11);
     expect(p220.killed).toBe(true);

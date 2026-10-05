@@ -15,14 +15,32 @@ describe('런 탄약 소유와 소비', () => {
 
   it('장착 부착물을 보유 목록에서 제거하면 용량과 장전 예약을 함께 갱신한다', () => {
     const player = new Player();
-    player.claimAttachment('extendedMagazine'); player.equipAttachment('extendedMagazine');
+    player.claimAttachment('highCapacityMagazine'); player.equipAttachment('highCapacityMagazine');
     for (let i = 0; i < 6; i++) player.addAmmo('ball');
-    expect(player.removeAttachment('extendedMagazine')).toBe(true);
+    expect(player.removeAttachment('highCapacityMagazine')).toBe(true);
     expect(player.getOwnedAttachments()).toEqual([]);
     expect(player.loadout.getSnapshot().magazine).toBeUndefined();
     expect(player.magazine.size).toBe(4);
-    expect(player.removeAttachment('extendedMagazine')).toBe(false);
-    expect(player.claimAttachment('extendedMagazine')).toBe(true);
+    expect(player.removeAttachment('highCapacityMagazine')).toBe(false);
+    expect(player.claimAttachment('highCapacityMagazine')).toBe(true);
+  });
+  it('대용량과 확장 탄창을 교체하면 추가 용량이 중첩되지 않고 초과 장전만 해제한다', () => {
+    const player = new Player();
+    player.supplyAmmo('wounding');
+    player.claimAttachment('highCapacityMagazine'); player.claimAttachment('extendedMagazine');
+    player.equipAttachment('highCapacityMagazine');
+    for (let i = 0; i < 5; i++) player.addAmmo('ball');
+    player.addAmmo('wounding');
+    expect(player.magazine.capacity).toBe(6);
+    expect(player.getAvailable('wounding')).toBe(0);
+    expect(player.equipAttachment('extendedMagazine')).toBe('highCapacityMagazine');
+    expect(player.magazine.capacity).toBe(5);
+    expect(player.magazine.size).toBe(5);
+    expect(player.getAvailable('wounding')).toBe(1);
+    expect(player.getSpecialCapacity()).toBe(14);
+    player.unequipAttachment('magazine');
+    expect(player.magazine.capacity).toBe(4);
+    expect(player.magazine.size).toBe(4);
   });
   it('수동 제거는 배분과 잔량을 줄이고 장전 예약과 무제한 탄약을 보호한다', () => {
     const player = new Player();
