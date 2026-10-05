@@ -796,6 +796,7 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .ammo-supply-card:disabled { cursor: default; }
 .ammo-supply-card:disabled .supply-action { color: var(--muted); background: rgba(255,255,255,.04); }
 .ammo-supply-dialog .ammo-stats { font-size: .78rem; }
+.ammo-supply-dialog #ammo-family-WOUND .ammo-stats { align-self: start; }
 .ammo-supply-dialog .ammo-stats > span { gap: .5rem; }
 .ammo-supply-dialog .ammo-stats b { font-size: var(--combat-value-size); }
 .game-shell[data-layout="portrait"] .ammo-utility-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }

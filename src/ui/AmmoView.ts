@@ -8,8 +8,15 @@ export function ammoStatsMarkup(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];
   const values: [string, number][] = [['화력', item.firepower], ['상처', item.wound], ['폭발', item.explosive], ['화상', item.burn], ['즉시 화상 피해', item.burnDamage], ['충격', item.actionShock], ['반동', item.recoil]];
   const effect = item.shockFollowUp ? `다음 탄 충격 +${item.shockFollowUp}`
-    : item.shockScale ? `현재 충격 ${item.shockScale.divisor}당 +1 · 추가 최대 +${item.shockScale.cap}` : burnEffectText(ammo);
+    : item.shockScale ? `현재 충격 ${item.shockScale.divisor}당 +1 · 추가 최대 +${item.shockScale.cap}` : woundEffectText(ammo) || burnEffectText(ammo);
   return `<span class="ammo-stats">${values.filter(([name, value]) => value > 0 || (name === '반동' && (ammo === 'reducedImpact' || item.family === 'BURN')) || (name === '충격' && item.family === 'BURN')).map(([name, value]) => `<span>${name}<b>${value}</b></span>`).join('')}${effect ? `<span class="ammo-special-effect">${effect}</span>` : ''}</span>`;
+}
+export function woundEffectText(ammo: AmmoType): string {
+  const item = AMMO_DEFINITIONS[ammo];
+  return [item.vulnerableTriggerDamage ? `취약 발동 피해 +${item.vulnerableTriggerDamage}` : '',
+    item.vulnerableExtraTurns ? `취약 발동 지속 +${item.vulnerableExtraTurns}턴` : '',
+    item.vulnerableWoundBonus ? `취약 대상 상처 +${item.vulnerableWoundBonus}` : '',
+    item.woundRetention ? `취약 발동 상처 최대 ${item.woundRetention} 보존` : ''].filter(Boolean).join(' · ');
 }
 export function burnEffectText(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];

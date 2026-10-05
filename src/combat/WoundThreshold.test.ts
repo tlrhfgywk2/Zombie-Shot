@@ -8,7 +8,7 @@ const target = (changes: Partial<EnemyState> = {}): EnemyState =>
   ({ ...createEnemyState('normal'), hp: 100, maxHp: 100, distance: 3, ...changes });
 
 describe('상처 임계치와 취약 창', () => {
-  it.each([['wounding', 3], ['serrated', 5], ['retreatCutter', 2], ['advanceCutter', 4]] as const)('%s는 기존 수치인 상처 %i를 더한다', (ammo, wound) => {
+  it.each([['wounding', 3], ['serrated', 5], ['retreatCutter', 2], ['rupture', 3], ['deepCut', 3], ['reopening', 3], ['scar', 3]] as const)('%s는 기본 상처 %i를 더한다', (ammo, wound) => {
     const shot = resolver.resolveShot(ammo, 0, target());
     expect(shot.woundApplied).toBe(wound);
     expect(shot.after.wound).toBe(wound);
@@ -78,7 +78,7 @@ describe('상처 임계치와 취약 창', () => {
     expect(notTriggered.after.vulnerableTurns).toBe(1);
   });
 
-  it.each(['wounding', 'serrated', 'advanceCutter', 'retreatCutter', 'flatNose', 'heavy'] as AmmoType[])('취약은 %s의 체력 피해만 증폭하고 상처·충격·이동·반동은 보존한다', ammo => {
+  it.each(['wounding', 'serrated', 'rupture', 'deepCut', 'scar', 'retreatCutter', 'flatNose', 'heavy'] as AmmoType[])('취약은 %s의 체력 피해만 증폭하고 상처·충격·이동·반동은 보존한다', ammo => {
     const normal = resolver.resolveShot(ammo, 0, target());
     const vulnerable = resolver.resolveShot(ammo, 0, target({ vulnerableTurns: 1 }));
     expect(vulnerable.hpDamage).toBeGreaterThan(normal.hpDamage);

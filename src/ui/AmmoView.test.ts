@@ -8,6 +8,12 @@ const resolver = new CombatResolver();
 const target = (): EnemyState => ({ ...createEnemyState('normal'), hp: 100, maxHp: 100, distance: 3 });
 
 describe('탄약 전투 수치 표시', () => {
+  it('재개방의 조건부 상처를 실제 순서 수치와 강화 표시로 전달한다', () => {
+    const round = resolver.resolveSequence(['wounding', 'wounding', 'reopening'], target()).roundPreviews[2]!;
+    expect(firingOrderStatEntries(round).find(entry => entry.kind === 'wound')).toEqual({
+      kind: 'wound', label: '상처', value: 6, modified: true,
+    });
+  });
   it('발사 순서에는 화력을 제외하고 상처·충격·누적 반동만 표시한다', () => {
     const round = resolver.resolveSequence(['wounding'], target()).roundPreviews[0]!;
     expect(firingOrderStatEntries(round)).toEqual([

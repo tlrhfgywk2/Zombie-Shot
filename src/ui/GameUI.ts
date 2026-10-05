@@ -631,7 +631,7 @@ export class GameUI {
           groundShock: '반동에 따른 화력 감소를 2턴 동안 강화합니다.',
           sonicPulse: '유효 거리 판정을 2턴 동안 1단계 악화합니다.',
         }[action.selectedAction]);
-    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span><span class="intent-detail"><b>${ACTION_NAMES[action.selectedAction]}</b> · ${actionDescription}</span>`;
+    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다. 심부 절개탄은 +1턴이며, 더 긴 남은 지속시간은 보존합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span><span class="intent-detail"><b>${ACTION_NAMES[action.selectedAction]}</b> · ${actionDescription}</span>`;
     this.enemyContext.parentElement?.setAttribute('aria-label', `${enemyName}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 폭발 ${enemy.explosive}, 화상 ${enemy.burn}/${enemy.burnThreshold}${isIgnited(enemy) ? ', 점화' : ''}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
     this.enemyContext.insertAdjacentHTML('beforeend', `<span><b>화상 ${enemy.burn}/${enemy.burnThreshold}</b> · 턴 사이에 유지되며 자동 피해는 없습니다. 한 발당 임계치를 한 번 소비해 초과분을 남기고 <b>점화</b>합니다. 다음 행동을 수행할 때 특수 행동을 일반 접근으로 바꾸고 점화가 해제됩니다. 충격으로 행동이 중단되면 점화는 유지됩니다.</span>`);
   }
@@ -687,6 +687,7 @@ export class GameUI {
       distanceReduction: shot.distanceFirepowerReduction,
       distancePenaltyPercents: shot.distanceFirepowerReduction > 0 ? [shot.rangePenaltyPercent] : [],
       detonationDamage: shot.detonationDamage,
+      ruptureDamage: shot.ruptureDamage,
       finalFirepower: shot.finalFirepower,
     }, '현재 탄 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${result.woundApplied}`;
@@ -964,7 +965,8 @@ export class GameUI {
     const hasPenalty = breakdown.recoilReduction > 0 || breakdown.playerDebuffReduction > 0 || breakdown.distanceReduction > 0;
     this.ammoTooltip.innerHTML = `<header><span>화력 상세</span><strong>${breakdown.finalFirepower}</strong></header><div class="firepower-breakdown">
       ${breakdown.detonationDamage > 0 ? `<span>기폭 피해 <b>+${breakdown.detonationDamage}</b></span>` : ''}
-      ${hasPenalty ? `<span>감쇠 전 탄약 화력 <b>${breakdown.prePenaltyFirepower - breakdown.detonationDamage}</b></span>
+      ${breakdown.ruptureDamage > 0 ? `<span>파열 피해 <b>+${breakdown.ruptureDamage}</b></span>` : ''}
+      ${hasPenalty ? `<span>감쇠 전 탄약 화력 <b>${breakdown.prePenaltyFirepower - breakdown.detonationDamage - breakdown.ruptureDamage}</b></span>
       ${breakdown.distanceReduction > 0 ? `<span class="distance-reduction">거리 감소 <b>-${breakdown.distanceReduction}</b></span>` : ''}
       ${breakdown.recoilReduction > 0 ? `<span class="recoil-reduction">반동 <b>-${breakdown.recoilReduction}</b></span>` : ''}
       ${breakdown.playerDebuffReduction > 0 ? `<span>반동 교란 <b>-${breakdown.playerDebuffReduction}</b></span>` : ''}` : '<span>적용된 화력 감소 없음</span>'}

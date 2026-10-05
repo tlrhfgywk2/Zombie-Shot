@@ -11,6 +11,7 @@ export interface AmmoDefinition {
   followUp?: number; healthScale?: { divisor: number; cap: number };
   recoilScale?: { cap: number };
   vulnerableBonus?: number; vulnerableDamagePercentBonus?: number; suppressedBonus?: number;
+  vulnerableTriggerDamage?: number; vulnerableExtraTurns?: number; vulnerableWoundBonus?: number; woundRetention?: number;
   execution?: { percent: number; bonus: number }; moveBefore?: number; moveAfter?: number;
 }
 export const AMMO_FAMILIES: Record<AmmoType, { family: AmmoFamily; primaryPayload: PrimaryPayload }> = {
@@ -29,7 +30,10 @@ export const AMMO_FAMILIES: Record<AmmoType, { family: AmmoFamily; primaryPayloa
   wounding: { family: 'WOUND', primaryPayload: 'wound' },
   serrated: { family: 'WOUND', primaryPayload: 'wound' },
   retreatCutter: { family: 'WOUND', primaryPayload: 'wound' },
-  advanceCutter: { family: 'WOUND', primaryPayload: 'wound' },
+  rupture: { family: 'WOUND', primaryPayload: 'wound' },
+  deepCut: { family: 'WOUND', primaryPayload: 'wound' },
+  reopening: { family: 'WOUND', primaryPayload: 'wound' },
+  scar: { family: 'WOUND', primaryPayload: 'wound' },
   explosive: { family: 'EXPLOSION', primaryPayload: 'explosive' },
   highExplosive: { family: 'EXPLOSION', primaryPayload: 'explosive' },
   stickyCharge: { family: 'EXPLOSION', primaryPayload: 'explosive' },
@@ -67,7 +71,10 @@ export const AMMO_DEFINITIONS: Record<AmmoType, AmmoDefinition> = {
   wounding: ammo('wounding', '절개탄', '절개탄', '피해 2 · 상처 +3 · 임계치 도달 시 취약', ['wound'], 0xe48ba9, 2, 3),
   serrated: ammo('serrated', '톱니탄', '톱니', '피해 2 · 상처 +5 · 반동 3', ['wound'], 0xcf6a8d, 2, 5, 0, 3),
   retreatCutter: ammo('retreatCutter', '후퇴 절개탄', '후퇴 절개', '피해 1 · 상처 +2 · 사격 후 2m 후퇴', ['wound'], 0xa37b9c, 1, 2, 0, 1, { moveAfter: 2 }),
-  advanceCutter: ammo('advanceCutter', '돌진 절개탄', '돌진 절개', '2m 전진한 거리에서 피해 2 · 상처 +4', ['wound'], 0xd4698d, 2, 4, 0, 2, { moveBefore: -2 }),
+  rupture: ammo('rupture', '파열탄', '파열탄', '이 탄으로 취약 발동 시 추가 피해 4', ['wound'], 0xd4698d, 2, 3, 0, 1, { vulnerableTriggerDamage: 4 }),
+  deepCut: ammo('deepCut', '심부 절개탄', '심부 절개', '이 탄으로 취약 발동 시 지속시간 +1턴', ['wound'], 0xb46a9c, 2, 3, 0, 1, { vulnerableExtraTurns: 1 }),
+  reopening: ammo('reopening', '재개방탄', '재개방탄', '사격 시작 시 취약 상태인 표적에게 상처 +3', ['wound'], 0xf198bb, 2, 3, 0, 1, { vulnerableWoundBonus: 3 }),
+  scar: ammo('scar', '흉터탄', '흉터탄', '이 탄으로 취약 발동 시 초과분에 더해 상처 최대 2 보존 · 임계치 미만 유지', ['wound'], 0xba8e9e, 2, 3, 0, 1, { woundRetention: 2 }),
   explosive: ammo('explosive', '폭발탄', '폭발탄', '폭발 +2 · 충격 탄약 명중 시 전량 기폭', ['explosive'], 0xffa34d, 3, 0, 0, 1, { explosive: 2 }),
   highExplosive: ammo('highExplosive', '고폭탄', '고폭탄', '폭발 +3 · 높은 화력과 반동 · 충격 탄약으로 기폭', ['explosive'], 0xff713d, 4, 0, 0, 3, { explosive: 3 }),
   stickyCharge: ammo('stickyCharge', '접착폭약탄', '접착폭약탄', '폭발 +4 · 낮은 화력 · 충격 탄약으로 기폭', ['explosive'], 0xffcd63, 1, 0, 0, 2, { explosive: 4 }),

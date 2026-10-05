@@ -81,7 +81,7 @@ describe('M1911 같은 계열 연속 효과', () => {
     expect(shots[3]!.breakdown.primaryPayloadValue).toBe(8);
   });
   it('이동·취약 지속·후속 강화·기폭 배율을 증폭하지 않는다', () => {
-    const shots = volley('m1911', ['advanceCutter', 'retreatCutter', 'explosive', 'explosive', 'heavy']).shots;
+    const shots = volley('m1911', ['wounding', 'retreatCutter', 'explosive', 'explosive', 'heavy']).shots;
     expect(shots[1]!.movement).toBe(2);
     expect(shots[1]!.after.vulnerableTurns).toBe(2);
     expect(shots[4]!.breakdown.detonationDamage).toBe(10);

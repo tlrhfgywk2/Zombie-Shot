@@ -144,6 +144,7 @@ export class CombatResolver {
       distancePenaltyPercents: [...new Set(shots.map(shot => shot.breakdown.rangePenaltyPercent)
         .filter(percent => percent > 0))],
       detonationDamage: shots.reduce((sum, shot) => sum + shot.breakdown.detonationDamage, 0),
+      ruptureDamage: shots.reduce((sum, shot) => sum + shot.breakdown.ruptureDamage, 0),
       finalFirepower: shots.reduce((sum, shot) => sum + shot.breakdown.finalFirepower, 0),
     };
     return { shots, roundPreviews, finalState: current,
@@ -234,9 +235,9 @@ export class CombatResolver {
     after.explosive -= explosiveConsumed;
     const explosionDamage = Math.min(Math.max(0, after.hp - directFirepower - burnDamage), detonationDamage);
     const actualBurnDamage = Math.min(Math.max(0, after.hp - directFirepower), burnDamage);
-    const prePenaltyFirepower = directPrePenaltyFirepower + definition.burnDamage + detonationDamage;
-    const finalFirepower = directFirepower + burnDamage + detonationDamage;
-    const hpDamage = Math.min(after.hp, finalFirepower);
+    let prePenaltyFirepower = directPrePenaltyFirepower + definition.burnDamage + detonationDamage;
+    let finalFirepower = directFirepower + burnDamage + detonationDamage;
+    let hpDamage = Math.min(after.hp, finalFirepower);
     after.hp -= hpDamage;
     const burnApplied = after.hp > 0 ? burnBuildup : 0;
     after.burn += burnApplied;
@@ -246,14 +247,25 @@ export class CombatResolver {
       after.ignitedActions = COMBAT_BALANCE.ignitedActions;
     }
     if (after.hp <= 0) { after.burn = 0; after.ignitedActions = 0; }
-    const woundApplied = after.hp > 0 ? payload.wound : 0;
+    // 재개방은 사격 시작 시 이미 취약한 표적에만 추가 상처를 준다.
+    const woundApplied = after.hp > 0 ? payload.wound + (isVulnerable(before) ? definition.vulnerableWoundBonus ?? 0 : 0) : 0;
     after.wound += woundApplied;
     const vulnerableTriggered = woundApplied > 0 && after.wound >= after.woundThreshold;
     if (vulnerableTriggered) {
-      // 임계치 단위로 소비하고 초과분 보존. 재발동은 지속 시간을 갱신하며 중첩하지 않는다.
+      // 임계치 단위로 소비하고 초과분 보존. 흉터는 다음 발동이 준비되는 임계치 미만까지 남긴다.
       after.wound %= after.woundThreshold;
-      after.vulnerableTurns = COMBAT_BALANCE.vulnerableTurns;
+      after.wound += Math.min(definition.woundRetention ?? 0, after.woundThreshold - 1 - after.wound);
+      // 재발동으로 심부 절개의 남은 지속시간을 줄이지 않으며, 반복 발동으로 합산하지 않는다.
+      after.vulnerableTurns = Math.max(before.vulnerableTurns, COMBAT_BALANCE.vulnerableTurns + (definition.vulnerableExtraTurns ?? 0));
     }
+    // 파열은 취약을 발동시킨 한 발에 한 번만 적용하고, 거리·반동·취약 배율과 독립된 피해다.
+    const rupturePower = vulnerableTriggered ? definition.vulnerableTriggerDamage ?? 0 : 0;
+    const ruptureDamage = Math.min(after.hp, rupturePower);
+    after.hp -= ruptureDamage;
+    hpDamage += ruptureDamage;
+    prePenaltyFirepower += rupturePower;
+    finalFirepower += rupturePower;
+    if (ruptureDamage > 0 && after.hp <= 0) { after.burn = 0; after.ignitedActions = 0; after.vulnerableTurns = 0; }
     const actionShockApplied = after.hp > 0 ? projectedShock : 0;
     after.actionShock += actionShockApplied;
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
@@ -273,7 +285,8 @@ export class CombatResolver {
     if (ignitionTriggered) detail.push(`점화 · 화상 잔량 ${after.burn}`);
     if (explosiveApplied) detail.push(`폭발 +${explosiveApplied}`);
     if (explosiveConsumed) detail.push(`기폭 ${explosiveConsumed} · 폭발 피해 ${explosionDamage}`);
-    if (vulnerableTriggered) detail.push(`취약 ${after.vulnerableTurns}턴 발동`);
+    if (vulnerableTriggered) detail.push(after.hp > 0 ? `취약 ${after.vulnerableTurns}턴 발동` : '취약 발동');
+    if (ruptureDamage) detail.push(`파열 피해 ${ruptureDamage}`);
     if (actionShockApplied) detail.push(`충격 +${actionShockApplied}`);
     if (shockFollowUpBonus) detail.push(`후속 충격 강화 +${shockFollowUpBonus}`);
     if (shockScaleBonus) detail.push(`누적 충격 증폭 +${shockScaleBonus}`);
@@ -285,9 +298,9 @@ export class CombatResolver {
       recoilGenerated: reducedRecoil, recoilAfter, recoilPenalty, recoilFirepowerReduction,
       playerDebuffFirepowerPenalty, playerDebuffFirepowerReduction,
       followUpBonus, conditionalBonus, vulnerableDamageBonus,
-      rangePenaltyPercent: range.percent, distanceFirepowerReduction, shockFollowUpBonus, shockScaleBonus, projectedShock, detonationDamage, finalFirepower,
+      rangePenaltyPercent: range.percent, distanceFirepowerReduction, shockFollowUpBonus, shockScaleBonus, projectedShock, detonationDamage, ruptureDamage: rupturePower, finalFirepower,
       burnBuildup, burnFollowUpPercent: cursor.burnFollowUpPercent, burnScaleBonus, burnDamage, effectiveBurnDamage, ignitedBonus, directFirepower };
-    return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, explosiveApplied, explosiveConsumed, explosionDamage, vulnerableTriggered, actionShockApplied,
+    return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, explosiveApplied, explosiveConsumed, explosionDamage, vulnerableTriggered, ruptureDamage, actionShockApplied,
       burnApplied, burnDamage: actualBurnDamage, ignitionTriggered,
       killed: after.hp <= 0, description: detail.join(' · '), breakdown,
       before, after, shotDistance, movement }, next };
