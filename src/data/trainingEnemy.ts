@@ -11,6 +11,6 @@ export const createTrainingActions = (random = Math.random): EnemyActionType[] =
 };
 
 export const createTrainingEnemy = (): EnemyState => ({
-  ...createEnemyState('normal'), hp: 10000, maxHp: 10000,
+  ...createEnemyState('normal'), hp: 10000, maxHp: 10000, distance: 12,
   trainingActions: createTrainingActions(),
 });
