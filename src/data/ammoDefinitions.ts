@@ -89,7 +89,7 @@ export type SpecialAmmoType = Exclude<AmmoType, 'ball'>;
 export type AmmoBuild = Record<SpecialAmmoType, number>;
 export type AmmoStock = AmmoBuild & { ball: 'infinite' };
 export const AMMO_BUILD_BALANCE = {
-  specialCapacity: 14, initialAllocations: { wounding: 3, laceration: 3 } as Partial<AmmoBuild>,
+  specialCapacity: 14, initialAllocations: {} as Partial<AmmoBuild>,
   rewardAmount: 1, rewardChoices: 3, rarityWeights: { common: 75, uncommon: 25 },
 };
 export const createAmmoBuild = (allocations: Partial<AmmoBuild> = AMMO_BUILD_BALANCE.initialAllocations): AmmoBuild =>

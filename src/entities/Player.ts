@@ -101,6 +101,13 @@ export class Player {
     this.ownedAttachments.add(id);
     return true;
   }
+  removeAttachment(id: AttachmentId): boolean {
+    if (!this.ownedAttachments.has(id)) return false;
+    const slot = ATTACHMENT_DEFINITIONS[id].slot;
+    if (this.loadout.getSnapshot()[slot] === id) this.unequipAttachment(slot);
+    this.ownedAttachments.delete(id);
+    return true;
+  }
   unequipAttachment(slot: AttachmentSlot): AttachmentId | undefined {
     const removed = this.loadout.unequip(slot); this.syncMagazineCapacity(); return removed;
   }

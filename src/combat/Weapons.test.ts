@@ -163,6 +163,7 @@ describe('M500 실린더', () => {
   });
   it('회전 배열 그대로 플레이어 탄약을 소비하고 미발사 탄은 재고를 소비하지 않는다', () => {
     const player = new Player(); player.selectWeapon('m500');
+    for (let i = 0; i < 3; i++) { player.supplyAmmo('wounding'); player.supplyAmmo('laceration'); }
     player.addAmmo('ball'); player.addAmmo('wounding'); player.addAmmo('laceration'); player.addAmmo('ball');
     const rotated = spinCylinder(player.magazine.getRounds(), () => 0);
     player.magazine.setRounds(rotated);

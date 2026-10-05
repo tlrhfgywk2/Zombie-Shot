@@ -39,6 +39,7 @@ export interface EnemyState {
   special: boolean;
   turnsElapsed: number;
   intent?: EnemyIntentState;
+  trainingActions?: readonly EnemyActionType[];
 }
 export interface PlayerCombatState {
   heavyKickPenaltyBonus: number;

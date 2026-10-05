@@ -207,6 +207,7 @@ describe('화상 보급과 용량', () => {
     expect(rewards).toContain(ammo);
     expect(new Set(rewards).size).toBe(rewards.length);
     const player = new Player();
+    for (let i = 0; i < 3; i++) { player.supplyAmmo('wounding'); player.supplyAmmo('laceration'); }
     expect(player.getBuild()[ammo]).toBe(0);
     expect(player.applyAmmoReward(ammo)).toBe(true);
     expect(countAllocations(player.getBuild())).toBe(7);

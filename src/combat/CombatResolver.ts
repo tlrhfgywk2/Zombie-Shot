@@ -5,6 +5,7 @@ import { ATTACHMENT_DEFINITIONS, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER,
 import { AMMO_DEFINITIONS, COMBAT_BALANCE, RANGE_NAMES } from '../data/ammoDefinitions';
 import { getEnabledAttachmentIds, createPlayerCombatState } from './AttachmentLoadout';
 import { recoilFirepowerPenalty } from './RecoilPenalty';
+import { createTrainingActions } from '../data/trainingEnemy';
 import type { AmmoFamily, AmmoType, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState,
   FirepowerBreakdown, PlayerCombatState, RangeBand, RoundPreview, SequenceResult, ShotResult } from './types';
 
@@ -49,7 +50,7 @@ export const ACTION_NAMES: Record<EnemyActionType, string> = {
   approach: '접근', attack: '치명 공격', contaminate: '오염 투척', groundShock: '지반 충격', sonicPulse: '초음파 공명',
 };
 const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
-  enemy.distance <= 0 ? 'attack' : enemy.intent && enemy.intent.countdown <= 1 ? enemy.intent.type : 'approach';
+  enemy.distance <= 0 ? 'attack' : enemy.trainingActions?.[0] ?? (enemy.intent && enemy.intent.countdown <= 1 ? enemy.intent.type : 'approach');
 export const isSpecialAction = (action: EnemyActionType): action is Exclude<EnemyActionType, 'approach' | 'attack'> =>
   action !== 'approach' && action !== 'attack';
 export const selectEnemyAction = (enemy: EnemyState): EnemyActionType => {
@@ -325,6 +326,10 @@ export class CombatResolver {
     // 충격으로 행동 자체가 중단되면 아직 다음 행동을 수행하지 않았으므로 점화를 보존한다.
     if (!interrupted) after.ignitedActions = Math.max(0, after.ignitedActions - 1);
     after.turnsElapsed += 1;
+    if (after.trainingActions) {
+      const remaining = after.trainingActions.slice(1);
+      after.trainingActions = remaining.length ? remaining : createTrainingActions();
+    }
     return { before, after, playerBefore, playerAfter, movement,
       selectedAction: action.selectedAction, threshold: action.threshold, interrupted,
       shockConsumed, shockRemaining: after.actionShock,
