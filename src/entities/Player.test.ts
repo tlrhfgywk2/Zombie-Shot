@@ -4,6 +4,25 @@ import { CombatResolver } from '../combat/CombatResolver';
 import { createEnemyState } from '../data/enemyDefinitions';
 
 describe('런 탄약 소유와 소비', () => {
+  it('수동 제거는 배분과 잔량을 줄이고 장전 예약과 무제한 탄약을 보호한다', () => {
+    const player = new Player();
+    player.addAmmo('wounding');
+    expect(player.removeSupplyAmmo('wounding')).toBe(true);
+    expect(player.removeSupplyAmmo('wounding')).toBe(true);
+    expect(player.getStock().wounding).toBe(1);
+    expect(player.getBuild().wounding).toBe(1);
+    expect(player.removeSupplyAmmo('wounding')).toBe(false);
+    expect(player.magazine.getRounds()).toEqual(['wounding']);
+    player.removeAmmo(0);
+    expect(player.removeSupplyAmmo('wounding')).toBe(true);
+    expect(player.removeSupplyAmmo('wounding')).toBe(false);
+    expect(player.removeSupplyAmmo('ball' as Parameters<Player['removeSupplyAmmo']>[0])).toBe(false);
+    expect(player.removeSupplyAmmo('invalid' as Parameters<Player['removeSupplyAmmo']>[0])).toBe(false);
+    player.startStage();
+    expect(player.getStock().wounding).toBe(0);
+    expect(player.supplyAmmo('wounding')).toBe(true);
+    expect(player.getAvailable('wounding')).toBe(1);
+  });
   it('수동 보급은 소진된 탄과 미보유 탄을 즉시 지급하고 장전 예약을 유지한다', () => {
     const player = new Player();
     for (let i = 0; i < 3; i++) {
