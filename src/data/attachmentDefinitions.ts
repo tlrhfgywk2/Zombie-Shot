@@ -8,7 +8,7 @@ export const ATTACHMENT_RARITY_NAMES: Record<AttachmentRarity, string> = {
   common: '일반', advanced: '고급', rare: '희귀', epic: '영웅',
 };
 export const ATTACHMENT_REWARD_WEIGHTS: Record<AttachmentRarity, number> = { common: 65, advanced: 35, rare: 0, epic: 0 };
-export type AttachmentId = 'extendedBarrel' | 'compensator' | 'muzzleBrake' | 'extendedMagazine'
+export type AttachmentId = 'extendedBarrel' | 'compensator' | 'muzzleBrake' | 'extendedMagazine' | 'highCapacityMagazine'
   | 'reflexSight' | 'pistolScope' | 'laserSight' | 'tacticalLight' | 'laserLightModule'
   | 'texturedGrip' | 'ergonomicGrip';
 export interface ModifierCondition { range?: RangeBand }
@@ -22,7 +22,7 @@ export interface AttachmentDefinition {
 }
 const item = (id: AttachmentId, name: string, slot: AttachmentSlot, rarity: AttachmentRarity,
   summary: string, modifiers: readonly AttachmentModifier[]): AttachmentDefinition =>
-  ({ id, name, slot, rarity, compatibleWeapons: id === 'extendedMagazine' ? WEAPON_ORDER.filter(weapon => weapon !== 'm500') : WEAPON_ORDER, summary, modifiers });
+  ({ id, name, slot, rarity, compatibleWeapons: slot === 'magazine' ? WEAPON_ORDER.filter(weapon => weapon !== 'm500') : WEAPON_ORDER, summary, modifiers });
 export const ATTACHMENT_SLOT_ORDER: readonly AttachmentSlot[] = ['barrel', 'muzzle', 'magazine', 'optic', 'rail', 'grip'];
 export const ATTACHMENT_SLOT_NAMES: Record<AttachmentSlot, string> = {
   barrel: '총열', muzzle: '총구', magazine: '탄창', optic: '조준 장치', rail: '전술 레일', grip: '손잡이',
@@ -34,8 +34,10 @@ export const ATTACHMENT_DEFINITIONS: Record<AttachmentId, AttachmentDefinition> 
     [{ kind: 'recoilThreshold', value: 2 }]),
   muzzleBrake: item('muzzleBrake', '총구 제퇴기', 'muzzle', 'advanced', '원래 반동 3 이상인 탄의 반동 -1',
     [{ kind: 'highRecoilReduction', value: 1 }]),
-  extendedMagazine: item('extendedMagazine', '확장 탄창', 'magazine', 'advanced', '탄창 최대 +2발 · 휴대 탄약 그대로',
-    [{ kind: 'capacity', value: 2 }]),
+  extendedMagazine: item('extendedMagazine', '확장 탄창', 'magazine', 'common', '탄창 최대 +1발 · 휴대 탄약 그대로',
+    [{ kind: 'capacity', value: 1 }]),
+  highCapacityMagazine: item('highCapacityMagazine', '대용량 탄창', 'magazine', 'advanced', '탄창 최대 +2발 · 반동 임계치 -1 · 휴대 탄약 그대로',
+    [{ kind: 'capacity', value: 2 }, { kind: 'recoilThreshold', value: -1 }]),
   reflexSight: item('reflexSight', '반사 조준기', 'optic', 'common', '중거리 화력 감소 10%p 완화',
     [{ kind: 'rangePenaltyReductionPercent', value: 10, condition: { range: 'mid' } }]),
   pistolScope: item('pistolScope', '저배율 권총 조준경', 'optic', 'advanced', '근거리 화력 -10% · 중·원거리 감소 10%p 완화',

@@ -93,11 +93,11 @@ describe('새 탄약과 전투 상태', () => {
 });
 
 describe('최종 부착물과 런 진행', () => {
-  it('확장 탄창과 휴대 용량 강화는 각각 별개 값을 바꾸며 런 종료 시 초기화된다', () => {
+  it('대용량 탄창과 휴대 용량 강화는 각각 별개 값을 바꾸며 런 종료 시 초기화된다', () => {
     const player = new Player();
     expect(player.magazine.capacity).toBe(4);
     expect(player.getSpecialCapacity()).toBe(14);
-    player.claimAttachment('extendedMagazine'); player.equipAttachment('extendedMagazine');
+    player.claimAttachment('highCapacityMagazine'); player.equipAttachment('highCapacityMagazine');
     expect(player.magazine.capacity).toBe(6);
     expect(player.getSpecialCapacity()).toBe(14);
     player.upgradeAmmoCapacity();
@@ -156,9 +156,9 @@ describe('최종 부착물과 런 진행', () => {
 });
 
 describe('데이터와 완성 탄창', () => {
-  it('최종 34종 탄약과 11종 부착물만 정의·보상에 포함한다', () => {
+  it('최종 34종 탄약과 12종 부착물만 정의·보상에 포함한다', () => {
     expect(AMMO_ORDER).toHaveLength(34);
-    expect(ATTACHMENT_ORDER).toHaveLength(11);
+    expect(ATTACHMENT_ORDER).toHaveLength(12);
     expect(new Set(AMMO_ORDER)).toEqual(new Set(Object.keys(AMMO_DEFINITIONS)));
     expect(new Set(ATTACHMENT_ORDER)).toEqual(new Set(Object.keys(ATTACHMENT_DEFINITIONS)));
     const excluded = ['matchBarrel', 'threadedBarrel', 'heavyBarrel', 'flashSuppressor', 'linearCompensator',
