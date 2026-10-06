@@ -36,6 +36,9 @@ jobs:
       - name: 테스트
         run: npm run test
 
+      - name: 탄약 Excel 명세 대조
+        run: npm run check:ammo-spec
+
       - name: 정적 분석
         run: npm run lint
 

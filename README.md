@@ -32,6 +32,8 @@ Vite가 표시하는 로컬 주소에서 플레이할 수 있습니다. 배포 �
 
 탄약·부착물 전체 수치와 설계 결정은 [전투 시스템 문서](docs/COMBAT_OVERHAUL.md)에 있습니다.
 
+최신 46종 탄약과 탄약 연계·탄창 배열 규칙은 [탄약 계층 문서](docs/AMMO_LAYERS.md), 필터 가능한 전체 수치는 [탄약 Excel 명세](docs/ZombieShot_Ammo_Spec.xlsx)에 있습니다. 수치 변경 뒤 `npm run export:ammo`로 명세를 갱신하고 `npm run check:ammo-spec`으로 코드와 대조합니다.
+
 폭발탄 3종의 수치와 비교 결과는 [폭발 밸런스 기록](docs/EXPLOSIVE_AMMO.md)에 있습니다.
 
 저충격탄·강타탄·연쇄충격탄·충격증폭탄의 수치와 발사 순서 비교는 [충격 밸런스 기록](docs/IMPACT_AMMO.md)에 있습니다.
