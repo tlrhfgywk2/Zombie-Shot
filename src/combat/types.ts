@@ -1,11 +1,37 @@
 export type AmmoFamily = 'HEALTH' | 'WOUND' | 'EXPLOSION' | 'IMPACT' | 'BURN';
 export type PrimaryPayload = 'firepower' | 'wound' | 'explosive' | 'actionShock' | 'burn';
+export type PrimaryEffectValues = Record<PrimaryPayload, number>;
+export type AmmoLayer = 'enemy' | 'ammo' | 'magazine';
+export type MechanicalCategory = 'direct' | 'sequence' | 'layout';
+export type AmmoCondition =
+  | { type: 'always' | 'previousExists' | 'first' | 'last' | 'interior' | 'adjacentDifferent' | 'bridgeDifferent' | 'monoFamily' | 'symmetricSame' }
+  | { type: 'previousFamily' | 'nextFamily'; relation: 'same' | 'different' }
+  | { type: 'familyDiversity' | 'emptySlots' };
+export interface PayloadModifier {
+  target: PrimaryPayload | 'primary'; mode: 'add' | 'percent'; amount: number;
+}
+export interface AmmoRule {
+  layer: 'ammo' | 'magazine'; condition: AmmoCondition;
+  action: ({ type: 'self' } & PayloadModifier) | ({ type: 'next' } & PayloadModifier)
+    | { type: 'copyPrevious'; percent: number } | { type: 'replayPrevious'; percent: number };
+  scaleBy?: 'extraFamilies' | 'emptySlots';
+}
+export interface CommittedMagazine {
+  readonly rounds: readonly AmmoType[];
+  readonly families: readonly AmmoFamily[];
+  readonly capacity: number;
+  readonly familyCount: number;
+  readonly emptySlots: number;
+}
+export interface LayerActivation { layer: 'ammo' | 'magazine'; active: boolean }
 export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' | 'frangible'
   | 'suppression' | 'execution' | 'kickback' | 'laceration' | 'retreat' | 'advance'
   | 'explosive' | 'highExplosive' | 'stickyCharge'
   | 'wounding' | 'serrated' | 'retreatCutter' | 'rupture' | 'deepCut' | 'reopening' | 'scar' | 'flatNose' | 'heavy'
   | 'reducedImpact' | 'hammer' | 'impactRelay' | 'resonance'
-  | 'incendiary' | 'highHeat' | 'lowHeat' | 'accelerant' | 'ignition' | 'kindling';
+  | 'incendiary' | 'highHeat' | 'lowHeat' | 'accelerant' | 'ignition' | 'kindling'
+  | 'mimic' | 'alternator' | 'bridge' | 'afterimage'
+  | 'opening' | 'finisher' | 'core' | 'crosslink' | 'mosaic' | 'focus' | 'lightLoad' | 'mirror';
 export type AmmoRarity = 'common' | 'uncommon';
 export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact' | 'burn';
 export type RangeBand = 'near' | 'mid' | 'far';
@@ -49,6 +75,9 @@ export interface PlayerCombatState {
   disabledSlots: Partial<Record<AttachmentSlot, number>>;
 }
 export interface ShotBreakdown {
+  resolvedPrimary: PrimaryEffectValues;
+  resolvedPayload: PrimaryEffectValues;
+  layerActivations: LayerActivation[];
   weaponFirepowerAdjustment: number;
   traitBonus: number;
   primaryPayload: PrimaryPayload;
@@ -118,6 +147,7 @@ export interface ShotResult {
   movement: number;
 }
 export interface RoundPreview {
+  layerActivations?: LayerActivation[];
   traitBonus?: number;
   recoilGenerated?: number;
   finalFirepower?: number;

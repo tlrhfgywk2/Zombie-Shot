@@ -54,7 +54,7 @@ describe('탄약 전투 수치 표시', () => {
     expect(ammoStatsMarkup('incendiary')).toContain('즉시 화상 피해<b>2</b>');
     expect(ammoStatsMarkup('incendiary')).toContain('충격<b>0</b>');
     expect(ammoStatsMarkup('lowHeat')).toContain('반동<b>0</b>');
-    expect(ammoStatsMarkup('accelerant')).toContain('바로 다음 탄 화상 ×1.5');
+    expect(ammoStatsMarkup('accelerant')).toContain('바로 다음 탄 화상 축적 +50%');
     expect(ammoStatsMarkup('ignition')).toContain('화상 2 + 현재 화상 ×0.5');
     expect(ammoStatsMarkup('kindling')).toContain('점화 대상 직접 화력 +3');
   });

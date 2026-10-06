@@ -69,7 +69,7 @@ export class Game {
   }
 
   private combatContext() {
-    return { weaponId: this.player.weapon.id, boostedOpening: this.boostedOpening,
+    return { weaponId: this.player.weapon.id, boostedOpening: this.boostedOpening, magazineCapacity: this.player.magazine.capacity,
       loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
   }
 
@@ -173,7 +173,9 @@ export class Game {
     if (this.state.phase !== 'LOADING' && (this.state.phase !== 'CYLINDER_CHOICE' || !this.cylinderDecided || this.busy)) return;
     this.busy = true;
     this.ui.renderCylinderChoice(0, false, false);
-    const sequence = this.resolver.resolveSequence(this.player.magazine.getRounds(), this.zombie.snapshot(), this.combatContext());
+    // 실린더 회전까지 결정한 최종 배열을 고정한다. 실제 사격의 remove(0)는 이 배열에 영향을 주지 않는다.
+    const committedMagazine = this.player.magazine.commit();
+    const sequence = this.resolver.resolveSequence(committedMagazine.rounds, this.zombie.snapshot(), { ...this.combatContext(), committedMagazine });
     this.state.transition('FIRING');
     this.ui.setPhase('FIRING');
     for (const shot of sequence.shots) {

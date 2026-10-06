@@ -4,8 +4,9 @@ import plugin from '@typescript-eslint/eslint-plugin';
 import globals from 'globals';
 
 export default [
-  { ignores: ['dist/**', 'node_modules/**'] },
+  { ignores: ['dist/**', 'node_modules/**', '**/*.local/**'] },
   js.configs.recommended,
+  { files: ['tools/**/*.mjs'], languageOptions: { globals: globals.node } },
   {
     files: ['src/**/*.ts', 'vite.config.ts'],
     languageOptions: {

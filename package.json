@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "export:ammo": "node tools/export-ammo-spec.mjs",
+    "check:ammo-spec": "node tools/check-ammo-spec.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
