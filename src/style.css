@@ -870,3 +870,13 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .attachment-inventory-card > small { color: var(--muted); }
 .game-shell[data-layout="portrait"] .attachment-inventory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
 .game-shell[data-layout="portrait"] .attachment-inventory-card { padding: .65rem; }
+.layer-state {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  font-size: 15px;
+  line-height: 1;
+  color: #7b8581;
+}
+.layer-state[data-active="true"] { color: #c8ff4d; }
+.mag-slot.will-not-fire .layer-state { bottom: 18px; }

@@ -1,6 +1,7 @@
 import { COMBAT_BALANCE } from '../data/ammoDefinitions';
 import { WEAPON_DEFINITIONS, type WeaponId } from '../data/weaponDefinitions';
 import type { AmmoType } from './types';
+import { commitMagazine } from './AmmoRules';
 
 export class Magazine {
   private rounds: AmmoType[] = [];
@@ -14,6 +15,7 @@ export class Magazine {
   get capacity(): number { return this.currentCapacity; }
   get size(): number { return this.rounds.length; }
   getRounds(): readonly AmmoType[] { return [...this.rounds]; }
+  commit() { return commitMagazine(this.rounds, this.capacity); }
 
   setCapacity(capacity: number): AmmoType[] {
     this.currentCapacity = Math.max(WEAPON_DEFINITIONS[this.weapon].baseMagazineCapacity, Math.min(WEAPON_DEFINITIONS[this.weapon].maximumMagazineCapacity, Math.floor(capacity)));

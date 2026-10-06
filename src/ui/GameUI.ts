@@ -1,6 +1,7 @@
 import { WEAPON_DEFINITIONS, WEAPON_ORDER, type WeaponDefinition, type WeaponId } from '../data/weaponDefinitions';
 import { isAttachmentCompatible } from '../data/attachmentDefinitions';
 import { ammoStatsMarkup, ammoTooltipStatsMarkup, firingOrderStatEntries } from './AmmoView';
+import { commitMagazine, emptyPayload, layerActivations, ruleText } from '../combat/AmmoRules';
 import { ACTION_NAMES, getRangeBand, isIgnited, isVulnerable, previewEnemyAction } from '../combat/CombatResolver';
 import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
 import type { AmmoFamily, AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, FirepowerBreakdown, PlayerCombatState, RoundPreview, SequenceResult, ShotResult } from '../combat/types';
@@ -413,6 +414,7 @@ export class GameUI {
     const slotHost = this.slots[0]?.parentElement;
     slotHost?.style.setProperty('--mag-capacity', String(capacity));
     slotHost?.parentElement?.toggleAttribute('data-expanded', capacity > 4);
+    const layout = commitMagazine(rounds, capacity);
     this.slots.forEach((slot, index) => {
       slot.hidden = index >= capacity;
       const ammo = rounds[index];
@@ -420,6 +422,15 @@ export class GameUI {
       if (ammo) slot.style.setProperty('--bullet', AMMO_DEFINITIONS[ammo].cssColor);
       else slot.style.removeProperty('--bullet');
       slot.innerHTML = ammo ? `<span class="slot-index">0${index + 1}</span><span class="round-visual"><i></i></span><span class="slot-content"><strong>${AMMO_DEFINITIONS[ammo].shortName}</strong></span>` : `<span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span>`;
+      if (ammo) {
+        const definition = AMMO_DEFINITIONS[ammo];
+        const conditions = layerActivations(definition, { magazine: layout, index, previousFamily: layout.families[index - 1], previousPrimary: index > 0 ? emptyPayload() : undefined });
+        if (conditions.length) {
+          const active = conditions.every(condition => condition.active);
+          const label = `${definition.category === 'layout' ? '배열' : '연계'} ${active ? '활성' : '미활성'}: ${ruleText(definition)}`;
+          slot.insertAdjacentHTML('beforeend', `<span class="layer-state" data-active="${active}" title="${label}" aria-label="${label}">${active ? '◆' : '◇'}</span>`);
+        }
+      }
       slot.setAttribute('aria-disabled', String(this.locked));
       slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}${this.locked ? ', 수정 불가' : ', 탭하여 즉시 제거'}` : `${index + 1}번 빈 슬롯`);
       slot.setAttribute('aria-pressed', 'false');
@@ -1001,8 +1012,8 @@ export class GameUI {
   private showAmmoTooltip(ammo: AmmoType, anchor: HTMLElement, round?: RoundPreview): void {
     this.hideTooltip();
     const definition = AMMO_DEFINITIONS[ammo];
-    const role = ammo !== 'ball' && definition.family !== 'BURN' ? `<p>${definition.role}</p>` : '';
-    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</span><strong>${definition.name}</strong></header>${role}${ammoTooltipStatsMarkup(ammo, round)}`;
+    const category = definition.category === 'layout' ? ' · 탄창 배열' : definition.category === 'sequence' ? ' · 탄약 연계' : '';
+    this.ammoTooltip.innerHTML = `<header><span>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}${category}</span><strong>${definition.name}</strong></header>${ammoTooltipStatsMarkup(ammo, round)}`;
     this.ammoTooltip.style.setProperty('--tooltip-color', definition.cssColor);
     this.ammoTooltip.classList.remove('is-attachment');
     this.ammoTooltip.hidden = false;

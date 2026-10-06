@@ -5,6 +5,9 @@ import type { AmmoFamily, AmmoType } from './types';
 /** 탄약 원본을 변경하지 않고 명시된 주효과 하나만 조정한다. */
 export function weaponPayload(ammo: AmmoDefinition, weapon: WeaponDefinition, previousFamily?: AmmoFamily,
   boostedOpening = false): { firepower: number; wound: number; explosive: number; burn: number; actionShock: number; traitBonus: number } {
+  // 주효과를 대체하는 탄은 원본에 이미 반영된 무기 조정·특성을 다시 더하지 않는다.
+  if (ammo.rules.some(rule => rule.action.type === 'copyPrevious'))
+    return { firepower: 0, wound: 0, explosive: 0, burn: 0, actionShock: 0, traitBonus: 0 };
   const payload = { firepower: Math.max(0, ammo.firepower + weapon.firepowerAdjustment),
     wound: ammo.wound, explosive: ammo.explosive, burn: ammo.burn, actionShock: ammo.actionShock, traitBonus: 0 };
   const key = ammo.primaryPayload;

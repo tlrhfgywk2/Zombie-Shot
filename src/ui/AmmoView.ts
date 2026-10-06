@@ -1,5 +1,6 @@
-import { AMMO_DEFINITIONS, type AmmoBuild, type SpecialAmmoType } from '../data/ammoDefinitions';
+import { AMMO_DEFINITIONS, COMBAT_BALANCE, type AmmoBuild, type SpecialAmmoType } from '../data/ammoDefinitions';
 import type { AmmoType, RoundPreview } from '../combat/types';
+import { ruleText } from '../combat/AmmoRules';
 
 export function ammoRewardOwnedCount(ammo: SpecialAmmoType, build: AmmoBuild, replacements: readonly SpecialAmmoType[] = []): number {
   return Math.max(0, build[ammo] - replacements.filter(value => value === ammo).length);
@@ -7,9 +8,8 @@ export function ammoRewardOwnedCount(ammo: SpecialAmmoType, build: AmmoBuild, re
 export function ammoStatsMarkup(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];
   const values: [string, number][] = [['화력', item.firepower], ['상처', item.wound], ['폭발', item.explosive], ['화상', item.burn], ['즉시 화상 피해', item.burnDamage], ['충격', item.actionShock], ['반동', item.recoil]];
-  const effect = item.shockFollowUp ? `다음 탄 충격 +${item.shockFollowUp}`
-    : item.shockScale ? `현재 충격 ${item.shockScale.divisor}당 +1 · 추가 최대 +${item.shockScale.cap}` : woundEffectText(ammo) || burnEffectText(ammo);
-  return `<span class="ammo-stats">${values.filter(([name, value]) => value > 0 || (name === '반동' && (ammo === 'reducedImpact' || item.family === 'BURN')) || (name === '충격' && item.family === 'BURN')).map(([name, value]) => `<span>${name}<b>${value}</b></span>`).join('')}${effect ? `<span class="ammo-special-effect">${effect}</span>` : ''}</span>`;
+  const effect = ammoEffectText(ammo);
+  return `<span class="ammo-stats">${values.filter(([name, value]) => value > 0 || name === '반동' || (name === '충격' && item.family === 'BURN')).map(([name, value]) => `<span>${name}<b>${value}</b></span>`).join('')}${effect ? `<span class="ammo-special-effect">${effect}</span>` : ''}</span>`;
 }
 export function woundEffectText(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];
@@ -20,10 +20,26 @@ export function woundEffectText(ammo: AmmoType): string {
 }
 export function burnEffectText(ammo: AmmoType): string {
   const item = AMMO_DEFINITIONS[ammo];
-  return [item.burnFollowUpPercent ? `바로 다음 탄 화상 ×${1 + item.burnFollowUpPercent / 100} · 소수점 버림 · 화상 0인 탄도 소비` : '',
+  return [
     item.burnScalePercent ? `화상 ${item.burn} + 현재 화상 ×${item.burnScalePercent / 100} · 소수점 버림` : '',
     item.ignitedBonus ? `점화 대상 직접 화력 +${item.ignitedBonus}` : '',
     item.family === 'BURN' && item.recoilRecovery ? `사격 전 누적 반동 ${item.recoilRecovery} 회복` : ''].filter(Boolean).join(' · ');
+}
+/** 보급·보유·탄창 툴팁 모두 같은 정의로 조건과 증가 대상을 설명한다. */
+export function ammoEffectText(ammo: AmmoType): string {
+  const item = AMMO_DEFINITIONS[ammo];
+  return [ruleText(item), woundEffectText(ammo), burnEffectText(ammo),
+    item.shockScale ? `현재 충격 ${item.shockScale.divisor}당 +1 · 추가 최대 +${item.shockScale.cap}` : '',
+    item.healthScale ? `현재 체력 ${item.healthScale.divisor}당 화력 +1 · 최대 +${item.healthScale.cap}` : '',
+    item.recoilScale ? `기존 반동만큼 화력 증가 · 최대 +${item.recoilScale.cap} · 반동 전부 소비` : '',
+    item.vulnerableBonus ? `취약 대상 화력 +${item.vulnerableBonus}` : '',
+    item.vulnerableDamagePercentBonus ? `취약 대상 체력 화력 +${COMBAT_BALANCE.vulnerableDamagePercent + item.vulnerableDamagePercentBonus}%` : '',
+    item.suppressedBonus ? `현재 충격이 다음 행동 임계치 이상이면 화력 +${item.suppressedBonus}` : '',
+    item.execution ? `체력 ${item.execution.percent}% 이하 대상 화력 +${item.execution.bonus}` : '',
+    item.moveBefore ? `사격 전 ${Math.abs(item.moveBefore)}m 전진` : '', item.moveAfter ? `사격 후 ${item.moveAfter}m 후퇴` : '',
+    item.family !== 'BURN' && item.recoilRecovery ? `사격 전 누적 반동 ${item.recoilRecovery} 회복` : '',
+    item.rules.some(rule => rule.action.type === 'copyPrevious' || rule.action.type === 'replayPrevious') ? '이동·부가효과 제외' : '',
+  ].filter(Boolean).join(' · ');
 }
 export interface FiringOrderStatEntry {
   kind: 'wound' | 'explosive' | 'burn' | 'shock' | 'recoil'; label: string; value: number; modified: boolean;
@@ -71,7 +87,7 @@ export function ammoTooltipStatsMarkup(ammo: AmmoType, round?: RoundPreview): st
     { label: '반동', value: round?.recoilGenerated ?? item.recoil },
   ];
   const visible = values.filter(({ value }) => value !== 0);
-  const effect = item.family === 'BURN' ? burnEffectText(ammo) : '';
+  const effect = [ammoEffectText(ammo), item.recoil === 0 ? '반동 없음' : ''].filter(Boolean).join(' · ');
   return `<div style="--ammo-tooltip-columns: ${Math.min(3, visible.length) || 1}">${visible.map(({ label, value, className, attributes }) =>
     `<span${className ? ` class="${className}"` : ''}>${label} <b${attributes ? ` ${attributes}` : ''}>${value}</b></span>`).join('')}</div>${effect ? `<small>${effect}</small>` : ''}`;
 }
