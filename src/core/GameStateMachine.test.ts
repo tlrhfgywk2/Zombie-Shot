@@ -8,6 +8,11 @@ const weaponSelection = () => {
 };
 
 describe('GameStateMachine', () => {
+  it('빈 탄창은 준비 단계에서 적 행동으로 바로 넘어간다', () => {
+    const state = weaponSelection();
+    state.transition('AMMO_SELECTION'); state.transition('ENEMY_ACTION'); state.transition('AMMO_SELECTION');
+    expect(state.phase).toBe('AMMO_SELECTION');
+  });
   it('정상 전투 사이클을 명시적인 순서로 전환한다', () => {
     const state = weaponSelection();
     state.transition('AMMO_SELECTION');

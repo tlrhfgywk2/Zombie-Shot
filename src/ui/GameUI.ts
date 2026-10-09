@@ -473,7 +473,6 @@ export class GameUI {
       slot.setAttribute('aria-label', ammo ? `${index + 1}번 슬롯: ${AMMO_DEFINITIONS[ammo].name}${this.locked ? ', 수정 불가' : ', 탭하여 즉시 제거'}` : `${index + 1}번 빈 슬롯`);
       slot.setAttribute('aria-pressed', 'false');
     });
-    this.loadButton.disabled = this.locked || rounds.length === 0;
     this.renderAmmoStock(stock, build, specialCapacity, rounds);
     this.updateLoadButton();
   }
@@ -972,9 +971,9 @@ export class GameUI {
 
   private updateLoadButton(): void {
     const label = this.loadButton.querySelector<HTMLElement>('span')!;
-    label.textContent = this.weapon.trait === 'cylinder' ? '실린더 장전' : '탄창 장전';
-    this.loadButton.disabled = this.locked || this.rounds.length === 0;
-    this.loadButton.setAttribute('aria-label', this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '탄창 장전, 탄약 1발 이상 필요');
+    label.textContent = this.rounds.length === 0 ? '턴 넘김' : this.weapon.trait === 'cylinder' ? '실린더 장전' : '탄창 장전';
+    this.loadButton.disabled = this.locked;
+    this.loadButton.setAttribute('aria-label', this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '턴 넘김');
   }
 
   private consumeSuppressedClick(): boolean {

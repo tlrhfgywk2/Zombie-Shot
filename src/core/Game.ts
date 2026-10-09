@@ -159,11 +159,17 @@ export class Game {
   }
 
   private async beginCombat(): Promise<void> {
-    if (this.busy || this.state.phase !== 'AMMO_SELECTION' || this.player.magazine.size === 0) return;
+    if (this.busy || this.state.phase !== 'AMMO_SELECTION') return;
     this.busy = true;
     this.boostedOpening = false;
     this.cylinderDecided = false;
     const rounds = this.player.magazine.getRounds();
+    if (rounds.length === 0) {
+      this.ui.setLocked(true);
+      try { await this.resolveEnemyAction(); }
+      finally { this.busy = false; }
+      return;
+    }
     const sequence = this.resolver.resolveSequence(rounds, this.zombie.snapshot(), this.combatContext());
     this.state.transition('LOADING');
     this.ui.setLocked(true);
