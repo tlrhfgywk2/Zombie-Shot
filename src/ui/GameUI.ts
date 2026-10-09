@@ -132,6 +132,11 @@ export class GameUI {
   private recoilDebuffPenaltyBonus = 0;
   private recoilAmount = 0;
   private readonly shell: HTMLElement;
+  private readonly mobilePanel: HTMLElement;
+  private readonly mobileBackgroundInert = new Map<HTMLElement, boolean>();
+  private readonly mobileRelocations: { element: HTMLElement; anchor: Comment; destination: HTMLElement }[] = [];
+  private mobileOpener?: HTMLButtonElement;
+  private desktopWeaponPanelOpen = false;
 
   constructor(root: HTMLElement, private readonly callbacks: GameUICallbacks) {
     root.innerHTML = `
@@ -161,6 +166,7 @@ export class GameUI {
           <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         </main>
         <section class="tactical-console" aria-label="전투 준비">
+          <nav class="mobile-tools" aria-label="전투 도구"><button type="button" data-mobile-panel="attachments" aria-haspopup="dialog" aria-controls="mobile-panel" aria-expanded="false">부착물 <b data-mobile-attachment-count>0</b></button><button type="button" data-mobile-panel="settings" aria-haspopup="dialog" aria-controls="mobile-panel" aria-expanded="false"><span data-mobile-weapon-name>P220</span> · 설정</button></nav>
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
           <div class="ammo-rack"><div class="section-label"><span>탄약</span><small id="ammo-capacity">보유 6</small></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
@@ -179,12 +185,12 @@ export class GameUI {
         <section id="exploration" class="route-choice exploration-screen" hidden role="dialog" aria-modal="true" aria-labelledby="exploration-title"></section>
         <section id="ammo-inventory" class="route-choice ammo-inventory-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-inventory-title"></section>
         <section id="attachment-inventory" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-inventory-title"></section>
+        <section id="mobile-panel" class="route-choice mobile-panel" hidden role="dialog" aria-modal="true" aria-labelledby="mobile-panel-title"><div class="route-card mobile-panel-card"><header class="inventory-header"><h2 id="mobile-panel-title">부착물</h2><button type="button" data-close-mobile-panel aria-label="패널 닫기">✕</button></header><div data-mobile-content="attachments" hidden></div><div data-mobile-content="settings" hidden></div></div></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><button id="restart-button">다시 시작</button><button type="button" data-return-to-menu>모드 선택</button></div></div>
       </div>`;
 
     this.shell = this.required(root, '.game-shell');
-    this.updateResponsiveLayout();
 
     this.hpFill = this.required(root, '#hp-fill');
     this.hpText = this.required(root, '#hp-text');
@@ -224,6 +230,24 @@ export class GameUI {
     this.ammoTooltip = this.required(root, '#ammo-tooltip');
     this.ammoInventory = this.required(root, '#ammo-inventory');
     this.slots = [...root.querySelectorAll<HTMLButtonElement>('.mag-slot')];
+    this.mobilePanel = this.required(root, '#mobile-panel');
+    for (const [selector, panel] of [['#attachment-bay', 'attachments'], ['#weapon-panel', 'settings'], ['.audio-controls', 'settings']] as const) {
+      const element = this.required(root, selector);
+      const anchor = document.createComment('모바일 패널 원래 위치');
+      element.before(anchor);
+      this.mobileRelocations.push({ element, anchor, destination: this.required(root, `[data-mobile-content="${panel}"]`) });
+    }
+    this.updateResponsiveLayout();
+    root.querySelectorAll<HTMLButtonElement>('[data-mobile-panel]').forEach(button => button.addEventListener('click', () => this.openMobilePanel(button)));
+    this.required(root, '[data-close-mobile-panel]').addEventListener('click', () => this.closeMobilePanel());
+    this.mobilePanel.addEventListener('click', event => { if (event.target === this.mobilePanel) this.closeMobilePanel(); });
+    this.mobilePanel.addEventListener('keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); this.closeMobilePanel(); }
+      if (event.key !== 'Tab') return;
+      const controls = [...this.mobilePanel.querySelectorAll<HTMLElement>('button:not(:disabled), summary, input:not(:disabled)')].filter(element => element.getClientRects().length > 0);
+      if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls.at(-1)?.focus(); }
+      else if (!event.shiftKey && document.activeElement === controls.at(-1)) { event.preventDefault(); controls[0]?.focus(); }
+    });
 
     this.nextAction.addEventListener('pointerdown', (event) => {
       this.nextActionPointerType = event.pointerType;
@@ -344,7 +368,11 @@ export class GameUI {
     this.loadButton.addEventListener('click', () => { if (!this.locked) this.callbacks.onLoad(); });
     this.required(root, '#ammo-supply-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement, true));
     this.required(root, '#inventory-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
-    this.required(root, '#attachment-supply-button').addEventListener('click', (event) => this.openAttachmentInventory(event.currentTarget as HTMLButtonElement));
+    this.required(root, '#attachment-supply-button').addEventListener('click', (event) => {
+      const opener = this.mobileOpener ?? event.currentTarget as HTMLButtonElement;
+      this.closeMobilePanel();
+      this.openAttachmentInventory(opener);
+    });
     this.required(root, '#restart-button').addEventListener('click', this.callbacks.onRestart);
     root.querySelectorAll('[data-restart-run]').forEach(button => button.addEventListener('click', this.callbacks.onRestart));
     root.querySelectorAll('[data-return-to-menu]').forEach(button => button.addEventListener('click', this.callbacks.onReturnToMenu));
@@ -370,6 +398,7 @@ export class GameUI {
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
 
   showModeSelection(): void {
+    this.closeMobilePanel();
     this.closeAmmoInventory();
     this.hideTooltip();
     const host = this.required(this.shell, '#weapon-selection');
@@ -385,6 +414,7 @@ export class GameUI {
   }
 
   showWeaponSelection(show: boolean, mode: GameMode = 'free'): void {
+    if (show) this.closeMobilePanel();
     const host = this.required(this.shell, '#weapon-selection');
     host.hidden = !show;
     this.required(this.shell, '.game-stage').inert = show;
@@ -429,6 +459,7 @@ export class GameUI {
   renderWeapon(weapon: WeaponDefinition): void {
     this.weapon = weapon;
     this.required(this.shell, '[data-weapon-name]').textContent = weapon.name;
+    this.required(this.shell, '[data-mobile-weapon-name]').textContent = weapon.name;
     this.required(this.shell, '[data-weapon-trait]').textContent = weapon.traitLabel;
     this.required(this.shell, '[data-weapon-detail]').textContent = `${weapon.traitDetail} 기본 화력 ${weapon.firepowerAdjustment >= 0 ? '+' : ''}${weapon.firepowerAdjustment} · 거리 감소 ${weapon.rangePenaltyPercentages.near}/${weapon.rangePenaltyPercentages.mid}/${weapon.rangePenaltyPercentages.far}% · 발생 반동 ${weapon.recoilAdjustment ? `+${weapon.recoilAdjustment} (원래 반동 0인 탄 제외)` : '추가 없음'} · 탄창 ${weapon.baseMagazineCapacity}~${weapon.maximumMagazineCapacity}발`;
     this.recoilGauge.title = `${weapon.traitDetail} 반동 허용치를 넘으면 초과량 2마다 화력 −1, 최대 −3. 새 탄창에서 초기화됩니다.`;
@@ -540,6 +571,8 @@ export class GameUI {
 
   setLocked(locked: boolean): void {
     this.locked = locked;
+    if (locked) this.closeMobilePanel();
+    this.shell.querySelectorAll<HTMLButtonElement>('[data-mobile-panel]').forEach(button => { button.disabled = locked; });
     (this.required(this.shell, '#attachment-supply-button') as HTMLButtonElement).disabled = locked;
     this.attachmentTabs.forEach((button) => {
       button.disabled = locked || button.dataset.compatible === 'false';
@@ -551,6 +584,7 @@ export class GameUI {
   }
 
   renderLoadout(loadout: LoadoutSnapshot, playerState: PlayerCombatState, capacity: number, owned: readonly AttachmentId[] = []): void {
+    this.required(this.shell, '[data-mobile-attachment-count]').textContent = String(Object.values(loadout).filter(Boolean).length);
     const inventory = this.required(this.shell, '#attachment-inventory');
     inventory.querySelectorAll<HTMLButtonElement>('[data-supply-attachment]').forEach(button => { button.disabled = owned.includes(button.dataset.supplyAttachment as AttachmentId); });
     inventory.querySelectorAll<HTMLButtonElement>('[data-remove-supply-attachment]').forEach(button => { button.disabled = !owned.includes(button.dataset.removeSupplyAttachment as AttachmentId); });
@@ -624,6 +658,7 @@ export class GameUI {
   }
 
   showExploration(screen: ExplorationScreen): void {
+    this.closeMobilePanel();
     this.closeAmmoInventory();
     this.hideTooltip();
     const host = this.required(this.shell, '#exploration');
@@ -667,6 +702,7 @@ export class GameUI {
   }
 
   setPhase(phase: GamePhase): void {
+    if (phase !== 'AMMO_SELECTION') this.closeMobilePanel();
     this.phaseText.textContent = PHASE_LABELS[phase];
     (this.required(this.shell, '#ammo-supply-button') as HTMLButtonElement).disabled = ['MODE_SELECTION', 'WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(phase);
     this.shell.querySelectorAll<HTMLButtonElement>('[data-restart-run], [data-return-to-menu]').forEach(button => {
@@ -813,6 +849,7 @@ export class GameUI {
     }
     const count = this.previewOutcome.querySelectorAll('.forecast-stat:not([hidden])').length;
     this.previewOutcome.style.setProperty('--forecast-stat-count', String(count));
+    this.previewOutcome.style.setProperty('--mobile-forecast-columns', String(Math.min(count, 3)));
   }
 
   private updateForecastLabel(): void {
@@ -1031,8 +1068,49 @@ export class GameUI {
   };
 
   private readonly updateResponsiveLayout = (): void => {
-    applyResponsiveLayoutMode(this.shell);
+    const mode = applyResponsiveLayoutMode(this.shell);
+    const compact = mode === 'portrait' || mode === 'compact-landscape';
+    if (compact === this.shell.hasAttribute('data-mobile-tools')) return;
+    this.closeMobilePanel();
+    this.shell.toggleAttribute('data-mobile-tools', compact);
+    const weaponPanel = this.required(this.shell, '#weapon-panel') as HTMLDetailsElement;
+    if (compact) this.desktopWeaponPanelOpen = weaponPanel.open;
+    else weaponPanel.open = this.desktopWeaponPanelOpen;
+    this.mobileRelocations.forEach(({ element, anchor, destination }) => {
+      if (compact) destination.append(element);
+      else anchor.after(element);
+    });
   };
+
+  private openMobilePanel(opener: HTMLButtonElement): void {
+    if (!this.shell.hasAttribute('data-mobile-tools') || this.locked) return;
+    this.hideTooltip();
+    this.closeNextActionTooltip();
+    this.mobileOpener = opener;
+    const panel = opener.dataset.mobilePanel;
+    this.required(this.shell, '#mobile-panel-title').textContent = panel === 'attachments' ? '부착물' : '총기 · 설정';
+    this.mobilePanel.querySelectorAll<HTMLElement>('[data-mobile-content]').forEach(element => { element.hidden = element.dataset.mobileContent !== panel; });
+    if (panel === 'settings') (this.required(this.shell, '#weapon-panel') as HTMLDetailsElement).open = true;
+    this.mobilePanel.hidden = false;
+    for (const element of this.shell.children) {
+      if (!(element instanceof HTMLElement) || element === this.mobilePanel) continue;
+      this.mobileBackgroundInert.set(element, element.inert);
+      element.inert = true;
+    }
+    opener.setAttribute('aria-expanded', 'true');
+    this.required(this.mobilePanel, '[data-close-mobile-panel]').focus();
+  }
+
+  private closeMobilePanel(): void {
+    if (!this.mobilePanel || this.mobilePanel.hidden) return;
+    this.mobilePanel.hidden = true;
+    this.mobileBackgroundInert.forEach((inert, element) => { element.inert = inert; });
+    this.mobileBackgroundInert.clear();
+    this.mobileOpener?.setAttribute('aria-expanded', 'false');
+    this.mobileOpener?.focus();
+    this.mobileOpener = undefined;
+    this.hideTooltip();
+  }
 
   private updateFirepowerPanel(breakdown: FirepowerBreakdown, label: string): void {
     this.firepowerBreakdown = breakdown;
@@ -1113,6 +1191,7 @@ export class GameUI {
   }
 
   private showAttachmentTooltip(id: AttachmentId, anchor: HTMLElement): void {
+    if (!this.mobilePanel.hidden) return;
     this.hideTooltip();
     const definition = ATTACHMENT_DEFINITIONS[id];
     this.ammoTooltip.innerHTML = `<header><span>${ATTACHMENT_SLOT_NAMES[definition.slot]} · ${ATTACHMENT_RARITY_NAMES[definition.rarity]}</span><strong>${definition.name}</strong></header><p>${definition.summary}</p>`;
@@ -1217,6 +1296,8 @@ export class GameUI {
   private bindPointerDrag(element: HTMLButtonElement, getPayload: () => { ammo?: AmmoType; sourceIndex?: number } | undefined): void {
     element.addEventListener('pointerdown', (event) => {
       if (this.locked || event.button !== 0) return;
+      // 탄약 줄은 손가락으로 스크롤하고, 슬롯 간 순서 변경은 기존 드래그를 유지한다.
+      if (event.pointerType === 'touch' && this.shell.hasAttribute('data-mobile-tools') && element.matches('.ammo-token')) return;
       const payload = getPayload();
       if (!payload) return;
       const startX = event.clientX;
