@@ -149,7 +149,7 @@ export const countAllocations = (build: AmmoBuild): number => Object.values(buil
 export const rewardAmount = (ammo: SpecialAmmoType): number => { void ammo; return AMMO_BUILD_BALANCE.rewardAmount; };
 export const RARITY_NAMES: Record<AmmoRarity, string> = { common: '일반', uncommon: '고급' };
 export const BUILD_TAG_NAMES: Record<BuildTag, string> = { health: '체력', wound: '상처', explosive: '폭발', impact: '충격', burn: '화상' };
-export const RANGE_NAMES: Record<RangeBand, string> = { near: '근거리', mid: '중거리', far: '원거리' };
+export const RANGE_NAMES: Record<RangeBand, string> = { melee: '근접', near: '근거리', mid: '중거리', far: '장거리' };
 export const COMBAT_BALANCE = {
   baseMagazineCapacity: WEAPON_DEFINITIONS.p220.baseMagazineCapacity,
   maximumMagazineCapacity: WEAPON_DEFINITIONS.p220.maximumMagazineCapacity,
@@ -157,5 +157,5 @@ export const COMBAT_BALANCE = {
   explosionDamagePerStack: 2,
   woundThreshold: 6, vulnerableTurns: 2, vulnerableDamagePercent: 50,
   burnThreshold: 20, ignitedActions: 1,
-  rangeThresholds: { near: 4, mid: 8 },
+  rangeThresholds: { melee: 1, near: 4, mid: 8 },
 } as const;

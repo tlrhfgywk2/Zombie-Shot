@@ -24,7 +24,7 @@ interface SequenceCursor { previousFamily?: AmmoFamily; previousPrimary?: Primar
 const freshCursor = (): SequenceCursor => ({ recoil: 0, incoming: [], distanceLossHundredths: 0 });
 const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined });
 const clonePlayerState = (state: PlayerCombatState): PlayerCombatState => ({ ...state, disabledSlots: { ...state.disabledSlots } });
-const rangeOrder: readonly RangeBand[] = ['near', 'mid', 'far'];
+const rangeOrder: readonly RangeBand[] = ['melee', 'near', 'mid', 'far'];
 export const roundPositiveFirepower = (value: number): number => {
   if (!Number.isFinite(value) || value < 0) throw new Error('화력은 0 이상의 유한한 값이어야 합니다.');
   return Math.floor(value + 0.5 + Number.EPSILON);
@@ -38,10 +38,13 @@ export const calculateFinalVolleyFirepower = (raw: number, penalty: number, mini
   const previousLoss = roundPositiveFirepower(previousLossHundredths / 100);
   return Math.max(minimum, raw - (totalLoss - previousLoss));
 };
-export const getRangeBand = (distance: number): RangeBand => distance <= COMBAT_BALANCE.rangeThresholds.near
-  ? 'near' : distance <= COMBAT_BALANCE.rangeThresholds.mid ? 'mid' : 'far';
+// 3.8 − 2.8 같은 이동 계산의 부동소수점 오차가 1m 경계를 넘기지 않게 한다.
+const distanceForComparison = (distance: number): number => Math.round(distance * 1e9) / 1e9;
+export const isMeleeRange = (distance: number): boolean => distanceForComparison(distance) < COMBAT_BALANCE.rangeThresholds.melee;
+export const getRangeBand = (distance: number): RangeBand => isMeleeRange(distance) ? 'melee'
+  : distanceForComparison(distance) < COMBAT_BALANCE.rangeThresholds.near ? 'near' : distanceForComparison(distance) < COMBAT_BALANCE.rangeThresholds.mid ? 'mid' : 'far';
 export const getEffectiveRangeBand = (band: RangeBand, steps: number): RangeBand =>
-  rangeOrder[Math.max(0, Math.min(2, rangeOrder.indexOf(band) + steps))] ?? 'far';
+  rangeOrder[Math.max(0, Math.min(rangeOrder.length - 1, rangeOrder.indexOf(band) + steps))] ?? 'far';
 export const formatRangePenalty = (percent: number): string => percent === 0 ? '거리 감소 없음' : `화력 -${percent}%`;
 export const isNearestValidTarget = (target: EnemyState, targets: readonly EnemyState[] = [target]): boolean =>
   target.hp > 0 && !targets.some(other => other.hp > 0 && other.distance < target.distance);
@@ -54,8 +57,11 @@ export const ACTION_SHOCK_THRESHOLDS: Record<EnemyActionType, number> = {
 export const ACTION_NAMES: Record<EnemyActionType, string> = {
   approach: '접근', attack: '치명 공격', contaminate: '오염 투척', groundShock: '지반 충격', sonicPulse: '초음파 공명',
 };
+const canApproachIntoMelee = (enemy: EnemyState): boolean =>
+  !isMeleeRange(enemy.distance) && isMeleeRange(Math.max(0, enemy.distance - enemy.advancePerTurn));
 const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
-  enemy.meleeRecovery ? 'approach' : enemy.distance <= 0 ? 'attack'
+  isMeleeRange(enemy.distance) ? 'attack'
+    : enemy.delayedAction === 'attack' || canApproachIntoMelee(enemy) ? 'approach'
     : enemy.delayedAction && isActionSupported(enemy, enemy.delayedAction)
       ? isEnemyActionInRange(enemy, enemy.delayedAction) ? enemy.delayedAction : 'approach'
     : enemy.trainingActions?.find(action => action !== enemy.excludedAction && isEnemyActionInRange(enemy, action))
@@ -64,11 +70,12 @@ const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
 export const isActionSupported = (enemy: EnemyState, action: EnemyActionType): boolean =>
   !isSpecialAction(action) || enemy.intent?.type === action || Boolean(enemy.trainingActions?.includes(action));
 export const isEnemyActionInRange = (enemy: EnemyState, action: EnemyActionType): boolean =>
-  action === 'approach' || (action === 'attack' ? enemy.distance <= 0 : enemy.distance > 0 && enemy.distance <= ENEMY_RANGED_ACTIONS[action].maxRange);
+  action === 'approach' || (action === 'attack' ? isMeleeRange(enemy.distance) : !isMeleeRange(enemy.distance) && enemy.distance <= ENEMY_RANGED_ACTIONS[action].maxRange);
 export const isSpecialAction = (action: EnemyActionType): action is Exclude<EnemyActionType, 'approach' | 'attack'> =>
   action !== 'approach' && action !== 'attack';
 export const selectEnemyAction = (enemy: EnemyState): EnemyActionType => {
   const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
+  if (isSpecialAction(scheduled) && canApproachIntoMelee(enemy)) return 'approach';
   return isIgnited(enemy) && isSpecialAction(scheduled) ? 'approach' : scheduled;
 };
 export const getActionShockThreshold = (enemy: EnemyState, action = selectEnemyAction(enemy)): number =>
@@ -80,7 +87,7 @@ export const previewEnemyAction = (enemy: EnemyState): EnemyActionPreview => {
   const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
   return { selectedAction, threshold: getActionShockThreshold(enemy, selectedAction), movement,
     suppressedIntent: isIgnited(enemy) && isSpecialAction(scheduled) ? scheduled : undefined,
-    rangeDelayed, recovery: Boolean(enemy.meleeRecovery), delayedAction: enemy.delayedAction };
+    rangeDelayed, delayedAction: enemy.delayedAction };
 };
 const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
   const next = clonePlayerState(state);
@@ -103,7 +110,8 @@ export class CombatResolver {
       .flatMap(id => ATTACHMENT_DEFINITIONS[id].modifiers);
   }
   private modifier(context: CombatContext, kind: AttachmentModifier['kind'], band?: RangeBand): number {
-    return this.modifiers(context).filter(mod => mod.kind === kind && (!mod.condition?.range || mod.condition.range === band))
+    const attachmentBand = band === 'melee' ? 'near' : band;
+    return this.modifiers(context).filter(mod => mod.kind === kind && (!mod.condition?.range || mod.condition.range === attachmentBand))
       .reduce((sum, mod) => sum + mod.value, 0);
   }
   getRecoilThreshold(context: CombatContext = {}): number {
@@ -342,7 +350,6 @@ export class CombatResolver {
     if (before.hp <= 0) {
       delete after.telegraphedAction;
       delete after.delayedAction;
-      delete after.meleeRecovery;
       delete after.excludedAction;
       return { before, after, playerBefore, playerAfter: clonePlayerState(playerState), movement: 0,
         selectedAction: action.selectedAction, threshold: action.threshold, interrupted: false,
@@ -366,17 +373,15 @@ export class CombatResolver {
       resolution = 'shock-nullified';
       if (action.selectedAction === 'attack') {
         after.delayedAction = action.selectedAction;
-        after.meleeRecovery = true;
-      } else if (!action.recovery) {
+      } else if (after.delayedAction !== 'attack') {
         delete after.delayedAction;
-        delete after.meleeRecovery;
       }
       if (isSpecialAction(action.selectedAction)) {
         after.excludedAction = action.selectedAction;
         if (after.intent) after.intent.countdown = after.intent.cooldown;
         consumeScheduled = true;
-      } else if (!action.recovery && !action.rangeDelayed) consumeScheduled = true;
-      if (action.selectedAction === 'approach' && !action.recovery && after.intent) {
+      } else if (!action.rangeDelayed) consumeScheduled = true;
+      if (action.selectedAction === 'approach' && after.intent) {
         after.intent.countdown = Math.max(1, after.intent.countdown - 1);
       }
     } else {
@@ -385,11 +390,8 @@ export class CombatResolver {
         resolution = 'retreat-delayed';
         // 미지원 능력은 폐기한다. 근접 도달 시 원거리 보류를 폐기해 근접 우선권을 보장한다.
         if (action.selectedAction !== 'approach' && isActionSupported(after, action.selectedAction)
-          && !(isSpecialAction(action.selectedAction) && after.distance <= 0)) after.delayedAction = action.selectedAction;
+          && !(isSpecialAction(action.selectedAction) && isMeleeRange(after.distance))) after.delayedAction = action.selectedAction;
         else delete after.delayedAction;
-      } else if (action.recovery) {
-        resolution = 'melee-recovery';
-        delete after.meleeRecovery;
       } else {
         const pursuing = action.selectedAction === 'approach' && Boolean(after.delayedAction);
         if (!pursuing) delete after.delayedAction;
@@ -398,7 +400,7 @@ export class CombatResolver {
       if (executedAction === 'approach') {
         movement = action.movement;
         after.distance = this.clampDistance(after.distance - movement);
-        if (!action.rangeDelayed && !action.recovery && !after.delayedAction && after.intent) after.intent.countdown = action.suppressedIntent
+        if (!action.rangeDelayed && !after.delayedAction && after.intent) after.intent.countdown = action.suppressedIntent
           ? after.intent.cooldown : Math.max(1, after.intent.countdown - 1);
       } else if (executedAction === 'attack') playerKilled = true;
       else {
@@ -417,7 +419,7 @@ export class CombatResolver {
       const remaining = after.trainingActions.filter((_, position) => position !== index);
       after.trainingActions = remaining.length ? remaining : createTrainingActions(this.random);
     }
-    if (after.delayedAction && (isSpecialAction(after.delayedAction) && after.distance <= 0
+    if (after.delayedAction && (isSpecialAction(after.delayedAction) && isMeleeRange(after.distance)
       || !isActionSupported(after, after.delayedAction))) delete after.delayedAction;
     after.telegraphedAction = scheduledEnemyAction(after);
     return { before, after, playerBefore, playerAfter, movement, executedAction, resolution,

@@ -20,31 +20,29 @@ describe('근접 공격의 지연과 충격 회복', () => {
     const delayed = resolver.resolveEnemyAction(volley.finalState);
     expect(delayed).toMatchObject({ selectedAction: 'attack', executedAction: 'approach', resolution: 'retreat-delayed', playerKilled: false });
     let next = delayed.after;
-    while (next.distance > 0) {
+    while (next.distance >= 1) {
       expect(next.delayedAction).toBe('attack');
       next = resolver.resolveEnemyAction(next).after;
     }
     expect(previewEnemyAction(next).selectedAction).toBe('attack');
     expect(resolver.resolveEnemyAction(next).playerKilled).toBe(true);
   });
-  it.each(['normal', 'brute', 'tough'] as const)('%s의 높은 임계치도 보존하며 충격 뒤 0m 회복 접근을 반드시 수행한다', type => {
-    const enemy = { ...createEnemyState(type), distance: 0 };
+  it.each(['normal', 'brute', 'tough'] as const)('%s의 높은 임계치도 보존하며 충격 뒤 근접이면 다시 치명 공격을 예고한다', type => {
+    const enemy = { ...createEnemyState(type), distance: 0.5 };
     const threshold = 8 + enemy.shockResistance;
     expect(getActionShockThreshold(enemy)).toBe(threshold);
     expect(resolver.resolveEnemyAction({ ...enemy, actionShock: threshold - 1 }).playerKilled).toBe(true);
     const stopped = resolver.resolveEnemyAction({ ...enemy, actionShock: threshold });
     expect(stopped).toMatchObject({ interrupted: true, resolution: 'shock-nullified', movement: 0, playerKilled: false });
     expect(stopped.executedAction).toBeUndefined();
-    expect(previewEnemyAction(stopped.after)).toMatchObject({ selectedAction: 'approach', recovery: true });
-    const recovered = resolver.resolveEnemyAction(stopped.after);
-    expect(recovered).toMatchObject({ resolution: 'melee-recovery', executedAction: 'approach', movement: 0, playerKilled: false });
-    expect(previewEnemyAction(recovered.after).selectedAction).toBe('attack');
+    expect(previewEnemyAction(stopped.after)).toMatchObject({ selectedAction: 'attack' });
+    expect(resolver.resolveEnemyAction(stopped.after)).toMatchObject({ executedAction: 'attack', playerKilled: true });
   });
-  it('멀어진 회복 접근 이후에도 원래 근접 공격을 보존하며 계속 접근한다', () => {
+  it('충격 중단 뒤 후퇴하면 접근하고 근접에 도달할 때 치명 공격을 예고한다', () => {
     const stopped = resolver.resolveEnemyAction(target({ distance: 0, actionShock: 8 }));
     const moved = resolver.resolveSequence(['retreat', 'retreat', 'retreat'], stopped.after).finalState;
     const recovered = resolver.resolveEnemyAction(moved);
-    expect(recovered).toMatchObject({ resolution: 'melee-recovery', movement: 2 });
+    expect(recovered).toMatchObject({ resolution: 'retreat-delayed', movement: 2 });
     let enemy = recovered.after;
     for (let index = 0; index < 2; index++) {
       expect(previewEnemyAction(enemy).selectedAction).toBe('approach');
@@ -53,11 +51,11 @@ describe('근접 공격의 지연과 충격 회복', () => {
     }
     expect(previewEnemyAction(enemy).selectedAction).toBe('attack');
   });
-  it('회복 접근도 충격으로 중단되면 수행하기 전까지 회복을 유지한다', () => {
-    const stopped = resolver.resolveEnemyAction(target({ distance: 0, actionShock: 12 }));
+  it('충격으로 다시 중단해도 근접이면 치명 공격 예고를 유지한다', () => {
+    const stopped = resolver.resolveEnemyAction(target({ distance: 0.5, actionShock: 16 }));
     const stoppedAgain = resolver.resolveEnemyAction(stopped.after);
-    expect(stoppedAgain).toMatchObject({ interrupted: true, after: { meleeRecovery: true, delayedAction: 'attack' } });
-    expect(resolver.resolveEnemyAction(stoppedAgain.after).resolution).toBe('melee-recovery');
+    expect(stoppedAgain).toMatchObject({ interrupted: true, after: { delayedAction: 'attack', telegraphedAction: 'attack' } });
+    expect(resolver.resolveEnemyAction(stoppedAgain.after).playerKilled).toBe(true);
   });
 });
 
@@ -81,7 +79,7 @@ describe('능력별 사거리와 원거리 행동', () => {
     expect(retried.after.intent?.countdown).toBe(3);
   });
   it.each(['contaminate', 'groundShock', 'sonicPulse'] as const)('%s는 사거리 안에서 후퇴해도 원래 능력을 실행한다', type => {
-    const enemy = ranged(type, ENEMY_RANGED_ACTIONS[type].maxRange - 2);
+    const enemy = { ...ranged(type, ENEMY_RANGED_ACTIONS[type].maxRange - 2), advancePerTurn: 0.5 };
     const volley = resolver.resolveSequence(['retreat'], enemy);
     const action = resolver.resolveEnemyAction(volley.finalState);
     expect(action).toMatchObject({ resolution: 'normal', selectedAction: type, executedAction: type, intentResolved: type, movement: 0 });
@@ -194,7 +192,7 @@ describe('사격 순서·우선순위·상태 수명', () => {
     expect(result).toMatchObject({ shockConsumed: 6, shockRemaining: 2, after: { vulnerableTurns: 1, turnsElapsed: 1 } });
   });
   it('사망 시 능력·이동·플레이어 효과 갱신 없이 보류 상태를 정리한다', () => {
-    const dead = resolver.resolveEnemyAction(target({ hp: 0, distance: 0, actionShock: 20, delayedAction: 'attack', meleeRecovery: true, excludedAction: 'contaminate' }));
+    const dead = resolver.resolveEnemyAction(target({ hp: 0, distance: 0, actionShock: 20, delayedAction: 'attack', excludedAction: 'contaminate' }));
     expect(dead).toMatchObject({ resolution: 'dead', movement: 0, interrupted: false, playerKilled: false, after: { turnsElapsed: 0 } });
     expect(dead.playerAfter).toEqual(dead.playerBefore);
     expect(dead.after.delayedAction).toBeUndefined();
@@ -205,10 +203,9 @@ describe('사격 순서·우선순위·상태 수명', () => {
   it('재시작과 새 조우에서 사용하는 새 표적은 보류·회복·제외 상태를 상속하지 않는다', () => {
     const old = new Zombie();
     old.applyState(resolver.resolveEnemyAction(target({ distance: 0, actionShock: 8 })).after);
-    expect(old.snapshot().meleeRecovery).toBe(true);
+    expect(old.snapshot().delayedAction).toBe('attack');
     for (const enemy of [new Zombie(), new Zombie('groundshaker'), new Zombie('normal', true)]) {
       expect(enemy.snapshot().delayedAction).toBeUndefined();
-      expect(enemy.snapshot().meleeRecovery).toBeUndefined();
       expect(enemy.snapshot().excludedAction).toBeUndefined();
       expect(enemy.snapshot().telegraphedAction).toBeUndefined();
     }

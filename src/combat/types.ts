@@ -34,7 +34,7 @@ export type AmmoType = 'ball' | 'hollowPoint' | 'lowRecoil' | 'plusP' | 'relay' 
   | 'opening' | 'finisher' | 'core' | 'crosslink' | 'mosaic' | 'focus' | 'lightLoad' | 'mirror';
 export type AmmoRarity = 'common' | 'uncommon';
 export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact' | 'burn';
-export type RangeBand = 'near' | 'mid' | 'far';
+export type RangeBand = 'melee' | 'near' | 'mid' | 'far';
 export type AttachmentSlot = 'barrel' | 'muzzle' | 'magazine' | 'optic' | 'rail' | 'grip';
 export type EnemyType = 'normal' | 'brute' | 'fast' | 'tough' | 'contaminator' | 'groundshaker' | 'screecher';
 export type EnemyIntentType = 'contaminate' | 'groundShock' | 'sonicPulse';
@@ -66,10 +66,9 @@ export interface EnemyState {
   turnsElapsed: number;
   intent?: EnemyIntentState;
   trainingActions?: readonly EnemyActionType[];
-  /** 사격 시작 시 고정하며, 적 행동 기회가 끝날 때만 새로 선택한다. */
+  /** 사격 시작 시 고정한다. 원거리 예고보다 근접 도달 가능한 접근이 우선한다. */
   telegraphedAction?: EnemyActionType;
   delayedAction?: Exclude<EnemyActionType, 'approach'>;
-  meleeRecovery?: boolean;
   excludedAction?: EnemyIntentType;
 }
 export interface PlayerCombatState {
@@ -200,13 +199,12 @@ export interface EnemyActionPreview {
   selectedAction: EnemyActionType; threshold: number; movement: number;
   suppressedIntent?: EnemyIntentType;
   rangeDelayed?: boolean;
-  recovery?: boolean;
   delayedAction?: Exclude<EnemyActionType, 'approach'>;
 }
 export interface EnemyActionResult {
   selectedAction: EnemyActionType;
   executedAction?: EnemyActionType;
-  resolution: 'normal' | 'shock-nullified' | 'retreat-delayed' | 'melee-recovery' | 'dead';
+  resolution: 'normal' | 'shock-nullified' | 'retreat-delayed' | 'dead';
   threshold: number;
   interrupted: boolean;
   shockConsumed: number;
