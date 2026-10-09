@@ -2,8 +2,98 @@ import { describe, expect, it } from 'vitest';
 import { Player } from './Player';
 import { CombatResolver } from '../combat/CombatResolver';
 import { createEnemyState } from '../data/enemyDefinitions';
+import { createAmmoBuild } from '../data/ammoDefinitions';
+import { WEAPON_ORDER } from '../data/weaponDefinitions';
+import { STARTING_AMMO_LOADOUTS } from '../data/gameModes';
 
 describe('런 탄약 소유와 소비', () => {
+  it.each(WEAPON_ORDER)('%s의 초기 탄약은 조우 안에서만 소모되고 종료하면 복구한다', weapon => {
+    const player = new Player();
+    player.startRun('startingAmmo', weapon);
+    const initial = createAmmoBuild(STARTING_AMMO_LOADOUTS[weapon]);
+    expect(player.weapon.id).toBe(weapon);
+    expect(player.getBuild()).toEqual(initial);
+    for (const [ammo, count] of Object.entries(initial)) {
+      for (let index = 0; index < count; index++) {
+        const type = ammo as Parameters<Player['supplyAmmo']>[0];
+        expect(player.addAmmo(type)).toBe(true);
+        player.fireRound({ ammoType: type });
+      }
+    }
+    expect(Object.entries(player.getStock()).filter(([id]) => id !== 'ball').every(([, count]) => count === 0)).toBe(true);
+    expect(player.getBuild()).toEqual(initial);
+    expect(player.addAmmo('opening')).toBe(false);
+    for (let index = 0; index < 12; index++) {
+      expect(player.getAvailable('ball')).toBe('infinite');
+      expect(player.addAmmo('ball')).toBe(true);
+      player.fireRound({ ammoType: 'ball' });
+    }
+    player.endEncounter();
+    expect(player.getStock()).toEqual({ ...initial, ball: 'infinite' });
+    player.endEncounter();
+    expect(player.getBuild()).toEqual(initial);
+  });
+
+  it('조우 복구는 획득·영구 제거·용량·부착물을 보존하고 최초 배분을 다시 적용하지 않는다', () => {
+    const player = new Player();
+    player.startRun('startingAmmo', 'p220');
+    player.supplyAmmo('opening');
+    player.removeSupplyAmmo('flatNose');
+    player.applyAmmoReward('mimic');
+    player.upgradeAmmoCapacity();
+    player.claimAttachment('highCapacityMagazine'); player.equipAttachment('highCapacityMagazine');
+    player.addAmmo('opening'); player.fireRound({ ammoType: 'opening' });
+    player.addAmmo('flatNose');
+    player.endEncounter();
+    expect(player.getBuild()).toEqual(createAmmoBuild({ opening: 2, flatNose: 1, mimic: 1 }));
+    expect(player.getStock()).toEqual({ ...player.getBuild(), ball: 'infinite' });
+    expect(player.magazine.size).toBe(0);
+    expect(player.magazine.capacity).toBe(6);
+    expect(player.getSpecialCapacity()).toBe(16);
+    expect(player.getOwnedAttachments()).toEqual(['highCapacityMagazine']);
+  });
+
+  it.each(WEAPON_ORDER)('재시작은 %s와 모드를 유지하며 최초 배분으로 초기화한다', weapon => {
+    const player = new Player();
+    player.startRun('startingAmmo', weapon);
+    player.supplyAmmo('mimic'); player.claimAttachment('compensator');
+    player.upgradeAmmoCapacity(); player.addAmmo('ball'); player.isAlive = false;
+    player.reset();
+    expect(player.gameMode).toBe('startingAmmo');
+    expect(player.weapon.id).toBe(weapon);
+    expect(player.getBuild()).toEqual(createAmmoBuild(STARTING_AMMO_LOADOUTS[weapon]));
+    expect(player.getStock()).toEqual({ ...player.getBuild(), ball: 'infinite' });
+    expect(player.magazine.size).toBe(0);
+    expect(player.getOwnedAttachments()).toEqual([]);
+    expect(player.getSpecialCapacity()).toBe(14);
+    expect(player.isAlive).toBe(true);
+  });
+
+  it('새 런의 모드·무기 변경은 보유·잔량·예약을 넘기지 않는다', () => {
+    const player = new Player();
+    player.startRun('startingAmmo', 'p220'); player.addAmmo('opening');
+    player.startRun('free', 'm500');
+    expect(player.getBuild()).toEqual(createAmmoBuild());
+    expect(player.magazine.size).toBe(0);
+    player.supplyAmmo('highHeat'); player.addAmmo('highHeat');
+    player.startRun('startingAmmo', 'm1911');
+    expect(player.getBuild()).toEqual(createAmmoBuild({ finisher: 1, wounding: 2 }));
+    expect(player.getStock().highHeat).toBe(0);
+    expect(player.magazine.size).toBe(0);
+  });
+
+  it('프리 모드의 수동 보급·구간별 복구 동작을 유지한다', () => {
+    const player = new Player();
+    player.startRun('free', 'desertEagle'); player.supplyAmmo('plusP');
+    player.addAmmo('plusP'); player.fireRound({ ammoType: 'plusP' });
+    player.endEncounter();
+    expect(player.getStock().plusP).toBe(0);
+    player.startStage();
+    expect(player.getStock().plusP).toBe(1);
+    player.reset();
+    expect(player.weapon.id).toBe('desertEagle');
+    expect(player.getBuild()).toEqual(createAmmoBuild());
+  });
   it('초기와 재시작 소지 탄약은 무한 표준탄뿐이다', () => {
     const player = new Player();
     expect(player.getAvailable('ball')).toBe('infinite');
