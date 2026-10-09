@@ -3,8 +3,10 @@ import { isAttachmentCompatible } from '../data/attachmentDefinitions';
 import { ammoStatsMarkup, ammoTooltipStatsMarkup, firingOrderStatEntries } from './AmmoView';
 import { commitMagazine, emptyPayload, layerActivations, ruleText } from '../combat/AmmoRules';
 import { ACTION_NAMES, getRangeBand, isIgnited, isVulnerable, previewEnemyAction } from '../combat/CombatResolver';
+import { ENEMY_RANGED_ACTIONS } from '../data/enemyActionDefinitions';
+import { enemyActionPreviewText, enemyActionResultText } from './EnemyActionView';
 import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
-import type { AmmoFamily, AmmoType, AttachmentSlot, EnemyActionPreview, EnemyState, FirepowerBreakdown, PlayerCombatState, RoundPreview, SequenceResult, ShotResult } from '../combat/types';
+import type { AmmoFamily, AmmoType, AttachmentSlot, EnemyActionPreview, EnemyActionResult, EnemyState, FirepowerBreakdown, PlayerCombatState, RoundPreview, SequenceResult, ShotResult } from '../combat/types';
 import { BUILD_LABEL } from '../buildInfo';
 import type { GamePhase } from '../core/GameStateMachine';
 import { ATTACHMENT_DEFINITIONS, ATTACHMENT_ORDER, ATTACHMENT_RARITY_NAMES, ATTACHMENT_SLOT_NAMES, ATTACHMENT_SLOT_ORDER, type AttachmentId, type LoadoutSnapshot } from '../data/attachmentDefinitions';
@@ -624,15 +626,18 @@ export class GameUI {
     const enemyName = enemy.trainingActions ? '훈련 감염체' : ENEMY_DEFINITIONS[enemy.type].name;
     this.levelText.textContent = enemyName;
     this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
-    this.nextActionName.textContent = action.selectedAction === 'approach'
-      ? `${ACTION_NAMES[action.selectedAction]} ${action.movement.toFixed(1)} m`
-      : ACTION_NAMES[action.selectedAction];
-    if (action.suppressedIntent) this.nextActionName.textContent = `${ACTION_NAMES[action.suppressedIntent]} 봉쇄 → 접근 ${action.movement.toFixed(1)} m`;
+    this.nextAction.querySelector('small')!.textContent = '다음 행동';
+    this.nextActionName.textContent = enemyActionPreviewText(action);
+    this.nextAction.setAttribute('aria-label', `다음 행동: ${this.nextActionName.textContent}`);
     this.nextAction.toggleAttribute('data-ignition-suppressed', Boolean(action.suppressedIntent));
     this.nextActionShock.querySelector<HTMLElement>('b')!.textContent = String(action.threshold);
     this.nextActionShock.setAttribute('aria-label', `중단 충격 ${action.threshold}`);
     const actionDescription = action.suppressedIntent
       ? `점화로 ${ACTION_NAMES[action.suppressedIntent]}의 모든 효과를 봉쇄하고 ${action.movement.toFixed(1)} m 접근합니다.`
+      : action.rangeDelayed || action.delayedAction && !action.recovery
+      ? `사거리 밖에서는 접근하고 같은 행동을 다시 시도합니다. 근접 도달 시 근접 공격을 우선합니다.`
+      : action.recovery
+      ? '충격으로 중단된 근접 공격은 회복 접근을 한 번 수행한 뒤 다시 예고합니다. 이동 거리가 0 m여도 행동을 소비합니다.'
       : action.selectedAction === 'approach'
       ? `${action.movement.toFixed(1)} m 접근합니다.`
       : action.selectedAction === 'attack'
@@ -642,9 +647,23 @@ export class GameUI {
           groundShock: '반동에 따른 화력 감소를 2턴 동안 강화합니다.',
           sonicPulse: '유효 거리 판정을 2턴 동안 1단계 악화합니다.',
         }[action.selectedAction]);
-    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다. 심부 절개탄은 +1턴이며, 더 긴 남은 지속시간은 보존합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b>이 임계치에 닿으면 다음 행동이 중단됩니다.</span><span class="intent-detail"><b>${ACTION_NAMES[action.selectedAction]}</b> · ${actionDescription}</span>`;
+    const rangeAction = action.delayedAction ?? action.suppressedIntent ?? action.selectedAction;
+    const rangeText = rangeAction !== 'approach' && rangeAction !== 'attack'
+      ? ` · 사거리 0 m 초과 ~ ${ENEMY_RANGED_ACTIONS[rangeAction].maxRange} m` : '';
+    this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다. 심부 절개탄은 +1턴이며, 더 긴 남은 지속시간은 보존합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b> 중단 시 근접은 회복 접근을 거치고, 원거리는 다음에 다른 행동을 선택합니다. <b>후퇴</b>는 사거리 밖에서만 행동을 지연합니다. 능력별 사거리 밖에서는 접근합니다.</span><span class="intent-detail"><b>${ACTION_NAMES[rangeAction]}</b>${rangeText} · ${actionDescription}</span>`;
     this.enemyContext.parentElement?.setAttribute('aria-label', `${enemyName}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 폭발 ${enemy.explosive}, 화상 ${enemy.burn}/${enemy.burnThreshold}${isIgnited(enemy) ? ', 점화' : ''}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
     this.enemyContext.insertAdjacentHTML('beforeend', `<span><b>화상 ${enemy.burn}/${enemy.burnThreshold}</b> · 턴 사이에 유지되며 자동 피해는 없습니다. 한 발당 임계치를 한 번 소비해 초과분을 남기고 <b>점화</b>합니다. 다음 행동을 수행할 때 특수 행동을 일반 접근으로 바꾸고 점화가 해제됩니다. 충격으로 행동이 중단되면 점화는 유지됩니다.</span>`);
+  }
+
+  showEnemyAction(action: EnemyActionResult): void {
+    this.nextAction.querySelector('small')!.textContent = '행동 결과';
+    this.nextActionName.textContent = enemyActionResultText(action);
+    this.nextAction.setAttribute('aria-label', `행동 결과: ${this.nextActionName.textContent}`);
+    this.impactText.textContent = String(action.shockRemaining);
+    this.impactThreshold.textContent = `/${action.threshold}`;
+    this.impactFill.style.width = `${Math.min(100, action.shockRemaining / action.threshold * 100)}%`;
+    this.nextActionShock.querySelector<HTMLElement>('b')!.textContent = String(action.threshold);
+    this.nextActionShock.setAttribute('aria-label', `중단 충격 ${action.threshold}`);
   }
 
   renderPreview(sequence: SequenceResult | undefined,

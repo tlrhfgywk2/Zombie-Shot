@@ -209,18 +209,15 @@ export class Game {
     const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), this.player.getCombatState(), this.player.loadout.getSnapshot());
     this.zombie.applyState(action.after);
     this.player.applyCombatState(action.playerAfter);
-    if (action.intentDetail) {
-      this.syncEnemy();
-      await this.pause(420);
-    }
-
+    this.ui.showEnemyAction(action);
+    if (action.intentDetail) await this.pause(420);
     if (action.movement > 0) await this.presentation.animateAdvance(this.zombie.distance);
-    this.syncEnemy();
     if (action.playerKilled) {
       this.showBreach();
       return;
     }
     await this.pause(350);
+    this.syncEnemy();
     this.state.transition('AMMO_SELECTION');
     this.ui.setLocked(false);
     this.ui.setPhase('AMMO_SELECTION');

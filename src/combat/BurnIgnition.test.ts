@@ -59,7 +59,7 @@ describe('점화와 적 행동', () => {
     expect(resolver.resolveShot('ball', 1, shot.after).after.burn).toBe(46);
   });
   it.each(['contaminator', 'groundshaker', 'screecher'] as const)('%s의 예정된 특수 행동 효과를 전부 봉쇄하고 일반 접근한다', type => {
-    const enemy = { ...createEnemyState(type), ignitedActions: 1 };
+    const enemy = { ...createEnemyState(type), distance: 4, ignitedActions: 1 };
     const preview = previewEnemyAction(enemy);
     expect(preview).toMatchObject({ selectedAction: 'approach', suppressedIntent: enemy.intent!.type, movement: enemy.advancePerTurn });
     const normal = resolver.resolveEnemyAction({ ...enemy, ignitedActions: 0 }, createPlayerCombatState(), { rail: 'laserSight' });

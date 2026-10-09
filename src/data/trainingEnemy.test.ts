@@ -15,7 +15,7 @@ describe('단일 훈련 표적', () => {
 
   it('예고와 실제 행동이 일치하고 한 묶음을 마치면 새 순서를 만든다', () => {
     const resolver = new CombatResolver();
-    let enemy = { ...createTrainingEnemy(), trainingActions: createTrainingActions(() => 0) };
+    let enemy = { ...createTrainingEnemy(), distance: 4, trainingActions: createTrainingActions(() => 0) };
     for (const expected of enemy.trainingActions) {
       const original = enemy.trainingActions;
       expect(previewEnemyAction(enemy).selectedAction).toBe(expected);
@@ -25,6 +25,6 @@ describe('단일 훈련 표적', () => {
       enemy = { ...result.after, trainingActions: [...result.after.trainingActions!] };
     }
     expect(enemy.trainingActions).toHaveLength(4);
-    expect(resolver.resolveEnemyAction({ ...enemy, distance: 0 })).toMatchObject({ selectedAction: 'attack', playerKilled: true });
+    expect(resolver.resolveEnemyAction({ ...enemy, distance: 0, telegraphedAction: undefined })).toMatchObject({ selectedAction: 'attack', playerKilled: true });
   });
 });

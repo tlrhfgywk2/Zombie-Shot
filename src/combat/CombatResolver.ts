@@ -7,6 +7,7 @@ import { getEnabledAttachmentIds, getMagazineCapacity, createPlayerCombatState }
 import { commitMagazine, resolveAmmoRules } from './AmmoRules';
 import { recoilFirepowerPenalty } from './RecoilPenalty';
 import { createTrainingActions } from '../data/trainingEnemy';
+import { ENEMY_RANGED_ACTIONS } from '../data/enemyActionDefinitions';
 import type { AmmoFamily, AmmoType, CommittedMagazine, PayloadModifier, PrimaryEffectValues, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState,
   FirepowerBreakdown, PlayerCombatState, RangeBand, RoundPreview, SequenceResult, ShotResult } from './types';
 
@@ -54,21 +55,32 @@ export const ACTION_NAMES: Record<EnemyActionType, string> = {
   approach: '접근', attack: '치명 공격', contaminate: '오염 투척', groundShock: '지반 충격', sonicPulse: '초음파 공명',
 };
 const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
-  enemy.distance <= 0 ? 'attack' : enemy.trainingActions?.[0] ?? (enemy.intent && enemy.intent.countdown <= 1 ? enemy.intent.type : 'approach');
+  enemy.meleeRecovery ? 'approach' : enemy.distance <= 0 ? 'attack'
+    : enemy.delayedAction && isActionSupported(enemy, enemy.delayedAction)
+      ? isEnemyActionInRange(enemy, enemy.delayedAction) ? enemy.delayedAction : 'approach'
+    : enemy.trainingActions?.find(action => action !== enemy.excludedAction && isEnemyActionInRange(enemy, action))
+      ?? (enemy.intent && enemy.intent.countdown <= 1 && enemy.intent.type !== enemy.excludedAction
+        && isEnemyActionInRange(enemy, enemy.intent.type) ? enemy.intent.type : 'approach');
+export const isActionSupported = (enemy: EnemyState, action: EnemyActionType): boolean =>
+  !isSpecialAction(action) || enemy.intent?.type === action || Boolean(enemy.trainingActions?.includes(action));
+export const isEnemyActionInRange = (enemy: EnemyState, action: EnemyActionType): boolean =>
+  action === 'approach' || (action === 'attack' ? enemy.distance <= 0 : enemy.distance > 0 && enemy.distance <= ENEMY_RANGED_ACTIONS[action].maxRange);
 export const isSpecialAction = (action: EnemyActionType): action is Exclude<EnemyActionType, 'approach' | 'attack'> =>
   action !== 'approach' && action !== 'attack';
 export const selectEnemyAction = (enemy: EnemyState): EnemyActionType => {
-  const scheduled = scheduledEnemyAction(enemy);
+  const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
   return isIgnited(enemy) && isSpecialAction(scheduled) ? 'approach' : scheduled;
 };
 export const getActionShockThreshold = (enemy: EnemyState, action = selectEnemyAction(enemy)): number =>
   Math.max(1, ACTION_SHOCK_THRESHOLDS[action] + enemy.shockResistance);
 export const previewEnemyAction = (enemy: EnemyState): EnemyActionPreview => {
   const selectedAction = selectEnemyAction(enemy);
-  const movement = selectedAction === 'approach' ? Math.min(enemy.distance, enemy.advancePerTurn) : 0;
-  const scheduled = scheduledEnemyAction(enemy);
+  const rangeDelayed = !isEnemyActionInRange(enemy, selectedAction) || !isActionSupported(enemy, selectedAction);
+  const movement = selectedAction === 'approach' || rangeDelayed ? Math.min(enemy.distance, enemy.advancePerTurn) : 0;
+  const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
   return { selectedAction, threshold: getActionShockThreshold(enemy, selectedAction), movement,
-    suppressedIntent: isIgnited(enemy) && isSpecialAction(scheduled) ? scheduled : undefined };
+    suppressedIntent: isIgnited(enemy) && isSpecialAction(scheduled) ? scheduled : undefined,
+    rangeDelayed, recovery: Boolean(enemy.meleeRecovery), delayedAction: enemy.delayedAction };
 };
 const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
   const next = clonePlayerState(state);
@@ -85,6 +97,7 @@ const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
 };
 
 export class CombatResolver {
+  constructor(private readonly random: () => number = Math.random) {}
   private modifiers(context: CombatContext): AttachmentModifier[] {
     return getEnabledAttachmentIds(context.loadout ?? {}, context.playerState ?? createPlayerCombatState(), context.weaponId)
       .flatMap(id => ATTACHMENT_DEFINITIONS[id].modifiers);
@@ -181,7 +194,8 @@ export class CombatResolver {
     const weapon = WEAPON_DEFINITIONS[context.weaponId ?? 'p220'];
     const weaponEffect = weaponPayload(definition, weapon, cursor.previousFamily, Boolean(context.boostedOpening && index === 0));
     const before = cloneState(enemy);
-    const after = cloneState(enemy);
+    before.telegraphedAction ??= scheduledEnemyAction(enemy);
+    const after = cloneState(before);
     if (definition.moveBefore) after.distance = this.clampDistance(after.distance + definition.moveBefore);
     const shotDistance = after.distance;
     const range = this.rangePenalty(shotDistance, context);
@@ -324,40 +338,89 @@ export class CombatResolver {
     const before = cloneState(enemyState);
     const after = cloneState(enemyState);
     const playerBefore = clonePlayerState(playerState);
+    const action = previewEnemyAction(before);
+    if (before.hp <= 0) {
+      delete after.telegraphedAction;
+      delete after.delayedAction;
+      delete after.meleeRecovery;
+      delete after.excludedAction;
+      return { before, after, playerBefore, playerAfter: clonePlayerState(playerState), movement: 0,
+        selectedAction: action.selectedAction, threshold: action.threshold, interrupted: false,
+        shockConsumed: 0, shockRemaining: after.actionShock, playerKilled: false, resolution: 'dead' };
+    }
     const playerAfter = tickPlayerEffects(playerState);
-    const action = previewEnemyAction(after);
     const interrupted = after.actionShock >= action.threshold;
     const shockConsumed = interrupted ? action.threshold : 0;
     after.actionShock -= shockConsumed;
+    // 이전 제외는 이번 기회에서 끝난다. 새 충격 중단만 다음 기회의 제외를 만든다.
+    delete after.excludedAction;
+    delete after.telegraphedAction;
     let movement = 0;
     let playerKilled = false;
     let intentResolved: EnemyActionResult['intentResolved'];
     let intentDetail: string | undefined;
-    if (action.selectedAction !== 'approach' && action.selectedAction !== 'attack') {
-      if (!interrupted) {
-        intentResolved = action.selectedAction;
-        intentDetail = this.applyIntent(action.selectedAction, after, playerAfter, loadout);
+    let executedAction: EnemyActionType | undefined;
+    let resolution: EnemyActionResult['resolution'] = 'normal';
+    let consumeScheduled = false;
+    if (interrupted) {
+      resolution = 'shock-nullified';
+      if (action.selectedAction === 'attack') {
+        after.delayedAction = action.selectedAction;
+        after.meleeRecovery = true;
+      } else if (!action.recovery) {
+        delete after.delayedAction;
+        delete after.meleeRecovery;
       }
-      if (after.intent) after.intent.countdown = after.intent.cooldown;
+      if (isSpecialAction(action.selectedAction)) {
+        after.excludedAction = action.selectedAction;
+        if (after.intent) after.intent.countdown = after.intent.cooldown;
+        consumeScheduled = true;
+      } else if (!action.recovery && !action.rangeDelayed) consumeScheduled = true;
+      if (action.selectedAction === 'approach' && !action.recovery && after.intent) {
+        after.intent.countdown = Math.max(1, after.intent.countdown - 1);
+      }
     } else {
-      if (after.intent) after.intent.countdown = action.suppressedIntent && !interrupted
-        ? after.intent.cooldown : Math.max(1, after.intent.countdown - 1);
-      if (!interrupted && action.selectedAction === 'attack') playerKilled = true;
-      if (!interrupted && action.selectedAction === 'approach') {
+      executedAction = action.rangeDelayed ? 'approach' : action.selectedAction;
+      if (action.rangeDelayed) {
+        resolution = 'retreat-delayed';
+        // 미지원 능력은 폐기한다. 근접 도달 시 원거리 보류를 폐기해 근접 우선권을 보장한다.
+        if (action.selectedAction !== 'approach' && isActionSupported(after, action.selectedAction)
+          && !(isSpecialAction(action.selectedAction) && after.distance <= 0)) after.delayedAction = action.selectedAction;
+        else delete after.delayedAction;
+      } else if (action.recovery) {
+        resolution = 'melee-recovery';
+        delete after.meleeRecovery;
+      } else {
+        const pursuing = action.selectedAction === 'approach' && Boolean(after.delayedAction);
+        if (!pursuing) delete after.delayedAction;
+        consumeScheduled = !pursuing;
+      }
+      if (executedAction === 'approach') {
         movement = action.movement;
         after.distance = this.clampDistance(after.distance - movement);
+        if (!action.rangeDelayed && !action.recovery && !after.delayedAction && after.intent) after.intent.countdown = action.suppressedIntent
+          ? after.intent.cooldown : Math.max(1, after.intent.countdown - 1);
+      } else if (executedAction === 'attack') playerKilled = true;
+      else {
+        intentResolved = executedAction;
+        intentDetail = this.applyIntent(executedAction, after, playerAfter, loadout);
+        if (after.intent) after.intent.countdown = after.intent.cooldown;
       }
     }
-    // 한 탄창이 한 플레이어 턴이다. 발동 턴을 포함하며, 행동이 중단되어도 턴은 끝난다.
+    // 한 탄창이 한 플레이어 턴이다. 중단에도 취약 시간은 흐르고 점화는 실제 행동 때만 소비한다.
     after.vulnerableTurns = Math.max(0, after.vulnerableTurns - 1);
-    // 충격으로 행동 자체가 중단되면 아직 다음 행동을 수행하지 않았으므로 점화를 보존한다.
     if (!interrupted) after.ignitedActions = Math.max(0, after.ignitedActions - 1);
     after.turnsElapsed += 1;
-    if (after.trainingActions) {
-      const remaining = after.trainingActions.slice(1);
-      after.trainingActions = remaining.length ? remaining : createTrainingActions();
+    if (after.trainingActions && consumeScheduled) {
+      const consumed = action.suppressedIntent ?? action.selectedAction;
+      const index = after.trainingActions.indexOf(consumed);
+      const remaining = after.trainingActions.filter((_, position) => position !== index);
+      after.trainingActions = remaining.length ? remaining : createTrainingActions(this.random);
     }
-    return { before, after, playerBefore, playerAfter, movement,
+    if (after.delayedAction && (isSpecialAction(after.delayedAction) && after.distance <= 0
+      || !isActionSupported(after, after.delayedAction))) delete after.delayedAction;
+    after.telegraphedAction = scheduledEnemyAction(after);
+    return { before, after, playerBefore, playerAfter, movement, executedAction, resolution,
       selectedAction: action.selectedAction, threshold: action.threshold, interrupted,
       shockConsumed, shockRemaining: after.actionShock,
       playerKilled, intentResolved, intentDetail, suppressedIntent: action.suppressedIntent };
