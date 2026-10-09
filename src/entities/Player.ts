@@ -1,4 +1,5 @@
 import { WEAPON_DEFINITIONS, type WeaponId } from '../data/weaponDefinitions';
+import { createRunAmmoBuild, type GameMode } from '../data/gameModes';
 import { Magazine } from '../combat/Magazine';
 import { AttachmentLoadout, createPlayerCombatState, getMagazineCapacity } from '../combat/AttachmentLoadout';
 import type { AmmoType, AttachmentSlot, PlayerCombatState, ShotResult } from '../combat/types';
@@ -14,9 +15,21 @@ export class Player {
   private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
   private ownedAttachments = new Set<AttachmentId>();
   private combatState: PlayerCombatState = createPlayerCombatState();
+  private mode: GameMode = 'free';
 
   constructor() { this.syncMagazineCapacity(); }
   get weapon() { return WEAPON_DEFINITIONS[this.loadout.weapon]; }
+  get gameMode(): GameMode { return this.mode; }
+  startRun(mode: GameMode, weapon: WeaponId): void {
+    this.mode = mode;
+    this.build = createRunAmmoBuild(mode, weapon);
+    this.specialCapacity = AMMO_BUILD_BALANCE.specialCapacity;
+    this.ownedAttachments.clear();
+    this.magazine.clear();
+    this.selectWeapon(weapon);
+    this.startStage();
+    this.isAlive = true;
+  }
   selectWeapon(id: WeaponId): void {
     this.loadout.reset(); this.loadout.weapon = id; this.magazine.setWeapon(id); this.syncMagazineCapacity();
   }
@@ -76,6 +89,10 @@ export class Player {
     this.stock = createStageStock(this.build);
     this.clearCombatDisruptions();
   }
+  /** 초기 탄약 모드의 조우 소모만 복구한다. 보유 배분·영구 획득·제거는 유지한다. */
+  endEncounter(): void {
+    if (this.mode === 'startingAmmo') this.startStage();
+  }
   /** 교체 목록 전체를 검증한 뒤 한 번에 반영한다. 실패 시 배분과 잔량 모두 유지된다. */
   applyAmmoReward(ammo: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): boolean {
     if (!Object.hasOwn(this.build, ammo) || !AMMO_ORDER.includes(ammo)) return false;
@@ -116,8 +133,7 @@ export class Player {
   }
   clearCombatDisruptions(): void { this.combatState = createPlayerCombatState(); this.syncMagazineCapacity(); }
   reset(): void {
-    this.build = createAmmoBuild(); this.specialCapacity = AMMO_BUILD_BALANCE.specialCapacity;
-    this.ownedAttachments.clear(); this.selectWeapon('p220'); this.startStage(); this.isAlive = true;
+    this.startRun(this.mode, this.weapon.id);
   }
   private syncMagazineCapacity(): void { this.magazine.setCapacity(getMagazineCapacity(this.loadout.getSnapshot(), this.combatState, this.loadout.weapon)); }
 }

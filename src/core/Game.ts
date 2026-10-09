@@ -1,4 +1,5 @@
 import { type WeaponId } from '../data/weaponDefinitions';
+import type { GameMode } from '../data/gameModes';
 import { spinCylinder } from '../combat/WeaponTraits';
 import { CombatResolver, getVisualKickScale, previewEnemyAction } from '../combat/CombatResolver';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
@@ -28,9 +29,12 @@ export class Game {
   private boostedOpening = false;
   private cylinderDecided = false;
   private pendingAttachment?: AttachmentId;
+  private selectedMode: GameMode = 'free';
 
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
+      onChooseMode: mode => this.chooseMode(mode),
+      onReturnToMenu: () => this.returnToMenu(),
       onChooseWeapon: id => this.chooseWeapon(id),
       onCylinderDecision: spin => this.chooseCylinder(spin),
       onFireCylinder: () => void this.fireLoadedMagazine(),
@@ -55,13 +59,21 @@ export class Game {
     this.presentation = new GamePresentation(this.ui.canvasHost);
     this.setAudioPreferences(this.audioPreferences);
     this.sync();
-    this.ui.showWeaponSelection(true);
+    this.ui.showModeSelection();
     this.ui.setLocked(true);
+  }
+
+  private chooseMode(mode: GameMode): void {
+    if (this.state.phase !== 'MODE_SELECTION') return;
+    this.selectedMode = mode;
+    this.state.transition('WEAPON_SELECTION');
+    this.ui.showWeaponSelection(true, mode);
+    this.ui.setPhase(this.state.phase);
   }
 
   private chooseWeapon(id: WeaponId): void {
     if (this.state.phase !== 'WEAPON_SELECTION') return;
-    this.player.selectWeapon(id);
+    this.player.startRun(this.selectedMode, id);
     this.state.transition('AMMO_SELECTION');
     this.ui.showWeaponSelection(false);
     this.ui.setLocked(false);
@@ -91,12 +103,12 @@ export class Game {
   }
 
   private supplyAmmo(ammo: SpecialAmmoType): void {
-    if (['WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.supplyAmmo(ammo)) return;
+    if (['MODE_SELECTION', 'WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.supplyAmmo(ammo)) return;
     this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
   }
 
   private removeSupplyAmmo(ammo: SpecialAmmoType): void {
-    if (['WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.removeSupplyAmmo(ammo)) return;
+    if (['MODE_SELECTION', 'WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(this.state.phase) || !this.player.removeSupplyAmmo(ammo)) return;
     this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
   }
 
@@ -226,6 +238,8 @@ export class Game {
 
   private async handleZombieDeath(): Promise<void> {
     await this.presentation.animateDeath();
+    this.player.endEncounter();
+    this.syncMagazine();
 
     if (this.zombie.snapshot().special) {
       this.pendingAttachment = generateAttachmentReward(this.player.getOwnedAttachments(), this.player.loadout.weapon);
@@ -239,6 +253,8 @@ export class Game {
   }
 
   private showBreach(): void {
+    this.player.endEncounter();
+    this.syncMagazine();
     this.player.isAlive = false;
     this.state.transition('GAME_OVER');
     this.ui.setPhase('GAME_OVER');
@@ -305,9 +321,26 @@ export class Game {
   }
 
   private restart(): void {
-    if (this.state.phase !== 'GAME_OVER' && this.state.phase !== 'VICTORY') return;
-    this.state.transition('WEAPON_SELECTION');
+    if (this.busy || !['AMMO_SELECTION', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD'].includes(this.state.phase)) return;
     this.player.reset();
+    this.resetBattle();
+    this.state.reset('AMMO_SELECTION');
+    this.ui.showWeaponSelection(false);
+    this.ui.setLocked(false);
+    this.sync();
+  }
+
+  private returnToMenu(): void {
+    if (this.busy || !this.state.canTransition('MODE_SELECTION')) return;
+    this.state.transition('MODE_SELECTION');
+    this.player.startRun('free', 'p220');
+    this.resetBattle();
+    this.sync();
+    this.ui.showModeSelection();
+    this.ui.setLocked(true);
+  }
+
+  private resetBattle(): void {
     this.boostedOpening = false;
     this.cylinderDecided = false;
     this.pendingAttachment = undefined;
@@ -319,11 +352,9 @@ export class Game {
     this.busy = false;
     this.ui.showEndState('', false);
     this.ui.hideRouteChoice();
-    this.ui.setLocked(false);
+    this.ui.renderCylinderChoice(0, false, false);
+    this.presentation.resetZombie(this.zombie.distance);
     this.presentation.setZombie(this.zombie.distance, 1, 1, this.zombie.type);
-    this.sync();
-    this.ui.showWeaponSelection(true);
-    this.ui.setLocked(true);
   }
 
   private sync(): void {

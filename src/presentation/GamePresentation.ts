@@ -447,6 +447,17 @@ export class GamePresentation {
     this.zombieFallen = false;
   }
 
+  /** 새 런은 직전 조우의 사망 자세를 이어받지 않는다. */
+  resetZombie(distance: number): void {
+    this.zombieTargetZ = 1.1 - distance * 0.72;
+    this.zombieFallen = false;
+    this.zombieModel.root.visible = true;
+    this.zombieModel.root.rotation.set(0, 0, 0);
+    this.zombieModel.root.position.set(0, 0, this.zombieTargetZ);
+    this.zombieModel.leftArm.rotation.x = 0.9;
+    this.zombieModel.rightArm.rotation.x = 1.05;
+  }
+
   private buildActors(): void {
     this.zombieModel.root.position.z = this.zombieTargetZ;
     this.scene.add(this.zombieModel.root);
