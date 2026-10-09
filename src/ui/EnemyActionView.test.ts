@@ -12,11 +12,11 @@ describe('예고와 행동 결과 문구', () => {
     expect(enemyActionResultText(result)).toBe('오염 투척 지연 → 접근 2.8 m');
     expect(enemyActionPreviewText(previewEnemyAction(result.after))).toBe('오염 투척');
   });
-  it('충격 중단과 0m 회복 접근을 구분한다', () => {
-    const result = resolver.resolveEnemyAction({ ...createEnemyState('normal'), distance: 0, actionShock: 8 });
+  it('충격으로 막아도 근접에서는 다시 치명 공격을 표시한다', () => {
+    const result = resolver.resolveEnemyAction({ ...createEnemyState('normal'), distance: 0.5, actionShock: 8 });
     expect(enemyActionResultText(result)).toBe('치명 공격 · 충격 중단');
-    expect(enemyActionPreviewText(previewEnemyAction(result.after))).toBe('회복 접근 0.0 m');
-    expect(enemyActionResultText(resolver.resolveEnemyAction(result.after))).toBe('회복 접근 0.0 m');
+    expect(enemyActionPreviewText(previewEnemyAction(result.after))).toBe('치명 공격');
+    expect(enemyActionResultText(resolver.resolveEnemyAction(result.after))).toBe('치명 공격');
   });
   it('멀리 있는 보류 능력은 접근으로 예고한다', () => {
     const result = resolver.resolveEnemyAction({ ...createEnemyState('groundshaker'), distance: 8, delayedAction: 'groundShock' });

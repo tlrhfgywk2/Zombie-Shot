@@ -15,15 +15,15 @@ describe('화력 계산 내역', () => {
       distanceReduction: 0, distancePenaltyPercents: [], detonationDamage: 0, ruptureDamage: 0, finalFirepower: 5 });
     expect(resolver.resolveSequence(['ball'], target({ distance: 8 })).firepowerBreakdown).toEqual({
       prePenaltyFirepower: 5, recoilReduction: 0, playerDebuffReduction: 0, distanceReduction: 1,
-      distancePenaltyPercents: [10], detonationDamage: 0, ruptureDamage: 0, finalFirepower: 4,
+      distancePenaltyPercents: [20], detonationDamage: 0, ruptureDamage: 0, finalFirepower: 4,
     });
   });
 
   it('같은 거리의 작은 손실을 탄창 안에서 누적해 8m가 6m보다 유리해지지 않는다', () => {
     const rounds = ['ball', 'ball', 'ball', 'ball'] as const;
-    const near = resolver.resolveSequence(rounds, target({ distance: 4 }));
+    const near = resolver.resolveSequence(rounds, target({ distance: 3.999 }));
     const mid = resolver.resolveSequence(rounds, target({ distance: 6 }));
-    const midEdge = resolver.resolveSequence(rounds, target({ distance: 8 }));
+    const midEdge = resolver.resolveSequence(rounds, target({ distance: 7.999 }));
     const far = resolver.resolveSequence(rounds, target({ distance: 9 }));
     expect(near.firepowerBreakdown).toMatchObject({ recoilReduction: 0, distanceReduction: 0, finalFirepower: 20 });
     expect(mid.firepowerBreakdown).toMatchObject({ recoilReduction: 0,
@@ -78,9 +78,9 @@ describe('화력 계산 내역', () => {
     expect(sequence.shots.map(shot => shot.breakdown.recoilAfter)).toEqual([0, 0, 0, 0]);
     expect(sequence.shots.map(shot => shot.breakdown.recoilPenalty)).toEqual([0, 0, 0, 0]);
     expect(sequence.shots[3]?.breakdown).toMatchObject({ prePenaltyFirepower: 5,
-      recoilFirepowerReduction: 0, rangePenaltyPercent: 10 });
+      recoilFirepowerReduction: 0, rangePenaltyPercent: 20 });
     expect(sequence.firepowerBreakdown).toEqual({ prePenaltyFirepower: 20, recoilReduction: 0,
-      playerDebuffReduction: 0, distanceReduction: 2, distancePenaltyPercents: [10], detonationDamage: 0, ruptureDamage: 0, finalFirepower: 18 });
+      playerDebuffReduction: 0, distanceReduction: 4, distancePenaltyPercents: [20], detonationDamage: 0, ruptureDamage: 0, finalFirepower: 16 });
   });
 
   it('탄약 패널 후보는 현재 발사 순서 맨 뒤에 추가한 화력을 미리 계산한다', () => {
