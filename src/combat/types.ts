@@ -66,6 +66,11 @@ export interface EnemyState {
   turnsElapsed: number;
   intent?: EnemyIntentState;
   trainingActions?: readonly EnemyActionType[];
+  /** 사격 시작 시 고정하며, 적 행동 기회가 끝날 때만 새로 선택한다. */
+  telegraphedAction?: EnemyActionType;
+  delayedAction?: Exclude<EnemyActionType, 'approach'>;
+  meleeRecovery?: boolean;
+  excludedAction?: EnemyIntentType;
 }
 export interface PlayerCombatState {
   heavyKickPenaltyBonus: number;
@@ -194,9 +199,14 @@ export interface SequenceResult {
 export interface EnemyActionPreview {
   selectedAction: EnemyActionType; threshold: number; movement: number;
   suppressedIntent?: EnemyIntentType;
+  rangeDelayed?: boolean;
+  recovery?: boolean;
+  delayedAction?: Exclude<EnemyActionType, 'approach'>;
 }
 export interface EnemyActionResult {
   selectedAction: EnemyActionType;
+  executedAction?: EnemyActionType;
+  resolution: 'normal' | 'shock-nullified' | 'retreat-delayed' | 'melee-recovery' | 'dead';
   threshold: number;
   interrupted: boolean;
   shockConsumed: number;

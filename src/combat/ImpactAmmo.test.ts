@@ -85,7 +85,7 @@ describe('신규 충격 탄약', () => {
     expect(action.shockConsumed).toBe(4);
     expect(action.after.actionShock).toBe(2);
     expect(resolver.resolveShot('resonance', 0, action.after).actionShockApplied).toBe(3);
-    const ground = createEnemyState('groundshaker');
+    const ground = { ...createEnemyState('groundshaker'), distance: 4 };
     expect(getActionShockThreshold(ground)).toBe(9);
     const lit = resolver.resolveShot('hammer', 0, ground, { loadout: { rail: 'tacticalLight' } });
     expect(resolver.resolveEnemyAction(lit.after).interrupted).toBe(false);
