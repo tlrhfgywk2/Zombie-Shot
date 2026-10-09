@@ -17,6 +17,7 @@ import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { AudioPreferences } from '../presentation/AudioPreferences';
 import { applyResponsiveLayoutMode } from '../presentation/ResponsiveLayout';
 import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
+import type { ExplorationScreen } from './ExplorationView';
 
 export interface GameUICallbacks {
   onChooseMode: (mode: GameMode) => void;
@@ -37,6 +38,7 @@ export interface GameUICallbacks {
   onSupplyAttachment: (id: AttachmentId) => void;
   onRemoveSupplyAttachment: (id: AttachmentId) => void;
   onChooseRoute: (kind: RouteKind) => void;
+  onExplorationAction: (action: string, payment?: SpecialAmmoType) => void;
   onAudioMutedChange: (muted: boolean) => void;
   onAudioVolumeChange: (volume: number) => void;
   onLoad: () => void;
@@ -44,7 +46,7 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  MODE_SELECTION: '모드 선택',
+  MODE_SELECTION: '모드 선택', EXPLORATION: '동굴 탐험',
   WEAPON_SELECTION: '권총 선택', CYLINDER_CHOICE: '실린더 준비', ATTACHMENT_REWARD: '부착물 획득', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
@@ -174,6 +176,7 @@ export class GameUI {
         <section id="weapon-selection" class="route-choice weapon-selection" hidden role="dialog" aria-modal="true" aria-labelledby="weapon-selection-title"></section>
         <section id="route-choice" class="route-choice" hidden aria-label="다음 조우 경로 선택"><div class="route-card"><h2>경로 선택</h2><div id="route-options" class="route-options"></div></div></section>
         <section id="attachment-reward" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-reward-title"></section>
+        <section id="exploration" class="route-choice exploration-screen" hidden role="dialog" aria-modal="true" aria-labelledby="exploration-title"></section>
         <section id="ammo-inventory" class="route-choice ammo-inventory-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="ammo-inventory-title"></section>
         <section id="attachment-inventory" class="route-choice" hidden role="dialog" aria-modal="true" aria-labelledby="attachment-inventory-title"></section>
         <div class="build-id" data-testid="build-id" aria-label="배포 빌드 식별자">${BUILD_LABEL}</div>
@@ -374,8 +377,8 @@ export class GameUI {
     this.required(this.shell, '.game-stage').inert = true;
     this.required(this.shell, '.tactical-console').inert = true;
     host.innerHTML = `<div class="route-card mode-selection-card"><span>좀비 샷</span><h2 id="weapon-selection-title">모드 선택</h2><div class="mode-options">
-      <button type="button" class="mode-option" data-choose-mode="free"><strong>프리 모드</strong><span>표준탄 무제한 · 자유 보급</span></button>
-      <button type="button" class="mode-option" data-choose-mode="startingAmmo"><strong>초기 탄약 지급</strong><span>권총별 특수탄 · 조우 종료 시 복구</span></button>
+      <button type="button" class="mode-option" data-choose-mode="free"><strong>프리 모드</strong><span>권총별 초기 탄약 · 자유 보급 · 조우 종료 시 복구</span></button>
+      <button type="button" class="mode-option" data-choose-mode="exploration"><strong>탐험 모드</strong><span>프로토타입 · 숨겨진 갈림길 · 감염체와 탄약 거래</span></button>
     </div></div>`;
     host.querySelectorAll<HTMLButtonElement>('[data-choose-mode]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseMode(button.dataset.chooseMode as GameMode)));
     this.focusSelection(host);
@@ -396,7 +399,7 @@ export class GameUI {
         <div><dt>거리 ${rating.range}</dt><dd>0 / −${weapon.rangePenaltyPercentages.mid} / −${weapon.rangePenaltyPercentages.far}%</dd></div>
         <div><dt>반동 ${rating.recoil}</dt><dd title="원래 반동 0인 탄에는 추가 반동이 없습니다.">${weapon.recoilAdjustment ? `발생 +${weapon.recoilAdjustment} · ` : ''}허용 ${weapon.recoilThreshold}</dd></div>
         <div><dt>난도</dt><dd>${rating.difficulty}</dd></div>
-      </dl><details><summary>${weapon.traitLabel}</summary><p>${weapon.traitDetail}</p></details>${mode === 'startingAmmo' ? this.startingAmmoMarkup(id) : ''}<button type="button" data-choose-weapon="${id}">${weapon.name} 선택</button></article>`;
+      </dl><details><summary>${weapon.traitLabel}</summary><p>${weapon.traitDetail}</p></details>${this.startingAmmoMarkup(id)}<button type="button" data-choose-weapon="${id}">${weapon.name} 선택</button></article>`;
     }).join('')}</div></div>`;
     host.querySelectorAll<HTMLButtonElement>('[data-choose-weapon]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseWeapon(button.dataset.chooseWeapon as WeaponId)));
     host.querySelector('[data-selection-back]')?.addEventListener('click', this.callbacks.onReturnToMenu);
@@ -404,7 +407,7 @@ export class GameUI {
   }
 
   private startingAmmoMarkup(weapon: WeaponId): string {
-    const build = createRunAmmoBuild('startingAmmo', weapon);
+    const build = createRunAmmoBuild('free', weapon);
     const owned = AMMO_ORDER.filter(ammo => ammo === 'ball' || build[ammo] > 0);
     return `<section class="starting-ammo" aria-label="지급 탄약"><h4>지급 탄약</h4>${owned.map(ammo => {
       const definition = AMMO_DEFINITIONS[ammo];
@@ -416,7 +419,7 @@ export class GameUI {
   private focusSelection(host: HTMLElement): void {
     host.onkeydown = event => {
       if (event.key !== 'Tab') return;
-      const elements = [...host.querySelectorAll<HTMLElement>('button, summary')];
+      const elements = [...host.querySelectorAll<HTMLElement>('button:not(:disabled), summary, select')];
       if (event.shiftKey && document.activeElement === elements[0]) { event.preventDefault(); elements.at(-1)?.focus(); }
       else if (!event.shiftKey && document.activeElement === elements.at(-1)) { event.preventDefault(); elements[0]?.focus(); }
     };
@@ -614,6 +617,40 @@ export class GameUI {
 
   hideRouteChoice(): void { this.routeChoice.hidden = true; }
 
+  setGameMode(mode: GameMode): void {
+    this.shell.dataset.gameMode = mode;
+    this.required(this.shell, '#ammo-supply-button').hidden = mode === 'exploration';
+    this.required(this.shell, '#attachment-supply-button').hidden = mode === 'exploration';
+  }
+
+  showExploration(screen: ExplorationScreen): void {
+    this.closeAmmoInventory();
+    this.hideTooltip();
+    const host = this.required(this.shell, '#exploration');
+    this.required(this.shell, '.game-stage').inert = true;
+    this.required(this.shell, '.tactical-console').inert = true;
+    host.hidden = false;
+    host.innerHTML = `<div class="route-card cave-card"><header class="cave-header"><span>${screen.progress}</span><div><button type="button" data-cave-action="restart">다시 시작</button><button type="button" data-cave-action="menu">모드 선택</button></div></header>
+      <div class="cave-illustration" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+      <h2 id="exploration-title">${screen.title}</h2><p>${screen.description}</p>
+      <div class="cave-equipment"><strong>인지 ${screen.awareness}/3</strong>${screen.tools.map(tool => `<span>${tool}</span>`).join('')}${screen.capacity ? `<span>${screen.capacity}</span>` : ''}</div>
+      ${screen.payment ? `<label class="cave-payment">지불할 특수탄 <select aria-label="지불할 특수탄" data-cave-payment ${screen.payment.options.length ? '' : 'disabled'}>${screen.payment.options.length ? screen.payment.options.map(({ ammo, count }) => `<option value="${ammo}" ${screen.payment?.selected === ammo ? 'selected' : ''}>${AMMO_DEFINITIONS[ammo].name} · ${count}발</option>`).join('') : '<option>특수탄 없음</option>'}</select></label>` : ''}
+      <div class="cave-choices">${screen.choices.map(choice => `<button type="button" class="cave-choice" data-cave-action="${choice.id}" ${choice.disabled ? 'disabled' : ''}>
+        ${choice.ammo ? `<span class="round-visual ammo-${choice.ammo}" style="--bullet:${AMMO_DEFINITIONS[choice.ammo].cssColor}" aria-hidden="true"><i></i></span>` : '<span class="cave-choice-mark" aria-hidden="true">◇</span>'}
+        <span><strong>${choice.label}</strong><small>${choice.detail}</small></span>${choice.badge || choice.amount ? `<b>${choice.badge ?? `×${choice.amount}`}</b>` : ''}</button>`).join('')}</div></div>`;
+    host.querySelectorAll<HTMLButtonElement>('[data-cave-action]').forEach(button => button.addEventListener('click', () => this.callbacks.onExplorationAction(button.dataset.caveAction!)));
+    host.querySelector<HTMLSelectElement>('[data-cave-payment]')?.addEventListener('change', event => this.callbacks.onExplorationAction('payment', (event.target as HTMLSelectElement).value as SpecialAmmoType));
+    this.focusSelection(host);
+  }
+
+  hideExploration(): void {
+    const host = this.required(this.shell, '#exploration');
+    host.hidden = true;
+    host.onkeydown = null;
+    this.required(this.shell, '.game-stage').inert = false;
+    this.required(this.shell, '.tactical-console').inert = false;
+  }
+
   renderAudioPreferences(preferences: AudioPreferences): void {
     this.audioMute.setAttribute('aria-pressed', String(preferences.muted));
     this.audioMute.setAttribute('aria-label', preferences.muted ? '음향 켜기' : '음향 끄기');
@@ -633,7 +670,7 @@ export class GameUI {
     this.phaseText.textContent = PHASE_LABELS[phase];
     (this.required(this.shell, '#ammo-supply-button') as HTMLButtonElement).disabled = ['MODE_SELECTION', 'WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(phase);
     this.shell.querySelectorAll<HTMLButtonElement>('[data-restart-run], [data-return-to-menu]').forEach(button => {
-      button.disabled = !['AMMO_SELECTION', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD'].includes(phase);
+      button.disabled = !['AMMO_SELECTION', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD', 'EXPLORATION'].includes(phase);
     });
     if (this.inventorySupplyMode && (phase === 'GAME_OVER' || phase === 'VICTORY')) this.closeAmmoInventory();
     document.body.dataset.phase = phase;

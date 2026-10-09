@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { STARTING_AMMO_LOADOUTS } from '../data/gameModes';
 import { CombatResolver } from './CombatResolver';
 import { commitMagazine, conditionMatches, emptyPayload, resolveAmmoRules, symmetricSlot } from './AmmoRules';
 import { AMMO_DEFINITIONS, AMMO_ORDER } from '../data/ammoDefinitions';
@@ -208,7 +209,7 @@ describe('획득부터 발사와 초기화', () => {
     player.startStage();
     expect(player.getStock()[ammo]).toBe(1);
     player.reset();
-    expect(player.getStock()[ammo]).toBe(0);
+    expect(player.getStock()[ammo]).toBe(STARTING_AMMO_LOADOUTS.p220[ammo] ?? 0);
   });
   it('무작위 보상 풀에 새 탄이 있고 초안·구 제거 탄은 없다', () => {
     let seed = 12;

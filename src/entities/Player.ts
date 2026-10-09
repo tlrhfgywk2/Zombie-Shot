@@ -89,9 +89,26 @@ export class Player {
     this.stock = createStageStock(this.build);
     this.clearCombatDisruptions();
   }
-  /** 초기 탄약 모드의 조우 소모만 복구한다. 보유 배분·영구 획득·제거는 유지한다. */
+  /** 발사 소모만 복구한다. 거래로 넘긴 소유권은 복구하지 않는다. */
   endEncounter(): void {
-    if (this.mode === 'startingAmmo') this.startStage();
+    this.startStage();
+  }
+  /** 탐험 보상과 거래는 전체 검증 후 소유량·잔량을 함께 반영한다. 표준탄은 지불할 수 없다. */
+  exchangeAmmo(payment: readonly SpecialAmmoType[], gains: readonly SpecialAmmoType[] = []): boolean {
+    if (this.magazine.size > 0) return false;
+    const next = { ...this.build };
+    for (const ammo of payment) {
+      if (!Object.hasOwn(next, ammo) || next[ammo] <= 0) return false;
+      next[ammo] -= 1;
+    }
+    for (const ammo of gains) {
+      if (!Object.hasOwn(next, ammo)) return false;
+      next[ammo] += 1;
+    }
+    if (countAllocations(next) > this.specialCapacity) return false;
+    this.build = next;
+    this.stock = createStageStock(next);
+    return true;
   }
   /** 교체 목록 전체를 검증한 뒤 한 번에 반영한다. 실패 시 배분과 잔량 모두 유지된다. */
   applyAmmoReward(ammo: SpecialAmmoType, replacements: readonly SpecialAmmoType[] = []): boolean {

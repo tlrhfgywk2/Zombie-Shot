@@ -9,7 +9,7 @@ import { STARTING_AMMO_LOADOUTS } from '../data/gameModes';
 describe('런 탄약 소유와 소비', () => {
   it.each(WEAPON_ORDER)('%s의 초기 탄약은 조우 안에서만 소모되고 종료하면 복구한다', weapon => {
     const player = new Player();
-    player.startRun('startingAmmo', weapon);
+    player.startRun('free', weapon);
     const initial = createAmmoBuild(STARTING_AMMO_LOADOUTS[weapon]);
     expect(player.weapon.id).toBe(weapon);
     expect(player.getBuild()).toEqual(initial);
@@ -36,7 +36,7 @@ describe('런 탄약 소유와 소비', () => {
 
   it('조우 복구는 획득·영구 제거·용량·부착물을 보존하고 최초 배분을 다시 적용하지 않는다', () => {
     const player = new Player();
-    player.startRun('startingAmmo', 'p220');
+    player.startRun('free', 'p220');
     player.supplyAmmo('opening');
     player.removeSupplyAmmo('flatNose');
     player.applyAmmoReward('mimic');
@@ -55,11 +55,11 @@ describe('런 탄약 소유와 소비', () => {
 
   it.each(WEAPON_ORDER)('재시작은 %s와 모드를 유지하며 최초 배분으로 초기화한다', weapon => {
     const player = new Player();
-    player.startRun('startingAmmo', weapon);
+    player.startRun('free', weapon);
     player.supplyAmmo('mimic'); player.claimAttachment('compensator');
     player.upgradeAmmoCapacity(); player.addAmmo('ball'); player.isAlive = false;
     player.reset();
-    expect(player.gameMode).toBe('startingAmmo');
+    expect(player.gameMode).toBe('free');
     expect(player.weapon.id).toBe(weapon);
     expect(player.getBuild()).toEqual(createAmmoBuild(STARTING_AMMO_LOADOUTS[weapon]));
     expect(player.getStock()).toEqual({ ...player.getBuild(), ball: 'infinite' });
@@ -71,36 +71,36 @@ describe('런 탄약 소유와 소비', () => {
 
   it('새 런의 모드·무기 변경은 보유·잔량·예약을 넘기지 않는다', () => {
     const player = new Player();
-    player.startRun('startingAmmo', 'p220'); player.addAmmo('opening');
-    player.startRun('free', 'm500');
-    expect(player.getBuild()).toEqual(createAmmoBuild());
+    player.startRun('free', 'p220'); player.addAmmo('opening');
+    player.startRun('exploration', 'm500');
+    expect(player.getBuild()).toEqual(createAmmoBuild({ lightLoad: 1, relay: 1 }));
     expect(player.magazine.size).toBe(0);
     player.supplyAmmo('highHeat'); player.addAmmo('highHeat');
-    player.startRun('startingAmmo', 'm1911');
+    player.startRun('free', 'm1911');
     expect(player.getBuild()).toEqual(createAmmoBuild({ finisher: 1, wounding: 2 }));
     expect(player.getStock().highHeat).toBe(0);
     expect(player.magazine.size).toBe(0);
   });
 
-  it('프리 모드의 수동 보급·구간별 복구 동작을 유지한다', () => {
+  it('통합 프리 모드는 초기 지급과 수동 보급을 조우 종료 때 함께 복구한다', () => {
     const player = new Player();
     player.startRun('free', 'desertEagle'); player.supplyAmmo('plusP');
     player.addAmmo('plusP'); player.fireRound({ ammoType: 'plusP' });
     player.endEncounter();
-    expect(player.getStock().plusP).toBe(0);
+    expect(player.getStock().plusP).toBe(2);
     player.startStage();
-    expect(player.getStock().plusP).toBe(1);
+    expect(player.getStock().plusP).toBe(2);
     player.reset();
     expect(player.weapon.id).toBe('desertEagle');
-    expect(player.getBuild()).toEqual(createAmmoBuild());
+    expect(player.getBuild()).toEqual(createAmmoBuild(STARTING_AMMO_LOADOUTS.desertEagle));
   });
-  it('초기와 재시작 소지 탄약은 무한 표준탄뿐이다', () => {
+  it('선택 전 빈 보유량은 재시작할 때 기본 무기의 최초 지급량으로 돌아간다', () => {
     const player = new Player();
     expect(player.getAvailable('ball')).toBe('infinite');
     expect(Object.values(player.getBuild()).every(count => count === 0)).toBe(true);
     player.supplyAmmo('laceration'); player.supplyAmmo('wounding');
     player.reset();
-    expect(Object.values(player.getBuild()).every(count => count === 0)).toBe(true);
+    expect(player.getBuild()).toEqual(createAmmoBuild(STARTING_AMMO_LOADOUTS.p220));
   });
 
   it('장착 부착물을 보유 목록에서 제거하면 용량과 장전 예약을 함께 갱신한다', () => {

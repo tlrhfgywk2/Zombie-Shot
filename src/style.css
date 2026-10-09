@@ -838,6 +838,40 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .mode-option strong { font-size: var(--combat-value-prominent); }
 .mode-option span { color: var(--muted); font-size: .9rem; line-height: 1.5; }
 .mode-option:hover, .mode-option:focus-visible { border-color: var(--acid); background: #22311c; }
+.exploration-screen { background: radial-gradient(ellipse at 50% 20%, rgba(34,48,35,.45), rgba(3,7,5,.94) 70%); }
+.cave-card { width: min(760px, 100%); max-height: calc(100dvh - 2rem); overflow-y: auto; background: linear-gradient(160deg, #16201b, #0c110f); }
+.cave-header { display: flex; justify-content: space-between; align-items: center; gap: .5rem; color: var(--acid); font-size: .85rem; }
+.cave-header > div { display: flex; gap: .4rem; }
+.cave-header button { min-height: 38px; padding: .4rem .6rem; border: 1px solid var(--line); color: #c6d0c9; background: #18211c; cursor: pointer; font-size: .8rem; }
+.cave-illustration { position: relative; height: 85px; margin: 1.1rem 0; overflow: hidden; background: radial-gradient(ellipse at 50% 100%, #3c5140, #050907 64%); border-bottom: 1px solid #334437; }
+.cave-illustration i { position: absolute; top: -15px; height: 110px; width: 45%; background: #263229; clip-path: polygon(0 0, 95% 0, 85% 25%, 95% 40%, 60% 50%, 72% 68%, 38% 83%, 30% 100%, 0 100%); }
+.cave-illustration i:nth-child(2) { right: 0; transform: scaleX(-1); }
+.cave-illustration i:nth-child(3) { left: 35%; top: -50px; width: 30%; height: 85px; opacity: .6; }
+.cave-illustration b { position: absolute; width: 5px; height: 5px; border-radius: 50%; background: var(--acid); left: 50%; top: 63%; box-shadow: 0 0 22px 8px #9ba76355; animation: cave-glow 3s ease-in-out infinite alternate; }
+@keyframes cave-glow { to { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .cave-illustration b { animation: none; } }
+.cave-card > h2 { font-size: 1.65rem; }
+.cave-card > p { font-size: .95rem; line-height: 1.6; color: #b0bcb3; }
+.cave-equipment { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; padding: .7rem 0; margin-bottom: .6rem; border-top: 1px solid var(--line); }
+.cave-equipment strong { font-size: var(--combat-value-prominent); color: #d8edae; }
+.cave-equipment span { font-size: .85rem; padding: .3rem .45rem; background: #25332a; color: #c2d2c5; }
+.cave-payment { display: flex; align-items: center; flex-wrap: wrap; gap: .6rem; margin-bottom: .8rem; font-size: .9rem; }
+.cave-payment select { padding: .6rem; min-width: 0; max-width: 100%; color: #e6efe8; background: #1e2b23; border: 1px solid #526354; font: inherit; }
+.cave-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+.cave-choice { display: flex; min-width: 0; align-items: center; gap: .7rem; min-height: 100px; padding: .85rem; border: 1px solid #405044; background: #1a261e; text-align: left; cursor: pointer; }
+.cave-choice > span:not(.round-visual) { display: grid; gap: .4rem; min-width: 0; }
+.cave-choice strong { font-size: var(--combat-value-prominent); overflow-wrap: anywhere; }
+.cave-choice small { font-size: .85rem; line-height: 1.5; color: #b1c1b5; overflow-wrap: anywhere; }
+.cave-choice > b { margin-left: auto; flex: 0 0 auto; color: var(--acid); font-size: var(--combat-value-size); }
+.cave-choice .round-visual { flex: 0 0 24px; }
+.cave-choice-mark { color: #d1e1ad; font-size: 1.5rem; }
+.cave-choice:disabled { opacity: .45; cursor: default; }
+.cave-choice:not(:disabled):hover { border-color: var(--acid); background: #283921; }
+.game-shell[data-layout="portrait"] .cave-choices { grid-template-columns: 1fr; }
+.game-shell[data-layout="portrait"] .cave-card { max-height: calc(100dvh - 1.4rem - env(safe-area-inset-top) - env(safe-area-inset-bottom)); }
+.game-shell[data-layout="portrait"] .cave-header { flex-wrap: wrap; }
+.game-shell[data-layout="portrait"] .cave-illustration { height: 55px; margin: .7rem 0; }
+.game-shell[data-layout="portrait"] .cave-choice { min-height: 82px; }
 .starting-ammo { margin: 0 0 1rem; }
 .starting-ammo h4 { margin: 0 0 .5rem; color: var(--muted); font-size: .82rem; }
 .starting-ammo-round { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; align-items: center; gap: .5rem; min-height: 40px; padding: .25rem .4rem; border-bottom: 1px solid var(--line); }
