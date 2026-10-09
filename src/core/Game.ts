@@ -505,7 +505,7 @@ export class Game {
       }), { id: 'leave', label: '거래를 마친다', detail: '계속 탐험' }];
     } else if (active?.kind === 'event') {
       screen.title = EVENT_NAMES[active.event!];
-      screen.payment = { options, selected: this.payment };
+      if (active.event === 'survey' || active.event === 'shrine') screen.payment = { options, selected: this.payment };
       const canPay = Boolean(this.payment);
       const mapOwned = run.tools.has('map');
       switch (active.event) {

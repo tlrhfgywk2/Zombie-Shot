@@ -44,7 +44,7 @@ export function seededRandom(seed: string): () => number {
 const rewardPool: readonly SpecialAmmoType[] = ['hollowPoint', 'plusP', 'lowRecoil', 'wounding', 'laceration', 'hammer', 'retreat', 'advance', 'relay', 'opening', 'finisher'];
 const eventPool: readonly CaveEvent[] = ['cache', 'survey', 'shrine', 'nest'];
 const pick = <T>(pool: readonly T[], random: () => number): T => pool[Math.floor(random() * pool.length)]!;
-export const RUN_LENGTH = 8;
+export const RUN_LENGTH = 9;
 
 export class ExplorationRun {
   readonly layers: readonly (readonly CaveEncounter[])[];
@@ -65,16 +65,20 @@ export class ExplorationRun {
     this.layers = Array.from({ length: RUN_LENGTH }, (_, index) => {
       const depth = index + 1;
       const eventIndex = Math.floor(random() * eventPool.length);
+      const quietBranch = Math.floor(random() * 2);
       return Array.from({ length: depth === RUN_LENGTH ? 1 : 2 }, (_, branch): CaveEncounter => {
         const firstReward = pick(rewardPool, random);
         const rewards = [firstReward, pick(rewardPool.filter(ammo => ammo !== firstReward), random)];
         const id = `${depth}-${branch}`;
         if (depth === RUN_LENGTH) return { id, kind: 'exit', rewards: [] };
-        if (depth === 2 || depth === 6) return { id, kind: 'event', event: eventPool[(eventIndex + branch) % eventPool.length], rewards };
+        if (depth === 2 || depth === 7) return { id, kind: 'event', event: eventPool[(eventIndex + branch) % eventPool.length], rewards };
         if (depth === 4) return { id, kind: 'merchant', rewards, attachment: pick(['texturedGrip', 'compensator', 'laserSight'] as const, random) };
-        const enemy = depth === 1 ? 'normal' : depth === 7 ? pick(['screecher', 'groundshaker'] as const, random)
+        if (depth === 5 && branch === quietBranch) return random() < .5
+          ? { id, kind: 'event', event: eventPool[eventIndex], rewards }
+          : { id, kind: 'merchant', rewards, attachment: pick(['texturedGrip', 'compensator', 'laserSight'] as const, random) };
+        const enemy = depth === 1 ? 'normal' : depth === 8 ? pick(['screecher', 'groundshaker'] as const, random)
           : pick(depth === 3 ? ['normal', 'brute'] as const : ['brute', 'fast', 'tough'] as const, random);
-        return { id, kind: 'combat', enemy, rewards, attachment: depth === 7 ? 'texturedGrip' : undefined };
+        return { id, kind: 'combat', enemy, rewards, attachment: depth === 8 ? 'texturedGrip' : undefined };
       });
     });
   }
@@ -97,7 +101,9 @@ export class ExplorationRun {
     if (this.revealed.has(route.id)) return [encounterName(route)];
     const clues: string[] = [];
     if (this.tools.has('echo')) clues.push(route.kind === 'combat'
-      ? this.isDisruptor(route) ? '강한 공명 · 인지 교란' : '생체 반응' : route.kind === 'merchant' ? '고른 호흡' : '움직임 없음');
+      ? this.isDisruptor(route) ? '강한 공명 · 인지 교란' : route.enemy === 'fast' ? '빠른 생체 반응'
+        : route.enemy === 'brute' || route.enemy === 'tough' ? '무거운 생체 반응' : '생체 반응'
+      : route.kind === 'merchant' ? '고른 호흡' : '움직임 없음');
     if (this.tools.has('uv')) clues.push(route.kind === 'merchant' ? '거래 표식' : route.kind === 'event' ? '오래된 시설'
       : route.kind === 'exit' ? '바깥의 빛' : '자연 동굴');
     return clues.length ? clues : ['목적지 미확인'];

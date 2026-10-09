@@ -48,10 +48,23 @@ describe('숨겨진 경로와 정보 도구', () => {
     expect(run.victories).toBe(1);
     expect(run.avoided).toBe(1);
     expect(run.settleCombat()).toBe(false);
-    run.leave(); run.depth = 6; run.enter(0); run.awareness = 3;
+    run.leave(); run.depth = RUN_LENGTH - 2; run.enter(0); run.awareness = 3;
     expect(run.isDisruptor()).toBe(true);
     expect(run.canAvoid()).toBe(false);
     expect(run.settleCombat(true)).toBe(false);
+  });
+  it('혼합 갈림길의 전투·비전투를 단서로 구분하고 청음기는 생체 반응의 빠르기와 무게를 구분한다', () => {
+    const run = new ExplorationRun('갈림길');
+    const mixed = run.layers[4]!;
+    expect(mixed.filter(route => route.kind === 'combat')).toHaveLength(1);
+    expect(mixed.filter(route => route.kind !== 'combat')).toHaveLength(1);
+    run.acquire('uv');
+    expect(run.routeClues(mixed[0]!)).not.toEqual(run.routeClues(mixed[1]!));
+    run.acquire('echo');
+    const ordinary = { id: 'fixture', kind: 'combat' as const, rewards: [] };
+    expect(run.routeClues({ ...ordinary, enemy: 'normal' })[0]).toBe('생체 반응');
+    expect(run.routeClues({ ...ordinary, enemy: 'fast' })[0]).toBe('빠른 생체 반응');
+    expect(run.routeClues({ ...ordinary, enemy: 'brute' })[0]).toBe('무거운 생체 반응');
   });
 });
 
@@ -105,7 +118,7 @@ describe('탐험 기본 생존 밸런스', () => {
         }
         run.leave();
       }
-      expect(run.depth).toBe(RUN_LENGTH); expect(run.victories).toBe(4);
+      expect(run.depth).toBe(RUN_LENGTH); expect(run.victories).toBeGreaterThanOrEqual(4);
     }
   });
 });
