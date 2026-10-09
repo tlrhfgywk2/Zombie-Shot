@@ -931,3 +931,104 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 }
 .layer-state[data-active="true"] { color: #c8ff4d; }
 .mag-slot.will-not-fire .layer-state { bottom: 18px; }
+
+/* 모바일에서는 준비 도구를 필요한 순간에만 연다. */
+.mobile-tools { display: none; }
+.game-shell:not([data-mobile-tools]) .tactical-console .ammo-options { max-height: 180px; overflow-y: auto; align-content: start; }
+.mobile-panel { z-index: 14; padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); }
+.mobile-panel-card { width: min(540px, 100%); max-height: 100%; overflow-y: auto; overscroll-behavior: contain; padding: 1rem; }
+.mobile-panel-card .inventory-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
+.mobile-panel-card h2 { margin: 0; font-size: 1.1rem; }
+.mobile-panel-card [data-close-mobile-panel] { width: 44px; height: 44px; border: 1px solid var(--line); color: #e8efe9; background: #22311c; cursor: pointer; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-bay { padding: 0; border: 0; background: none; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-workspace { grid-template-columns: 1fr; gap: .8rem; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-slot-tab { min-height: 62px; padding: .5rem; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-slot-tab small { font-size: .75rem; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-slot-tab strong { display: block; font-size: .8rem; white-space: normal; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-group { grid-template-columns: 1fr; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-option { height: auto; min-height: 82px; padding: .7rem; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-option strong { font-size: var(--combat-value-size); }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-option small { display: block; font-size: .8rem; white-space: normal; line-height: 1.5; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-option em { display: block; font-size: 0; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .attachment-option em span { display: block; font-size: .75rem; line-height: 1.5; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .weapon-panel { font-size: .9rem; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .audio-controls { display: flex; min-height: 48px; margin-top: 1rem; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .audio-controls button { width: 88px; min-height: 48px; flex: 0 0 auto; }
+.game-shell[data-mobile-tools][data-layout] .mobile-panel .audio-controls > label { display: flex; flex: 1; align-items: center; padding: .5rem; }
+.mobile-panel #audio-volume { width: 100%; }
+.game-shell[data-mobile-tools][data-layout] .mobile-tools { display: flex; justify-content: space-between; gap: 6px; margin-bottom: 4px; }
+.mobile-tools button { min-height: 36px; padding: .3rem .6rem; border: 1px solid var(--line); color: #d0dbd2; background: #17201a; font-size: .8rem; cursor: pointer; touch-action: manipulation; }
+.mobile-tools b { color: var(--acid); margin-left: .35rem; }
+.mobile-tools button:disabled { opacity: .4; cursor: default; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console { padding: 5px max(6px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(6px, env(safe-area-inset-left)); }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .loadout { grid-template-columns: 1fr; gap: 4px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .ammo-rack,
+.game-shell[data-mobile-tools][data-layout] .tactical-console .magazine-panel { padding: 4px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .section-label { margin-bottom: 3px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .ammo-options { display: flex; gap: 4px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; scrollbar-width: thin; padding-bottom: 2px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .ammo-token { flex: 0 0 76px; display: grid; grid-template-columns: 12px minmax(0, 1fr); grid-template-rows: 1fr; gap: 4px; height: 46px; min-height: 46px; padding: 4px; touch-action: pan-x; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .ammo-token > span:nth-child(2) { display: block; align-self: end; grid-row: 1; grid-column: 2; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .ammo-token strong { font-size: .68rem; line-height: 1.15; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .ammo-token .round-visual { width: 9px; height: 27px; margin: 0; align-self: center; }
+.game-shell[data-mobile-tools][data-layout] .ammo-token .stock-count { top: 2px; right: 3px; min-width: 18px; height: 17px; padding: 0 3px; font-size: .65rem; }
+.game-shell[data-mobile-tools][data-layout] .magazine-panel { position: relative; }
+.game-shell[data-mobile-tools][data-layout] .magazine-panel > .section-label { min-height: 32px; align-items: center; padding-right: 100px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .magazine-row,
+.game-shell[data-mobile-tools][data-layout] .tactical-console .magazine-row[data-expanded] { display: block; }
+.game-shell[data-mobile-tools][data-layout] .magazine-row .load-button,
+.game-shell[data-mobile-tools][data-layout] .magazine-row[data-expanded] .load-button { position: absolute; top: 3px; right: 4px; width: 96px; height: 32px; min-height: 32px; font-size: .8rem; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .mag-slot { height: 92px; min-height: 92px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .magazine-row[data-expanded] .mag-slot { height: 110px; min-height: 110px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .mag-slot.filled { grid-template-columns: 8px minmax(0, 1fr); column-gap: 3px; padding: 16px 3px 5px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .mag-slot.filled .round-visual { width: 8px; height: 28px; }
+.game-shell[data-mobile-tools][data-layout] .tactical-console .slot-content > strong { min-height: 0; font-size: .68rem; }
+.game-shell[data-mobile-tools][data-layout] .slot-content { gap: 3px; }
+.game-shell[data-mobile-tools][data-layout] .trait-bonus[aria-hidden="true"] { display: none; }
+.game-shell[data-mobile-tools][data-layout] .sequence-stat svg { width: 11px; height: 11px; flex-basis: 11px; }
+.game-shell[data-mobile-tools][data-layout] .sequence-stat b { font-size: var(--combat-value-size); }
+.game-shell[data-mobile-tools][data-layout] .sequence-burn-state { font-size: .75rem; }
+.game-shell[data-mobile-tools][data-layout] .layer-state { top: 2px; right: 3px; bottom: auto; font-size: 12px; }
+.game-shell[data-mobile-tools][data-layout] .mag-slot.will-not-fire .layer-state { bottom: auto; }
+.game-shell[data-mobile-tools][data-layout] .combat-forecast { grid-template-columns: repeat(var(--mobile-forecast-columns, 3), minmax(0, 1fr)); width: calc(100% - 16px); bottom: 6px; }
+.game-shell[data-mobile-tools][data-layout] .forecast-stat { min-height: 35px; padding: 3px 5px; gap: 5px; }
+.game-shell[data-mobile-tools][data-layout] .forecast-stat strong { font-size: var(--combat-value-prominent); }
+.game-shell[data-mobile-tools][data-layout] .ammo-tooltip:not(.is-firepower) { position: fixed; left: 8px; right: 8px; bottom: max(12px, env(safe-area-inset-bottom)); width: auto; max-height: calc(100dvh - 24px); overflow-y: auto; transform: none; }
+.game-shell[data-layout="portrait"][data-mobile-tools] { --portrait-top-hud-height: 120px; --portrait-phase-height: 28px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .top-hud { grid-template-columns: minmax(0, 1fr) 94px; gap: 4px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-card { padding: 5px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-heading { font-size: .7rem; letter-spacing: 0; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-stat { min-height: 34px; padding: 3px 1px; gap: 1px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-stat strong { font-size: var(--combat-value-size); }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-stat > svg { width: 10px; height: 10px; flex-basis: 10px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-action { min-height: 34px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-action strong { font-size: .8rem; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .enemy-action > em b { font-size: var(--combat-value-size); }
+.game-shell[data-layout="portrait"][data-mobile-tools] .utility-stack { width: 94px; height: 120px; grid-template-columns: 1fr; grid-template-rows: 30px 44px 38px; gap: 4px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .distance-card { grid-row: 1; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .recoil-gauge { grid-row: 2; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .ammo-utility-buttons { grid-row: 3; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .inventory-open-button { min-height: 38px; }
+.game-shell[data-layout="portrait"][data-mobile-tools] .phase-panel { padding: 3px 5px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .tactical-console .loadout { grid-template-columns: .8fr 1.2fr; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .tactical-console .mag-slot { height: 76px; min-height: 76px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .tactical-console .magazine-row[data-expanded] .mag-slot { height: 92px; min-height: 92px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .top-hud { grid-template-columns: 280px 94px; justify-content: space-between; gap: 4px; padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) 0 max(8px, env(safe-area-inset-left)); }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .brand { display: none; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-card { grid-column: 1; padding: 5px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-vitals { gap: 2px; margin-top: 4px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-stat { min-height: 30px; padding: 3px; gap: 3px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-stat > svg { width: 12px; height: 12px; flex-basis: 12px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-stat strong { font-size: var(--combat-value-size); }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-action { min-height: 32px; padding: 3px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .enemy-action strong { font-size: .8rem; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .utility-stack { width: 94px; grid-template-columns: 1fr; gap: 4px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .distance-card { padding-right: 5px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .distance-card strong { font-size: 1rem; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .recoil-gauge { padding: 3px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .ammo-utility-buttons { display: flex; gap: 4px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .inventory-open-button { flex: 1; min-height: 36px; padding: 2px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .inventory-open-button span { display: none; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .phase-panel { top: max(8px, env(safe-area-inset-top)); left: calc(50% - 80px); width: 160px; padding: 4px 6px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .phase-panel > strong { font-size: .8rem; margin-top: 4px; }
+.game-shell[data-layout="compact-landscape"][data-mobile-tools] .combat-forecast { grid-template-columns: repeat(var(--forecast-stat-count, 6), minmax(0, 1fr)); }
