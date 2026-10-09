@@ -133,6 +133,12 @@ export class GamePresentation {
     this.playbackSpeed = clampPresentationSpeed(speed);
   }
 
+  setExploring(exploring: boolean): void {
+    this.zombieModel.root.visible = !exploring;
+    this.pistolModel.root.visible = !exploring;
+    this.magazineModel.root.visible = !exploring;
+  }
+
   isDestroyed(): boolean {
     return this.destroyed;
   }

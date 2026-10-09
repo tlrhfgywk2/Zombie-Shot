@@ -10,10 +10,10 @@ describe('권총별 초기 탄약 정의', () => {
     ['desertEagle', { plusP: 1, lowRecoil: 2 }],
     ['m500', { lightLoad: 1, relay: 1 }],
   ] as const)('%s는 지정 탄약만 정확히 지급한다', (weapon, allocations) => {
-    expect(createRunAmmoBuild('startingAmmo', weapon)).toEqual(createAmmoBuild(allocations));
+    expect(createRunAmmoBuild('free', weapon)).toEqual(createAmmoBuild(allocations));
   });
-  it.each(WEAPON_ORDER)('프리 모드 %s는 기존 초기 배분을 유지한다', weapon => {
-    expect(createRunAmmoBuild('free', weapon)).toEqual(createAmmoBuild());
+  it.each(WEAPON_ORDER)('탐험 모드 %s는 프리 모드와 같은 초기 탄약을 지급한다', weapon => {
+    expect(createRunAmmoBuild('exploration', weapon)).toEqual(createRunAmmoBuild('free', weapon));
   });
   it.each([
     ['opening', '초탄', 'Opening Round', 'first'],
