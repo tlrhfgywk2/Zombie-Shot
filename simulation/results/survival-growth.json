@@ -1,0 +1,16 @@
+{
+  "exploratory": {
+    "early": 19,
+    "middle": 47,
+    "late": 135,
+    "lateP90": 344,
+    "pass": true
+  },
+  "holdout": {
+    "early": 19,
+    "middle": 45,
+    "late": 146,
+    "lateP90": 344,
+    "pass": true
+  }
+}

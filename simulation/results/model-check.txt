@@ -1,0 +1,118 @@
+TAP version 13
+# Subtest: unchanged ball, recoil, range and weapon traits match the production resolver
+ok 1 - unchanged ball, recoil, range and weapon traits match the production resolver
+  ---
+  duration_ms: 6.4083
+  type: 'test'
+  ...
+# Subtest: wound threshold affects subsequent shots, expires once per enemy action
+ok 2 - wound threshold affects subsequent shots, expires once per enemy action
+  ---
+  duration_ms: 0.3543
+  type: 'test'
+  ...
+# Subtest: laceration secondary wound cannot be copied as a primary effect
+ok 3 - laceration secondary wound cannot be copied as a primary effect
+  ---
+  duration_ms: 0.1688
+  type: 'test'
+  ...
+# Subtest: thermal build conserves heat and consumes it only once, with range loss
+ok 4 - thermal build conserves heat and consumes it only once, with range loss
+  ---
+  duration_ms: 0.116
+  type: 'test'
+  ...
+# Subtest: banked heat cannot create free repeated ignition from standard rounds
+ok 5 - banked heat cannot create free repeated ignition from standard rounds
+  ---
+  duration_ms: 0.1131
+  type: 'test'
+  ...
+# Subtest: thermal-wound hybrid ablation preserves direct power and removes only cross-trigger
+ok 6 - thermal-wound hybrid ablation preserves direct power and removes only cross-trigger
+  ---
+  duration_ms: 0.1339
+  type: 'test'
+  ...
+# Subtest: concussion converts banked control into one bounded charge burst
+ok 7 - concussion converts banked control into one bounded charge burst
+  ---
+  duration_ms: 0.1031
+  type: 'test'
+  ...
+# Subtest: explosion ignores recoil, range, and vulnerable; only new impact detonates
+ok 8 - explosion ignores recoil, range, and vulnerable; only new impact detonates
+  ---
+  duration_ms: 0.1091
+  type: 'test'
+  ...
+# Subtest: kickback consumes actual accumulated recoil and cannot repeat consumption via mimic
+ok 9 - kickback consumes actual accumulated recoil and cannot repeat consumption via mimic
+  ---
+  duration_ms: 0.1135
+  type: 'test'
+  ...
+# Subtest: relay is consumed by next round and never amplifies another relay rule
+ok 10 - relay is consumed by next round and never amplifies another relay rule
+  ---
+  duration_ms: 0.707
+  type: 'test'
+  ...
+# Subtest: laser has an explicit useful vulnerable interaction after redundant ammo removal
+ok 11 - laser has an explicit useful vulnerable interaction after redundant ammo removal
+  ---
+  duration_ms: 0.245
+  type: 'test'
+  ...
+# Subtest: kill stops firing and does not spend later inventory
+ok 12 - kill stops firing and does not spend later inventory
+  ---
+  duration_ms: 0.1049
+  type: 'test'
+  ...
+# Subtest: turn, magazine and inventory boundaries do not generate free resources
+ok 13 - turn, magazine and inventory boundaries do not generate free resources
+  ---
+  duration_ms: 10.4968
+  type: 'test'
+  ...
+# Subtest: reward tape is deterministic, policy-independent, finite and does not alter encounter seeds
+ok 14 - reward tape is deterministic, policy-independent, finite and does not alter encounter seeds
+  ---
+  duration_ms: 0.6655
+  type: 'test'
+  ...
+# Subtest: attachment compatibility, slot exclusions, and contaminated capacity apply
+ok 15 - attachment compatibility, slot exclusions, and contaminated capacity apply
+  ---
+  duration_ms: 0.1405
+  type: 'test'
+  ...
+# Subtest: firing order uses a real permutation and changes a staged burst
+ok 16 - firing order uses a real permutation and changes a staged burst
+  ---
+  duration_ms: 0.7465
+  type: 'test'
+  ...
+# Subtest: instant melee death, interrupted attack, and special enemy actions are preserved
+ok 17 - instant melee death, interrupted attack, and special enemy actions are preserved
+  ---
+  duration_ms: 0.2265
+  type: 'test'
+  ...
+# Subtest: pre-volley enemy action commitment matches production across movement and special range boundaries
+ok 18 - pre-volley enemy action commitment matches production across movement and special range boundaries
+  ---
+  duration_ms: 6.1476
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 136.0429

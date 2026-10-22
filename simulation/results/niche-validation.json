@@ -1,0 +1,50 @@
+{
+  "wound": {
+    "cell": "late/groundshaker/10",
+    "strategy": "damage",
+    "metric": "winningRounds",
+    "explore": 3.72,
+    "exploreNext": 3.98,
+    "advantage": 0.0653266331658291,
+    "holdout": 3.69,
+    "holdoutNext": 4.05,
+    "holdoutWinRate": 1,
+    "confirmed": true
+  },
+  "heat": {
+    "cell": "middle/tough/10",
+    "strategy": "search",
+    "metric": "winningRounds",
+    "explore": 3.045,
+    "exploreNext": 4.395,
+    "advantage": 0.30716723549488045,
+    "holdout": 3.49,
+    "holdoutNext": 4.19,
+    "holdoutWinRate": 1,
+    "confirmed": true
+  },
+  "blast": {
+    "cell": "middle/tough/3",
+    "strategy": "damage",
+    "metric": "winningSpecial",
+    "explore": 3.31,
+    "exploreNext": 3.575,
+    "advantage": 0.07412587412587412,
+    "holdout": 3.32,
+    "holdoutNext": 3.41,
+    "holdoutWinRate": 1,
+    "confirmed": true
+  },
+  "recoil": {
+    "cell": "late/fast/3",
+    "strategy": "heuristic",
+    "metric": "winningSpecial",
+    "explore": 1.555,
+    "exploreNext": 3.135,
+    "advantage": 0.5039872408293461,
+    "holdout": 1.49,
+    "holdoutNext": 3.15,
+    "holdoutWinRate": 1,
+    "confirmed": true
+  }
+}

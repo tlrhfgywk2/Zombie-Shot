@@ -1,0 +1,447 @@
+{
+  "version": "v7",
+  "firstSeed": 1200001,
+  "count": 1000,
+  "cases": {
+    "wound": {
+      "cell": "late/groundshaker/10",
+      "strategy": "damage",
+      "metric": "winningRounds",
+      "summary": {
+        "wound": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.68
+        },
+        "heat": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.282
+        },
+        "blast": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 6.26
+        },
+        "recoil": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.022
+        },
+        "cauterize": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.429
+        },
+        "concussion": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.586
+        }
+      },
+      "comparisons": {
+        "heat": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.602,
+          "ci95": [
+            0.523,
+            0.696
+          ]
+        },
+        "blast": {
+          "nJointVictories": 1000,
+          "meanSaving": 2.58,
+          "ci95": [
+            2.45095,
+            2.70905
+          ]
+        },
+        "recoil": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.342,
+          "ci95": [
+            0.268975,
+            0.418
+          ]
+        },
+        "cauterize": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.749,
+          "ci95": [
+            0.674,
+            0.8240249999999999
+          ]
+        },
+        "concussion": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.906,
+          "ci95": [
+            0.81695,
+            0.9990999999999999
+          ]
+        }
+      },
+      "pointAdvantage": true
+    },
+    "heat": {
+      "cell": "middle/tough/10",
+      "strategy": "search",
+      "metric": "winningRounds",
+      "summary": {
+        "wound": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.686
+        },
+        "heat": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.178
+        },
+        "blast": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 6.872
+        },
+        "recoil": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.974
+        },
+        "cauterize": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.474
+        },
+        "concussion": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.848
+        }
+      },
+      "comparisons": {
+        "wound": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.508,
+          "ci95": [
+            1.3409499999999999,
+            1.69705
+          ]
+        },
+        "blast": {
+          "nJointVictories": 1000,
+          "meanSaving": 3.694,
+          "ci95": [
+            3.4838999999999998,
+            3.899025
+          ]
+        },
+        "recoil": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.796,
+          "ci95": [
+            1.618975,
+            1.97105
+          ]
+        },
+        "cauterize": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.296,
+          "ci95": [
+            1.130975,
+            1.45305
+          ]
+        },
+        "concussion": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.67,
+          "ci95": [
+            1.44295,
+            1.9090749999999999
+          ]
+        }
+      },
+      "pointAdvantage": true
+    },
+    "blast": {
+      "cell": "middle/tough/3",
+      "strategy": "damage",
+      "metric": "winningSpecial",
+      "summary": {
+        "wound": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.76
+        },
+        "heat": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.712
+        },
+        "blast": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.141
+        },
+        "recoil": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.605
+        },
+        "cauterize": {
+          "n": 1000,
+          "wins": 999,
+          "winRate": 0.999,
+          "ci95": [
+            0.9943572970398398,
+            0.9998234581709429
+          ],
+          "meanWinningMetric": 4.037037037037037
+        },
+        "concussion": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.806
+        }
+      },
+      "comparisons": {
+        "wound": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.619,
+          "ci95": [
+            0.494,
+            0.745
+          ]
+        },
+        "heat": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.571,
+          "ci95": [
+            0.448925,
+            0.7000249999999999
+          ]
+        },
+        "recoil": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.464,
+          "ci95": [
+            0.337975,
+            0.584
+          ]
+        },
+        "cauterize": {
+          "nJointVictories": 999,
+          "meanSaving": 0.8978978978978979,
+          "ci95": [
+            0.7757757757757757,
+            1.0260510510510512
+          ]
+        },
+        "concussion": {
+          "nJointVictories": 1000,
+          "meanSaving": 0.665,
+          "ci95": [
+            0.55295,
+            0.776075
+          ]
+        }
+      },
+      "pointAdvantage": true
+    },
+    "recoil": {
+      "cell": "late/fast/3",
+      "strategy": "heuristic",
+      "metric": "winningSpecial",
+      "summary": {
+        "wound": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.162
+        },
+        "heat": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.208
+        },
+        "blast": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.457
+        },
+        "recoil": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 1.536
+        },
+        "cauterize": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 3.741
+        },
+        "concussion": {
+          "n": 1000,
+          "wins": 1000,
+          "winRate": 1,
+          "ci95": [
+            0.9961731014136095,
+            1
+          ],
+          "meanWinningMetric": 4.663
+        }
+      },
+      "comparisons": {
+        "wound": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.626,
+          "ci95": [
+            1.5799750000000001,
+            1.6760249999999999
+          ]
+        },
+        "heat": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.672,
+          "ci95": [
+            1.6179750000000002,
+            1.732025
+          ]
+        },
+        "blast": {
+          "nJointVictories": 1000,
+          "meanSaving": 1.921,
+          "ci95": [
+            1.873,
+            1.967025
+          ]
+        },
+        "cauterize": {
+          "nJointVictories": 1000,
+          "meanSaving": 2.205,
+          "ci95": [
+            2.148975,
+            2.26605
+          ]
+        },
+        "concussion": {
+          "nJointVictories": 1000,
+          "meanSaving": 3.127,
+          "ci95": [
+            3.054975,
+            3.202025
+          ]
+        }
+      },
+      "pointAdvantage": true
+    }
+  }
+}
