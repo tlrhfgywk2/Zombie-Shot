@@ -1,0 +1,154 @@
+{
+  "candidate": "v7",
+  "portableFingerprint": "09921a8b407acca91dbfbc720d6c0209c78049b1e09e554ddc9b38176d16f7c7",
+  "legacyFingerprint": "66a74b268ff7a7e96c507dfd6319e1c5798b51f3f9886befe9a4bb3fc4aa4672",
+  "provenanceMatches": true,
+  "candidateMatches": true,
+  "sampleSizes": {
+    "exploratory": 200,
+    "holdout": 100
+  },
+  "independentHoldout": true,
+  "sourceProductionUnchanged": true,
+  "tests": {
+    "status": 0,
+    "passed": 20
+  },
+  "documents": {
+    "ammo_redesign.md": true,
+    "design_rationale.md": true,
+    "build_archetypes.md": true,
+    "balance_report.md": true,
+    "iteration_log.md": true
+  },
+  "rulesDocumented": true,
+  "gates": {
+    "exploratory": {
+      "A": {
+        "pass": true,
+        "middleRatio": 2.736842105263158,
+        "lateRatio": 7.7368421052631575,
+        "lateP90Ratio": 18.105263157894736
+      },
+      "B": {
+        "pass": true,
+        "middle": 0.6949891067538126,
+        "late": 0.7752918287937743
+      },
+      "D": {
+        "pass": true,
+        "note": "Hybrid viability additionally requires C combat."
+      },
+      "C": {
+        "pass": true,
+        "relative": {
+          "middle/wound": 0.9863799283154122,
+          "middle/heat": 0.9937275985663082,
+          "middle/blast": 0.9754480286738352,
+          "middle/recoil": 0.9813620071684588,
+          "middle/cauterize": 0.9713261648745519,
+          "middle/concussion": 1,
+          "late/wound": 0.9991071428571429,
+          "late/heat": 0.9998214285714285,
+          "late/blast": 0.9982142857142857,
+          "late/recoil": 1,
+          "late/cauterize": 0.9983928571428572,
+          "late/concussion": 1
+        },
+        "scenarioAdvantages": {
+          "wound": 45,
+          "heat": 50,
+          "blast": 45,
+          "recoil": 50,
+          "cauterize": 47,
+          "concussion": 56
+        }
+      },
+      "F": {
+        "pass": true
+      },
+      "E": {
+        "pass": true,
+        "byArchetype": {
+          "wound": 0.865,
+          "heat": 0.93,
+          "blast": 0.895,
+          "recoil": 0.835,
+          "cauterize": 0.885,
+          "concussion": 0.925
+        }
+      },
+      "G": {
+        "pass": true,
+        "description": "20 independent checks and all 20 documented ammo effects; human comprehensibility remains for review."
+      }
+    },
+    "holdout": {
+      "A": {
+        "pass": true,
+        "middleRatio": 2.736842105263158,
+        "lateRatio": 8.263157894736842,
+        "lateP90Ratio": 18.163157894736845
+      },
+      "B": {
+        "pass": true,
+        "middle": 0.7374429223744292,
+        "late": 0.7719298245614035
+      },
+      "D": {
+        "pass": true,
+        "note": "Hybrid viability additionally requires C combat."
+      },
+      "C": {
+        "pass": true,
+        "relative": {
+          "middle/wound": 0.9864042933810375,
+          "middle/heat": 0.9910554561717353,
+          "middle/blast": 0.9828264758497317,
+          "middle/recoil": 0.9856887298747763,
+          "middle/cauterize": 0.9720930232558139,
+          "middle/concussion": 1,
+          "late/wound": 1,
+          "late/heat": 0.9996428571428572,
+          "late/blast": 0.9982142857142857,
+          "late/recoil": 1,
+          "late/cauterize": 0.9985714285714286,
+          "late/concussion": 1
+        },
+        "scenarioAdvantages": {
+          "wound": 51,
+          "heat": 47,
+          "blast": 43,
+          "recoil": 52,
+          "cauterize": 47,
+          "concussion": 56
+        }
+      },
+      "F": {
+        "pass": true
+      },
+      "E": {
+        "pass": true,
+        "byArchetype": {
+          "wound": 0.84,
+          "heat": 0.92,
+          "blast": 0.95,
+          "recoil": 0.8,
+          "cauterize": 0.89,
+          "concussion": 0.95
+        }
+      },
+      "G": {
+        "pass": true,
+        "description": "20 independent checks and all 20 documented ammo effects; human comprehensibility remains for review."
+      }
+    }
+  },
+  "additionalChecks": {
+    "survivalAccountedGrowth": true,
+    "fourDistinctScenarioAdvantagesConfirmed": true,
+    "expandedNicheConfirmation": true
+  },
+  "humanGameplayReview": "required; automated validation does not establish fun",
+  "pass": true
+}
