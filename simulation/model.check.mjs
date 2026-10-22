@@ -6,7 +6,7 @@ import { production, rng } from './common.mjs';
 import { AMMO, createModel, acquired, rewardTape, initialRun, capacity, combat, total, optimizeOrder } from './model.mjs';
 const p = await production();
 const configs = JSON.parse(await readFile(new URL('./candidates.json', import.meta.url)));
-const config = configs.v6, model = createModel(p, config);
+const config = configs.v7, model = createModel(p, config);
 const run = (ranks = {}, loadout = {}, weapon = 'p220') => ({ ...initialRun('wound', weapon), ranks, loadout });
 const enemy = overrides => ({ ...p.createEnemyState('normal'), hp: 10000, maxHp: 10000, distance: 3, ...overrides });
 
@@ -136,4 +136,16 @@ test('instant melee death, interrupted attack, and special enemy actions are pre
   const ground = { ...p.createEnemyState('groundshaker'), distance: 4 };
   const action = model.action(ground);
   assert.equal(action.playerAfter.heavyKickPenaltyTurns, 2);
+});
+test('pre-volley enemy action commitment matches production across movement and special range boundaries', () => {
+  const resolver = new p.CombatResolver(() => .5);
+  for (const type of Object.keys(p.ENEMY_DEFINITIONS)) for (const distance of [.5, 3, 4, 6, 8, 10]) for (const rounds of [['retreat', 'ball'], ['advance', 'ball'], ['ball', 'retreat', 'retreat']]) {
+    const target = { ...p.createEnemyState(type), hp: 10000, maxHp: 10000, distance };
+    const before = resolver.resolveSequence(rounds, target).finalState;
+    const after = model.resolve(rounds, target, run()).after;
+    assert.equal(after.telegraphedAction, before.telegraphedAction, `${type}/${distance}/${rounds}`);
+    const a = model.action(after), b = resolver.resolveEnemyAction(before);
+    for (const key of ['selectedAction', 'threshold', 'playerKilled', 'movement', 'resolution']) assert.equal(a[key], b[key], `${key}/${type}/${distance}`);
+    assert.equal(a.after.delayedAction, b.after.delayedAction);
+  }
 });

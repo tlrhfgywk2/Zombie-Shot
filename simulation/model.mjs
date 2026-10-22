@@ -102,6 +102,12 @@ export function createModel(p, config) {
   const actionResolver = new p.CombatResolver(() => .5);
   function resolve(rounds, enemy, run, options = {}) {
     const after = { ...enemy, intent: enemy.intent ? { ...enemy.intent } : undefined };
+    // The production resolver commits the enemy action before the first shot.
+    // Movement can delay that action; it must not silently choose a cheaper one.
+    if (!after.telegraphedAction) {
+      const action = p.previewEnemyAction(enemy);
+      after.telegraphedAction = action.suppressedIntent ?? action.selectedAction;
+    }
     let recoil = 0, incomingPower = 0, incomingHeat = 1, previous, previousFamily, loss = 0;
     const trace = [];
     let damage = 0, fired = 0, special = 0, potential = 0;
