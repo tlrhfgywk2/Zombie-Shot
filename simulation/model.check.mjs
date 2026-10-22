@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { production, rng } from './common.mjs';
 import { AMMO, createModel, acquired, rewardTape, initialRun, capacity, combat, total, optimizeOrder } from './model.mjs';
+import { fingerprint, productionInputs } from './provenance.mjs';
+import { assertFreshOrExactReplay } from './exposure.mjs';
 const p = await production();
 const configs = JSON.parse(await readFile(new URL('./candidates.json', import.meta.url)));
 const config = configs.v7, model = createModel(p, config);
@@ -148,4 +150,29 @@ test('pre-volley enemy action commitment matches production across movement and 
     for (const key of ['selectedAction', 'threshold', 'playerKilled', 'movement', 'resolution']) assert.equal(a[key], b[key], `${key}/${type}/${distance}`);
     assert.equal(a.after.delayedAction, b.after.delayedAction);
   }
+});
+test('provenance covers actual transitive reward and enemy-action inputs', async () => {
+  const protocol = JSON.parse(await readFile(new URL('./protocol.json', import.meta.url)));
+  const inputs = await productionInputs();
+  const paths = ['src/progression/AttachmentRewards.ts', 'src/data/enemyActionDefinitions.ts'];
+  const original = await fingerprint(config, protocol);
+  for (const changed of paths) {
+    assert.ok(inputs.includes(changed), changed);
+    const modified = await fingerprint(config, protocol, async (path, encoding) => {
+      const source = await readFile(path, encoding);
+      return String(path).replaceAll('\\', '/').endsWith(changed) ? source + '\n// regression: changed transitive production input\n' : source;
+    });
+    assert.notEqual(modified, original, changed);
+  }
+});
+test('holdout protection rejects overlaps, containment and shifted replay but permits adjacency and exact replay', () => {
+  const registry = [{ firstSeed: 1000, count: 100, hash: 'frozen', portableHash: 'portable' }];
+  for (const firstSeed of [950, 1000, 1050, 1099]) assert.throws(() => assertFreshOrExactReplay(registry, { firstSeed, count: 100, hash: 'different' }), /overlaps/);
+  assert.throws(() => assertFreshOrExactReplay(registry, { firstSeed: 900, count: 300, hash: 'different' }), /overlaps/);
+  assert.throws(() => assertFreshOrExactReplay(registry, { firstSeed: 1000, count: 50, hash: 'frozen' }), /overlaps/);
+  assert.throws(() => assertFreshOrExactReplay(registry, { firstSeed: 1050, count: 100, hash: 'frozen' }), /overlaps/);
+  for (const firstSeed of [900, 1100]) assert.doesNotThrow(() => assertFreshOrExactReplay(registry, { firstSeed, count: 100, hash: 'new' }));
+  assert.doesNotThrow(() => assertFreshOrExactReplay(registry, { firstSeed: 1000, count: 100, hash: 'portable' }));
+  assert.throws(() => assertFreshOrExactReplay([], { firstSeed: -1, count: 100, hash: 'new' }), /Invalid/);
+  assert.throws(() => assertFreshOrExactReplay([], { firstSeed: 2 ** 32 - 1, count: 2, hash: 'new' }), /Invalid/);
 });

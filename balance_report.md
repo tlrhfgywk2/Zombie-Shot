@@ -203,7 +203,7 @@
 
 ## G: 계산 추적과 수동 검토
 
-ammo_redesign.md의20종 표가 간단한 설명·조건·수치·목적을 규정한다.18개 독립 검사에서 원본4무기의 기본 탄약 동치, 반동/거리, 임계치, 레이저, 두 교차 규칙, 복사 제외 범위, 조기 처치 미소모, 유한 재고, 무료 재점화 금지, 부착물 봉쇄와 즉사를 확인한다. 증거는 final-validation.json이다.
+ammo_redesign.md의20종 표가 간단한 설명·조건·수치·목적을 규정한다.20개 독립 검사에서 원본4무기의 기본 탄약 동치, 반동/거리, 임계치, 레이저, 두 교차 규칙, 복사 제외 범위, 조기 처치 미소모, 유한 재고, 무료 재점화 금지, 부착물 봉쇄와 즉사를 확인한다. 원본의 전체 간접 의존성 변경 감지와 홀드아웃 구간 중첩/포함/경계/재실행 보호도 검사한다. 증거는 final-validation.json이다.
 
 ## 남은 위험과 인간 검토
 
@@ -218,6 +218,6 @@ ammo_redesign.md의20종 표가 간단한 설명·조건·수치·목적을 규�
 
 ## 재현성과 원자료
 
-실행 명령은 simulation/README.md. 줄바꿈을 정규화한 소스 SHA를 holdout-registry.json에 기록한다. v6 검증 뒤 첫 탄창의 사전 확정 행동 차이를 발견했으므로830001~830100은 폐기된 검증 자료로 보존하고, 수정한 v7을 미사용930001~930100으로 검증했다. 탄약·보상 수치나 적은 그 뒤 조정하지 않았다.
+실행 명령은 simulation/README.md. 줄바꿈을 정규화한 평가 도구·잠금 파일·실제 번들의 전체 원본 의존성 SHA를 holdout-registry.json에 기록한다. v6 검증 뒤 첫 탄창의 사전 확정 행동 차이를 발견했으므로830001~830100은 폐기된 검증 자료로 보존하고, 수정한 v7을 미사용930001~930100으로 검증했다. 탄약·보상 수치나 적은 그 뒤 조정하지 않았다. PR 리뷰 후 변경은 의존성 지문의 범위와 홀드아웃 중첩 차단 보호 장치뿐이며 이전 지문은 기록에 보존한다.
 
 [탐색 전체](simulation/results/v7-exploratory-all.json.gz), [홀드아웃 전체](simulation/results/v7-holdout-all.json.gz), [모든 전투 셀](simulation/results/combat_cells.csv), [빌드별 실제 trace](simulation/results/build-traces.json), [최종 검사](simulation/results/final-validation.json).

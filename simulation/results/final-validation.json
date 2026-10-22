@@ -1,6 +1,6 @@
 {
   "candidate": "v7",
-  "portableFingerprint": "66a74b268ff7a7e96c507dfd6319e1c5798b51f3f9886befe9a4bb3fc4aa4672",
+  "portableFingerprint": "09921a8b407acca91dbfbc720d6c0209c78049b1e09e554ddc9b38176d16f7c7",
   "legacyFingerprint": "66a74b268ff7a7e96c507dfd6319e1c5798b51f3f9886befe9a4bb3fc4aa4672",
   "provenanceMatches": true,
   "candidateMatches": true,
@@ -12,7 +12,7 @@
   "sourceProductionUnchanged": true,
   "tests": {
     "status": 0,
-    "passed": 18
+    "passed": 20
   },
   "documents": {
     "ammo_redesign.md": true,
@@ -80,7 +80,7 @@
       },
       "G": {
         "pass": true,
-        "description": "18 independent checks and all 20 documented ammo effects; human comprehensibility remains for review."
+        "description": "20 independent checks and all 20 documented ammo effects; human comprehensibility remains for review."
       }
     },
     "holdout": {
@@ -140,7 +140,7 @@
       },
       "G": {
         "pass": true,
-        "description": "18 independent checks and all 20 documented ammo effects; human comprehensibility remains for review."
+        "description": "20 independent checks and all 20 documented ammo effects; human comprehensibility remains for review."
       }
     }
   },

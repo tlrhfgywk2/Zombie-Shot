@@ -1,6 +1,7 @@
 /* global console, process, setTimeout, URL */
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { fingerprint } from './provenance.mjs';
+import { assertFreshOrExactReplay } from './exposure.mjs';
 import { production, rng, shuffle, quantile, summary, wilson, mean } from './common.mjs';
 import { ARCHETYPES, acquired, capacity, createModel, oriented, optimizeOrder, selectMagazine, combat, rewardTape, reward, initialRun } from './model.mjs';
 const protocol = JSON.parse(await readFile(new URL('./protocol.json', import.meta.url)));
@@ -17,7 +18,7 @@ if (split === 'holdout') {
   const registryURL = new URL('./results/holdout-registry.json', import.meta.url);
   let registry = [];
   try { registry = JSON.parse(await readFile(registryURL)); } catch (e) { if (e.code !== 'ENOENT') throw e; }
-  if (registry.some(r => r.firstSeed === firstSeed && r.hash !== hash && r.portableHash !== hash)) throw new Error('Holdout seeds already exposed to a different candidate; declare fresh seeds before running');
+  assertFreshOrExactReplay(registry, { firstSeed, count, hash });
   if (!registry.some(r => r.hash === hash || r.portableHash === hash)) { registry.push({ version, hash, firstSeed, count }); await writeFile(registryURL, JSON.stringify(registry, null, 2) + '\n'); }
 }
 const result = { version, split, hash, protocolVersion: protocol.version, firstSeed, count, candidate: config, potential: {}, order: {}, hybrid: {}, combat: {}, acquisition: {}, stress: {}, gates: {} };

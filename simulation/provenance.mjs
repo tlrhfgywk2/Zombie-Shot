@@ -1,15 +1,28 @@
 /* global URL */
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-// Normalize checkout line endings. Ignore only evaluator bookkeeping between
-// provenance initialization and the first numerical/statistical function.
-// Imports, seed initialization, all numerical loops and all game rules are hashed.
-export async function fingerprint(config, protocol) {
+import { fileURLToPath } from 'node:url';
+import { build } from 'esbuild';
+
+const root = new URL('../', import.meta.url);
+export async function productionInputs() {
+  const output = await build({ absWorkingDir: fileURLToPath(root), entryPoints: ['simulation/production-entry.mjs'], bundle: true, write: false, platform: 'node', format: 'esm', metafile: true });
+  return Object.keys(output.metafile.inputs).map(path => path.replaceAll('\\', '/')).sort();
+}
+
+// Hash complete evaluator sources, lockfile and the actual production dependency
+// graph. Normalize checkout line endings; never guess transitive dependencies.
+// The optional source reader permits in-memory mutation tests without editing game files.
+export async function fingerprint(config, protocol, readSource = readFile) {
+  const files = new Set([
+    'simulation/model.mjs', 'simulation/evaluate.mjs', 'simulation/common.mjs',
+    'simulation/provenance.mjs', 'simulation/exposure.mjs', 'package-lock.json',
+    ...await productionInputs(),
+  ]);
   const hasher = createHash('sha256');
-  for (const file of ['./model.mjs', './evaluate.mjs', './common.mjs', '../src/combat/CombatResolver.ts', '../src/data/attachmentDefinitions.ts', '../src/data/enemyDefinitions.ts', '../src/data/weaponDefinitions.ts']) {
-    let source = (await readFile(new URL(file, import.meta.url), 'utf8')).replace(/\r\n/g, '\n');
-    if (file === './evaluate.mjs') source = source.slice(0, source.indexOf('const hash =')) + source.slice(source.indexOf('function bootstrap'));
-    hasher.update(source);
+  for (const file of [...files].sort()) {
+    const source = (await readSource(new URL(file, root), 'utf8')).replace(/\r\n/g, '\n');
+    hasher.update(file + '\0').update(source).update('\0');
   }
   return hasher.update(JSON.stringify(config)).update(JSON.stringify(protocol)).digest('hex');
 }

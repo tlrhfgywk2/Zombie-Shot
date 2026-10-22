@@ -36,7 +36,7 @@ const result = {
   additionalChecks: { survivalAccountedGrowth: Object.values(growth).every(row => row.pass), fourDistinctScenarioAdvantagesConfirmed: Object.values(niches).length >= 4 && Object.values(niches).every(row => row.confirmed), expandedNicheConfirmation: confirmation.count >= 1000 && Object.values(confirmation.cases).every(row => row.pointAdvantage && Object.values(row.comparisons).every(pair => pair.ci95[0] > 0)) },
   humanGameplayReview: 'required; automated validation does not establish fun',
 };
-const g = { pass: tests.status === 0 && passedTests >= 18 && Object.values(documents).every(Boolean) && rulesDocumented, description: '18 independent checks and all 20 documented ammo effects; human comprehensibility remains for review.' };
+const g = { pass: tests.status === 0 && passedTests >= 20 && Object.values(documents).every(Boolean) && rulesDocumented, description: '20 independent checks and all 20 documented ammo effects; human comprehensibility remains for review.' };
 result.gates.exploratory.G = g; result.gates.holdout.G = g;
 result.pass = result.provenanceMatches && result.candidateMatches && result.independentHoldout && result.sampleSizes.exploratory >= 200 && result.sampleSizes.holdout >= 100 && result.sourceProductionUnchanged && Object.values(result.additionalChecks).every(Boolean) && Object.values(result.gates).every(split => Object.values(split).every(gate => gate.pass));
 await writeFile(new URL('./results/final-validation.json', import.meta.url), JSON.stringify(result, null, 2) + '\n');

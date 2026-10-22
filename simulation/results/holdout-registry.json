@@ -11,6 +11,8 @@
     "version": "v7",
     "hash": "66a74b268ff7a7e96c507dfd6319e1c5798b51f3f9886befe9a4bb3fc4aa4672",
     "firstSeed": 930001,
-    "count": 100
+    "count": 100,
+    "portableHash": "09921a8b407acca91dbfbc720d6c0209c78049b1e09e554ddc9b38176d16f7c7",
+    "provenanceMigration": "PR74 P1/P2: full transitive esbuild inputs, evaluator and lockfile; interval guard only. Numerical model, reward rules, scenarios and evaluation loops unchanged from 93d808a. Legacy fingerprint retained."
   }
 ]

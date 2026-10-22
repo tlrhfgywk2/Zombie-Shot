@@ -110,7 +110,7 @@ report.push('', '특히 설치 빌드에서는 조합을 소유해도 작은 적
 for (const [label, r] of splits) { const u = r.utility; report.push(`|${label}|${u.pairedN}|${u.survivalGains}|${u.survivalLosses}|${u.economyGains} / ${u.economyLosses}|${percent(u.survivalDifference.mean)} [${interval(u.survivalDifference.ci95)}]|`); }
 report.push('', '유틸리티 탐색기가 오히려 사망하거나 특수탄을 더 쓴 사례도 존재한다. 탐색은 유한 예산이며 전투 전역 최적해를 보증하지 않는다. 실제 반례는 combat-pairs.json.gz에 전부 남긴다. replay.mjs로 초기 상태·발별 계산을 확인할 수 있다.', '', '## 강한 적·긴 전투 경계', '', '적을 약화하는 대신 HP2/4배, 상처·열·충격 저항 변화를 같은 시드로 적용했다. 매 턴 특수탄을 재공급하지 않으며12턴 내 처치하지 못하면 실패다. 주 게이트의 원래 적 행렬과 구별한 한계 시험이다.', '', '| 집합/빌드 |2배HP 승률|4배HP 승률|4배HP 승리 시 총 탄수|', '|---|---:|---:|---:|');
 for (const [label, r] of splits) for (const id of ids) report.push(`|${label}/${NAMES[id]}|${percent(r.stress[`2x/${id}`].rate)}|${percent(r.stress[`4x/${id}`].rate)}|${number(r.stress[`4x/${id}`].winningRounds?.mean)}|`);
-report.push('', '## G: 계산 추적과 수동 검토', '', 'ammo_redesign.md의20종 표가 간단한 설명·조건·수치·목적을 규정한다.18개 독립 검사에서 원본4무기의 기본 탄약 동치, 반동/거리, 임계치, 레이저, 두 교차 규칙, 복사 제외 범위, 조기 처치 미소모, 유한 재고, 무료 재점화 금지, 부착물 봉쇄와 즉사를 확인한다. 증거는 final-validation.json이다.', '', '## 남은 위험과 인간 검토', '',
+report.push('', '## G: 계산 추적과 수동 검토', '', 'ammo_redesign.md의20종 표가 간단한 설명·조건·수치·목적을 규정한다.20개 독립 검사에서 원본4무기의 기본 탄약 동치, 반동/거리, 임계치, 레이저, 두 교차 규칙, 복사 제외 범위, 조기 처치 미소모, 유한 재고, 무료 재점화 금지, 부착물 봉쇄와 즉사를 확인한다. 원본의 전체 간접 의존성 변경 감지와 홀드아웃 구간 중첩/포함/경계/재실행 보호도 검사한다. 증거는 final-validation.json이다.', '', '## 남은 위험과 인간 검토', '',
   '- **과도한 성장:** 촉진→고등급 소이→소비와 충격 선저장→공명은 큰 상한을 만든다. 원래22~54HP 적은 후반에 쉽게 죽어 잠재 피해 증가 대부분이 과잉 피해가 된다. 현재 적을 약화해 통과시키지 않았고 HP4배 경계도 공개했다. 더 높은 후반 적의 설계는 별도 과제다.',
   '- **약한 경로:** 단독 절개/설치, 열 소비탄 없는 열 축적, 소비 전 공명을 먼저 쏘는 순서, 낮은 등급의 순수 직접 화력은 실패할 수 있다. 낮은 무작위 전략 승률과 각 단계 사망 수를 확인해야 한다.',
   '- **수렴 위험:** 평두 화력4·충격4의 범용성, 같은 탄종 전체에 적용되는 제작 강화, 무제한 표준탄으로 특수탄을 과도하게 아끼는 선택이 반복될 수 있다. 일부 빌드의 실제 조합 사용률은 획득률보다 낮다.',
@@ -119,7 +119,7 @@ report.push('', '## G: 계산 추적과 수동 검토', '', 'ammo_redesign.md의
   '- **수동 확인:**4발에서 다음 탄과 적 행동을 예측할 수 있는지, 상처/열 소모 시점이 직관적인지, 큰 피해가 만족스러운지, 유틸리티 선택과 제작 선택에 고민이 생기는지, 같은 정답 순서로 수렴하는지 직접 플레이 검토가 필요하다.', '',
   '자동 수치 통과 후보를 인간 게임플레이 검토에 넘긴다. 재미가 객관적으로 증명되었다고 주장하지 않는다.', '',
   '## 재현성과 원자료', '',
-  '실행 명령은 simulation/README.md. 줄바꿈을 정규화한 소스 SHA를 holdout-registry.json에 기록한다. v6 검증 뒤 첫 탄창의 사전 확정 행동 차이를 발견했으므로830001~830100은 폐기된 검증 자료로 보존하고, 수정한 v7을 미사용930001~930100으로 검증했다. 탄약·보상 수치나 적은 그 뒤 조정하지 않았다.', '',
+  '실행 명령은 simulation/README.md. 줄바꿈을 정규화한 평가 도구·잠금 파일·실제 번들의 전체 원본 의존성 SHA를 holdout-registry.json에 기록한다. v6 검증 뒤 첫 탄창의 사전 확정 행동 차이를 발견했으므로830001~830100은 폐기된 검증 자료로 보존하고, 수정한 v7을 미사용930001~930100으로 검증했다. 탄약·보상 수치나 적은 그 뒤 조정하지 않았다. PR 리뷰 후 변경은 의존성 지문의 범위와 홀드아웃 중첩 차단 보호 장치뿐이며 이전 지문은 기록에 보존한다.', '',
   `[탐색 전체](simulation/results/v7-exploratory-all.json.gz), [홀드아웃 전체](simulation/results/v7-holdout-all.json.gz), [모든 전투 셀](simulation/results/combat_cells.csv), [빌드별 실제 trace](simulation/results/build-traces.json), [최종 검사](simulation/results/final-validation.json).`, ''
 );
 await writeFile(new URL('../balance_report.md', import.meta.url), report.join('\n').replace('固定', '고정'));
