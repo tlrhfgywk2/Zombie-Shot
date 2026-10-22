@@ -1,0 +1,27 @@
+{
+  "version": "1.0-locked-before-candidate",
+  "baselineRevision": "4850a01",
+  "exploratory": { "firstSeed": 11001, "count": 200 },
+  "holdout": { "firstSeed": 830001, "count": 100 },
+  "stages": { "early": 1, "middle": 9, "late": 18 },
+  "reference": { "type": "normal", "hp": 1000000000, "distance": 6, "woundThreshold": 6, "burnThreshold": 20 },
+  "capacities": [4, 6, 8],
+  "obtainableCapacities": [4, 6],
+  "stressOnlyCapacities": [8],
+  "ranges": [0.5, 3, 6, 10],
+  "enemies": ["normal", "brute", "fast", "tough", "contaminator", "groundshaker", "screecher"],
+  "archetypes": ["wound", "heat", "blast", "recoil", "cauterize", "concussion"],
+  "strategies": ["random", "heuristic", "search"],
+  "randomOrderSamples": 64,
+  "searchCandidates": 32,
+  "combatTurnLimit": 12,
+  "gates": {
+    "A": { "middleMedianRatio": 1.5, "lateMedianRatio": 3, "lateP90Ratio": 8 },
+    "B": { "requiredFraction": 0.6, "damageOrderRatio": 1.25 },
+    "C": { "minimumDistinctArchetypes": 4, "winRateRelativeToStrongest": 0.75, "requiresScenarioAdvantage": true },
+    "D": { "minimumHybrids": 2, "ablationMedianGain": 0.05 },
+    "E": { "coherentFractionByMiddle": 0.7, "deadRunsCountAsFailures": true },
+    "F": { "requiresPairedSurvivalAndEconomyCounterexamples": true },
+    "G": { "requiresDocumentedEffectsAndTraceTests": true }
+  }
+}
