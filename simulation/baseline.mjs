@@ -1,3 +1,4 @@
+/* global console, URL */
 import { writeFile, mkdir } from 'node:fs/promises';
 import { production, rng, pick, shuffle, summary } from './common.mjs';
 const p = await production();

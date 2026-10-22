@@ -1,3 +1,4 @@
+/* global Buffer, URL */
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 export async function production() {

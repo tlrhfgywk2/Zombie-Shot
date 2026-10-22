@@ -1,0 +1,3001 @@
+{
+  "version": "v1",
+  "split": "exploratory",
+  "hash": "9c4945404c74e15f822b7480f96826e647f0defbb0286fc506d8d0ea9a1e8152",
+  "protocolVersion": "1.0-locked-before-candidate",
+  "firstSeed": 11001,
+  "count": 200,
+  "candidate": {
+    "description": "기존 골격 보존, 탄종별 최대 3단계 제작 강화, 열 소비 및 충격 투자 혼합",
+    "directRank": 4,
+    "heatRank": 6,
+    "chargeRank": 4,
+    "ventFactor": 2,
+    "vulnerableRank": 0.5,
+    "explosionFactor": 3,
+    "thermalFactor": 2,
+    "shockChargeFactor": 1,
+    "upgradeEvery": 3,
+    "maxRank": 3
+  },
+  "potential": {
+    "early": {
+      "n": 1200,
+      "median": 19,
+      "p10": 19,
+      "p90": 19,
+      "min": 18,
+      "max": 19,
+      "mean": 18.975,
+      "medianCI95": [
+        19,
+        19
+      ],
+      "p90CI95": [
+        19,
+        19
+      ],
+      "capacityCells": {
+        "4": {
+          "n": 1200,
+          "median": 19,
+          "p10": 19,
+          "p90": 19,
+          "min": 18,
+          "max": 19,
+          "mean": 18.99,
+          "medianCI95": [
+            19,
+            19
+          ],
+          "stressOnly": false
+        },
+        "6": {
+          "n": 1200,
+          "median": 28,
+          "p10": 28,
+          "p90": 28,
+          "min": 27,
+          "max": 28,
+          "mean": 27.945,
+          "medianCI95": [
+            28,
+            28
+          ],
+          "stressOnly": false
+        },
+        "8": {
+          "n": 1200,
+          "median": 37,
+          "p10": 36,
+          "p90": 37,
+          "min": 36,
+          "max": 37,
+          "mean": 36.8,
+          "medianCI95": [
+            37,
+            37
+          ],
+          "stressOnly": true
+        }
+      },
+      "note": "Reward-acquisition ceiling conditional on reaching stage; survival is separately evaluated by E."
+    },
+    "middle": {
+      "n": 1200,
+      "median": 40,
+      "p10": 21,
+      "p90": 92,
+      "min": 18,
+      "max": 221,
+      "mean": 49.43833333333333,
+      "medianCI95": [
+        37.9875,
+        42
+      ],
+      "p90CI95": [
+        90,
+        98
+      ],
+      "capacityCells": {
+        "4": {
+          "n": 1200,
+          "median": 38,
+          "p10": 20,
+          "p90": 89,
+          "min": 18,
+          "max": 221,
+          "mean": 45.50333333333333,
+          "medianCI95": [
+            36,
+            40
+          ],
+          "stressOnly": false
+        },
+        "6": {
+          "n": 1200,
+          "median": 51,
+          "p10": 29,
+          "p90": 134,
+          "min": 27,
+          "max": 281,
+          "mean": 67.07916666666667,
+          "medianCI95": [
+            49,
+            53
+          ],
+          "stressOnly": false
+        },
+        "8": {
+          "n": 1200,
+          "median": 63,
+          "p10": 37,
+          "p90": 158,
+          "min": 36,
+          "max": 335,
+          "mean": 82.3225,
+          "medianCI95": [
+            60,
+            66
+          ],
+          "stressOnly": true
+        }
+      },
+      "note": "Reward-acquisition ceiling conditional on reaching stage; survival is separately evaluated by E."
+    },
+    "late": {
+      "n": 1200,
+      "median": 111,
+      "p10": 32,
+      "p90": 310,
+      "min": 20,
+      "max": 1656,
+      "mean": 143.325,
+      "medianCI95": [
+        106,
+        116
+      ],
+      "p90CI95": [
+        273.96750000000003,
+        319
+      ],
+      "capacityCells": {
+        "4": {
+          "n": 1200,
+          "median": 90,
+          "p10": 28,
+          "p90": 236,
+          "min": 18,
+          "max": 666,
+          "mean": 111.13666666666667,
+          "medianCI95": [
+            84,
+            96
+          ],
+          "stressOnly": false
+        },
+        "6": {
+          "n": 1200,
+          "median": 159,
+          "p10": 42,
+          "p90": 412.2000000000003,
+          "min": 27,
+          "max": 946,
+          "mean": 194.695,
+          "medianCI95": [
+            150.5,
+            168.5125
+          ],
+          "stressOnly": false
+        },
+        "8": {
+          "n": 1200,
+          "median": 216,
+          "p10": 52,
+          "p90": 560.3000000000018,
+          "min": 36,
+          "max": 2214,
+          "mean": 279.7725,
+          "medianCI95": [
+            202,
+            230
+          ],
+          "stressOnly": true
+        }
+      },
+      "note": "Reward-acquisition ceiling conditional on reaching stage; survival is separately evaluated by E."
+    }
+  },
+  "order": {
+    "middle": {
+      "successes": 558,
+      "n": 750,
+      "rate": 0.744,
+      "ci95": [
+        0.7115771437152189,
+        0.7739359932620985
+      ],
+      "included": 750,
+      "excluded": 450,
+      "ratios": {
+        "n": 750,
+        "median": 1.6,
+        "p10": 1.0169811320754718,
+        "p90": 3.376209677419355,
+        "min": 1,
+        "max": 8.578947368421053,
+        "mean": 1.9801298142997006,
+        "medianCI95": [
+          1.5554982495623906,
+          1.6557377049180328
+        ]
+      },
+      "byArchetype": {
+        "wound": {
+          "successes": 84,
+          "n": 114,
+          "rate": 0.7368421052631579,
+          "ci95": [
+            0.6492406917150557,
+            0.8090015588993282
+          ],
+          "ratios": {
+            "n": 114,
+            "median": 1.5917508417508417,
+            "p10": 1,
+            "p90": 2.4280487804878055,
+            "min": 1,
+            "max": 3.1578947368421053,
+            "mean": 1.6195960656191704,
+            "medianCI95": [
+              1.4780952380952381,
+              1.6666666666666667
+            ]
+          }
+        },
+        "heat": {
+          "successes": 127,
+          "n": 148,
+          "rate": 0.8581081081081081,
+          "ci95": [
+            0.7928110941256529,
+            0.9052848163494739
+          ],
+          "ratios": {
+            "n": 148,
+            "median": 1.8,
+            "p10": 1.0918808777429467,
+            "p90": 3.6696255201109578,
+            "min": 1,
+            "max": 7.818181818181818,
+            "mean": 2.211599620573674,
+            "medianCI95": [
+              1.7089947089947088,
+              2.066666666666667
+            ]
+          }
+        },
+        "blast": {
+          "successes": 38,
+          "n": 57,
+          "rate": 0.6666666666666666,
+          "ci95": [
+            0.5372226902277747,
+            0.7750636401777372
+          ],
+          "ratios": {
+            "n": 57,
+            "median": 1.514018691588785,
+            "p10": 1.1136752136752137,
+            "p90": 2.2552631578947366,
+            "min": 1,
+            "max": 3.4,
+            "mean": 1.5945154331558136,
+            "medianCI95": [
+              1.3,
+              1.5625
+            ]
+          }
+        },
+        "recoil": {
+          "successes": 81,
+          "n": 152,
+          "rate": 0.5328947368421053,
+          "ci95": [
+            0.4537470759394048,
+            0.6104206430778539
+          ],
+          "ratios": {
+            "n": 152,
+            "median": 1.2615789473684211,
+            "p10": 1,
+            "p90": 1.7483333333333335,
+            "min": 1,
+            "max": 3.1818181818181817,
+            "mean": 1.3381775125742217,
+            "medianCI95": [
+              1.2181081081081082,
+              1.3107375478927203
+            ]
+          }
+        },
+        "cauterize": {
+          "successes": 97,
+          "n": 137,
+          "rate": 0.708029197080292,
+          "ci95": [
+            0.6270502509703795,
+            0.777659721083332
+          ],
+          "ratios": {
+            "n": 137,
+            "median": 1.5925925925925926,
+            "p10": 1,
+            "p90": 3.4222910216718274,
+            "min": 1,
+            "max": 6.538461538461538,
+            "mean": 1.9113742774870242,
+            "medianCI95": [
+              1.5,
+              1.6545454545454545
+            ]
+          }
+        },
+        "concussion": {
+          "successes": 131,
+          "n": 142,
+          "rate": 0.9225352112676056,
+          "ci95": [
+            0.8666134827980981,
+            0.9561970184580592
+          ],
+          "ratios": {
+            "n": 142,
+            "median": 2.5652173913043477,
+            "p10": 1.2731141199226306,
+            "p90": 5.081818181818182,
+            "min": 1,
+            "max": 8.578947368421053,
+            "mean": 2.9366058294535264,
+            "medianCI95": [
+              2.341453111799493,
+              2.8285714285714283
+            ]
+          }
+        }
+      }
+    },
+    "late": {
+      "successes": 788,
+      "n": 968,
+      "rate": 0.8140495867768595,
+      "ci95": [
+        0.7883152399124753,
+        0.8373011156746901
+      ],
+      "included": 968,
+      "excluded": 232,
+      "ratios": {
+        "n": 968,
+        "median": 1.7878787878787878,
+        "p10": 1.1046511627906976,
+        "p90": 5.233082706766922,
+        "min": 1,
+        "max": 13.5,
+        "mean": 2.524934750003712,
+        "medianCI95": [
+          1.75,
+          1.829025160782704
+        ]
+      },
+      "byArchetype": {
+        "wound": {
+          "successes": 141,
+          "n": 168,
+          "rate": 0.8392857142857143,
+          "ci95": [
+            0.776266600491963,
+            0.8871350438130249
+          ],
+          "ratios": {
+            "n": 168,
+            "median": 1.8108108108108107,
+            "p10": 1.1555697823303457,
+            "p90": 2.771276595744682,
+            "min": 1,
+            "max": 3.1607142857142856,
+            "mean": 1.8352332248379777,
+            "medianCI95": [
+              1.5656510759771631,
+              1.8617021276595744
+            ]
+          }
+        },
+        "heat": {
+          "successes": 174,
+          "n": 190,
+          "rate": 0.9157894736842105,
+          "ci95": [
+            0.8675959522760093,
+            0.9475025611493852
+          ],
+          "ratios": {
+            "n": 190,
+            "median": 1.8055417066155321,
+            "p10": 1.2826086956521738,
+            "p90": 3.6636129032258036,
+            "min": 1,
+            "max": 13.5,
+            "mean": 2.5084098457484525,
+            "medianCI95": [
+              1.7813813025210083,
+              1.8353413654618473
+            ]
+          }
+        },
+        "blast": {
+          "successes": 42,
+          "n": 45,
+          "rate": 0.9333333333333333,
+          "ci95": [
+            0.8214312561135918,
+            0.977068383537853
+          ],
+          "ratios": {
+            "n": 45,
+            "median": 1.746031746031746,
+            "p10": 1.304832474226804,
+            "p90": 3.451851851851852,
+            "min": 1,
+            "max": 6.615384615384615,
+            "mean": 2.1600426721734514,
+            "medianCI95": [
+              1.6571428571428573,
+              1.9318181818181819
+            ]
+          }
+        },
+        "recoil": {
+          "successes": 74,
+          "n": 192,
+          "rate": 0.3854166666666667,
+          "ci95": [
+            0.3194626161509185,
+            0.4558660167850869
+          ],
+          "ratios": {
+            "n": 192,
+            "median": 1.1880543237250554,
+            "p10": 1,
+            "p90": 1.61731884057971,
+            "min": 1,
+            "max": 2.085714285714286,
+            "mean": 1.2685719199575336,
+            "medianCI95": [
+              1.1492301649646504,
+              1.2256190637720488
+            ]
+          }
+        },
+        "cauterize": {
+          "successes": 169,
+          "n": 184,
+          "rate": 0.9184782608695652,
+          "ci95": [
+            0.8698629515670593,
+            0.9499767431544506
+          ],
+          "ratios": {
+            "n": 184,
+            "median": 2.2515060240963853,
+            "p10": 1.3132413793103448,
+            "p90": 7.0724137931034505,
+            "min": 1,
+            "max": 12.106666666666667,
+            "mean": 3.3446705099652694,
+            "medianCI95": [
+              2,
+              2.382972401289283
+            ]
+          }
+        },
+        "concussion": {
+          "successes": 188,
+          "n": 189,
+          "rate": 0.9947089947089947,
+          "ci95": [
+            0.9706423605812214,
+            0.9990654203125277
+          ],
+          "ratios": {
+            "n": 189,
+            "median": 2.9215686274509802,
+            "p10": 1.5454545454545454,
+            "p90": 6.941739980449663,
+            "min": 1,
+            "max": 11.378378378378379,
+            "mean": 3.7197496445785605,
+            "medianCI95": [
+              2.8461538461538463,
+              3.526550751879699
+            ]
+          }
+        }
+      }
+    }
+  },
+  "hybrid": {
+    "cauterize": {
+      "gain": {
+        "n": 200,
+        "median": 0,
+        "p10": 0,
+        "p90": 3.8805194805194794,
+        "min": 0,
+        "max": 8.26530612244898,
+        "mean": 1.11065590159952,
+        "medianCI95": [
+          0,
+          0
+        ]
+      },
+      "positive": {
+        "successes": 62,
+        "n": 200,
+        "rate": 0.31,
+        "ci95": [
+          0.24998842733633997,
+          0.377173054912622
+        ]
+      },
+      "rows": [
+        {
+          "seed": 11001,
+          "gain": 0,
+          "damage": 54,
+          "ablated": 54
+        },
+        {
+          "seed": 11002,
+          "gain": 0,
+          "damage": 69,
+          "ablated": 69
+        },
+        {
+          "seed": 11003,
+          "gain": 0,
+          "damage": 59,
+          "ablated": 59
+        },
+        {
+          "seed": 11004,
+          "gain": 0,
+          "damage": 103,
+          "ablated": 103
+        },
+        {
+          "seed": 11005,
+          "gain": 4.395348837209302,
+          "damage": 232,
+          "ablated": 43
+        },
+        {
+          "seed": 11006,
+          "gain": 0,
+          "damage": 75,
+          "ablated": 75
+        },
+        {
+          "seed": 11007,
+          "gain": 7.363636363636363,
+          "damage": 460,
+          "ablated": 55
+        },
+        {
+          "seed": 11008,
+          "gain": 0.7090909090909091,
+          "damage": 94,
+          "ablated": 55
+        },
+        {
+          "seed": 11009,
+          "gain": 0,
+          "damage": 140,
+          "ablated": 140
+        },
+        {
+          "seed": 11010,
+          "gain": 5.25,
+          "damage": 250,
+          "ablated": 40
+        },
+        {
+          "seed": 11011,
+          "gain": 0,
+          "damage": 43,
+          "ablated": 43
+        },
+        {
+          "seed": 11012,
+          "gain": 2.625,
+          "damage": 145,
+          "ablated": 40
+        },
+        {
+          "seed": 11013,
+          "gain": 0,
+          "damage": 129,
+          "ablated": 129
+        },
+        {
+          "seed": 11014,
+          "gain": 0,
+          "damage": 132,
+          "ablated": 132
+        },
+        {
+          "seed": 11015,
+          "gain": 0,
+          "damage": 80,
+          "ablated": 80
+        },
+        {
+          "seed": 11016,
+          "gain": 1.640625,
+          "damage": 169,
+          "ablated": 64
+        },
+        {
+          "seed": 11017,
+          "gain": 0,
+          "damage": 134,
+          "ablated": 134
+        },
+        {
+          "seed": 11018,
+          "gain": 5.74468085106383,
+          "damage": 317,
+          "ablated": 47
+        },
+        {
+          "seed": 11019,
+          "gain": 1.4634146341463414,
+          "damage": 101,
+          "ablated": 41
+        },
+        {
+          "seed": 11020,
+          "gain": 3.1914893617021276,
+          "damage": 197,
+          "ablated": 47
+        },
+        {
+          "seed": 11021,
+          "gain": 0,
+          "damage": 95,
+          "ablated": 95
+        },
+        {
+          "seed": 11022,
+          "gain": 2.380952380952381,
+          "damage": 213,
+          "ablated": 63
+        },
+        {
+          "seed": 11023,
+          "gain": 0,
+          "damage": 192,
+          "ablated": 192
+        },
+        {
+          "seed": 11024,
+          "gain": 3.5714285714285716,
+          "damage": 192,
+          "ablated": 42
+        },
+        {
+          "seed": 11025,
+          "gain": 0,
+          "damage": 75,
+          "ablated": 75
+        },
+        {
+          "seed": 11026,
+          "gain": 0,
+          "damage": 90,
+          "ablated": 90
+        },
+        {
+          "seed": 11027,
+          "gain": 0,
+          "damage": 60,
+          "ablated": 60
+        },
+        {
+          "seed": 11028,
+          "gain": 0,
+          "damage": 79,
+          "ablated": 79
+        },
+        {
+          "seed": 11029,
+          "gain": 0,
+          "damage": 98,
+          "ablated": 98
+        },
+        {
+          "seed": 11030,
+          "gain": 3.2142857142857144,
+          "damage": 177,
+          "ablated": 42
+        },
+        {
+          "seed": 11031,
+          "gain": 3.8461538461538463,
+          "damage": 189,
+          "ablated": 39
+        },
+        {
+          "seed": 11032,
+          "gain": 1.75,
+          "damage": 165,
+          "ablated": 60
+        },
+        {
+          "seed": 11033,
+          "gain": 0,
+          "damage": 71,
+          "ablated": 71
+        },
+        {
+          "seed": 11034,
+          "gain": 0,
+          "damage": 41,
+          "ablated": 41
+        },
+        {
+          "seed": 11035,
+          "gain": 0,
+          "damage": 131,
+          "ablated": 131
+        },
+        {
+          "seed": 11036,
+          "gain": 0,
+          "damage": 76,
+          "ablated": 76
+        },
+        {
+          "seed": 11037,
+          "gain": 0,
+          "damage": 52,
+          "ablated": 52
+        },
+        {
+          "seed": 11038,
+          "gain": 0,
+          "damage": 101,
+          "ablated": 101
+        },
+        {
+          "seed": 11039,
+          "gain": 0,
+          "damage": 124,
+          "ablated": 124
+        },
+        {
+          "seed": 11040,
+          "gain": 6.926829268292683,
+          "damage": 325,
+          "ablated": 41
+        },
+        {
+          "seed": 11041,
+          "gain": 0,
+          "damage": 114,
+          "ablated": 114
+        },
+        {
+          "seed": 11042,
+          "gain": 0,
+          "damage": 100,
+          "ablated": 100
+        },
+        {
+          "seed": 11043,
+          "gain": 0,
+          "damage": 128,
+          "ablated": 128
+        },
+        {
+          "seed": 11044,
+          "gain": 0,
+          "damage": 140,
+          "ablated": 140
+        },
+        {
+          "seed": 11045,
+          "gain": 0,
+          "damage": 142,
+          "ablated": 142
+        },
+        {
+          "seed": 11046,
+          "gain": 0,
+          "damage": 98,
+          "ablated": 98
+        },
+        {
+          "seed": 11047,
+          "gain": 0,
+          "damage": 70,
+          "ablated": 70
+        },
+        {
+          "seed": 11048,
+          "gain": 0,
+          "damage": 35,
+          "ablated": 35
+        },
+        {
+          "seed": 11049,
+          "gain": 4.7727272727272725,
+          "damage": 254,
+          "ablated": 44
+        },
+        {
+          "seed": 11050,
+          "gain": 0,
+          "damage": 76,
+          "ablated": 76
+        },
+        {
+          "seed": 11051,
+          "gain": 0,
+          "damage": 86,
+          "ablated": 86
+        },
+        {
+          "seed": 11052,
+          "gain": 3.176470588235294,
+          "damage": 142,
+          "ablated": 34
+        },
+        {
+          "seed": 11053,
+          "gain": 0,
+          "damage": 128,
+          "ablated": 128
+        },
+        {
+          "seed": 11054,
+          "gain": 0,
+          "damage": 142,
+          "ablated": 142
+        },
+        {
+          "seed": 11055,
+          "gain": 0,
+          "damage": 187,
+          "ablated": 187
+        },
+        {
+          "seed": 11056,
+          "gain": 3.8461538461538463,
+          "damage": 189,
+          "ablated": 39
+        },
+        {
+          "seed": 11057,
+          "gain": 0,
+          "damage": 186,
+          "ablated": 186
+        },
+        {
+          "seed": 11058,
+          "gain": 0,
+          "damage": 64,
+          "ablated": 64
+        },
+        {
+          "seed": 11059,
+          "gain": 0,
+          "damage": 180,
+          "ablated": 180
+        },
+        {
+          "seed": 11060,
+          "gain": 3.574468085106383,
+          "damage": 215,
+          "ablated": 47
+        },
+        {
+          "seed": 11061,
+          "gain": 0,
+          "damage": 33,
+          "ablated": 33
+        },
+        {
+          "seed": 11062,
+          "gain": 0,
+          "damage": 39,
+          "ablated": 39
+        },
+        {
+          "seed": 11063,
+          "gain": 0,
+          "damage": 151,
+          "ablated": 151
+        },
+        {
+          "seed": 11064,
+          "gain": 0,
+          "damage": 54,
+          "ablated": 54
+        },
+        {
+          "seed": 11065,
+          "gain": 0,
+          "damage": 80,
+          "ablated": 80
+        },
+        {
+          "seed": 11066,
+          "gain": 0,
+          "damage": 138,
+          "ablated": 138
+        },
+        {
+          "seed": 11067,
+          "gain": 0,
+          "damage": 60,
+          "ablated": 60
+        },
+        {
+          "seed": 11068,
+          "gain": 0,
+          "damage": 96,
+          "ablated": 96
+        },
+        {
+          "seed": 11069,
+          "gain": 0,
+          "damage": 143,
+          "ablated": 143
+        },
+        {
+          "seed": 11070,
+          "gain": 0,
+          "damage": 163,
+          "ablated": 163
+        },
+        {
+          "seed": 11071,
+          "gain": 0,
+          "damage": 76,
+          "ablated": 76
+        },
+        {
+          "seed": 11072,
+          "gain": 0,
+          "damage": 94,
+          "ablated": 94
+        },
+        {
+          "seed": 11073,
+          "gain": 2.9166666666666665,
+          "damage": 282,
+          "ablated": 72
+        },
+        {
+          "seed": 11074,
+          "gain": 0,
+          "damage": 103,
+          "ablated": 103
+        },
+        {
+          "seed": 11075,
+          "gain": 0,
+          "damage": 189,
+          "ablated": 189
+        },
+        {
+          "seed": 11076,
+          "gain": 0,
+          "damage": 62,
+          "ablated": 62
+        },
+        {
+          "seed": 11077,
+          "gain": 1.1162790697674418,
+          "damage": 91,
+          "ablated": 43
+        },
+        {
+          "seed": 11078,
+          "gain": 0,
+          "damage": 50,
+          "ablated": 50
+        },
+        {
+          "seed": 11079,
+          "gain": 5.023255813953488,
+          "damage": 259,
+          "ablated": 43
+        },
+        {
+          "seed": 11080,
+          "gain": 0,
+          "damage": 49,
+          "ablated": 49
+        },
+        {
+          "seed": 11081,
+          "gain": 2.7857142857142856,
+          "damage": 159,
+          "ablated": 42
+        },
+        {
+          "seed": 11082,
+          "gain": 0,
+          "damage": 102,
+          "ablated": 102
+        },
+        {
+          "seed": 11083,
+          "gain": 4.090909090909091,
+          "damage": 336,
+          "ablated": 66
+        },
+        {
+          "seed": 11084,
+          "gain": 0,
+          "damage": 65,
+          "ablated": 65
+        },
+        {
+          "seed": 11085,
+          "gain": 0,
+          "damage": 110,
+          "ablated": 110
+        },
+        {
+          "seed": 11086,
+          "gain": 0,
+          "damage": 41,
+          "ablated": 41
+        },
+        {
+          "seed": 11087,
+          "gain": 0,
+          "damage": 114,
+          "ablated": 114
+        },
+        {
+          "seed": 11088,
+          "gain": 0,
+          "damage": 162,
+          "ablated": 162
+        },
+        {
+          "seed": 11089,
+          "gain": 2.019230769230769,
+          "damage": 157,
+          "ablated": 52
+        },
+        {
+          "seed": 11090,
+          "gain": 2.4193548387096775,
+          "damage": 212,
+          "ablated": 62
+        },
+        {
+          "seed": 11091,
+          "gain": 2.547169811320755,
+          "damage": 188,
+          "ablated": 53
+        },
+        {
+          "seed": 11092,
+          "gain": 0,
+          "damage": 134,
+          "ablated": 134
+        },
+        {
+          "seed": 11093,
+          "gain": 0,
+          "damage": 124,
+          "ablated": 124
+        },
+        {
+          "seed": 11094,
+          "gain": 0,
+          "damage": 85,
+          "ablated": 85
+        },
+        {
+          "seed": 11095,
+          "gain": 6.122448979591836,
+          "damage": 349,
+          "ablated": 49
+        },
+        {
+          "seed": 11096,
+          "gain": 6.454545454545454,
+          "damage": 328,
+          "ablated": 44
+        },
+        {
+          "seed": 11097,
+          "gain": 0,
+          "damage": 129,
+          "ablated": 129
+        },
+        {
+          "seed": 11098,
+          "gain": 0.9818181818181818,
+          "damage": 109,
+          "ablated": 55
+        },
+        {
+          "seed": 11099,
+          "gain": 0,
+          "damage": 67,
+          "ablated": 67
+        },
+        {
+          "seed": 11100,
+          "gain": 0,
+          "damage": 77,
+          "ablated": 77
+        },
+        {
+          "seed": 11101,
+          "gain": 0,
+          "damage": 128,
+          "ablated": 128
+        },
+        {
+          "seed": 11102,
+          "gain": 3.025,
+          "damage": 161,
+          "ablated": 40
+        },
+        {
+          "seed": 11103,
+          "gain": 0,
+          "damage": 125,
+          "ablated": 125
+        },
+        {
+          "seed": 11104,
+          "gain": 0,
+          "damage": 73,
+          "ablated": 73
+        },
+        {
+          "seed": 11105,
+          "gain": 0,
+          "damage": 127,
+          "ablated": 127
+        },
+        {
+          "seed": 11106,
+          "gain": 0,
+          "damage": 43,
+          "ablated": 43
+        },
+        {
+          "seed": 11107,
+          "gain": 1.3333333333333333,
+          "damage": 105,
+          "ablated": 45
+        },
+        {
+          "seed": 11108,
+          "gain": 1.356164383561644,
+          "damage": 172,
+          "ablated": 73
+        },
+        {
+          "seed": 11109,
+          "gain": 0,
+          "damage": 66,
+          "ablated": 66
+        },
+        {
+          "seed": 11110,
+          "gain": 0.8518518518518519,
+          "damage": 150,
+          "ablated": 81
+        },
+        {
+          "seed": 11111,
+          "gain": 0,
+          "damage": 37,
+          "ablated": 37
+        },
+        {
+          "seed": 11112,
+          "gain": 0,
+          "damage": 94,
+          "ablated": 94
+        },
+        {
+          "seed": 11113,
+          "gain": 0,
+          "damage": 100,
+          "ablated": 100
+        },
+        {
+          "seed": 11114,
+          "gain": 0,
+          "damage": 75,
+          "ablated": 75
+        },
+        {
+          "seed": 11115,
+          "gain": 3.8461538461538463,
+          "damage": 189,
+          "ablated": 39
+        },
+        {
+          "seed": 11116,
+          "gain": 0,
+          "damage": 98,
+          "ablated": 98
+        },
+        {
+          "seed": 11117,
+          "gain": 0,
+          "damage": 75,
+          "ablated": 75
+        },
+        {
+          "seed": 11118,
+          "gain": 0,
+          "damage": 109,
+          "ablated": 109
+        },
+        {
+          "seed": 11119,
+          "gain": 0,
+          "damage": 168,
+          "ablated": 168
+        },
+        {
+          "seed": 11120,
+          "gain": 2.9347826086956523,
+          "damage": 181,
+          "ablated": 46
+        },
+        {
+          "seed": 11121,
+          "gain": 0,
+          "damage": 132,
+          "ablated": 132
+        },
+        {
+          "seed": 11122,
+          "gain": 3.391304347826087,
+          "damage": 202,
+          "ablated": 46
+        },
+        {
+          "seed": 11123,
+          "gain": 0,
+          "damage": 94,
+          "ablated": 94
+        },
+        {
+          "seed": 11124,
+          "gain": 3.2432432432432434,
+          "damage": 157,
+          "ablated": 37
+        },
+        {
+          "seed": 11125,
+          "gain": 3.8461538461538463,
+          "damage": 189,
+          "ablated": 39
+        },
+        {
+          "seed": 11126,
+          "gain": 0,
+          "damage": 40,
+          "ablated": 40
+        },
+        {
+          "seed": 11127,
+          "gain": 5.487804878048781,
+          "damage": 266,
+          "ablated": 41
+        },
+        {
+          "seed": 11128,
+          "gain": 0,
+          "damage": 120,
+          "ablated": 120
+        },
+        {
+          "seed": 11129,
+          "gain": 0,
+          "damage": 99,
+          "ablated": 99
+        },
+        {
+          "seed": 11130,
+          "gain": 0,
+          "damage": 128,
+          "ablated": 128
+        },
+        {
+          "seed": 11131,
+          "gain": 0,
+          "damage": 113,
+          "ablated": 113
+        },
+        {
+          "seed": 11132,
+          "gain": 3.857142857142857,
+          "damage": 170,
+          "ablated": 35
+        },
+        {
+          "seed": 11133,
+          "gain": 4.7727272727272725,
+          "damage": 254,
+          "ablated": 44
+        },
+        {
+          "seed": 11134,
+          "gain": 0,
+          "damage": 192,
+          "ablated": 192
+        },
+        {
+          "seed": 11135,
+          "gain": 3.1914893617021276,
+          "damage": 197,
+          "ablated": 47
+        },
+        {
+          "seed": 11136,
+          "gain": 0,
+          "damage": 46,
+          "ablated": 46
+        },
+        {
+          "seed": 11137,
+          "gain": 6,
+          "damage": 350,
+          "ablated": 50
+        },
+        {
+          "seed": 11138,
+          "gain": 0,
+          "damage": 49,
+          "ablated": 49
+        },
+        {
+          "seed": 11139,
+          "gain": 2.1875,
+          "damage": 153,
+          "ablated": 48
+        },
+        {
+          "seed": 11140,
+          "gain": 0.9857142857142858,
+          "damage": 139,
+          "ablated": 70
+        },
+        {
+          "seed": 11141,
+          "gain": 0,
+          "damage": 106,
+          "ablated": 106
+        },
+        {
+          "seed": 11142,
+          "gain": 0,
+          "damage": 99,
+          "ablated": 99
+        },
+        {
+          "seed": 11143,
+          "gain": 0,
+          "damage": 101,
+          "ablated": 101
+        },
+        {
+          "seed": 11144,
+          "gain": 0,
+          "damage": 107,
+          "ablated": 107
+        },
+        {
+          "seed": 11145,
+          "gain": 0,
+          "damage": 99,
+          "ablated": 99
+        },
+        {
+          "seed": 11146,
+          "gain": 0,
+          "damage": 152,
+          "ablated": 152
+        },
+        {
+          "seed": 11147,
+          "gain": 0,
+          "damage": 32,
+          "ablated": 32
+        },
+        {
+          "seed": 11148,
+          "gain": 0,
+          "damage": 58,
+          "ablated": 58
+        },
+        {
+          "seed": 11149,
+          "gain": 4.7727272727272725,
+          "damage": 254,
+          "ablated": 44
+        },
+        {
+          "seed": 11150,
+          "gain": 0,
+          "damage": 100,
+          "ablated": 100
+        },
+        {
+          "seed": 11151,
+          "gain": 8.26530612244898,
+          "damage": 454,
+          "ablated": 49
+        },
+        {
+          "seed": 11152,
+          "gain": 0,
+          "damage": 119,
+          "ablated": 119
+        },
+        {
+          "seed": 11153,
+          "gain": 0,
+          "damage": 74,
+          "ablated": 74
+        },
+        {
+          "seed": 11154,
+          "gain": 0,
+          "damage": 55,
+          "ablated": 55
+        },
+        {
+          "seed": 11155,
+          "gain": 0,
+          "damage": 133,
+          "ablated": 133
+        },
+        {
+          "seed": 11156,
+          "gain": 3.391304347826087,
+          "damage": 202,
+          "ablated": 46
+        },
+        {
+          "seed": 11157,
+          "gain": 6.122448979591836,
+          "damage": 349,
+          "ablated": 49
+        },
+        {
+          "seed": 11158,
+          "gain": 0,
+          "damage": 96,
+          "ablated": 96
+        },
+        {
+          "seed": 11159,
+          "gain": 0,
+          "damage": 52,
+          "ablated": 52
+        },
+        {
+          "seed": 11160,
+          "gain": 0,
+          "damage": 100,
+          "ablated": 100
+        },
+        {
+          "seed": 11161,
+          "gain": 0,
+          "damage": 132,
+          "ablated": 132
+        },
+        {
+          "seed": 11162,
+          "gain": 0,
+          "damage": 55,
+          "ablated": 55
+        },
+        {
+          "seed": 11163,
+          "gain": 1.6666666666666667,
+          "damage": 168,
+          "ablated": 63
+        },
+        {
+          "seed": 11164,
+          "gain": 0,
+          "damage": 34,
+          "ablated": 34
+        },
+        {
+          "seed": 11165,
+          "gain": 7.377049180327869,
+          "damage": 511,
+          "ablated": 61
+        },
+        {
+          "seed": 11166,
+          "gain": 0,
+          "damage": 40,
+          "ablated": 40
+        },
+        {
+          "seed": 11167,
+          "gain": 0,
+          "damage": 97,
+          "ablated": 97
+        },
+        {
+          "seed": 11168,
+          "gain": 0,
+          "damage": 72,
+          "ablated": 72
+        },
+        {
+          "seed": 11169,
+          "gain": 0,
+          "damage": 49,
+          "ablated": 49
+        },
+        {
+          "seed": 11170,
+          "gain": 3.391304347826087,
+          "damage": 202,
+          "ablated": 46
+        },
+        {
+          "seed": 11171,
+          "gain": 3.1914893617021276,
+          "damage": 197,
+          "ablated": 47
+        },
+        {
+          "seed": 11172,
+          "gain": 0,
+          "damage": 98,
+          "ablated": 98
+        },
+        {
+          "seed": 11173,
+          "gain": 0,
+          "damage": 111,
+          "ablated": 111
+        },
+        {
+          "seed": 11174,
+          "gain": 4.421052631578948,
+          "damage": 206,
+          "ablated": 38
+        },
+        {
+          "seed": 11175,
+          "gain": 0,
+          "damage": 37,
+          "ablated": 37
+        },
+        {
+          "seed": 11176,
+          "gain": 1.053191489361702,
+          "damage": 193,
+          "ablated": 94
+        },
+        {
+          "seed": 11177,
+          "gain": 0,
+          "damage": 83,
+          "ablated": 83
+        },
+        {
+          "seed": 11178,
+          "gain": 0,
+          "damage": 145,
+          "ablated": 145
+        },
+        {
+          "seed": 11179,
+          "gain": 0,
+          "damage": 55,
+          "ablated": 55
+        },
+        {
+          "seed": 11180,
+          "gain": 0,
+          "damage": 43,
+          "ablated": 43
+        },
+        {
+          "seed": 11181,
+          "gain": 0.5,
+          "damage": 45,
+          "ablated": 30
+        },
+        {
+          "seed": 11182,
+          "gain": 0,
+          "damage": 46,
+          "ablated": 46
+        },
+        {
+          "seed": 11183,
+          "gain": 0,
+          "damage": 116,
+          "ablated": 116
+        },
+        {
+          "seed": 11184,
+          "gain": 0,
+          "damage": 48,
+          "ablated": 48
+        },
+        {
+          "seed": 11185,
+          "gain": 0,
+          "damage": 174,
+          "ablated": 174
+        },
+        {
+          "seed": 11186,
+          "gain": 4.333333333333333,
+          "damage": 192,
+          "ablated": 36
+        },
+        {
+          "seed": 11187,
+          "gain": 0,
+          "damage": 186,
+          "ablated": 186
+        },
+        {
+          "seed": 11188,
+          "gain": 0,
+          "damage": 93,
+          "ablated": 93
+        },
+        {
+          "seed": 11189,
+          "gain": 0,
+          "damage": 47,
+          "ablated": 47
+        },
+        {
+          "seed": 11190,
+          "gain": 3.658536585365854,
+          "damage": 191,
+          "ablated": 41
+        },
+        {
+          "seed": 11191,
+          "gain": 3.098360655737705,
+          "damage": 250,
+          "ablated": 61
+        },
+        {
+          "seed": 11192,
+          "gain": 0,
+          "damage": 180,
+          "ablated": 180
+        },
+        {
+          "seed": 11193,
+          "gain": 0,
+          "damage": 60,
+          "ablated": 60
+        },
+        {
+          "seed": 11194,
+          "gain": 7.5,
+          "damage": 510,
+          "ablated": 60
+        },
+        {
+          "seed": 11195,
+          "gain": 0,
+          "damage": 72,
+          "ablated": 72
+        },
+        {
+          "seed": 11196,
+          "gain": 3.1578947368421053,
+          "damage": 158,
+          "ablated": 38
+        },
+        {
+          "seed": 11197,
+          "gain": 0,
+          "damage": 80,
+          "ablated": 80
+        },
+        {
+          "seed": 11198,
+          "gain": 0,
+          "damage": 111,
+          "ablated": 111
+        },
+        {
+          "seed": 11199,
+          "gain": 0,
+          "damage": 90,
+          "ablated": 90
+        },
+        {
+          "seed": 11200,
+          "gain": 0,
+          "damage": 60,
+          "ablated": 60
+        }
+      ]
+    },
+    "concussion": {
+      "gain": {
+        "n": 200,
+        "median": 1.92,
+        "p10": 0,
+        "p90": 5.348571428571428,
+        "min": 0,
+        "max": 10.378378378378379,
+        "mean": 2.5126423114982286,
+        "medianCI95": [
+          1.8056603773584907,
+          2.2153846153846155
+        ]
+      },
+      "positive": {
+        "successes": 175,
+        "n": 200,
+        "rate": 0.875,
+        "ci95": [
+          0.8219846471534161,
+          0.9138808484078432
+        ]
+      },
+      "rows": [
+        {
+          "seed": 11001,
+          "gain": 10.378378378378379,
+          "damage": 421,
+          "ablated": 37
+        },
+        {
+          "seed": 11002,
+          "gain": 1,
+          "damage": 192,
+          "ablated": 96
+        },
+        {
+          "seed": 11003,
+          "gain": 1.9591836734693877,
+          "damage": 145,
+          "ablated": 49
+        },
+        {
+          "seed": 11004,
+          "gain": 0.5052631578947369,
+          "damage": 143,
+          "ablated": 95
+        },
+        {
+          "seed": 11005,
+          "gain": 2.5945945945945947,
+          "damage": 133,
+          "ablated": 37
+        },
+        {
+          "seed": 11006,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11007,
+          "gain": 0.9795918367346939,
+          "damage": 194,
+          "ablated": 98
+        },
+        {
+          "seed": 11008,
+          "gain": 2.0210526315789474,
+          "damage": 287,
+          "ablated": 95
+        },
+        {
+          "seed": 11009,
+          "gain": 0.5454545454545454,
+          "damage": 136,
+          "ablated": 88
+        },
+        {
+          "seed": 11010,
+          "gain": 0.42857142857142855,
+          "damage": 180,
+          "ablated": 126
+        },
+        {
+          "seed": 11011,
+          "gain": 1.8113207547169812,
+          "damage": 149,
+          "ablated": 53
+        },
+        {
+          "seed": 11012,
+          "gain": 2.5714285714285716,
+          "damage": 200,
+          "ablated": 56
+        },
+        {
+          "seed": 11013,
+          "gain": 2.526315789473684,
+          "damage": 134,
+          "ablated": 38
+        },
+        {
+          "seed": 11014,
+          "gain": 7.2,
+          "damage": 123,
+          "ablated": 15
+        },
+        {
+          "seed": 11015,
+          "gain": 0,
+          "damage": 27,
+          "ablated": 27
+        },
+        {
+          "seed": 11016,
+          "gain": 0.2975206611570248,
+          "damage": 157,
+          "ablated": 121
+        },
+        {
+          "seed": 11017,
+          "gain": 5.333333333333333,
+          "damage": 171,
+          "ablated": 27
+        },
+        {
+          "seed": 11018,
+          "gain": 3.0638297872340425,
+          "damage": 191,
+          "ablated": 47
+        },
+        {
+          "seed": 11019,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11020,
+          "gain": 1.5319148936170213,
+          "damage": 119,
+          "ablated": 47
+        },
+        {
+          "seed": 11021,
+          "gain": 0,
+          "damage": 95,
+          "ablated": 95
+        },
+        {
+          "seed": 11022,
+          "gain": 3.2,
+          "damage": 189,
+          "ablated": 45
+        },
+        {
+          "seed": 11023,
+          "gain": 1.5737704918032787,
+          "damage": 157,
+          "ablated": 61
+        },
+        {
+          "seed": 11024,
+          "gain": 3.3488372093023258,
+          "damage": 187,
+          "ablated": 43
+        },
+        {
+          "seed": 11025,
+          "gain": 1.7142857142857142,
+          "damage": 114,
+          "ablated": 42
+        },
+        {
+          "seed": 11026,
+          "gain": 0.8571428571428571,
+          "damage": 104,
+          "ablated": 56
+        },
+        {
+          "seed": 11027,
+          "gain": 0.7272727272727273,
+          "damage": 114,
+          "ablated": 66
+        },
+        {
+          "seed": 11028,
+          "gain": 2.2153846153846155,
+          "damage": 209,
+          "ablated": 65
+        },
+        {
+          "seed": 11029,
+          "gain": 0.5454545454545454,
+          "damage": 136,
+          "ablated": 88
+        },
+        {
+          "seed": 11030,
+          "gain": 1.8461538461538463,
+          "damage": 148,
+          "ablated": 52
+        },
+        {
+          "seed": 11031,
+          "gain": 1.9591836734693877,
+          "damage": 145,
+          "ablated": 49
+        },
+        {
+          "seed": 11032,
+          "gain": 3.5555555555555554,
+          "damage": 123,
+          "ablated": 27
+        },
+        {
+          "seed": 11033,
+          "gain": 1.8461538461538463,
+          "damage": 148,
+          "ablated": 52
+        },
+        {
+          "seed": 11034,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11035,
+          "gain": 0.8888888888888888,
+          "damage": 102,
+          "ablated": 54
+        },
+        {
+          "seed": 11036,
+          "gain": 1.8113207547169812,
+          "damage": 149,
+          "ablated": 53
+        },
+        {
+          "seed": 11037,
+          "gain": 1.7777777777777777,
+          "damage": 150,
+          "ablated": 54
+        },
+        {
+          "seed": 11038,
+          "gain": 3.096774193548387,
+          "damage": 127,
+          "ablated": 31
+        },
+        {
+          "seed": 11039,
+          "gain": 7.111111111111111,
+          "damage": 219,
+          "ablated": 27
+        },
+        {
+          "seed": 11040,
+          "gain": 4.705882352941177,
+          "damage": 291,
+          "ablated": 51
+        },
+        {
+          "seed": 11041,
+          "gain": 1.0909090909090908,
+          "damage": 184,
+          "ablated": 88
+        },
+        {
+          "seed": 11042,
+          "gain": 0.375,
+          "damage": 88,
+          "ablated": 64
+        },
+        {
+          "seed": 11043,
+          "gain": 1.8,
+          "damage": 112,
+          "ablated": 40
+        },
+        {
+          "seed": 11044,
+          "gain": 0.5373134328358209,
+          "damage": 103,
+          "ablated": 67
+        },
+        {
+          "seed": 11045,
+          "gain": 3.6923076923076925,
+          "damage": 122,
+          "ablated": 26
+        },
+        {
+          "seed": 11046,
+          "gain": 0,
+          "damage": 24,
+          "ablated": 24
+        },
+        {
+          "seed": 11047,
+          "gain": 2.618181818181818,
+          "damage": 199,
+          "ablated": 55
+        },
+        {
+          "seed": 11048,
+          "gain": 2.5714285714285716,
+          "damage": 200,
+          "ablated": 56
+        },
+        {
+          "seed": 11049,
+          "gain": 0.366412213740458,
+          "damage": 179,
+          "ablated": 131
+        },
+        {
+          "seed": 11050,
+          "gain": 1.8113207547169812,
+          "damage": 149,
+          "ablated": 53
+        },
+        {
+          "seed": 11051,
+          "gain": 0.5806451612903226,
+          "damage": 147,
+          "ablated": 93
+        },
+        {
+          "seed": 11052,
+          "gain": 2.2857142857142856,
+          "damage": 207,
+          "ablated": 63
+        },
+        {
+          "seed": 11053,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11054,
+          "gain": 0.8275862068965517,
+          "damage": 106,
+          "ablated": 58
+        },
+        {
+          "seed": 11055,
+          "gain": 7.578947368421052,
+          "damage": 163,
+          "ablated": 19
+        },
+        {
+          "seed": 11056,
+          "gain": 0,
+          "damage": 98,
+          "ablated": 98
+        },
+        {
+          "seed": 11057,
+          "gain": 1.92,
+          "damage": 73,
+          "ablated": 25
+        },
+        {
+          "seed": 11058,
+          "gain": 4.8,
+          "damage": 261,
+          "ablated": 45
+        },
+        {
+          "seed": 11059,
+          "gain": 0,
+          "damage": 170,
+          "ablated": 170
+        },
+        {
+          "seed": 11060,
+          "gain": 4.285714285714286,
+          "damage": 296,
+          "ablated": 56
+        },
+        {
+          "seed": 11061,
+          "gain": 1.9591836734693877,
+          "damage": 145,
+          "ablated": 49
+        },
+        {
+          "seed": 11062,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11063,
+          "gain": 2.4,
+          "damage": 204,
+          "ablated": 60
+        },
+        {
+          "seed": 11064,
+          "gain": 0,
+          "damage": 28,
+          "ablated": 28
+        },
+        {
+          "seed": 11065,
+          "gain": 2.1818181818181817,
+          "damage": 70,
+          "ablated": 22
+        },
+        {
+          "seed": 11066,
+          "gain": 0,
+          "damage": 176,
+          "ablated": 176
+        },
+        {
+          "seed": 11067,
+          "gain": 0.5052631578947369,
+          "damage": 143,
+          "ablated": 95
+        },
+        {
+          "seed": 11068,
+          "gain": 0,
+          "damage": 172,
+          "ablated": 172
+        },
+        {
+          "seed": 11069,
+          "gain": 0,
+          "damage": 35,
+          "ablated": 35
+        },
+        {
+          "seed": 11070,
+          "gain": 0.41025641025641024,
+          "damage": 165,
+          "ablated": 117
+        },
+        {
+          "seed": 11071,
+          "gain": 6.428571428571429,
+          "damage": 208,
+          "ablated": 28
+        },
+        {
+          "seed": 11072,
+          "gain": 1.8113207547169812,
+          "damage": 149,
+          "ablated": 53
+        },
+        {
+          "seed": 11073,
+          "gain": 6.260869565217392,
+          "damage": 334,
+          "ablated": 46
+        },
+        {
+          "seed": 11074,
+          "gain": 8,
+          "damage": 162,
+          "ablated": 18
+        },
+        {
+          "seed": 11075,
+          "gain": 8.228571428571428,
+          "damage": 323,
+          "ablated": 35
+        },
+        {
+          "seed": 11076,
+          "gain": 4.173913043478261,
+          "damage": 119,
+          "ablated": 23
+        },
+        {
+          "seed": 11077,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11078,
+          "gain": 8.228571428571428,
+          "damage": 323,
+          "ablated": 35
+        },
+        {
+          "seed": 11079,
+          "gain": 1.92,
+          "damage": 73,
+          "ablated": 25
+        },
+        {
+          "seed": 11080,
+          "gain": 3.789473684210526,
+          "damage": 182,
+          "ablated": 38
+        },
+        {
+          "seed": 11081,
+          "gain": 0.39669421487603307,
+          "damage": 169,
+          "ablated": 121
+        },
+        {
+          "seed": 11082,
+          "gain": 5.333333333333333,
+          "damage": 171,
+          "ablated": 27
+        },
+        {
+          "seed": 11083,
+          "gain": 6.857142857142857,
+          "damage": 330,
+          "ablated": 42
+        },
+        {
+          "seed": 11084,
+          "gain": 3.6226415094339623,
+          "damage": 245,
+          "ablated": 53
+        },
+        {
+          "seed": 11085,
+          "gain": 0,
+          "damage": 37,
+          "ablated": 37
+        },
+        {
+          "seed": 11086,
+          "gain": 4.9655172413793105,
+          "damage": 173,
+          "ablated": 29
+        },
+        {
+          "seed": 11087,
+          "gain": 0.48,
+          "damage": 111,
+          "ablated": 75
+        },
+        {
+          "seed": 11088,
+          "gain": 0.5454545454545454,
+          "damage": 136,
+          "ablated": 88
+        },
+        {
+          "seed": 11089,
+          "gain": 0.3333333333333333,
+          "damage": 96,
+          "ablated": 72
+        },
+        {
+          "seed": 11090,
+          "gain": 1.2,
+          "damage": 198,
+          "ablated": 90
+        },
+        {
+          "seed": 11091,
+          "gain": 3.2542372881355934,
+          "damage": 251,
+          "ablated": 59
+        },
+        {
+          "seed": 11092,
+          "gain": 0,
+          "damage": 125,
+          "ablated": 125
+        },
+        {
+          "seed": 11093,
+          "gain": 3.6,
+          "damage": 184,
+          "ablated": 40
+        },
+        {
+          "seed": 11094,
+          "gain": 1.6271186440677967,
+          "damage": 155,
+          "ablated": 59
+        },
+        {
+          "seed": 11095,
+          "gain": 2.938775510204082,
+          "damage": 193,
+          "ablated": 49
+        },
+        {
+          "seed": 11096,
+          "gain": 1.6941176470588235,
+          "damage": 229,
+          "ablated": 85
+        },
+        {
+          "seed": 11097,
+          "gain": 2.5714285714285716,
+          "damage": 125,
+          "ablated": 35
+        },
+        {
+          "seed": 11098,
+          "gain": 0.2975206611570248,
+          "damage": 157,
+          "ablated": 121
+        },
+        {
+          "seed": 11099,
+          "gain": 5.333333333333333,
+          "damage": 285,
+          "ablated": 45
+        },
+        {
+          "seed": 11100,
+          "gain": 3.3684210526315788,
+          "damage": 249,
+          "ablated": 57
+        },
+        {
+          "seed": 11101,
+          "gain": 0,
+          "damage": 170,
+          "ablated": 170
+        },
+        {
+          "seed": 11102,
+          "gain": 2.6666666666666665,
+          "damage": 198,
+          "ablated": 54
+        },
+        {
+          "seed": 11103,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11104,
+          "gain": 4.5,
+          "damage": 88,
+          "ablated": 16
+        },
+        {
+          "seed": 11105,
+          "gain": 1.7777777777777777,
+          "damage": 150,
+          "ablated": 54
+        },
+        {
+          "seed": 11106,
+          "gain": 1.9591836734693877,
+          "damage": 145,
+          "ablated": 49
+        },
+        {
+          "seed": 11107,
+          "gain": 3.3684210526315788,
+          "damage": 249,
+          "ablated": 57
+        },
+        {
+          "seed": 11108,
+          "gain": 6.857142857142857,
+          "damage": 220,
+          "ablated": 28
+        },
+        {
+          "seed": 11109,
+          "gain": 2.769230769230769,
+          "damage": 147,
+          "ablated": 39
+        },
+        {
+          "seed": 11110,
+          "gain": 2.6666666666666665,
+          "damage": 198,
+          "ablated": 54
+        },
+        {
+          "seed": 11111,
+          "gain": 0,
+          "damage": 118,
+          "ablated": 118
+        },
+        {
+          "seed": 11112,
+          "gain": 5.333333333333333,
+          "damage": 171,
+          "ablated": 27
+        },
+        {
+          "seed": 11113,
+          "gain": 0,
+          "damage": 28,
+          "ablated": 28
+        },
+        {
+          "seed": 11114,
+          "gain": 2.7169811320754715,
+          "damage": 197,
+          "ablated": 53
+        },
+        {
+          "seed": 11115,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11116,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11117,
+          "gain": 0.5161290322580645,
+          "damage": 141,
+          "ablated": 93
+        },
+        {
+          "seed": 11118,
+          "gain": 0,
+          "damage": 30,
+          "ablated": 30
+        },
+        {
+          "seed": 11119,
+          "gain": 1.935483870967742,
+          "damage": 91,
+          "ablated": 31
+        },
+        {
+          "seed": 11120,
+          "gain": 0.8823529411764706,
+          "damage": 128,
+          "ablated": 68
+        },
+        {
+          "seed": 11121,
+          "gain": 2.6666666666666665,
+          "damage": 198,
+          "ablated": 54
+        },
+        {
+          "seed": 11122,
+          "gain": 3.3684210526315788,
+          "damage": 249,
+          "ablated": 57
+        },
+        {
+          "seed": 11123,
+          "gain": 0,
+          "damage": 122,
+          "ablated": 122
+        },
+        {
+          "seed": 11124,
+          "gain": 2.938775510204082,
+          "damage": 193,
+          "ablated": 49
+        },
+        {
+          "seed": 11125,
+          "gain": 1.8,
+          "damage": 112,
+          "ablated": 40
+        },
+        {
+          "seed": 11126,
+          "gain": 0.7619047619047619,
+          "damage": 111,
+          "ablated": 63
+        },
+        {
+          "seed": 11127,
+          "gain": 0.5161290322580645,
+          "damage": 141,
+          "ablated": 93
+        },
+        {
+          "seed": 11128,
+          "gain": 8.88888888888889,
+          "damage": 267,
+          "ablated": 27
+        },
+        {
+          "seed": 11129,
+          "gain": 1.6179775280898876,
+          "damage": 233,
+          "ablated": 89
+        },
+        {
+          "seed": 11130,
+          "gain": 3.3488372093023258,
+          "damage": 187,
+          "ablated": 43
+        },
+        {
+          "seed": 11131,
+          "gain": 1.6271186440677967,
+          "damage": 155,
+          "ablated": 59
+        },
+        {
+          "seed": 11132,
+          "gain": 0.8571428571428571,
+          "damage": 104,
+          "ablated": 56
+        },
+        {
+          "seed": 11133,
+          "gain": 0.7164179104477612,
+          "damage": 115,
+          "ablated": 67
+        },
+        {
+          "seed": 11134,
+          "gain": 5.485714285714286,
+          "damage": 227,
+          "ablated": 35
+        },
+        {
+          "seed": 11135,
+          "gain": 0.7619047619047619,
+          "damage": 111,
+          "ablated": 63
+        },
+        {
+          "seed": 11136,
+          "gain": 1.7454545454545454,
+          "damage": 151,
+          "ablated": 55
+        },
+        {
+          "seed": 11137,
+          "gain": 2.938775510204082,
+          "damage": 193,
+          "ablated": 49
+        },
+        {
+          "seed": 11138,
+          "gain": 3.789473684210526,
+          "damage": 182,
+          "ablated": 38
+        },
+        {
+          "seed": 11139,
+          "gain": 2.823529411764706,
+          "damage": 195,
+          "ablated": 51
+        },
+        {
+          "seed": 11140,
+          "gain": 6.638297872340425,
+          "damage": 359,
+          "ablated": 47
+        },
+        {
+          "seed": 11141,
+          "gain": 5.1891891891891895,
+          "damage": 229,
+          "ablated": 37
+        },
+        {
+          "seed": 11142,
+          "gain": 3,
+          "damage": 120,
+          "ablated": 30
+        },
+        {
+          "seed": 11143,
+          "gain": 3.6,
+          "damage": 184,
+          "ablated": 40
+        },
+        {
+          "seed": 11144,
+          "gain": 0,
+          "damage": 24,
+          "ablated": 24
+        },
+        {
+          "seed": 11145,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11146,
+          "gain": 4.9655172413793105,
+          "damage": 173,
+          "ablated": 29
+        },
+        {
+          "seed": 11147,
+          "gain": 1.7454545454545454,
+          "damage": 151,
+          "ablated": 55
+        },
+        {
+          "seed": 11148,
+          "gain": 1.0666666666666667,
+          "damage": 186,
+          "ablated": 90
+        },
+        {
+          "seed": 11149,
+          "gain": 0,
+          "damage": 175,
+          "ablated": 175
+        },
+        {
+          "seed": 11150,
+          "gain": 3.6,
+          "damage": 184,
+          "ablated": 40
+        },
+        {
+          "seed": 11151,
+          "gain": 5.142857142857143,
+          "damage": 172,
+          "ablated": 28
+        },
+        {
+          "seed": 11152,
+          "gain": 1.6,
+          "damage": 234,
+          "ablated": 90
+        },
+        {
+          "seed": 11153,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11154,
+          "gain": 0,
+          "damage": 26,
+          "ablated": 26
+        },
+        {
+          "seed": 11155,
+          "gain": 1,
+          "damage": 144,
+          "ablated": 72
+        },
+        {
+          "seed": 11156,
+          "gain": 0,
+          "damage": 175,
+          "ablated": 175
+        },
+        {
+          "seed": 11157,
+          "gain": 6.193548387096774,
+          "damage": 223,
+          "ablated": 31
+        },
+        {
+          "seed": 11158,
+          "gain": 6.545454545454546,
+          "damage": 166,
+          "ablated": 22
+        },
+        {
+          "seed": 11159,
+          "gain": 0.8275862068965517,
+          "damage": 106,
+          "ablated": 58
+        },
+        {
+          "seed": 11160,
+          "gain": 0.8421052631578947,
+          "damage": 105,
+          "ablated": 57
+        },
+        {
+          "seed": 11161,
+          "gain": 3.3684210526315788,
+          "damage": 249,
+          "ablated": 57
+        },
+        {
+          "seed": 11162,
+          "gain": 0,
+          "damage": 31,
+          "ablated": 31
+        },
+        {
+          "seed": 11163,
+          "gain": 5.2682926829268295,
+          "damage": 257,
+          "ablated": 41
+        },
+        {
+          "seed": 11164,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11165,
+          "gain": 7.2,
+          "damage": 328,
+          "ablated": 40
+        },
+        {
+          "seed": 11166,
+          "gain": 6.620689655172414,
+          "damage": 221,
+          "ablated": 29
+        },
+        {
+          "seed": 11167,
+          "gain": 3.3488372093023258,
+          "damage": 187,
+          "ablated": 43
+        },
+        {
+          "seed": 11168,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11169,
+          "gain": 3,
+          "damage": 96,
+          "ablated": 24
+        },
+        {
+          "seed": 11170,
+          "gain": 2.5714285714285716,
+          "damage": 200,
+          "ablated": 56
+        },
+        {
+          "seed": 11171,
+          "gain": 1.6271186440677967,
+          "damage": 155,
+          "ablated": 59
+        },
+        {
+          "seed": 11172,
+          "gain": 1.3636363636363635,
+          "damage": 52,
+          "ablated": 22
+        },
+        {
+          "seed": 11173,
+          "gain": 0,
+          "damage": 126,
+          "ablated": 126
+        },
+        {
+          "seed": 11174,
+          "gain": 1.6271186440677967,
+          "damage": 155,
+          "ablated": 59
+        },
+        {
+          "seed": 11175,
+          "gain": 0.5161290322580645,
+          "damage": 141,
+          "ablated": 93
+        },
+        {
+          "seed": 11176,
+          "gain": 0,
+          "damage": 129,
+          "ablated": 129
+        },
+        {
+          "seed": 11177,
+          "gain": 0,
+          "damage": 25,
+          "ablated": 25
+        },
+        {
+          "seed": 11178,
+          "gain": 1.1612903225806452,
+          "damage": 201,
+          "ablated": 93
+        },
+        {
+          "seed": 11179,
+          "gain": 2.5454545454545454,
+          "damage": 234,
+          "ablated": 66
+        },
+        {
+          "seed": 11180,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11181,
+          "gain": 5.333333333333333,
+          "damage": 114,
+          "ablated": 18
+        },
+        {
+          "seed": 11182,
+          "gain": 0.5333333333333333,
+          "damage": 138,
+          "ablated": 90
+        },
+        {
+          "seed": 11183,
+          "gain": 1.0909090909090908,
+          "damage": 184,
+          "ablated": 88
+        },
+        {
+          "seed": 11184,
+          "gain": 3.0638297872340425,
+          "damage": 191,
+          "ablated": 47
+        },
+        {
+          "seed": 11185,
+          "gain": 6.857142857142857,
+          "damage": 330,
+          "ablated": 42
+        },
+        {
+          "seed": 11186,
+          "gain": 1.7142857142857142,
+          "damage": 114,
+          "ablated": 42
+        },
+        {
+          "seed": 11187,
+          "gain": 0.7868852459016393,
+          "damage": 109,
+          "ablated": 61
+        },
+        {
+          "seed": 11188,
+          "gain": 3.4909090909090907,
+          "damage": 247,
+          "ablated": 55
+        },
+        {
+          "seed": 11189,
+          "gain": 3.3684210526315788,
+          "damage": 249,
+          "ablated": 57
+        },
+        {
+          "seed": 11190,
+          "gain": 1.8113207547169812,
+          "damage": 149,
+          "ablated": 53
+        },
+        {
+          "seed": 11191,
+          "gain": 0.2874251497005988,
+          "damage": 215,
+          "ablated": 167
+        },
+        {
+          "seed": 11192,
+          "gain": 6.545454545454546,
+          "damage": 166,
+          "ablated": 22
+        },
+        {
+          "seed": 11193,
+          "gain": 1.44,
+          "damage": 122,
+          "ablated": 50
+        },
+        {
+          "seed": 11194,
+          "gain": 3.2238805970149254,
+          "damage": 283,
+          "ablated": 67
+        },
+        {
+          "seed": 11195,
+          "gain": 1.8113207547169812,
+          "damage": 149,
+          "ablated": 53
+        },
+        {
+          "seed": 11196,
+          "gain": 2.823529411764706,
+          "damage": 195,
+          "ablated": 51
+        },
+        {
+          "seed": 11197,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        },
+        {
+          "seed": 11198,
+          "gain": 0,
+          "damage": 26,
+          "ablated": 26
+        },
+        {
+          "seed": 11199,
+          "gain": 0.9818181818181818,
+          "damage": 109,
+          "ablated": 55
+        },
+        {
+          "seed": 11200,
+          "gain": 1.92,
+          "damage": 146,
+          "ablated": 50
+        }
+      ]
+    }
+  },
+  "combat": {},
+  "acquisition": {},
+  "stress": {},
+  "gates": {
+    "A": {
+      "pass": true,
+      "middleRatio": 2.1052631578947367,
+      "lateRatio": 5.842105263157895,
+      "lateP90Ratio": 16.31578947368421
+    },
+    "B": {
+      "pass": true,
+      "middle": 0.744,
+      "late": 0.8140495867768595
+    },
+    "D": {
+      "pass": false,
+      "note": "Hybrid viability additionally requires C combat."
+    }
+  }
+}
