@@ -10,7 +10,7 @@ import { ExplorationRun, RUN_LENGTH } from '../exploration/ExplorationRun';
 import type { CaveEvent } from '../exploration/ExplorationRun';
 
 const view = vi.hoisted(() => ({ callbacks: undefined as GameUICallbacks | undefined }));
-const animations = vi.hoisted(() => ({ animateLoading: vi.fn(), animateShot: vi.fn(), animateMagazineDiscard: vi.fn() }));
+const animations = vi.hoisted(() => ({ animateLoading: vi.fn(), animateShot: vi.fn(), animateMagazineDiscard: vi.fn(), setQuickFiring: vi.fn() }));
 // 데이터·Player·전투·상태 전환은 실제 구현을 쓰고 렌더링·애니메이션만 대체한다.
 vi.mock('../ui/GameUI', () => ({ GameUI: class {
   constructor(_root: HTMLElement, callbacks: GameUICallbacks) {
@@ -44,6 +44,27 @@ const killWithOpening = async (game: GameInternals) => {
 };
 
 beforeEach(() => { view.callbacks = undefined; Object.values(animations).forEach(animation => animation.mockClear()); });
+
+describe('퀵모드', () => {
+  it.each([true, false] as const)('선택한 퀵모드 %s를 장전과 사격 연출에 전달하고 사격 후 해제한다', async quickMode => {
+    const game = newGame();
+    callbacks().onChooseMode('free', quickMode);
+    callbacks().onChooseWeapon('p220');
+    await killWithOpening(game);
+    expect(animations.animateLoading).toHaveBeenCalledWith(['opening'], quickMode);
+    expect(animations.animateShot).toHaveBeenCalledTimes(1);
+    expect(animations.setQuickFiring.mock.calls).toEqual([[quickMode], [false]]);
+    expect(game.player.magazine.size).toBe(0);
+  });
+
+  it('기본값은 퀵모드다', async () => {
+    const game = newGame();
+    callbacks().onChooseMode('free');
+    callbacks().onChooseWeapon('p220');
+    await killWithOpening(game);
+    expect(animations.animateLoading).toHaveBeenCalledWith(['opening'], true);
+  });
+});
 
 describe('빈 탄창 턴 넘김', () => {
   for (const mode of ['free'] as const) {

@@ -72,6 +72,8 @@ export class GamePresentation {
   private shotEffectSequence = 0;
   private specialThreat = false;
   private playbackSpeed = 1;
+  private firingSpeed = 1;
+
   private destroyed = false;
   private chamberCheckCleanup?: () => void;
 
@@ -187,7 +189,26 @@ export class GamePresentation {
     haloMaterial.color.setHex(type === 'contaminator' ? 0x9bd24a : type === 'groundshaker' ? 0xff8a4c : 0x69c7ff);
   }
 
-  async animateLoading(rounds: readonly AmmoType[]): Promise<void> {
+
+  setQuickFiring(enabled: boolean): void {
+    this.firingSpeed = enabled ? 2 : 1;
+  }
+
+  async animateLoading(rounds: readonly AmmoType[], quickMode = false): Promise<void> {
+    if (quickMode) {
+      this.audio.prepare();
+      this.clearCartridges();
+      this.resetWeaponPose();
+      this.resetCameraPose();
+      this.setMagazineRounds(rounds);
+      this.magazineModel.root.visible = true;
+      this.magazineModel.roundDisplay.visible = false;
+      this.attachMagazineAtSeat();
+      this.aimPistolAtTarget(this.getZombieTarget());
+      this.animationInProgress = false;
+      this.presentationState = '사격 준비';
+      return;
+    }
     this.presentationState = '탄약 삽입';
     this.animationInProgress = true;
     this.audio.prepare();
@@ -966,7 +987,7 @@ export class GamePresentation {
   }
 
   private updateShotEffects(delta: number): void {
-    const gunDelta = delta * this.playbackSpeed;
+    const gunDelta = delta * this.playbackSpeed * this.firingSpeed;
     for (const effect of this.muzzleSmokePool) {
       if (!effect.active) continue;
       effect.age += gunDelta;
@@ -1305,7 +1326,7 @@ export class GamePresentation {
     this.animationFrame = requestAnimationFrame(this.tick);
   };
 
-  private tween(duration: number, update: (progress: number) => void, playbackRate: () => number = () => 1): Promise<void> {
+  private tween(duration: number, update: (progress: number) => void, playbackRate: () => number = () => this.firingSpeed): Promise<void> {
     return new Promise((resolve) => {
       let elapsed = 0;
       let previous = performance.now();
@@ -1324,7 +1345,7 @@ export class GamePresentation {
   }
 
   private gunTween(duration: number, update: (progress: number) => void): Promise<void> {
-    return this.tween(duration, update, () => this.playbackSpeed);
+    return this.tween(duration, update, () => this.playbackSpeed * this.firingSpeed);
   }
 
   private gunWait(duration: number): Promise<void> {

@@ -20,7 +20,7 @@ import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
 import type { ExplorationScreen } from './ExplorationView';
 
 export interface GameUICallbacks {
-  onChooseMode: (mode: GameMode) => void;
+  onChooseMode: (mode: GameMode, quickMode?: boolean) => void;
   onReturnToMenu: () => void;
   onChooseWeapon: (id: WeaponId) => void;
   onCylinderDecision: (spin: boolean) => void;
@@ -397,6 +397,8 @@ export class GameUI {
 
   get canvasHost(): HTMLElement { return document.querySelector<HTMLElement>('#canvas-host')!; }
 
+  private quickMode = true;
+
   showModeSelection(): void {
     this.closeMobilePanel();
     this.closeAmmoInventory();
@@ -408,8 +410,10 @@ export class GameUI {
     host.innerHTML = `<div class="route-card mode-selection-card"><span>좀비 샷</span><h2 id="weapon-selection-title">모드 선택</h2><div class="mode-options">
       <button type="button" class="mode-option" data-choose-mode="free"><strong>프리 모드</strong><span>권총별 초기 탄약 · 자유 보급 · 조우 종료 시 복구</span></button>
       <button type="button" class="mode-option" data-choose-mode="exploration"><strong>탐험 모드</strong><span>프로토타입 · 숨겨진 갈림길 · 감염체와 탄약 거래</span></button>
-    </div></div>`;
-    host.querySelectorAll<HTMLButtonElement>('[data-choose-mode]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseMode(button.dataset.chooseMode as GameMode)));
+    </div><label class="quick-mode-option"><input type="checkbox" id="quick-mode" ${this.quickMode ? 'checked' : ''}>퀵모드</label></div>`;
+    const quickMode = host.querySelector<HTMLInputElement>('#quick-mode')!;
+    quickMode.addEventListener('change', () => { this.quickMode = quickMode.checked; });
+    host.querySelectorAll<HTMLButtonElement>('[data-choose-mode]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseMode(button.dataset.chooseMode as GameMode, quickMode.checked)));
     this.focusSelection(host);
   }
 
