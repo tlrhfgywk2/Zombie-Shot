@@ -118,6 +118,8 @@ export class GameUI {
   private stock: AmmoStock = createStageStock(this.build);
   private specialCapacity: number = AMMO_BUILD_BALANCE.specialCapacity;
   private locked = false;
+  private phase: GamePhase = 'MODE_SELECTION';
+  private shortcutFocus: 'ammo' | 'order' = 'ammo';
   private weapon: WeaponDefinition = WEAPON_DEFINITIONS.p220;
   private magazineCapacity: number = COMBAT_BALANCE.baseMagazineCapacity;
   private suppressClick = false;
@@ -388,6 +390,20 @@ export class GameUI {
       if (!(event.target as Element).closest('.ammo-token, .mag-slot, .attachment-option, #firepower-button, #ammo-tooltip')) this.hideTooltip();
       if (event.target instanceof Node && !this.nextAction.contains(event.target)) this.closeNextActionTooltip();
     });
+    for (const [selector, focus] of [['.ammo-rack', 'ammo'], ['.magazine-panel', 'order']] as const) {
+      const panel = this.required(this.shell, selector);
+      panel.tabIndex = -1;
+      panel.setAttribute('role', 'group');
+      panel.setAttribute('aria-label', focus === 'ammo' ? '탄약 패널' : '발사 순서 패널');
+      panel.setAttribute('aria-keyshortcuts', 'Space');
+      panel.querySelector('.section-label > span')?.insertAdjacentHTML('beforeend', '<kbd class="panel-shortcut">스페이스</kbd>');
+      panel.addEventListener('pointerdown', () => this.setShortcutFocus(focus));
+      panel.addEventListener('focusin', () => this.setShortcutFocus(focus));
+    }
+    this.shell.querySelectorAll('.ammo-token').forEach(button => button.insertAdjacentHTML('beforeend', '<kbd class="ammo-shortcut" hidden></kbd>'));
+    this.loadButton.insertAdjacentHTML('beforeend', '<kbd>R</kbd>');
+    this.loadButton.setAttribute('aria-keyshortcuts', 'R');
+    document.addEventListener('keydown', event => this.handleCombatShortcut(event));
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
       this.hideTooltip();
@@ -475,8 +491,8 @@ export class GameUI {
     this.loadButton.hidden = size > 0;
     if (!size) return;
     host.innerHTML = decided
-      ? `<span>${spun ? '회전 완료 · 첫 탄 주효과 +50%' : '선택한 순서 유지'}</span><button type="button" data-cylinder-fire>발사</button>`
-      : `<button type="button" data-cylinder-keep>순서 유지</button><button type="button" data-cylinder-spin ${size < 2 ? 'disabled' : ''}>실린더 회전</button>`;
+      ? `<span>${spun ? '회전 완료 · 첫 탄 주효과 +50%' : '선택한 순서 유지'}</span><button type="button" data-cylinder-fire aria-keyshortcuts="R">발사 <kbd>R</kbd></button>`
+      : `<button type="button" data-cylinder-keep aria-keyshortcuts="E">순서 유지 <kbd>E</kbd></button><button type="button" data-cylinder-spin aria-keyshortcuts="R" ${size < 2 ? 'disabled' : ''}>실린더 회전 <kbd>R</kbd></button>`;
     host.querySelector<HTMLButtonElement>('[data-cylinder-keep]')?.addEventListener('click', () => this.callbacks.onCylinderDecision(false));
     host.querySelector<HTMLButtonElement>('[data-cylinder-spin]')?.addEventListener('click', () => this.callbacks.onCylinderDecision(true));
     host.querySelector<HTMLButtonElement>('[data-cylinder-fire]')?.addEventListener('click', this.callbacks.onFireCylinder);
@@ -545,6 +561,7 @@ export class GameUI {
       button.querySelector<HTMLElement>('.stock-count')!.textContent = label;
       button.setAttribute('aria-label', AMMO_DEFINITIONS[ammo].name + ' · ' + RARITY_NAMES[AMMO_DEFINITIONS[ammo].rarity] + ' · ' + label + ' · 장전 예약 ' + loaded + '발');
     });
+    this.updateShortcutIndicators();
   }
 
   showAttachmentReward(id: AttachmentId | undefined, loadout: LoadoutSnapshot): void {
@@ -706,6 +723,8 @@ export class GameUI {
   }
 
   setPhase(phase: GamePhase): void {
+    this.phase = phase;
+    this.updateShortcutIndicators();
     if (phase !== 'AMMO_SELECTION') this.closeMobilePanel();
     this.phaseText.textContent = PHASE_LABELS[phase];
     (this.required(this.shell, '#ammo-supply-button') as HTMLButtonElement).disabled = ['MODE_SELECTION', 'WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(phase);
@@ -1056,6 +1075,73 @@ export class GameUI {
     if (!this.suppressClick) return false;
     this.suppressClick = false;
     return true;
+  }
+
+  private shortcutAmmoButtons(): HTMLButtonElement[] {
+    return [...this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token')].filter(button => {
+      const ammo = button.dataset.ammo as AmmoType;
+      const count = this.stock[ammo];
+      return !button.hidden && (count === 'infinite' || count - this.rounds.filter(round => round === ammo).length > 0);
+    });
+  }
+
+  private setShortcutFocus(focus: 'ammo' | 'order'): void {
+    this.shortcutFocus = focus;
+    this.updateShortcutIndicators();
+  }
+
+  private updateShortcutIndicators(): void {
+    const active = this.phase === 'AMMO_SELECTION' && !this.locked;
+    this.shell.dataset.shortcutFocus = active ? this.shortcutFocus : '';
+    const available = this.shortcutAmmoButtons().slice(0, 9);
+    this.shell.querySelectorAll<HTMLButtonElement>('.ammo-token').forEach(button => {
+      const index = available.indexOf(button);
+      const badge = button.querySelector<HTMLElement>('.ammo-shortcut');
+      if (badge) {
+        badge.hidden = !active || index < 0;
+        badge.textContent = index < 0 ? '' : String(index + 1);
+      }
+      if (active && this.shortcutFocus === 'ammo' && index >= 0) button.setAttribute('aria-keyshortcuts', String(index + 1));
+      else button.removeAttribute('aria-keyshortcuts');
+    });
+    this.slots.forEach((slot, index) => {
+      if (active && this.shortcutFocus === 'order' && index < this.rounds.length) slot.setAttribute('aria-keyshortcuts', String(index + 1));
+      else slot.removeAttribute('aria-keyshortcuts');
+    });
+  }
+
+  private handleCombatShortcut(event: KeyboardEvent): void {
+    if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    const target = event.target;
+    if (target instanceof Element && target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
+    if (!this.shell.isConnected || this.shell.querySelector('[role="dialog"]:not([hidden])')) return;
+    if (this.phase !== 'AMMO_SELECTION' && this.phase !== 'CYLINDER_CHOICE') return;
+    const code = event.code;
+    if (code !== 'Space' && code !== 'KeyR' && code !== 'KeyE' && !/^(Digit|Numpad)[1-9]$/.test(code)) return;
+    event.preventDefault();
+    if (event.repeat) return;
+    if (this.phase === 'CYLINDER_CHOICE') {
+      const selector = code === 'KeyE' ? '[data-cylinder-keep]' : code === 'KeyR' ? '[data-cylinder-fire], [data-cylinder-spin]' : undefined;
+      if (selector) this.shell.querySelector<HTMLButtonElement>(selector)?.click();
+      return;
+    }
+    if (this.locked) return;
+    if (code === 'KeyR') { this.loadButton.click(); return; }
+    if (code === 'KeyE') return;
+    if (code === 'Space') {
+      const focus = this.shortcutFocus === 'ammo' ? 'order' : 'ammo';
+      this.setShortcutFocus(focus);
+      this.hideTooltip();
+      this.required(this.shell, focus === 'ammo' ? '.ammo-rack' : '.magazine-panel').focus({ preventScroll: true });
+      return;
+    }
+    const index = Number(code.at(-1)) - 1;
+    this.hideTooltip();
+    if (this.shortcutFocus === 'ammo') {
+      this.shortcutAmmoButtons()[index]?.click();
+    } else if (index < this.magazineCapacity && this.rounds[index]) {
+      this.callbacks.onRemoveAmmo(index);
+    }
   }
 
   private isAmmoSelectable(ammo: AmmoType): boolean {
