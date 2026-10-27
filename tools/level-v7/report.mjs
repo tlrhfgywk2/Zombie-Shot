@@ -23,6 +23,12 @@ const buildTable = table(['빌드', '완주', '엄격한 조합 기회', '실제
   const c = buildCell(hold, id); return [BUILD_NAMES[id], pct(c.completion.rate), `${c.opportunities.yes}/${c.opportunities.n} · ${pct(c.opportunities.rate)}`,
     pct(c.actualMeaningful.rate), pct(c.utilization), num(c.specialPerRun)];
 }));
+const majorOpportunities = Object.fromEntries(builds.map(id => {
+  const subset = raw.filter(r => r.strategy === 'competent' && r.archetype === id);
+  const yes = subset.filter(r => r.logs.some(row => row.depth === 8 && (row.opportunity || row.meaningful))).length;
+  return [id, { yes, n: subset.length, rate: yes / subset.length }];
+}));
+await writeFile(new URL('experiments/level-v7/results/major-opportunities.json', root), JSON.stringify(majorOpportunities, null, 2));
 const roleTable = table(['역할', '조우 수', '탄창 수/조우', '유효/발사 잠재 피해', '활용률', '사망'], ['regular', 'dangerous', 'elite', 'boss'].map(role => {
   const row = hold.byRole[`nine-linked/competent/${role}`];
   return [{ regular: '일반', dangerous: '위험', elite: '엘리트', boss: '주 경비' }[role], row.enemies, num(row.volleys / row.enemies), `${row.effective}/${row.potential}`, pct(row.effective / row.potential), row.deaths];
@@ -158,6 +164,8 @@ ${buildTable}
 조합 기회는 보유 재고에서 제한된 구성들을 조사한 보수적 하한이다. 실제 조합이 발동하고 해당 엔진만 제거한 같은 탄창보다 승리/턴수가 좋아져야 한다. **표준탄만으로 전체 전투를 안전하게 이기는 경우는 제외**한다. 발동 자체와 실제 의미 있는 사용은 구별하며 죽은 런에 미래 보상을 부여하지 않는다. 기회는 가능한 구성, 실제 사용은 정책이 선택한 구성이다.
 
 ${roleTable}
+
+8노드의 주요 연속 조우만 따로 제한해도 기회는 ${builds.map(id => BUILD_NAMES[id] + ' ' + majorOpportunities[id].yes + '/' + majorOpportunities[id].n).join(', ')}다. 따라서 F를6노드 기회만으로 통과시킨 것이 아니다. 이것도 실제 도달 재고에서의 보수적 하한이다.
 
 발사 잠재 피해는 실제 발사한 탄의 HP 절단 전 피해다. 활용률=유효 피해/발사 잠재 피해이며 초과 피해는 두 값의 차이다. 적 사망 뒤 미발사된 탄은 소모/과잉 피해에 넣지 않는다. 전체 계획 탄창의 HP무한 표적 피해를 분모로 한 plannedUtilization도 원자료에 따로 있다. 일반 적을 없애 활용률만 높이지 않는다.
 
