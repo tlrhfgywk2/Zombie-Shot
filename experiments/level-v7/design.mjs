@@ -30,7 +30,7 @@ export function makePlan(seed, variant, p, settings = DEFAULT_SETTINGS) {
   const boss = combat([
     encounter(settings.guard, 6, 'regular'),
     encounter(pick(['groundshaker', 'screecher', 'contaminator'], random), rng(seed ^ 0x4c617465)() < (settings.ambushFraction ?? 0) ? .5 : settings.bossDistance, 'boss'),
-    ...(settings.waves > 2 ? [encounter('tough', 3.5, 'elite')] : []),
+    ...(settings.waves > 2 ? [encounter(settings.finalEnemy ?? 'tough', rng(seed ^ 0x656e6421)() < (settings.finalAmbushFraction ?? 0) ? .5 : 3.5, 'elite')] : []),
   ], '출구 경비');
   const exit = { kind: 'exit', title: '동굴 출구' };
   let plan = [first, discovery, training, workshop(), tactical, danger, workshop(), boss, exit];

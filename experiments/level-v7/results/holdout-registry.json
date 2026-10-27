@@ -28,5 +28,21 @@
       "waves": 2,
       "ambushFraction": 0.25
     }
+  },
+  {
+    "firstSeed": 3730001,
+    "count": 80,
+    "hash": "d5e927841e4405e1b623b72cacf51bff2e5290b66bad89a11f05ac52e1ad094b",
+    "settings": {
+      "id": "candidate-6",
+      "bossDistance": 3.5,
+      "guard": "normal",
+      "dangerDistance": 3.2,
+      "workshopRanks": 2,
+      "waves": 3,
+      "ambushFraction": 0.25,
+      "reinforcement": 1,
+      "finalEnemy": "groundshaker"
+    }
   }
 ]

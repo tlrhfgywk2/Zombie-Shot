@@ -1,28 +1,97 @@
 {
-  "version": "level-v7-1.1-strict-basic-counterfactual",
+  "version": "level-v7-1.2-resource-policy",
   "baselineRevision": "85e6d228a232f148eb550781e5e3512ac73fea23",
-  "exploratory": { "firstSeed": 21001, "count": 80 },
-  "holdout": { "firstSeed": 2730001, "count": 80 },
-  "retiredHoldout": { "firstSeed": 1730001, "count": 80, "reason": "v1은 첫 탄창 기본탄 처치만 제외해 안전한 기본탄 2턴 처치를 기회로 과대 집계. 원본 결과/난이도 실패 보존. 후보 튜닝 없이 정의를 엄격히 수정한 v1.1에 새 검증 시드 사용." },
-  "archetypes": ["wound", "heat", "blast", "recoil", "cauterize", "concussion"],
-  "strategies": ["random", "damage", "heuristic", "competent", "optimized"],
-  "variants": ["nine-original-pacing", "nine-linked", "twelve-linked", "eighteen-v7"],
+  "exploratory": {
+    "firstSeed": 21001,
+    "count": 80
+  },
+  "holdout": {
+    "firstSeed": 3730001,
+    "count": 80
+  },
+  "archetypes": [
+    "wound",
+    "heat",
+    "blast",
+    "recoil",
+    "cauterize",
+    "concussion"
+  ],
+  "strategies": [
+    "random",
+    "damage",
+    "heuristic",
+    "competent",
+    "optimized"
+  ],
+  "variants": [
+    "nine-original-pacing",
+    "nine-linked",
+    "twelve-linked",
+    "eighteen-v7"
+  ],
   "turnLimit": 12,
   "orderSamples": 64,
   "gates": {
-    "A": { "lateReachedRunOpportunityEachArchetype": 0.7 },
-    "B": { "allRunsCoherentByMiddle": 0.7 },
-    "C": { "primaryCount": 4, "hybridCount": 2, "relativeCompetentCompletion": 0.75 },
-    "D": { "eligibleOrderFraction": 0.6, "potentialDamageRatio": 1.25 },
-    "E": { "competentCompletionTarget": [0.45, 0.85], "optimizedCompletionTarget": [0.65, 0.98], "competentRandomGap": 0.15 },
-    "F": { "eachArchetypeMajorEncounterOpportunity": 0.7, "keepOriginalWeakEnemies": true },
-    "G": { "requiresProductionAndCandidateBrowserEvidence": true, "v7ProductionParityRequired": true }
+    "A": {
+      "lateReachedRunOpportunityEachArchetype": 0.7
+    },
+    "B": {
+      "allRunsCoherentByMiddle": 0.7
+    },
+    "C": {
+      "primaryCount": 4,
+      "hybridCount": 2,
+      "relativeCompetentCompletion": 0.75
+    },
+    "D": {
+      "eligibleOrderFraction": 0.6,
+      "potentialDamageRatio": 1.25
+    },
+    "E": {
+      "competentCompletionTarget": [
+        0.45,
+        0.85
+      ],
+      "optimizedCompletionTarget": [
+        0.65,
+        0.98
+      ],
+      "competentRandomGap": 0.15
+    },
+    "F": {
+      "eachArchetypeMajorEncounterOpportunity": 0.7,
+      "keepOriginalWeakEnemies": true
+    },
+    "G": {
+      "requiresProductionAndCandidateBrowserEvidence": true,
+      "v7ProductionParityRequired": true
+    }
   },
   "meaningfulOpportunity": "후반 실제 도달 상태에서 보유 탄약만 사용. 정의 시너지 실제 발동 및 교차효과 제거 반사실 대비 생존/턴수 개선. 같은 현재 상태에서 매 턴 기본탄만 사용해 안전하게 처치 가능한 적은 전부 제외(첫 턴뿐 아니라 12턴 한도 전체 전투). 기회(관측 상태의 제한 탐색)와 실제 선택 발동을 별도 집계.",
-  "midpoint": { "nine": 5, "twelve": 7, "eighteen": 9 },
-  "lateStart": { "nine": 6, "twelve": 9, "eighteen": 13 },
+  "midpoint": {
+    "nine": 5,
+    "twelve": 7,
+    "eighteen": 9
+  },
+  "lateStart": {
+    "nine": 6,
+    "twelve": 9,
+    "eighteen": 13
+  },
   "independence": "동일 시드의 빌드/전략은 군집. 홀드아웃 최초 실행 후 후보 변경 금지, 변경 시 새로운 구간 선언.",
-  "policyInformation": "현재 적의 표시 상태·예고·자신의 재고/제작/부착물/현재 제시 보상만 전달. 시드·다음 적·미래 보상은 전달하지 않음. competent는 고정 조합 최대12개와 현재 UI 미리보기, optimized는128개 구성 및 순서 교환 탐색. 전역 최적 보장 없음.",
-  "budgets": "빌드별 시작3, 발견2, 두번째 승리 연결1, 승리당1, 상인1발 영구 교환, 제작2회. 빌드와 전략에 같은 선택지/적/부착물 테이프 제공. 18안은 기존 v7 승리당1/3승당 강화 경로를 별도 표시.",
-  "freezeNote": "구현·최적화 전 기준. E는 관측 기준선과 함께 해석할 목표이며 자동 통과를 위해 적 능력/기준을 완화하지 않는다. G는 의도된 v7/현행 규칙 차이도 FAIL로 명시한다."
+  "policyInformation": "현재 적의 표시 상태·예고·자신의 재고/제작/부착물/현재 제시 보상만 전달. 시드·다음 적·미래 보상은 전달하지 않음. competent는 고정 조합 최대12개와 현재 UI 미리보기, optimized는128개 구성 및 순서 교환 탐색. 전역 최적 보장 없음. 숙련과 탐색은 현재 적에 대한 안전한 기본탄 2턴 처치를 확인하면 특수탄을 보존한다. 다음 적/미래 보상 정보는 사용하지 않는다.",
+  "budgets": "빌드별 시작3, 발견2, 두번째 승리 연결1, 승리당1, 상인1발 영구 교환, 제작2회. 빌드와 전략에 같은 선택지/적/부착물 테이프 제공. 18안은 기존 v7 승리당1/3승당 강화 경로를 별도 표시. 최종 후보6은 7노드에 보유 탄종 하나 +1배분을 한 번 추가한다. 기존 탄종/14발 한도/실제 소모 유지.",
+  "freezeNote": "구현·최적화 전 기준. E는 관측 기준선과 함께 해석할 목표이며 자동 통과를 위해 적 능력/기준을 완화하지 않는다. G는 의도된 v7/현행 규칙 차이도 FAIL로 명시한다.",
+  "retiredHoldouts": [
+    {
+      "firstSeed": 1730001,
+      "count": 80,
+      "reason": "v1은 첫 탄창 기본탄 처치만 제외해 안전한 기본탄 2턴 처치를 기회로 과대 집계. 원본 결과/난이도 실패 보존. 후보 튜닝 없이 정의를 엄격히 수정한 v1.1에 새 검증 시드 사용."
+    },
+    {
+      "firstSeed": 2730001,
+      "count": 80
+    }
+  ]
 }

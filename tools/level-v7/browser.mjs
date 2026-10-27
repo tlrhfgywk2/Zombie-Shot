@@ -12,7 +12,7 @@ const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ? pathToFileURL(
 const p = await production(), config = JSON.parse(await readFile(new URL('experiments/level-v7/v7-config.json', root)));
 const model = createModel(p, config), output = new URL('experiments/level-v7/results/browser/', root); await mkdir(output, { recursive: true });
 const base = process.env.VALIDATION_BASE ?? 'http://127.0.0.1:5173/Zombie-Shot/';
-const raw = JSON.parse(gunzipSync(await readFile(new URL('experiments/level-v7/results/candidate-4-exploratory-raw.json.gz', root))));
+const raw = JSON.parse(gunzipSync(await readFile(new URL('experiments/level-v7/results/candidate-6-exploratory-raw.json.gz', root))));
 const commonSeed = [...new Set(raw.map(r => r.seed))].find(seed => raw.filter(r => r.variant === 'nine-linked' && r.seed === seed && r.strategy === 'competent' && r.phase === 'victory').length === 6);
 assert.ok(commonSeed, '여섯 빌드의 같은 자연 획득 시드');
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL ?? 'chrome', headless: true });
@@ -54,6 +54,7 @@ try {
           for (const id of rounds) await page.locator(`[data-ammo="${id}"]`).click();
           if (s.depth === 1 && archetype === 'wound' && s.observation.enemy.turnsElapsed === 0) await audit(page, label, 'early-full');
           if (s.depth === 8 && s.wave === 1 && s.observation.enemy.turnsElapsed === 0) await audit(page, label, `${archetype}-late-combination`);
+          if (s.depth === 8 && s.wave === 2 && s.observation.enemy.turnsElapsed === 0) await audit(page, label, `${archetype}-final-resource`);
           await page.locator('#fire').click();
           await page.waitForFunction(() => !window.levelValidation.snapshot().busy, null, { timeout: 30000 });
           const after = await page.evaluate(() => window.levelValidation.snapshot());
@@ -69,6 +70,10 @@ try {
           const priority = archetype === 'recoil' ? ['plusP', 'kickback', 'relay'] : UPGRADE_PRIORITY[archetype];
           const id = priority.find(id => s.run.stock[id] > 0 && (s.run.ranks[id] ?? 0) < 3);
           if (id) await page.locator(`[data-upgrade="${id}"]`).click();
+          if (s.depth === 7) {
+            const reinforce = priority.find(id => s.run.stock[id] > 0);
+            await page.locator(`[data-reinforce="${reinforce}"]`).click();
+          }
           const payment = Object.keys(s.run.stock).find(id => s.run.stock[id] > 0 && !PACKS[archetype].includes(id));
           if (payment) {
             const order = [...s.node.attachments].sort((a, b) => {

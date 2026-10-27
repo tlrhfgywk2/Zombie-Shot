@@ -3,9 +3,9 @@ import './style.css';
 import * as p from './bridge.ts';
 import { GamePresentation } from '../../src/presentation/GamePresentation.ts';
 import { BUILD_LABEL } from '../../src/buildInfo.ts';
-import { createModel, capacity, UPGRADE_PRIORITY } from './model-portable.mjs';
+import { createModel, capacity, total, UPGRADE_PRIORITY } from './model-portable.mjs';
 import config from './v7-config.json';
-import settings from './candidate-4.json';
+import settings from './candidate-6.json';
 import { LevelSession, observe } from './engine.mjs';
 import { BUILD_NAMES, PACKS } from './design.mjs';
 
@@ -58,6 +58,7 @@ function render() {
     choices.innerHTML = `<h2>제작 강화</h2><div class="choice-grid">${eligible.map(id => button(name(id), `data-upgrade="${id}" ${session.workshopUsed === session.depth ? 'disabled' : ''}`, `등급 ${session.run.ranks[id] ?? 0} → ${(session.run.ranks[id] ?? 0) + 1}`)).join('')}</div>
       <h2>부착물 교환</h2><label>지불 탄약 <select id="payment">${Object.entries(session.run.stock).filter(([, n]) => n > 0).map(([id, n]) => `<option value="${id}">${name(id)} ×${n}</option>`).join('')}</select></label>
       <div class="choice-grid">${session.node.attachments.map(id => button(p.ATTACHMENT_DEFINITIONS[id].name, `data-attachment="${id}" ${session.tradeUsed === session.depth ? 'disabled' : ''}`, p.ATTACHMENT_DEFINITIONS[id].summary + ' · 특수탄 1발 영구 지불')).join('')}</div>${button('계속 탐험', 'data-action="leave"')}`;
+    if (session.depth === 7) choices.insertAdjacentHTML('afterbegin', `<h2>추가 배분 · 한 종류 +1</h2><div class="choice-grid">${Object.keys(session.run.stock).filter(id => session.run.stock[id] > 0).map(id => button(name(id), `data-reinforce="${id}" ${session.reinforced || total(session.run.stock) >= 14 ? 'disabled' : ''}`, '휴대 한도 내 1회')).join('')}</div>`);
   } else if (session.phase === 'combat') {
     const enemy = session.enemy, preview = session.model.resolve(rounds, enemy, session.run, { player: session.player, trace: true });
     const next = p.previewEnemyAction(enemy);
@@ -124,6 +125,7 @@ document.addEventListener('click', async event => {
   else if (element.dataset.build) { session.run.archetype = element.dataset.build; session.chooseDiscovery(element.dataset.build); render(); }
   else if (element.dataset.reward) { session.chooseReward(element.dataset.reward); render(); }
   else if (element.dataset.upgrade) { session.upgrade(element.dataset.upgrade); render(); }
+  else if (element.dataset.reinforce) { session.reinforce(element.dataset.reinforce); render(); }
   else if (element.dataset.attachment) { session.tradeAttachment(element.dataset.attachment, document.querySelector('#payment').value); render(); }
   else if (element.dataset.action === 'advance') {
     session.advance(); rounds = [];

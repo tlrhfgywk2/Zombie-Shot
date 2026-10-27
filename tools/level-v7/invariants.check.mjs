@@ -53,6 +53,17 @@ test('부족한 특수탄과 부착물 호환 용량을 검증하며 8발은 제
   assert.equal(portable.capacity(s.run, p, s.player), 6);
   s.player.disabledSlots.magazine = 2; assert.equal(portable.capacity(s.run, p, s.player), 4);
 });
+test('후반 추가 배분은 보유 탄종 하나만 한 번 획득하고 휴대 한도를 보존', () => {
+  const s = new LevelSession(p, model, config, 21001, 'recoil', 'nine-linked', { ...DEFAULT_SETTINGS, reinforcement: 1 });
+  s.phase = 'workshop'; s.depth = 4; s.run.stock = { plusP: 2, kickback: 1 };
+  assert.equal(s.reinforce('plusP'), false);
+  s.depth = 7; assert.equal(s.reinforce('ignition'), false);
+  assert.equal(s.reinforce('plusP'), true); assert.equal(s.run.stock.plusP, 3);
+  assert.equal(s.reinforce('plusP'), false); assert.equal(s.run.stock.plusP, 3);
+  const full = new LevelSession(p, model, config, 21001, 'recoil', 'nine-linked', { ...DEFAULT_SETTINGS, reinforcement: 1 });
+  full.phase = 'workshop'; full.depth = 7; full.run.stock = { plusP: 14 };
+  assert.equal(full.reinforce('plusP'), false);
+});
 test('반사실에서 지정 교차 효과만 제거하고 다른 빌드는 그대로 계산', () => {
   const run = { ...portable.initialRun('cauterize'), ranks: { cauterize: 2 } }, enemy = target({ wound: 3, burn: 8 });
   const actual = model.resolve(['cauterize'], enemy, run, { trace: true });

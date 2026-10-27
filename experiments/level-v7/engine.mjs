@@ -55,6 +55,12 @@ export function chooseRounds(observation, strategy, model, p, random) {
     const score = id => list.includes(id) ? 20 - list.indexOf(id) : id === 'ball' ? 0 : 1;
     return heuristicOrder([...pool].sort((a, b) => score(b) - score(a)).slice(0, cap));
   }
+  // 현재 적에 대한 두 턴 기본탄 미리보기만 사용한다. 다음 적과 보상은 보지 않는다.
+  const basic = Array(cap).fill('ball'), firstBasic = model.resolve(basic, observation.enemy, observation, { player: observation.player });
+  if (firstBasic.killed) return basic;
+  const firstAction = model.action(firstBasic.after, observation.player, observation.loadout);
+  if (!firstAction.playerKilled && !firstAction.intentResolved && model.resolve(Array(capacity(observation, p, firstAction.playerAfter)).fill('ball'), firstAction.after, observation,
+    { player: firstAction.playerAfter }).killed) return basic;
   if (strategy === 'optimized') return selectMagazine(observation.stock, cap, observation, observation.enemy, model, 'search', random, { player: observation.player, candidates: 128 });
   const score = rounds => {
     const shot = model.resolve(rounds, observation.enemy, observation, { player: observation.player });
@@ -109,6 +115,12 @@ export class LevelSession {
     if (this.phase !== 'workshop' || this.workshopUsed === this.depth || !(this.run.stock[id] > 0) || (this.run.ranks[id] ?? 0) >= 3 || this.upgrades >= this.settings.workshopRanks) return false;
     this.run.ranks[id] = (this.run.ranks[id] ?? 0) + 1; this.upgrades++; this.workshopUsed = this.depth; return true;
   }
+  reinforce(id) {
+    if (!this.settings.reinforcement || this.depth !== 7 || this.phase !== 'workshop' || this.reinforced || !(this.run.stock[id] > 0) || total(this.run.stock) >= 14) return false;
+    this.add(id); this.reinforced = true;
+    this.rewards.push({ depth: this.depth, kind: 'reinforcement', chosen: id, rejected: Object.keys(this.run.stock).filter(key => this.run.stock[key] > 0 && key !== id) });
+    return true;
+  }
   tradeAttachment(id, payment) {
     if (this.phase !== 'workshop' || this.tradeUsed === this.depth || !this.node.attachments.includes(id) || !(this.run.stock[payment] > 0)) return false;
     this.run.stock[payment]--; this.run.owned.push(id); this.run.loadout[this.p.ATTACHMENT_DEFINITIONS[id].slot] = id;
@@ -160,6 +172,8 @@ export function autoNoncombat(session, strategy) {
       : session.run.archetype === 'recoil' ? ['plusP', 'kickback', 'relay'] : UPGRADE_PRIORITY[session.run.archetype];
     const choices = priorities.filter(id => session.run.stock[id] > 0 && (session.run.ranks[id] ?? 0) < 3);
     session.upgrade(strategy === 'random' ? pick(choices, session.random) : choices[0]);
+    const ownedAmmo = Object.keys(session.run.stock).filter(id => session.run.stock[id] > 0);
+    session.reinforce(strategy === 'random' ? pick(ownedAmmo, session.random) : priorities.find(id => session.run.stock[id] > 0));
     const expendable = Object.keys(session.run.stock).filter(id => session.run.stock[id] > 0 && (strategy === 'random' || !PACKS[session.run.archetype].includes(id)));
     if (expendable.length && session.node.attachments.length) {
       const id = strategy === 'random' ? pick(session.node.attachments, session.random) : [...session.node.attachments].sort((a, b) => {

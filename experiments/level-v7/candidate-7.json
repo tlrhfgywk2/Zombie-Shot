@@ -1,0 +1,1 @@
+{ "id": "candidate-7", "bossDistance": 3.5, "guard": "normal", "dangerDistance": 3.2, "workshopRanks": 2, "waves": 3, "ambushFraction": 0.25, "reinforcement": 1, "finalEnemy": "groundshaker", "finalAmbushFraction": 0.25 }

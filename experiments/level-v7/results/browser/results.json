@@ -1,5 +1,5 @@
 {
-  "commonSeed": 21002,
+  "commonSeed": 21001,
   "findings": [
     {
       "label": "desktop",
@@ -45,6 +45,13 @@
     },
     {
       "label": "desktop",
+      "name": "wound-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
       "name": "wound-victory",
       "width": 1440,
       "overflow": false,
@@ -53,6 +60,13 @@
     {
       "label": "desktop",
       "name": "heat-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "heat-final-resource",
       "width": 1440,
       "overflow": false,
       "bad": []
@@ -73,6 +87,13 @@
     },
     {
       "label": "desktop",
+      "name": "blast-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
       "name": "blast-victory",
       "width": 1440,
       "overflow": false,
@@ -81,6 +102,13 @@
     {
       "label": "desktop",
       "name": "recoil-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "recoil-final-resource",
       "width": 1440,
       "overflow": false,
       "bad": []
@@ -101,6 +129,13 @@
     },
     {
       "label": "desktop",
+      "name": "cauterize-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
       "name": "cauterize-victory",
       "width": 1440,
       "overflow": false,
@@ -109,6 +144,13 @@
     {
       "label": "desktop",
       "name": "concussion-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "concussion-final-resource",
       "width": 1440,
       "overflow": false,
       "bad": []
@@ -199,6 +241,13 @@
     },
     {
       "label": "portrait",
+      "name": "wound-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
       "name": "wound-victory",
       "width": 390,
       "overflow": false,
@@ -207,6 +256,13 @@
     {
       "label": "portrait",
       "name": "heat-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "heat-final-resource",
       "width": 390,
       "overflow": false,
       "bad": []
@@ -227,6 +283,13 @@
     },
     {
       "label": "portrait",
+      "name": "blast-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
       "name": "blast-victory",
       "width": 390,
       "overflow": false,
@@ -235,6 +298,13 @@
     {
       "label": "portrait",
       "name": "recoil-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "recoil-final-resource",
       "width": 390,
       "overflow": false,
       "bad": []
@@ -255,6 +325,13 @@
     },
     {
       "label": "portrait",
+      "name": "cauterize-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
       "name": "cauterize-victory",
       "width": 390,
       "overflow": false,
@@ -263,6 +340,13 @@
     {
       "label": "portrait",
       "name": "concussion-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "concussion-final-resource",
       "width": 390,
       "overflow": false,
       "bad": []

@@ -8,7 +8,7 @@
         "run"
       ],
       "status": 0,
-      "milliseconds": 3911
+      "milliseconds": 3731
     },
     "lint": {
       "command": [
@@ -17,7 +17,7 @@
         "."
       ],
       "status": 0,
-      "milliseconds": 2425
+      "milliseconds": 2538
     },
     "typecheck": {
       "command": [
@@ -26,7 +26,7 @@
         "-b"
       ],
       "status": 0,
-      "milliseconds": 1629
+      "milliseconds": 1595
     },
     "build": {
       "command": [
@@ -35,7 +35,7 @@
         "build"
       ],
       "status": 0,
-      "milliseconds": 1988
+      "milliseconds": 2030
     },
     "ammo-spec": {
       "command": [
@@ -43,7 +43,7 @@
         "tools/check-ammo-spec.mjs"
       ],
       "status": 0,
-      "milliseconds": 1455
+      "milliseconds": 1002
     },
     "original-v7": {
       "command": [
@@ -52,7 +52,7 @@
         "simulation/model.check.mjs"
       ],
       "status": 0,
-      "milliseconds": 287
+      "milliseconds": 393
     },
     "invariants": {
       "command": [
@@ -61,7 +61,7 @@
         "tools/level-v7/invariants.check.mjs"
       ],
       "status": 0,
-      "milliseconds": 243
+      "milliseconds": 258
     },
     "productionSourcesUnchanged": {
       "pass": true,
