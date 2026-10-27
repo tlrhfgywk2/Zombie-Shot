@@ -1,0 +1,949 @@
+{
+  "unchangedCases": 84,
+  "matched": 84,
+  "mismatches": [
+    {
+      "kind": "수치 경계 모델 불일치",
+      "distance": 3.999999999999,
+      "v7": 5,
+      "production": 4,
+      "reason": "실게임은 거리 비교를 1e-9로 정규화하지만 v7은 원시 부동소수점 비교. 원본 수정하지 않음."
+    }
+  ],
+  "intendedDifferences": [
+    "평두 직접 화력 1→4",
+    "열 저장/소비",
+    "폭약 배율 3→4",
+    "반동 회수 계수/상한",
+    "열상 상처와 제작 등급",
+    "소작 신규",
+    "공명 충격 투자",
+    "취약 레이저 연결"
+  ],
+  "cases": [
+    {
+      "weapon": "p220",
+      "distance": 0.5,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 0.5,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 0.5,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 1,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 1,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 1,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 3,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 3,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 3,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 4,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 4,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 4,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 6,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 6,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 6,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 8,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 8,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 8,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 10,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 10,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "p220",
+      "distance": 10,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 0.5,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 0.5,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 0.5,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 1,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 1,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 1,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 3,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 3,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 3,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 4,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 4,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 4,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 6,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 6,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 6,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 8,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 8,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 8,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 10,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 10,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m1911",
+      "distance": 10,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 0.5,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 0.5,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 0.5,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 1,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 1,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 1,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 3,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 3,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 3,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 4,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 4,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 4,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 6,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 6,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 6,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 8,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 8,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 8,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 10,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 10,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "desertEagle",
+      "distance": 10,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 0.5,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 0.5,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 0.5,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 1,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 1,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 1,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 3,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 3,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 3,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 4,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 4,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 4,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 6,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 6,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 6,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 8,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 8,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 8,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 10,
+      "rounds": [
+        "ball",
+        "ball",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 10,
+      "rounds": [
+        "plusP",
+        "lowRecoil",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    },
+    {
+      "weapon": "m500",
+      "distance": 10,
+      "rounds": [
+        "advance",
+        "retreat",
+        "ball",
+        "ball"
+      ],
+      "match": true
+    }
+  ]
+}
