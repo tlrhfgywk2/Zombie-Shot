@@ -1,0 +1,152 @@
+[
+  {
+    "label": "desktop",
+    "name": "entry",
+    "card": [
+      340,
+      223.78125,
+      1100,
+      676.21875
+    ],
+    "width": 1440,
+    "height": 900,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "desktop",
+    "name": "event-cache",
+    "card": [
+      340,
+      168.984375,
+      1100,
+      731.015625
+    ],
+    "width": 1440,
+    "height": 900,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "desktop",
+    "name": "event-survey",
+    "card": [
+      340,
+      140.484375,
+      1100,
+      759.5
+    ],
+    "width": 1440,
+    "height": 900,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "desktop",
+    "name": "event-shrine",
+    "card": [
+      340,
+      140.484375,
+      1100,
+      759.5
+    ],
+    "width": 1440,
+    "height": 900,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "desktop",
+    "name": "event-nest",
+    "card": [
+      340,
+      168.984375,
+      1100,
+      731.015625
+    ],
+    "width": 1440,
+    "height": 900,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "portrait",
+    "name": "entry",
+    "card": [
+      11.1875,
+      185.703125,
+      378.8125,
+      658.28125
+    ],
+    "width": 390,
+    "height": 844,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "portrait",
+    "name": "event-cache",
+    "card": [
+      11.1875,
+      149.09375,
+      378.8125,
+      694.90625
+    ],
+    "width": 390,
+    "height": 844,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "portrait",
+    "name": "event-survey",
+    "card": [
+      11.1875,
+      108.4375,
+      378.8125,
+      735.546875
+    ],
+    "width": 390,
+    "height": 844,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "portrait",
+    "name": "event-shrine",
+    "card": [
+      11.1875,
+      120.59375,
+      378.8125,
+      723.390625
+    ],
+    "width": 390,
+    "height": 844,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  },
+  {
+    "label": "portrait",
+    "name": "event-nest",
+    "card": [
+      11.1875,
+      149.09375,
+      378.8125,
+      694.90625
+    ],
+    "width": 390,
+    "height": 844,
+    "overflow": false,
+    "badChoices": [],
+    "scrolls": false
+  }
+]

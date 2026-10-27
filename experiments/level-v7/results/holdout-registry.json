@@ -1,0 +1,16 @@
+[
+  {
+    "firstSeed": 1730001,
+    "count": 80,
+    "hash": "29e341711e5c6204dc81a86296ca943b206d226d9a0a4fd05a1d88755dd81b6d",
+    "settings": {
+      "id": "candidate-4",
+      "bossDistance": 3.5,
+      "guard": "normal",
+      "dangerDistance": 3.2,
+      "workshopRanks": 2,
+      "waves": 2,
+      "ambushFraction": 0.25
+    }
+  }
+]

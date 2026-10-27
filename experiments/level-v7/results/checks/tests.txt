@@ -1,0 +1,824 @@
+
+ RUN  v3.2.7 C:/Users/tlrhf/Desktop/Projects/Zombie-Shot
+
+stdout | src/simulation/AmmoLayerBalance.test.ts > 대표 배열의 밸런스와 실제 적 상태 > 세 거리에서 피해·상태·반동을 비교하며 특수 조건의 이득은 제한된다
+┌─────────┬──────────────────┬──────┬──────┬──────┬──────┬──────┬──────────┬──────┐
+│ (index) │ 배열             │ 거리 │ 피해 │ 상처 │ 화상 │ 충격 │ 폭발잔량 │ 반동 │
+├─────────┼──────────────────┼──────┼──────┼──────┼──────┼──────┼──────────┼──────┤
+│ 0       │ '표준'           │ 3    │ 20   │ 0    │ 0    │ 0    │ 0        │ 0    │
+│ 1       │ '고압 연사'      │ 3    │ 25   │ 0    │ 0    │ 0    │ 0        │ 12   │
+│ 2       │ '단일 계열 배열' │ 3    │ 25   │ 0    │ 0    │ 0    │ 0        │ 4    │
+│ 3       │ '집중 연사'      │ 3    │ 24   │ 0    │ 0    │ 0    │ 0        │ 4    │
+│ 4       │ '다섯 계열 혼합' │ 3    │ 21   │ 3    │ 8    │ 4    │ 0        │ 5    │
+│ 5       │ '교차 계열'      │ 3    │ 17   │ 3    │ 0    │ 0    │ 2        │ 4    │
+│ 6       │ '초탄 연계 종결' │ 3    │ 25   │ 0    │ 0    │ 0    │ 0        │ 3    │
+│ 7       │ '초탄 매개 종결' │ 3    │ 19   │ 3    │ 0    │ 0    │ 0        │ 3    │
+│ 8       │ '부분 장전'      │ 3    │ 15   │ 0    │ 0    │ 0    │ 0        │ 1    │
+│ 9       │ '네 발 경량'     │ 3    │ 32   │ 0    │ 0    │ 0    │ 0        │ 0    │
+│ 10      │ '복사 잔향 연계' │ 3    │ 25   │ 0    │ 0    │ 0    │ 0        │ 5    │
+│ 11      │ '화상 복사'      │ 3    │ 17   │ 0    │ 26   │ 0    │ 0        │ 6    │
+│ 12      │ '표준'           │ 7    │ 18   │ 0    │ 0    │ 0    │ 0        │ 0    │
+│ 13      │ '고압 연사'      │ 7    │ 22   │ 0    │ 0    │ 0    │ 0        │ 12   │
+│ 14      │ '단일 계열 배열' │ 7    │ 22   │ 0    │ 0    │ 0    │ 0        │ 4    │
+│ 15      │ '집중 연사'      │ 7    │ 22   │ 0    │ 0    │ 0    │ 0        │ 4    │
+│ 16      │ '다섯 계열 혼합' │ 7    │ 19   │ 3    │ 8    │ 4    │ 0        │ 5    │
+│ 17      │ '교차 계열'      │ 7    │ 15   │ 3    │ 0    │ 0    │ 2        │ 4    │
+│ 18      │ '초탄 연계 종결' │ 7    │ 22   │ 0    │ 0    │ 0    │ 0        │ 3    │
+│ 19      │ '초탄 매개 종결' │ 7    │ 17   │ 3    │ 0    │ 0    │ 0        │ 3    │
+│ 20      │ '부분 장전'      │ 7    │ 13   │ 0    │ 0    │ 0    │ 0        │ 1    │
+│ 21      │ '네 발 경량'     │ 7    │ 29   │ 0    │ 0    │ 0    │ 0        │ 0    │
+│ 22      │ '복사 잔향 연계' │ 7    │ 22   │ 0    │ 0    │ 0    │ 0        │ 5    │
+│ 23      │ '화상 복사'      │ 7    │ 15   │ 0    │ 26   │ 0    │ 0        │ 6    │
+│ 24      │ '표준'           │ 11   │ 16   │ 0    │ 0    │ 0    │ 0        │ 0    │
+│ 25      │ '고압 연사'      │ 11   │ 20   │ 0    │ 0    │ 0    │ 0        │ 12   │
+│ 26      │ '단일 계열 배열' │ 11   │ 20   │ 0    │ 0    │ 0    │ 0        │ 4    │
+│ 27      │ '집중 연사'      │ 11   │ 19   │ 0    │ 0    │ 0    │ 0        │ 4    │
+│ 28      │ '다섯 계열 혼합' │ 11   │ 18   │ 3    │ 8    │ 4    │ 0        │ 5    │
+│ 29      │ '교차 계열'      │ 11   │ 14   │ 3    │ 0    │ 0    │ 2        │ 4    │
+│ 30      │ '초탄 연계 종결' │ 11   │ 20   │ 0    │ 0    │ 0    │ 0        │ 3    │
+│ 31      │ '초탄 매개 종결' │ 11   │ 15   │ 3    │ 0    │ 0    │ 0        │ 3    │
+│ 32      │ '부분 장전'      │ 11   │ 12   │ 0    │ 0    │ 0    │ 0        │ 1    │
+│ 33      │ '네 발 경량'     │ 11   │ 26   │ 0    │ 0    │ 0    │ 0        │ 0    │
+│ 34      │ '복사 잔향 연계' │ 11   │ 20   │ 0    │ 0    │ 0    │ 0        │ 5    │
+│ 35      │ '화상 복사'      │ 11   │ 14   │ 0    │ 26   │ 0    │ 0        │ 6    │
+└─────────┴──────────────────┴──────┴──────┴──────┴──────┴──────┴──────────┴──────┘
+
+stdout | src/simulation/ImpactBalance.test.ts > 충격 탄약 밸런스 비교 > 세 거리에서 체력 피해·행동 충격·기폭 피해·반동을 기존 탄약과 비교한다
+┌─────────┬──────────────────┬──────────┬────────┬───────┬───────────┬────────┐
+│ (index) │ name             │ distance │ damage │ shock │ explosion │ recoil │
+├─────────┼──────────────────┼──────────┼────────┼───────┼───────────┼────────┤
+│ 0       │ '평두 연사'      │ 3        │ 4      │ 16    │ 0         │ 4      │
+│ 1       │ '평두 연사'      │ 7        │ 4      │ 16    │ 0         │ 4      │
+│ 2       │ '평두 연사'      │ 11       │ 3      │ 16    │ 0         │ 4      │
+│ 3       │ '중량 연사'      │ 3        │ 9      │ 8     │ 0         │ 8      │
+│ 4       │ '중량 연사'      │ 7        │ 8      │ 8     │ 0         │ 8      │
+│ 5       │ '중량 연사'      │ 11       │ 7      │ 8     │ 0         │ 8      │
+│ 6       │ '저충격 연사'    │ 3        │ 4      │ 8     │ 0         │ 0      │
+│ 7       │ '저충격 연사'    │ 7        │ 4      │ 8     │ 0         │ 0      │
+│ 8       │ '저충격 연사'    │ 11       │ 3      │ 8     │ 0         │ 0      │
+│ 9       │ '강타 연사'      │ 3        │ 1      │ 24    │ 0         │ 12     │
+│ 10      │ '강타 연사'      │ 7        │ 1      │ 24    │ 0         │ 12     │
+│ 11      │ '강타 연사'      │ 11       │ 1      │ 24    │ 0         │ 12     │
+│ 12      │ '증폭 연사'      │ 3        │ 4      │ 15    │ 0         │ 4      │
+│ 13      │ '증폭 연사'      │ 7        │ 4      │ 15    │ 0         │ 4      │
+│ 14      │ '증폭 연사'      │ 11       │ 3      │ 15    │ 0         │ 4      │
+│ 15      │ '연쇄 일반탄'    │ 3        │ 16     │ 4     │ 0         │ 1      │
+│ 16      │ '연쇄 일반탄'    │ 7        │ 14     │ 4     │ 0         │ 1      │
+│ 17      │ '연쇄 일반탄'    │ 11       │ 13     │ 4     │ 0         │ 1      │
+│ 18      │ '충격 혼합'      │ 3        │ 3      │ 18    │ 0         │ 7      │
+│ 19      │ '충격 혼합'      │ 7        │ 3      │ 18    │ 0         │ 7      │
+│ 20      │ '충격 혼합'      │ 11       │ 2      │ 18    │ 0         │ 7      │
+│ 21      │ '기존 폭발'      │ 3        │ 26     │ 2     │ 18        │ 8      │
+│ 22      │ '기존 폭발'      │ 7        │ 25     │ 2     │ 18        │ 8      │
+│ 23      │ '기존 폭발'      │ 11       │ 24     │ 2     │ 18        │ 8      │
+│ 24      │ '저반동 기폭'    │ 3        │ 25     │ 2     │ 18        │ 6      │
+│ 25      │ '저반동 기폭'    │ 7        │ 24     │ 2     │ 18        │ 6      │
+│ 26      │ '저반동 기폭'    │ 11       │ 24     │ 2     │ 18        │ 6      │
+│ 27      │ '충격 연쇄 기폭' │ 3        │ 22     │ 4     │ 12        │ 4      │
+│ 28      │ '충격 연쇄 기폭' │ 7        │ 21     │ 4     │ 12        │ 4      │
+│ 29      │ '충격 연쇄 기폭' │ 11       │ 20     │ 4     │ 12        │ 4      │
+└─────────┴──────────────────┴──────────┴────────┴───────┴───────────┴────────┘
+
+stdout | src/simulation/ImpactBalance.test.ts > 충격 탄약 밸런스 비교 > 증폭 준비·긴 탄창의 보상과 단발 충격탄의 우위를 구분한다
+┌─────────┬─────────────┬─────────────┬───────┬────────────┬────────┐
+│ (index) │ ammo        │ actionShock │ slots │ addedShock │ recoil │
+├─────────┼─────────────┼─────────────┼───────┼────────────┼────────┤
+│ 0       │ 'flatNose'  │ 0           │ 4     │ 16         │ 4      │
+│ 1       │ 'hammer'    │ 0           │ 4     │ 24         │ 12     │
+│ 2       │ 'resonance' │ 0           │ 4     │ 15         │ 4      │
+│ 3       │ 'flatNose'  │ 0           │ 6     │ 24         │ 6      │
+│ 4       │ 'hammer'    │ 0           │ 6     │ 36         │ 18     │
+│ 5       │ 'resonance' │ 0           │ 6     │ 27         │ 6      │
+│ 6       │ 'flatNose'  │ 2           │ 4     │ 16         │ 4      │
+│ 7       │ 'hammer'    │ 2           │ 4     │ 24         │ 12     │
+│ 8       │ 'resonance' │ 2           │ 4     │ 19         │ 4      │
+│ 9       │ 'flatNose'  │ 2           │ 6     │ 24         │ 6      │
+│ 10      │ 'hammer'    │ 2           │ 6     │ 36         │ 18     │
+│ 11      │ 'resonance' │ 2           │ 6     │ 31         │ 6      │
+│ 12      │ 'flatNose'  │ 4           │ 4     │ 16         │ 4      │
+│ 13      │ 'hammer'    │ 4           │ 4     │ 24         │ 12     │
+│ 14      │ 'resonance' │ 4           │ 4     │ 22         │ 4      │
+│ 15      │ 'flatNose'  │ 4           │ 6     │ 24         │ 6      │
+│ 16      │ 'hammer'    │ 4           │ 6     │ 36         │ 18     │
+│ 17      │ 'resonance' │ 4           │ 6     │ 34         │ 6      │
+│ 18      │ 'flatNose'  │ 6           │ 4     │ 16         │ 4      │
+│ 19      │ 'hammer'    │ 6           │ 4     │ 24         │ 12     │
+│ 20      │ 'resonance' │ 6           │ 4     │ 23         │ 4      │
+│ 21      │ 'flatNose'  │ 6           │ 6     │ 24         │ 6      │
+│ 22      │ 'hammer'    │ 6           │ 6     │ 36         │ 18     │
+│ 23      │ 'resonance' │ 6           │ 6     │ 35         │ 6      │
+│ 24      │ 'flatNose'  │ 8           │ 4     │ 16         │ 4      │
+│ 25      │ 'hammer'    │ 8           │ 4     │ 24         │ 12     │
+│ 26      │ 'resonance' │ 8           │ 4     │ 24         │ 4      │
+│ 27      │ 'flatNose'  │ 8           │ 6     │ 24         │ 6      │
+│ 28      │ 'hammer'    │ 8           │ 6     │ 36         │ 18     │
+│ 29      │ 'resonance' │ 8           │ 6     │ 36         │ 6      │
+└─────────┴─────────────┴─────────────┴───────┴────────────┴────────┘
+
+stdout | src/simulation/ImpactBalance.test.ts > 충격 탄약 밸런스 비교 > 적 7종의 접근·특수·치명 공격에서 단발 행동 중단 범위를 비교한다
+┌─────────┬────────────────┬─────────────────┬───────────────┬───────────┬───────┬─────────────┐
+│ (index) │ type           │ ammo            │ action        │ threshold │ shock │ interrupted │
+├─────────┼────────────────┼─────────────────┼───────────────┼───────────┼───────┼─────────────┤
+│ 0       │ 'normal'       │ 'flatNose'      │ 'approach'    │ 4         │ 4     │ true        │
+│ 1       │ 'normal'       │ 'reducedImpact' │ 'approach'    │ 4         │ 2     │ false       │
+│ 2       │ 'normal'       │ 'hammer'        │ 'approach'    │ 4         │ 6     │ true        │
+│ 3       │ 'normal'       │ 'resonance'     │ 'approach'    │ 4         │ 2     │ false       │
+│ 4       │ 'normal'       │ 'flatNose'      │ 'attack'      │ 8         │ 4     │ false       │
+│ 5       │ 'normal'       │ 'reducedImpact' │ 'attack'      │ 8         │ 2     │ false       │
+│ 6       │ 'normal'       │ 'hammer'        │ 'attack'      │ 8         │ 6     │ false       │
+│ 7       │ 'normal'       │ 'resonance'     │ 'attack'      │ 8         │ 2     │ false       │
+│ 8       │ 'brute'        │ 'flatNose'      │ 'approach'    │ 5         │ 4     │ false       │
+│ 9       │ 'brute'        │ 'reducedImpact' │ 'approach'    │ 5         │ 2     │ false       │
+│ 10      │ 'brute'        │ 'hammer'        │ 'approach'    │ 5         │ 6     │ true        │
+│ 11      │ 'brute'        │ 'resonance'     │ 'approach'    │ 5         │ 2     │ false       │
+│ 12      │ 'brute'        │ 'flatNose'      │ 'attack'      │ 9         │ 4     │ false       │
+│ 13      │ 'brute'        │ 'reducedImpact' │ 'attack'      │ 9         │ 2     │ false       │
+│ 14      │ 'brute'        │ 'hammer'        │ 'attack'      │ 9         │ 6     │ false       │
+│ 15      │ 'brute'        │ 'resonance'     │ 'attack'      │ 9         │ 2     │ false       │
+│ 16      │ 'fast'         │ 'flatNose'      │ 'approach'    │ 3         │ 4     │ true        │
+│ 17      │ 'fast'         │ 'reducedImpact' │ 'approach'    │ 3         │ 2     │ false       │
+│ 18      │ 'fast'         │ 'hammer'        │ 'approach'    │ 3         │ 6     │ true        │
+│ 19      │ 'fast'         │ 'resonance'     │ 'approach'    │ 3         │ 2     │ false       │
+│ 20      │ 'fast'         │ 'flatNose'      │ 'attack'      │ 7         │ 4     │ false       │
+│ 21      │ 'fast'         │ 'reducedImpact' │ 'attack'      │ 7         │ 2     │ false       │
+│ 22      │ 'fast'         │ 'hammer'        │ 'attack'      │ 7         │ 6     │ false       │
+│ 23      │ 'fast'         │ 'resonance'     │ 'attack'      │ 7         │ 2     │ false       │
+│ 24      │ 'tough'        │ 'flatNose'      │ 'approach'    │ 6         │ 4     │ false       │
+│ 25      │ 'tough'        │ 'reducedImpact' │ 'approach'    │ 6         │ 2     │ false       │
+│ 26      │ 'tough'        │ 'hammer'        │ 'approach'    │ 6         │ 6     │ true        │
+│ 27      │ 'tough'        │ 'resonance'     │ 'approach'    │ 6         │ 2     │ false       │
+│ 28      │ 'tough'        │ 'flatNose'      │ 'attack'      │ 10        │ 4     │ false       │
+│ 29      │ 'tough'        │ 'reducedImpact' │ 'attack'      │ 10        │ 2     │ false       │
+│ 30      │ 'tough'        │ 'hammer'        │ 'attack'      │ 10        │ 6     │ false       │
+│ 31      │ 'tough'        │ 'resonance'     │ 'attack'      │ 10        │ 2     │ false       │
+│ 32      │ 'contaminator' │ 'flatNose'      │ 'contaminate' │ 7         │ 4     │ false       │
+│ 33      │ 'contaminator' │ 'reducedImpact' │ 'contaminate' │ 7         │ 2     │ false       │
+│ 34      │ 'contaminator' │ 'hammer'        │ 'contaminate' │ 7         │ 6     │ false       │
+│ 35      │ 'contaminator' │ 'resonance'     │ 'contaminate' │ 7         │ 2     │ false       │
+│ 36      │ 'contaminator' │ 'flatNose'      │ 'attack'      │ 9         │ 4     │ false       │
+│ 37      │ 'contaminator' │ 'reducedImpact' │ 'attack'      │ 9         │ 2     │ false       │
+│ 38      │ 'contaminator' │ 'hammer'        │ 'attack'      │ 9         │ 6     │ false       │
+│ 39      │ 'contaminator' │ 'resonance'     │ 'attack'      │ 9         │ 2     │ false       │
+│ 40      │ 'groundshaker' │ 'flatNose'      │ 'approach'    │ 6         │ 4     │ false       │
+│ 41      │ 'groundshaker' │ 'reducedImpact' │ 'approach'    │ 6         │ 2     │ false       │
+│ 42      │ 'groundshaker' │ 'hammer'        │ 'approach'    │ 6         │ 6     │ true        │
+│ 43      │ 'groundshaker' │ 'resonance'     │ 'approach'    │ 6         │ 2     │ false       │
+│ 44      │ 'groundshaker' │ 'flatNose'      │ 'attack'      │ 10        │ 4     │ false       │
+│ 45      │ 'groundshaker' │ 'reducedImpact' │ 'attack'      │ 10        │ 2     │ false       │
+│ 46      │ 'groundshaker' │ 'hammer'        │ 'attack'      │ 10        │ 6     │ false       │
+│ 47      │ 'groundshaker' │ 'resonance'     │ 'attack'      │ 10        │ 2     │ false       │
+│ 48      │ 'screecher'    │ 'flatNose'      │ 'sonicPulse'  │ 7         │ 4     │ false       │
+│ 49      │ 'screecher'    │ 'reducedImpact' │ 'sonicPulse'  │ 7         │ 2     │ false       │
+│ 50      │ 'screecher'    │ 'hammer'        │ 'sonicPulse'  │ 7         │ 6     │ false       │
+│ 51      │ 'screecher'    │ 'resonance'     │ 'sonicPulse'  │ 7         │ 2     │ false       │
+│ 52      │ 'screecher'    │ 'flatNose'      │ 'attack'      │ 9         │ 4     │ false       │
+│ 53      │ 'screecher'    │ 'reducedImpact' │ 'attack'      │ 9         │ 2     │ false       │
+│ 54      │ 'screecher'    │ 'hammer'        │ 'attack'      │ 9         │ 6     │ false       │
+│ 55      │ 'screecher'    │ 'resonance'     │ 'attack'      │ 9         │ 2     │ false       │
+└─────────┴────────────────┴─────────────────┴───────────────┴───────────┴───────┴─────────────┘
+
+ ✓ src/simulation/ImpactBalance.test.ts (3 tests) 25ms
+ ✓ src/combat/ImpactAmmo.test.ts (21 tests) 22ms
+stdout | src/simulation/AmmoLayerBalance.test.ts > 대표 배열의 밸런스와 실제 적 상태 > 적 7종에서 완성 탄창을 실제 체력과 행동 상태로 해결한다
+┌─────────┬─────────────────┬──────────────────┬──────┬──────┬───────┬──────────┐
+│ (index) │ 적              │ 배열             │ 피해 │ 발사 │ 처치  │ 행동중단 │
+├─────────┼─────────────────┼──────────────────┼──────┼──────┼───────┼──────────┤
+│ 0       │ '일반 감염체'   │ '표준'           │ 16   │ 4    │ false │ false    │
+│ 1       │ '일반 감염체'   │ '고압 연사'      │ 20   │ 4    │ false │ false    │
+│ 2       │ '일반 감염체'   │ '단일 계열 배열' │ 20   │ 4    │ false │ false    │
+│ 3       │ '일반 감염체'   │ '집중 연사'      │ 19   │ 4    │ false │ false    │
+│ 4       │ '일반 감염체'   │ '다섯 계열 혼합' │ 18   │ 5    │ false │ true     │
+│ 5       │ '일반 감염체'   │ '교차 계열'      │ 14   │ 4    │ false │ false    │
+│ 6       │ '일반 감염체'   │ '초탄 연계 종결' │ 20   │ 4    │ false │ false    │
+│ 7       │ '일반 감염체'   │ '초탄 매개 종결' │ 15   │ 4    │ false │ false    │
+│ 8       │ '일반 감염체'   │ '부분 장전'      │ 12   │ 2    │ false │ false    │
+│ 9       │ '일반 감염체'   │ '네 발 경량'     │ 22   │ 4    │ true  │ false    │
+│ 10      │ '일반 감염체'   │ '복사 잔향 연계' │ 20   │ 4    │ false │ false    │
+│ 11      │ '일반 감염체'   │ '화상 복사'      │ 14   │ 4    │ false │ false    │
+│ 12      │ '강인한 감염체' │ '표준'           │ 16   │ 4    │ false │ false    │
+│ 13      │ '강인한 감염체' │ '고압 연사'      │ 20   │ 4    │ false │ false    │
+│ 14      │ '강인한 감염체' │ '단일 계열 배열' │ 20   │ 4    │ false │ false    │
+│ 15      │ '강인한 감염체' │ '집중 연사'      │ 19   │ 4    │ false │ false    │
+│ 16      │ '강인한 감염체' │ '다섯 계열 혼합' │ 18   │ 5    │ false │ false    │
+│ 17      │ '강인한 감염체' │ '교차 계열'      │ 14   │ 4    │ false │ false    │
+│ 18      │ '강인한 감염체' │ '초탄 연계 종결' │ 20   │ 4    │ false │ false    │
+│ 19      │ '강인한 감염체' │ '초탄 매개 종결' │ 15   │ 4    │ false │ false    │
+│ 20      │ '강인한 감염체' │ '부분 장전'      │ 12   │ 2    │ false │ false    │
+│ 21      │ '강인한 감염체' │ '네 발 경량'     │ 26   │ 4    │ false │ false    │
+│ 22      │ '강인한 감염체' │ '복사 잔향 연계' │ 20   │ 4    │ false │ false    │
+│ 23      │ '강인한 감염체' │ '화상 복사'      │ 14   │ 4    │ false │ false    │
+│ 24      │ '질주 감염체'   │ '표준'           │ 18   │ 4    │ false │ false    │
+│ 25      │ '질주 감염체'   │ '고압 연사'      │ 20   │ 4    │ true  │ false    │
+│ 26      │ '질주 감염체'   │ '단일 계열 배열' │ 20   │ 4    │ true  │ false    │
+│ 27      │ '질주 감염체'   │ '집중 연사'      │ 20   │ 4    │ true  │ false    │
+│ 28      │ '질주 감염체'   │ '다섯 계열 혼합' │ 19   │ 5    │ false │ true     │
+│ 29      │ '질주 감염체'   │ '교차 계열'      │ 15   │ 4    │ false │ false    │
+│ 30      │ '질주 감염체'   │ '초탄 연계 종결' │ 20   │ 4    │ true  │ false    │
+│ 31      │ '질주 감염체'   │ '초탄 매개 종결' │ 17   │ 4    │ false │ false    │
+│ 32      │ '질주 감염체'   │ '부분 장전'      │ 13   │ 2    │ false │ false    │
+│ 33      │ '질주 감염체'   │ '네 발 경량'     │ 20   │ 3    │ true  │ false    │
+│ 34      │ '질주 감염체'   │ '복사 잔향 연계' │ 20   │ 4    │ true  │ false    │
+│ 35      │ '질주 감염체'   │ '화상 복사'      │ 15   │ 4    │ false │ false    │
+│ 36      │ '거대 감염체'   │ '표준'           │ 16   │ 4    │ false │ false    │
+│ 37      │ '거대 감염체'   │ '고압 연사'      │ 20   │ 4    │ false │ false    │
+│ 38      │ '거대 감염체'   │ '단일 계열 배열' │ 20   │ 4    │ false │ false    │
+│ 39      │ '거대 감염체'   │ '집중 연사'      │ 19   │ 4    │ false │ false    │
+│ 40      │ '거대 감염체'   │ '다섯 계열 혼합' │ 18   │ 5    │ false │ false    │
+│ 41      │ '거대 감염체'   │ '교차 계열'      │ 14   │ 4    │ false │ false    │
+│ 42      │ '거대 감염체'   │ '초탄 연계 종결' │ 20   │ 4    │ false │ false    │
+│ 43      │ '거대 감염체'   │ '초탄 매개 종결' │ 15   │ 4    │ false │ false    │
+│ 44      │ '거대 감염체'   │ '부분 장전'      │ 12   │ 2    │ false │ false    │
+│ 45      │ '거대 감염체'   │ '네 발 경량'     │ 26   │ 4    │ false │ false    │
+│ 46      │ '거대 감염체'   │ '복사 잔향 연계' │ 20   │ 4    │ false │ false    │
+│ 47      │ '거대 감염체'   │ '화상 복사'      │ 11   │ 4    │ false │ false    │
+│ 48      │ '오염 투척체'   │ '표준'           │ 18   │ 4    │ false │ false    │
+│ 49      │ '오염 투척체'   │ '고압 연사'      │ 22   │ 4    │ false │ false    │
+│ 50      │ '오염 투척체'   │ '단일 계열 배열' │ 22   │ 4    │ false │ false    │
+│ 51      │ '오염 투척체'   │ '집중 연사'      │ 22   │ 4    │ false │ false    │
+│ 52      │ '오염 투척체'   │ '다섯 계열 혼합' │ 19   │ 5    │ false │ false    │
+│ 53      │ '오염 투척체'   │ '교차 계열'      │ 15   │ 4    │ false │ false    │
+│ 54      │ '오염 투척체'   │ '초탄 연계 종결' │ 22   │ 4    │ false │ false    │
+│ 55      │ '오염 투척체'   │ '초탄 매개 종결' │ 17   │ 4    │ false │ false    │
+│ 56      │ '오염 투척체'   │ '부분 장전'      │ 13   │ 2    │ false │ false    │
+│ 57      │ '오염 투척체'   │ '네 발 경량'     │ 29   │ 4    │ false │ false    │
+│ 58      │ '오염 투척체'   │ '복사 잔향 연계' │ 22   │ 4    │ false │ false    │
+│ 59      │ '오염 투척체'   │ '화상 복사'      │ 15   │ 4    │ false │ false    │
+│ 60      │ '지반 파쇄체'   │ '표준'           │ 18   │ 4    │ false │ false    │
+│ 61      │ '지반 파쇄체'   │ '고압 연사'      │ 22   │ 4    │ false │ false    │
+│ 62      │ '지반 파쇄체'   │ '단일 계열 배열' │ 22   │ 4    │ false │ false    │
+│ 63      │ '지반 파쇄체'   │ '집중 연사'      │ 22   │ 4    │ false │ false    │
+│ 64      │ '지반 파쇄체'   │ '다섯 계열 혼합' │ 19   │ 5    │ false │ false    │
+│ 65      │ '지반 파쇄체'   │ '교차 계열'      │ 15   │ 4    │ false │ false    │
+│ 66      │ '지반 파쇄체'   │ '초탄 연계 종결' │ 22   │ 4    │ false │ false    │
+│ 67      │ '지반 파쇄체'   │ '초탄 매개 종결' │ 17   │ 4    │ false │ false    │
+│ 68      │ '지반 파쇄체'   │ '부분 장전'      │ 13   │ 2    │ false │ false    │
+│ 69      │ '지반 파쇄체'   │ '네 발 경량'     │ 29   │ 4    │ false │ false    │
+│ 70      │ '지반 파쇄체'   │ '복사 잔향 연계' │ 22   │ 4    │ false │ false    │
+│ 71      │ '지반 파쇄체'   │ '화상 복사'      │ 15   │ 4    │ false │ false    │
+│ 72      │ '공명 비명체'   │ '표준'           │ 18   │ 4    │ false │ false    │
+│ 73      │ '공명 비명체'   │ '고압 연사'      │ 22   │ 4    │ false │ false    │
+│ 74      │ '공명 비명체'   │ '단일 계열 배열' │ 22   │ 4    │ false │ false    │
+│ 75      │ '공명 비명체'   │ '집중 연사'      │ 22   │ 4    │ false │ false    │
+│ 76      │ '공명 비명체'   │ '다섯 계열 혼합' │ 19   │ 5    │ false │ false    │
+│ 77      │ '공명 비명체'   │ '교차 계열'      │ 15   │ 4    │ false │ false    │
+│ 78      │ '공명 비명체'   │ '초탄 연계 종결' │ 22   │ 4    │ false │ false    │
+│ 79      │ '공명 비명체'   │ '초탄 매개 종결' │ 17   │ 4    │ false │ false    │
+│ 80      │ '공명 비명체'   │ '부분 장전'      │ 13   │ 2    │ false │ false    │
+│ 81      │ '공명 비명체'   │ '네 발 경량'     │ 29   │ 4    │ false │ false    │
+│ 82      │ '공명 비명체'   │ '복사 잔향 연계' │ 22   │ 4    │ false │ false    │
+│ 83      │ '공명 비명체'   │ '화상 복사'      │ 15   │ 4    │ false │ false    │
+└─────────┴─────────────────┴──────────────────┴──────┴──────┴───────┴──────────┘
+
+ ✓ src/simulation/AmmoLayerBalance.test.ts (3 tests) 41ms
+ ✓ src/ui/AmmoView.test.ts (56 tests) 33ms
+ ✓ src/combat/BurnIgnition.test.ts (54 tests) 53ms
+ ✓ src/combat/CombatOverhaul.test.ts (21 tests) 33ms
+ ✓ src/combat/AmmoLayers.test.ts (96 tests) 64ms
+ ✓ tools/ammo-export.local/baseline/src/combat/CombatOverhaul.test.ts (21 tests) 22ms
+ ✓ tools/ammo-export.local/baseline/src/combat/BurnIgnition.test.ts (54 tests) 44ms
+ ✓ src/exploration/ExplorationRun.test.ts (10 tests) 215ms
+ ✓ tools/ammo-export.local/baseline/src/simulation/WeaponBalance.test.ts (4 tests) 244ms
+ ✓ src/simulation/WeaponBalance.test.ts (4 tests) 291ms
+ ✓ tools/ammo-export.local/baseline/src/combat/Weapons.test.ts (39 tests) 161ms
+ ✓ src/combat/Weapons.test.ts (39 tests) 300ms
+stdout | src/simulation/ExplosionBalance.test.ts > 폭발 탄약 밸런스 > 세 거리의 피해·기폭·반동과 기존 연계를 비교한다
+┌─────────┬─────────────┬──────────┬────────┬───────────┬────────┐
+│ (index) │ name        │ distance │ damage │ explosion │ recoil │
+├─────────┼─────────────┼──────────┼────────┼───────────┼────────┤
+│ 0       │ '표준탄'    │ 3        │ 20     │ 0         │ 0      │
+│ 1       │ '표준탄'    │ 7        │ 18     │ 0         │ 0      │
+│ 2       │ '표준탄'    │ 11       │ 16     │ 0         │ 0      │
+│ 3       │ '고압 연사' │ 3        │ 25     │ 0         │ 12     │
+│ 4       │ '고압 연사' │ 7        │ 22     │ 0         │ 12     │
+│ 5       │ '고압 연사' │ 11       │ 20     │ 0         │ 12     │
+│ 6       │ '반동 연계' │ 3        │ 28     │ 0         │ 0      │
+│ 7       │ '반동 연계' │ 7        │ 25     │ 0         │ 0      │
+│ 8       │ '반동 연계' │ 11       │ 22     │ 0         │ 0      │
+│ 9       │ '상처 연계' │ 3        │ 24     │ 0         │ 4      │
+│ 10      │ '상처 연계' │ 7        │ 22     │ 0         │ 4      │
+│ 11      │ '상처 연계' │ 11       │ 19     │ 0         │ 4      │
+│ 12      │ '폭발 연계' │ 3        │ 22     │ 12        │ 4      │
+│ 13      │ '폭발 연계' │ 7        │ 21     │ 12        │ 4      │
+│ 14      │ '폭발 연계' │ 11       │ 20     │ 12        │ 4      │
+│ 15      │ '고폭 연계' │ 3        │ 26     │ 18        │ 10     │
+│ 16      │ '고폭 연계' │ 7        │ 25     │ 18        │ 10     │
+│ 17      │ '고폭 연계' │ 11       │ 24     │ 18        │ 10     │
+│ 18      │ '접착 연계' │ 3        │ 26     │ 24        │ 7      │
+│ 19      │ '접착 연계' │ 7        │ 26     │ 24        │ 7      │
+│ 20      │ '접착 연계' │ 11       │ 26     │ 24        │ 7      │
+│ 21      │ '혼합 연계' │ 3        │ 26     │ 18        │ 8      │
+│ 22      │ '혼합 연계' │ 7        │ 25     │ 18        │ 8      │
+│ 23      │ '혼합 연계' │ 11       │ 24     │ 18        │ 8      │
+└─────────┴─────────────┴──────────┴────────┴───────────┴────────┘
+
+stdout | src/simulation/ExplosionBalance.test.ts > 폭발 탄약 밸런스 > 모든 적의 시작 상태에서 처치 시점과 남은 체력을 비교한다
+┌─────────┬─────────────────┬─────────┬─────────────┬────┬───────┬────────┐
+│ (index) │ enemy           │ special │ name        │ hp │ shots │ killed │
+├─────────┼─────────────────┼─────────┼─────────────┼────┼───────┼────────┤
+│ 0       │ '일반 감염체'   │ false   │ '표준탄'    │ 6  │ 4     │ false  │
+│ 1       │ '일반 감염체'   │ false   │ '고압 연사' │ 2  │ 4     │ false  │
+│ 2       │ '일반 감염체'   │ false   │ '반동 연계' │ 0  │ 4     │ true   │
+│ 3       │ '일반 감염체'   │ false   │ '상처 연계' │ 3  │ 4     │ false  │
+│ 4       │ '일반 감염체'   │ false   │ '폭발 연계' │ 2  │ 4     │ false  │
+│ 5       │ '일반 감염체'   │ false   │ '고폭 연계' │ 0  │ 4     │ true   │
+│ 6       │ '일반 감염체'   │ false   │ '접착 연계' │ 0  │ 4     │ true   │
+│ 7       │ '일반 감염체'   │ false   │ '혼합 연계' │ 0  │ 4     │ true   │
+│ 8       │ '강인한 감염체' │ false   │ '표준탄'    │ 16 │ 4     │ false  │
+│ 9       │ '강인한 감염체' │ false   │ '고압 연사' │ 12 │ 4     │ false  │
+│ 10      │ '강인한 감염체' │ false   │ '반동 연계' │ 10 │ 4     │ false  │
+│ 11      │ '강인한 감염체' │ false   │ '상처 연계' │ 13 │ 4     │ false  │
+│ 12      │ '강인한 감염체' │ false   │ '폭발 연계' │ 12 │ 4     │ false  │
+│ 13      │ '강인한 감염체' │ false   │ '고폭 연계' │ 8  │ 4     │ false  │
+│ 14      │ '강인한 감염체' │ false   │ '접착 연계' │ 6  │ 4     │ false  │
+│ 15      │ '강인한 감염체' │ false   │ '혼합 연계' │ 8  │ 4     │ false  │
+│ 16      │ '질주 감염체'   │ false   │ '표준탄'    │ 2  │ 4     │ false  │
+│ 17      │ '질주 감염체'   │ false   │ '고압 연사' │ 0  │ 4     │ true   │
+│ 18      │ '질주 감염체'   │ false   │ '반동 연계' │ 0  │ 3     │ true   │
+│ 19      │ '질주 감염체'   │ false   │ '상처 연계' │ 0  │ 4     │ true   │
+│ 20      │ '질주 감염체'   │ false   │ '폭발 연계' │ 0  │ 4     │ true   │
+│ 21      │ '질주 감염체'   │ false   │ '고폭 연계' │ 0  │ 4     │ true   │
+│ 22      │ '질주 감염체'   │ false   │ '접착 연계' │ 0  │ 4     │ true   │
+│ 23      │ '질주 감염체'   │ false   │ '혼합 연계' │ 0  │ 4     │ true   │
+│ 24      │ '거대 감염체'   │ false   │ '표준탄'    │ 22 │ 4     │ false  │
+│ 25      │ '거대 감염체'   │ false   │ '고압 연사' │ 18 │ 4     │ false  │
+│ 26      │ '거대 감염체'   │ false   │ '반동 연계' │ 16 │ 4     │ false  │
+│ 27      │ '거대 감염체'   │ false   │ '상처 연계' │ 19 │ 4     │ false  │
+│ 28      │ '거대 감염체'   │ false   │ '폭발 연계' │ 18 │ 4     │ false  │
+│ 29      │ '거대 감염체'   │ false   │ '고폭 연계' │ 14 │ 4     │ false  │
+│ 30      │ '거대 감염체'   │ false   │ '접착 연계' │ 12 │ 4     │ false  │
+│ 31      │ '거대 감염체'   │ false   │ '혼합 연계' │ 14 │ 4     │ false  │
+│ 32      │ '오염 투척체'   │ true    │ '표준탄'    │ 32 │ 4     │ false  │
+│ 33      │ '오염 투척체'   │ true    │ '고압 연사' │ 28 │ 4     │ false  │
+│ 34      │ '오염 투척체'   │ true    │ '반동 연계' │ 25 │ 4     │ false  │
+│ 35      │ '오염 투척체'   │ true    │ '상처 연계' │ 28 │ 4     │ false  │
+│ 36      │ '오염 투척체'   │ true    │ '폭발 연계' │ 29 │ 4     │ false  │
+│ 37      │ '오염 투척체'   │ true    │ '고폭 연계' │ 25 │ 4     │ false  │
+│ 38      │ '오염 투척체'   │ true    │ '접착 연계' │ 24 │ 4     │ false  │
+│ 39      │ '오염 투척체'   │ true    │ '혼합 연계' │ 25 │ 4     │ false  │
+│ 40      │ '지반 파쇄체'   │ true    │ '표준탄'    │ 36 │ 4     │ false  │
+│ 41      │ '지반 파쇄체'   │ true    │ '고압 연사' │ 32 │ 4     │ false  │
+│ 42      │ '지반 파쇄체'   │ true    │ '반동 연계' │ 29 │ 4     │ false  │
+│ 43      │ '지반 파쇄체'   │ true    │ '상처 연계' │ 32 │ 4     │ false  │
+│ 44      │ '지반 파쇄체'   │ true    │ '폭발 연계' │ 33 │ 4     │ false  │
+│ 45      │ '지반 파쇄체'   │ true    │ '고폭 연계' │ 29 │ 4     │ false  │
+│ 46      │ '지반 파쇄체'   │ true    │ '접착 연계' │ 28 │ 4     │ false  │
+│ 47      │ '지반 파쇄체'   │ true    │ '혼합 연계' │ 29 │ 4     │ false  │
+│ 48      │ '공명 비명체'   │ true    │ '표준탄'    │ 28 │ 4     │ false  │
+│ 49      │ '공명 비명체'   │ true    │ '고압 연사' │ 24 │ 4     │ false  │
+│ 50      │ '공명 비명체'   │ true    │ '반동 연계' │ 21 │ 4     │ false  │
+│ 51      │ '공명 비명체'   │ true    │ '상처 연계' │ 24 │ 4     │ false  │
+│ 52      │ '공명 비명체'   │ true    │ '폭발 연계' │ 25 │ 4     │ false  │
+│ 53      │ '공명 비명체'   │ true    │ '고폭 연계' │ 21 │ 4     │ false  │
+│ 54      │ '공명 비명체'   │ true    │ '접착 연계' │ 20 │ 4     │ false  │
+│ 55      │ '공명 비명체'   │ true    │ '혼합 연계' │ 21 │ 4     │ false  │
+└─────────┴─────────────────┴─────────┴─────────────┴────┴───────┴────────┘
+
+ ✓ src/simulation/ExplosionBalance.test.ts (3 tests) 23ms
+ ✓ src/combat/WoundThreshold.test.ts (27 tests) 16ms
+stdout | tools/ammo-export.local/baseline/src/simulation/ImpactBalance.test.ts > 충격 탄약 밸런스 비교 > 세 거리에서 체력 피해·행동 충격·기폭 피해·반동을 기존 탄약과 비교한다
+┌─────────┬──────────────────┬──────────┬────────┬───────┬───────────┬────────┐
+│ (index) │ name             │ distance │ damage │ shock │ explosion │ recoil │
+├─────────┼──────────────────┼──────────┼────────┼───────┼───────────┼────────┤
+│ 0       │ '평두 연사'      │ 3        │ 4      │ 16    │ 0         │ 4      │
+│ 1       │ '평두 연사'      │ 7        │ 4      │ 16    │ 0         │ 4      │
+│ 2       │ '평두 연사'      │ 11       │ 3      │ 16    │ 0         │ 4      │
+│ 3       │ '중량 연사'      │ 3        │ 9      │ 8     │ 0         │ 8      │
+│ 4       │ '중량 연사'      │ 7        │ 8      │ 8     │ 0         │ 8      │
+│ 5       │ '중량 연사'      │ 11       │ 7      │ 8     │ 0         │ 8      │
+│ 6       │ '저충격 연사'    │ 3        │ 4      │ 8     │ 0         │ 0      │
+│ 7       │ '저충격 연사'    │ 7        │ 4      │ 8     │ 0         │ 0      │
+│ 8       │ '저충격 연사'    │ 11       │ 3      │ 8     │ 0         │ 0      │
+│ 9       │ '강타 연사'      │ 3        │ 1      │ 24    │ 0         │ 12     │
+│ 10      │ '강타 연사'      │ 7        │ 1      │ 24    │ 0         │ 12     │
+│ 11      │ '강타 연사'      │ 11       │ 1      │ 24    │ 0         │ 12     │
+│ 12      │ '증폭 연사'      │ 3        │ 4      │ 15    │ 0         │ 4      │
+│ 13      │ '증폭 연사'      │ 7        │ 4      │ 15    │ 0         │ 4      │
+│ 14      │ '증폭 연사'      │ 11       │ 3      │ 15    │ 0         │ 4      │
+│ 15      │ '연쇄 일반탄'    │ 3        │ 16     │ 4     │ 0         │ 1      │
+│ 16      │ '연쇄 일반탄'    │ 7        │ 14     │ 4     │ 0         │ 1      │
+│ 17      │ '연쇄 일반탄'    │ 11       │ 13     │ 4     │ 0         │ 1      │
+│ 18      │ '충격 혼합'      │ 3        │ 3      │ 18    │ 0         │ 7      │
+│ 19      │ '충격 혼합'      │ 7        │ 3      │ 18    │ 0         │ 7      │
+│ 20      │ '충격 혼합'      │ 11       │ 2      │ 18    │ 0         │ 7      │
+│ 21      │ '기존 폭발'      │ 3        │ 26     │ 2     │ 18        │ 8      │
+│ 22      │ '기존 폭발'      │ 7        │ 25     │ 2     │ 18        │ 8      │
+│ 23      │ '기존 폭발'      │ 11       │ 24     │ 2     │ 18        │ 8      │
+│ 24      │ '저반동 기폭'    │ 3        │ 25     │ 2     │ 18        │ 6      │
+│ 25      │ '저반동 기폭'    │ 7        │ 24     │ 2     │ 18        │ 6      │
+│ 26      │ '저반동 기폭'    │ 11       │ 24     │ 2     │ 18        │ 6      │
+│ 27      │ '충격 연쇄 기폭' │ 3        │ 22     │ 4     │ 12        │ 4      │
+│ 28      │ '충격 연쇄 기폭' │ 7        │ 21     │ 4     │ 12        │ 4      │
+│ 29      │ '충격 연쇄 기폭' │ 11       │ 20     │ 4     │ 12        │ 4      │
+└─────────┴──────────────────┴──────────┴────────┴───────┴───────────┴────────┘
+
+stdout | tools/ammo-export.local/baseline/src/simulation/ImpactBalance.test.ts > 충격 탄약 밸런스 비교 > 증폭 준비·긴 탄창의 보상과 단발 충격탄의 우위를 구분한다
+┌─────────┬─────────────┬─────────────┬───────┬────────────┬────────┐
+│ (index) │ ammo        │ actionShock │ slots │ addedShock │ recoil │
+├─────────┼─────────────┼─────────────┼───────┼────────────┼────────┤
+│ 0       │ 'flatNose'  │ 0           │ 4     │ 16         │ 4      │
+│ 1       │ 'hammer'    │ 0           │ 4     │ 24         │ 12     │
+│ 2       │ 'resonance' │ 0           │ 4     │ 15         │ 4      │
+│ 3       │ 'flatNose'  │ 0           │ 6     │ 24         │ 6      │
+│ 4       │ 'hammer'    │ 0           │ 6     │ 36         │ 18     │
+│ 5       │ 'resonance' │ 0           │ 6     │ 27         │ 6      │
+│ 6       │ 'flatNose'  │ 2           │ 4     │ 16         │ 4      │
+│ 7       │ 'hammer'    │ 2           │ 4     │ 24         │ 12     │
+│ 8       │ 'resonance' │ 2           │ 4     │ 19         │ 4      │
+│ 9       │ 'flatNose'  │ 2           │ 6     │ 24         │ 6      │
+│ 10      │ 'hammer'    │ 2           │ 6     │ 36         │ 18     │
+│ 11      │ 'resonance' │ 2           │ 6     │ 31         │ 6      │
+│ 12      │ 'flatNose'  │ 4           │ 4     │ 16         │ 4      │
+│ 13      │ 'hammer'    │ 4           │ 4     │ 24         │ 12     │
+│ 14      │ 'resonance' │ 4           │ 4     │ 22         │ 4      │
+│ 15      │ 'flatNose'  │ 4           │ 6     │ 24         │ 6      │
+│ 16      │ 'hammer'    │ 4           │ 6     │ 36         │ 18     │
+│ 17      │ 'resonance' │ 4           │ 6     │ 34         │ 6      │
+│ 18      │ 'flatNose'  │ 6           │ 4     │ 16         │ 4      │
+│ 19      │ 'hammer'    │ 6           │ 4     │ 24         │ 12     │
+│ 20      │ 'resonance' │ 6           │ 4     │ 23         │ 4      │
+│ 21      │ 'flatNose'  │ 6           │ 6     │ 24         │ 6      │
+│ 22      │ 'hammer'    │ 6           │ 6     │ 36         │ 18     │
+│ 23      │ 'resonance' │ 6           │ 6     │ 35         │ 6      │
+│ 24      │ 'flatNose'  │ 8           │ 4     │ 16         │ 4      │
+│ 25      │ 'hammer'    │ 8           │ 4     │ 24         │ 12     │
+│ 26      │ 'resonance' │ 8           │ 4     │ 24         │ 4      │
+│ 27      │ 'flatNose'  │ 8           │ 6     │ 24         │ 6      │
+│ 28      │ 'hammer'    │ 8           │ 6     │ 36         │ 18     │
+│ 29      │ 'resonance' │ 8           │ 6     │ 36         │ 6      │
+└─────────┴─────────────┴─────────────┴───────┴────────────┴────────┘
+
+stdout | tools/ammo-export.local/baseline/src/simulation/ImpactBalance.test.ts > 충격 탄약 밸런스 비교 > 적 7종의 접근·특수·치명 공격에서 단발 행동 중단 범위를 비교한다
+┌─────────┬────────────────┬─────────────────┬───────────────┬───────────┬───────┬─────────────┐
+│ (index) │ type           │ ammo            │ action        │ threshold │ shock │ interrupted │
+├─────────┼────────────────┼─────────────────┼───────────────┼───────────┼───────┼─────────────┤
+│ 0       │ 'normal'       │ 'flatNose'      │ 'approach'    │ 4         │ 4     │ true        │
+│ 1       │ 'normal'       │ 'reducedImpact' │ 'approach'    │ 4         │ 2     │ false       │
+│ 2       │ 'normal'       │ 'hammer'        │ 'approach'    │ 4         │ 6     │ true        │
+│ 3       │ 'normal'       │ 'resonance'     │ 'approach'    │ 4         │ 2     │ false       │
+│ 4       │ 'normal'       │ 'flatNose'      │ 'attack'      │ 8         │ 4     │ false       │
+│ 5       │ 'normal'       │ 'reducedImpact' │ 'attack'      │ 8         │ 2     │ false       │
+│ 6       │ 'normal'       │ 'hammer'        │ 'attack'      │ 8         │ 6     │ false       │
+│ 7       │ 'normal'       │ 'resonance'     │ 'attack'      │ 8         │ 2     │ false       │
+│ 8       │ 'brute'        │ 'flatNose'      │ 'approach'    │ 5         │ 4     │ false       │
+│ 9       │ 'brute'        │ 'reducedImpact' │ 'approach'    │ 5         │ 2     │ false       │
+│ 10      │ 'brute'        │ 'hammer'        │ 'approach'    │ 5         │ 6     │ true        │
+│ 11      │ 'brute'        │ 'resonance'     │ 'approach'    │ 5         │ 2     │ false       │
+│ 12      │ 'brute'        │ 'flatNose'      │ 'attack'      │ 9         │ 4     │ false       │
+│ 13      │ 'brute'        │ 'reducedImpact' │ 'attack'      │ 9         │ 2     │ false       │
+│ 14      │ 'brute'        │ 'hammer'        │ 'attack'      │ 9         │ 6     │ false       │
+│ 15      │ 'brute'        │ 'resonance'     │ 'attack'      │ 9         │ 2     │ false       │
+│ 16      │ 'fast'         │ 'flatNose'      │ 'approach'    │ 3         │ 4     │ true        │
+│ 17      │ 'fast'         │ 'reducedImpact' │ 'approach'    │ 3         │ 2     │ false       │
+│ 18      │ 'fast'         │ 'hammer'        │ 'approach'    │ 3         │ 6     │ true        │
+│ 19      │ 'fast'         │ 'resonance'     │ 'approach'    │ 3         │ 2     │ false       │
+│ 20      │ 'fast'         │ 'flatNose'      │ 'attack'      │ 7         │ 4     │ false       │
+│ 21      │ 'fast'         │ 'reducedImpact' │ 'attack'      │ 7         │ 2     │ false       │
+│ 22      │ 'fast'         │ 'hammer'        │ 'attack'      │ 7         │ 6     │ false       │
+│ 23      │ 'fast'         │ 'resonance'     │ 'attack'      │ 7         │ 2     │ false       │
+│ 24      │ 'tough'        │ 'flatNose'      │ 'approach'    │ 6         │ 4     │ false       │
+│ 25      │ 'tough'        │ 'reducedImpact' │ 'approach'    │ 6         │ 2     │ false       │
+│ 26      │ 'tough'        │ 'hammer'        │ 'approach'    │ 6         │ 6     │ true        │
+│ 27      │ 'tough'        │ 'resonance'     │ 'approach'    │ 6         │ 2     │ false       │
+│ 28      │ 'tough'        │ 'flatNose'      │ 'attack'      │ 10        │ 4     │ false       │
+│ 29      │ 'tough'        │ 'reducedImpact' │ 'attack'      │ 10        │ 2     │ false       │
+│ 30      │ 'tough'        │ 'hammer'        │ 'attack'      │ 10        │ 6     │ false       │
+│ 31      │ 'tough'        │ 'resonance'     │ 'attack'      │ 10        │ 2     │ false       │
+│ 32      │ 'contaminator' │ 'flatNose'      │ 'contaminate' │ 7         │ 4     │ false       │
+│ 33      │ 'contaminator' │ 'reducedImpact' │ 'contaminate' │ 7         │ 2     │ false       │
+│ 34      │ 'contaminator' │ 'hammer'        │ 'contaminate' │ 7         │ 6     │ false       │
+│ 35      │ 'contaminator' │ 'resonance'     │ 'contaminate' │ 7         │ 2     │ false       │
+│ 36      │ 'contaminator' │ 'flatNose'      │ 'attack'      │ 9         │ 4     │ false       │
+│ 37      │ 'contaminator' │ 'reducedImpact' │ 'attack'      │ 9         │ 2     │ false       │
+│ 38      │ 'contaminator' │ 'hammer'        │ 'attack'      │ 9         │ 6     │ false       │
+│ 39      │ 'contaminator' │ 'resonance'     │ 'attack'      │ 9         │ 2     │ false       │
+│ 40      │ 'groundshaker' │ 'flatNose'      │ 'groundShock' │ 9         │ 4     │ false       │
+│ 41      │ 'groundshaker' │ 'reducedImpact' │ 'groundShock' │ 9         │ 2     │ false       │
+│ 42      │ 'groundshaker' │ 'hammer'        │ 'groundShock' │ 9         │ 6     │ false       │
+│ 43      │ 'groundshaker' │ 'resonance'     │ 'groundShock' │ 9         │ 2     │ false       │
+│ 44      │ 'groundshaker' │ 'flatNose'      │ 'attack'      │ 10        │ 4     │ false       │
+│ 45      │ 'groundshaker' │ 'reducedImpact' │ 'attack'      │ 10        │ 2     │ false       │
+│ 46      │ 'groundshaker' │ 'hammer'        │ 'attack'      │ 10        │ 6     │ false       │
+│ 47      │ 'groundshaker' │ 'resonance'     │ 'attack'      │ 10        │ 2     │ false       │
+│ 48      │ 'screecher'    │ 'flatNose'      │ 'sonicPulse'  │ 7         │ 4     │ false       │
+│ 49      │ 'screecher'    │ 'reducedImpact' │ 'sonicPulse'  │ 7         │ 2     │ false       │
+│ 50      │ 'screecher'    │ 'hammer'        │ 'sonicPulse'  │ 7         │ 6     │ false       │
+│ 51      │ 'screecher'    │ 'resonance'     │ 'sonicPulse'  │ 7         │ 2     │ false       │
+│ 52      │ 'screecher'    │ 'flatNose'      │ 'attack'      │ 9         │ 4     │ false       │
+│ 53      │ 'screecher'    │ 'reducedImpact' │ 'attack'      │ 9         │ 2     │ false       │
+│ 54      │ 'screecher'    │ 'hammer'        │ 'attack'      │ 9         │ 6     │ false       │
+│ 55      │ 'screecher'    │ 'resonance'     │ 'attack'      │ 9         │ 2     │ false       │
+└─────────┴────────────────┴─────────────────┴───────────────┴───────────┴───────┴─────────────┘
+
+ ✓ tools/ammo-export.local/baseline/src/simulation/ImpactBalance.test.ts (3 tests) 20ms
+ ✓ src/combat/Explosion.test.ts (11 tests) 18ms
+stdout | src/simulation/BurnBalance.test.ts > 화상 계열 집중 밸런스 > 세 거리에서 대표 순서와 일반탄 혼합을 비교한다
+┌─────────┬──────────────────────┬──────────┬────────┬───────────┬──────┬───────────┬─────────┬────────┐
+│ (index) │ name                 │ distance │ damage │ immediate │ burn │ remaining │ ignited │ recoil │
+├─────────┼──────────────────────┼──────────┼────────┼───────────┼──────┼───────────┼─────────┼────────┤
+│ 0       │ '소이 → 소이 → 점화' │ 3        │ 12     │ 5         │ 26   │ 6         │ 1       │ 3      │
+│ 1       │ '촉진 → 고열 → 발화' │ 3        │ 13     │ 5         │ 22   │ 2         │ 1       │ 5      │
+│ 2       │ '고열 → 촉진 → 발화' │ 3        │ 10     │ 5         │ 17   │ 17        │ 0       │ 5      │
+│ 3       │ '저열 → 고열 → 점화' │ 3        │ 10     │ 5         │ 26   │ 6         │ 1       │ 4      │
+│ 4       │ '소이 → 표준 → 고열' │ 3        │ 15     │ 5         │ 20   │ 0         │ 1       │ 4      │
+│ 5       │ '소이 → 소이 → 표준' │ 3        │ 15     │ 4         │ 16   │ 16        │ 0       │ 2      │
+│ 6       │ '표준 3발'           │ 3        │ 15     │ 0         │ 0    │ 0         │ 0       │ 0      │
+│ 7       │ '소이 → 소이 → 점화' │ 7        │ 11     │ 4         │ 26   │ 6         │ 1       │ 3      │
+│ 8       │ '촉진 → 고열 → 발화' │ 7        │ 12     │ 4         │ 22   │ 2         │ 1       │ 5      │
+│ 9       │ '고열 → 촉진 → 발화' │ 7        │ 9      │ 4         │ 17   │ 17        │ 0       │ 5      │
+│ 10      │ '저열 → 고열 → 점화' │ 7        │ 9      │ 5         │ 26   │ 6         │ 1       │ 4      │
+│ 11      │ '소이 → 표준 → 고열' │ 7        │ 13     │ 3         │ 20   │ 0         │ 1       │ 4      │
+│ 12      │ '소이 → 소이 → 표준' │ 7        │ 13     │ 3         │ 16   │ 16        │ 0       │ 2      │
+│ 13      │ '표준 3발'           │ 7        │ 13     │ 0         │ 0    │ 0         │ 0       │ 0      │
+│ 14      │ '소이 → 소이 → 점화' │ 11       │ 10     │ 5         │ 26   │ 6         │ 1       │ 3      │
+│ 15      │ '촉진 → 고열 → 발화' │ 11       │ 10     │ 4         │ 22   │ 2         │ 1       │ 5      │
+│ 16      │ '고열 → 촉진 → 발화' │ 11       │ 8      │ 4         │ 17   │ 17        │ 0       │ 5      │
+│ 17      │ '저열 → 고열 → 점화' │ 11       │ 8      │ 3         │ 26   │ 6         │ 1       │ 4      │
+│ 18      │ '소이 → 표준 → 고열' │ 11       │ 12     │ 4         │ 20   │ 0         │ 1       │ 4      │
+│ 19      │ '소이 → 소이 → 표준' │ 11       │ 12     │ 4         │ 16   │ 16        │ 0       │ 2      │
+│ 20      │ '표준 3발'           │ 11       │ 12     │ 0         │ 0    │ 0         │ 0       │ 0      │
+└─────────┴──────────────────────┴──────────┴────────┴───────────┴──────┴───────────┴─────────┴────────┘
+
+ ✓ src/simulation/BurnBalance.test.ts (2 tests) 19ms
+ ✓ src/combat/EnemyActionResolution.test.ts (31 tests) 22ms
+stdout | tools/ammo-export.local/baseline/src/simulation/ExplosionBalance.test.ts > 폭발 탄약 밸런스 > 세 거리의 피해·기폭·반동과 기존 연계를 비교한다
+┌─────────┬─────────────┬──────────┬────────┬───────────┬────────┐
+│ (index) │ name        │ distance │ damage │ explosion │ recoil │
+├─────────┼─────────────┼──────────┼────────┼───────────┼────────┤
+│ 0       │ '표준탄'    │ 3        │ 20     │ 0         │ 0      │
+│ 1       │ '표준탄'    │ 7        │ 18     │ 0         │ 0      │
+│ 2       │ '표준탄'    │ 11       │ 16     │ 0         │ 0      │
+│ 3       │ '고압 연사' │ 3        │ 25     │ 0         │ 12     │
+│ 4       │ '고압 연사' │ 7        │ 22     │ 0         │ 12     │
+│ 5       │ '고압 연사' │ 11       │ 20     │ 0         │ 12     │
+│ 6       │ '반동 연계' │ 3        │ 28     │ 0         │ 0      │
+│ 7       │ '반동 연계' │ 7        │ 25     │ 0         │ 0      │
+│ 8       │ '반동 연계' │ 11       │ 22     │ 0         │ 0      │
+│ 9       │ '상처 연계' │ 3        │ 24     │ 0         │ 4      │
+│ 10      │ '상처 연계' │ 7        │ 22     │ 0         │ 4      │
+│ 11      │ '상처 연계' │ 11       │ 19     │ 0         │ 4      │
+│ 12      │ '폭발 연계' │ 3        │ 22     │ 12        │ 4      │
+│ 13      │ '폭발 연계' │ 7        │ 21     │ 12        │ 4      │
+│ 14      │ '폭발 연계' │ 11       │ 20     │ 12        │ 4      │
+│ 15      │ '고폭 연계' │ 3        │ 26     │ 18        │ 10     │
+│ 16      │ '고폭 연계' │ 7        │ 25     │ 18        │ 10     │
+│ 17      │ '고폭 연계' │ 11       │ 24     │ 18        │ 10     │
+│ 18      │ '접착 연계' │ 3        │ 26     │ 24        │ 7      │
+│ 19      │ '접착 연계' │ 7        │ 26     │ 24        │ 7      │
+│ 20      │ '접착 연계' │ 11       │ 26     │ 24        │ 7      │
+│ 21      │ '혼합 연계' │ 3        │ 26     │ 18        │ 8      │
+│ 22      │ '혼합 연계' │ 7        │ 25     │ 18        │ 8      │
+│ 23      │ '혼합 연계' │ 11       │ 24     │ 18        │ 8      │
+└─────────┴─────────────┴──────────┴────────┴───────────┴────────┘
+
+stdout | tools/ammo-export.local/baseline/src/simulation/ExplosionBalance.test.ts > 폭발 탄약 밸런스 > 모든 적의 시작 상태에서 처치 시점과 남은 체력을 비교한다
+┌─────────┬─────────────────┬─────────┬─────────────┬────┬───────┬────────┐
+│ (index) │ enemy           │ special │ name        │ hp │ shots │ killed │
+├─────────┼─────────────────┼─────────┼─────────────┼────┼───────┼────────┤
+│ 0       │ '일반 감염체'   │ false   │ '표준탄'    │ 4  │ 4     │ false  │
+│ 1       │ '일반 감염체'   │ false   │ '고압 연사' │ 0  │ 4     │ true   │
+│ 2       │ '일반 감염체'   │ false   │ '반동 연계' │ 0  │ 4     │ true   │
+│ 3       │ '일반 감염체'   │ false   │ '상처 연계' │ 0  │ 4     │ true   │
+│ 4       │ '일반 감염체'   │ false   │ '폭발 연계' │ 1  │ 4     │ false  │
+│ 5       │ '일반 감염체'   │ false   │ '고폭 연계' │ 0  │ 4     │ true   │
+│ 6       │ '일반 감염체'   │ false   │ '접착 연계' │ 0  │ 4     │ true   │
+│ 7       │ '일반 감염체'   │ false   │ '혼합 연계' │ 0  │ 4     │ true   │
+│ 8       │ '강인한 감염체' │ false   │ '표준탄'    │ 16 │ 4     │ false  │
+│ 9       │ '강인한 감염체' │ false   │ '고압 연사' │ 12 │ 4     │ false  │
+│ 10      │ '강인한 감염체' │ false   │ '반동 연계' │ 10 │ 4     │ false  │
+│ 11      │ '강인한 감염체' │ false   │ '상처 연계' │ 13 │ 4     │ false  │
+│ 12      │ '강인한 감염체' │ false   │ '폭발 연계' │ 12 │ 4     │ false  │
+│ 13      │ '강인한 감염체' │ false   │ '고폭 연계' │ 8  │ 4     │ false  │
+│ 14      │ '강인한 감염체' │ false   │ '접착 연계' │ 6  │ 4     │ false  │
+│ 15      │ '강인한 감염체' │ false   │ '혼합 연계' │ 8  │ 4     │ false  │
+│ 16      │ '질주 감염체'   │ false   │ '표준탄'    │ 2  │ 4     │ false  │
+│ 17      │ '질주 감염체'   │ false   │ '고압 연사' │ 0  │ 4     │ true   │
+│ 18      │ '질주 감염체'   │ false   │ '반동 연계' │ 0  │ 3     │ true   │
+│ 19      │ '질주 감염체'   │ false   │ '상처 연계' │ 0  │ 4     │ true   │
+│ 20      │ '질주 감염체'   │ false   │ '폭발 연계' │ 0  │ 4     │ true   │
+│ 21      │ '질주 감염체'   │ false   │ '고폭 연계' │ 0  │ 4     │ true   │
+│ 22      │ '질주 감염체'   │ false   │ '접착 연계' │ 0  │ 4     │ true   │
+│ 23      │ '질주 감염체'   │ false   │ '혼합 연계' │ 0  │ 4     │ true   │
+│ 24      │ '거대 감염체'   │ false   │ '표준탄'    │ 22 │ 4     │ false  │
+│ 25      │ '거대 감염체'   │ false   │ '고압 연사' │ 18 │ 4     │ false  │
+│ 26      │ '거대 감염체'   │ false   │ '반동 연계' │ 16 │ 4     │ false  │
+│ 27      │ '거대 감염체'   │ false   │ '상처 연계' │ 19 │ 4     │ false  │
+│ 28      │ '거대 감염체'   │ false   │ '폭발 연계' │ 18 │ 4     │ false  │
+│ 29      │ '거대 감염체'   │ false   │ '고폭 연계' │ 14 │ 4     │ false  │
+│ 30      │ '거대 감염체'   │ false   │ '접착 연계' │ 12 │ 4     │ false  │
+│ 31      │ '거대 감염체'   │ false   │ '혼합 연계' │ 14 │ 4     │ false  │
+│ 32      │ '오염 투척체'   │ true    │ '표준탄'    │ 32 │ 4     │ false  │
+│ 33      │ '오염 투척체'   │ true    │ '고압 연사' │ 28 │ 4     │ false  │
+│ 34      │ '오염 투척체'   │ true    │ '반동 연계' │ 25 │ 4     │ false  │
+│ 35      │ '오염 투척체'   │ true    │ '상처 연계' │ 28 │ 4     │ false  │
+│ 36      │ '오염 투척체'   │ true    │ '폭발 연계' │ 29 │ 4     │ false  │
+│ 37      │ '오염 투척체'   │ true    │ '고폭 연계' │ 25 │ 4     │ false  │
+│ 38      │ '오염 투척체'   │ true    │ '접착 연계' │ 24 │ 4     │ false  │
+│ 39      │ '오염 투척체'   │ true    │ '혼합 연계' │ 25 │ 4     │ false  │
+│ 40      │ '지반 파쇄체'   │ true    │ '표준탄'    │ 36 │ 4     │ false  │
+│ 41      │ '지반 파쇄체'   │ true    │ '고압 연사' │ 32 │ 4     │ false  │
+│ 42      │ '지반 파쇄체'   │ true    │ '반동 연계' │ 29 │ 4     │ false  │
+│ 43      │ '지반 파쇄체'   │ true    │ '상처 연계' │ 32 │ 4     │ false  │
+│ 44      │ '지반 파쇄체'   │ true    │ '폭발 연계' │ 33 │ 4     │ false  │
+│ 45      │ '지반 파쇄체'   │ true    │ '고폭 연계' │ 29 │ 4     │ false  │
+│ 46      │ '지반 파쇄체'   │ true    │ '접착 연계' │ 28 │ 4     │ false  │
+│ 47      │ '지반 파쇄체'   │ true    │ '혼합 연계' │ 29 │ 4     │ false  │
+│ 48      │ '공명 비명체'   │ true    │ '표준탄'    │ 28 │ 4     │ false  │
+│ 49      │ '공명 비명체'   │ true    │ '고압 연사' │ 24 │ 4     │ false  │
+│ 50      │ '공명 비명체'   │ true    │ '반동 연계' │ 21 │ 4     │ false  │
+│ 51      │ '공명 비명체'   │ true    │ '상처 연계' │ 24 │ 4     │ false  │
+│ 52      │ '공명 비명체'   │ true    │ '폭발 연계' │ 25 │ 4     │ false  │
+│ 53      │ '공명 비명체'   │ true    │ '고폭 연계' │ 21 │ 4     │ false  │
+│ 54      │ '공명 비명체'   │ true    │ '접착 연계' │ 20 │ 4     │ false  │
+│ 55      │ '공명 비명체'   │ true    │ '혼합 연계' │ 21 │ 4     │ false  │
+└─────────┴─────────────────┴─────────┴─────────────┴────┴───────┴────────┘
+
+ ✓ tools/ammo-export.local/baseline/src/simulation/ExplosionBalance.test.ts (3 tests) 20ms
+ ✓ src/combat/DistanceActionRules.test.ts (31 tests) 15ms
+stdout | tools/ammo-export.local/baseline/src/simulation/BurnBalance.test.ts > 화상 계열 집중 밸런스 > 세 거리에서 대표 순서와 일반탄 혼합을 비교한다
+┌─────────┬──────────────────────┬──────────┬────────┬───────────┬──────┬───────────┬─────────┬────────┐
+│ (index) │ name                 │ distance │ damage │ immediate │ burn │ remaining │ ignited │ recoil │
+├─────────┼──────────────────────┼──────────┼────────┼───────────┼──────┼───────────┼─────────┼────────┤
+│ 0       │ '소이 → 소이 → 점화' │ 3        │ 12     │ 5         │ 26   │ 6         │ 1       │ 3      │
+│ 1       │ '촉진 → 고열 → 발화' │ 3        │ 13     │ 5         │ 22   │ 2         │ 1       │ 5      │
+│ 2       │ '고열 → 촉진 → 발화' │ 3        │ 10     │ 5         │ 17   │ 17        │ 0       │ 5      │
+│ 3       │ '저열 → 고열 → 점화' │ 3        │ 10     │ 5         │ 26   │ 6         │ 1       │ 4      │
+│ 4       │ '소이 → 표준 → 고열' │ 3        │ 15     │ 5         │ 20   │ 0         │ 1       │ 4      │
+│ 5       │ '소이 → 소이 → 표준' │ 3        │ 15     │ 4         │ 16   │ 16        │ 0       │ 2      │
+│ 6       │ '표준 3발'           │ 3        │ 15     │ 0         │ 0    │ 0         │ 0       │ 0      │
+│ 7       │ '소이 → 소이 → 점화' │ 7        │ 11     │ 4         │ 26   │ 6         │ 1       │ 3      │
+│ 8       │ '촉진 → 고열 → 발화' │ 7        │ 12     │ 4         │ 22   │ 2         │ 1       │ 5      │
+│ 9       │ '고열 → 촉진 → 발화' │ 7        │ 9      │ 4         │ 17   │ 17        │ 0       │ 5      │
+│ 10      │ '저열 → 고열 → 점화' │ 7        │ 9      │ 5         │ 26   │ 6         │ 1       │ 4      │
+│ 11      │ '소이 → 표준 → 고열' │ 7        │ 13     │ 3         │ 20   │ 0         │ 1       │ 4      │
+│ 12      │ '소이 → 소이 → 표준' │ 7        │ 13     │ 3         │ 16   │ 16        │ 0       │ 2      │
+│ 13      │ '표준 3발'           │ 7        │ 13     │ 0         │ 0    │ 0         │ 0       │ 0      │
+│ 14      │ '소이 → 소이 → 점화' │ 11       │ 10     │ 5         │ 26   │ 6         │ 1       │ 3      │
+│ 15      │ '촉진 → 고열 → 발화' │ 11       │ 10     │ 4         │ 22   │ 2         │ 1       │ 5      │
+│ 16      │ '고열 → 촉진 → 발화' │ 11       │ 8      │ 4         │ 17   │ 17        │ 0       │ 5      │
+│ 17      │ '저열 → 고열 → 점화' │ 11       │ 8      │ 3         │ 26   │ 6         │ 1       │ 4      │
+│ 18      │ '소이 → 표준 → 고열' │ 11       │ 12     │ 4         │ 20   │ 0         │ 1       │ 4      │
+│ 19      │ '소이 → 소이 → 표준' │ 11       │ 12     │ 4         │ 16   │ 16        │ 0       │ 2      │
+│ 20      │ '표준 3발'           │ 11       │ 12     │ 0         │ 0    │ 0         │ 0       │ 0      │
+└─────────┴──────────────────────┴──────────┴────────┴───────────┴──────┴───────────┴─────────┴────────┘
+
+ ✓ tools/ammo-export.local/baseline/src/combat/ImpactAmmo.test.ts (21 tests) 18ms
+ ✓ src/entities/Player.test.ts (19 tests) 18ms
+ ✓ tools/ammo-export.local/baseline/src/simulation/BurnBalance.test.ts (2 tests) 19ms
+ ✓ tools/ammo-export.local/baseline/src/ui/AmmoView.test.ts (44 tests) 19ms
+stdout | src/simulation/BalanceSimulator.test.ts > 초기 밸런스 감사 > 모든 탄약을 기본 권총의 세 거리에서 비교한다
+┌─────────┬─────────────────┬──────┬─────┬─────┬───────┬────────┬────────┐
+│ (index) │ ammo            │ near │ mid │ far │ wound │ impact │ recoil │
+├─────────┼─────────────────┼──────┼─────┼─────┼───────┼────────┼────────┤
+│ 0       │ 'ball'          │ 5    │ 4   │ 4   │ 0     │ 0      │ 0      │
+│ 1       │ 'hollowPoint'   │ 6    │ 5   │ 5   │ 0     │ 0      │ 1      │
+│ 2       │ 'lowRecoil'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 0      │
+│ 3       │ 'plusP'         │ 8    │ 7   │ 6   │ 0     │ 0      │ 3      │
+│ 4       │ 'relay'         │ 2    │ 2   │ 2   │ 0     │ 0      │ 0      │
+│ 5       │ 'frangible'     │ 4    │ 4   │ 3   │ 0     │ 0      │ 1      │
+│ 6       │ 'suppression'   │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 7       │ 'execution'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 8       │ 'kickback'      │ 2    │ 2   │ 2   │ 0     │ 0      │ 0      │
+│ 9       │ 'laceration'    │ 5    │ 4   │ 4   │ 0     │ 0      │ 1      │
+│ 10      │ 'retreat'       │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 11      │ 'advance'       │ 6    │ 5   │ 5   │ 0     │ 0      │ 2      │
+│ 12      │ 'wounding'      │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 13      │ 'serrated'      │ 2    │ 2   │ 2   │ 5     │ 0      │ 3      │
+│ 14      │ 'retreatCutter' │ 1    │ 1   │ 1   │ 2     │ 0      │ 1      │
+│ 15      │ 'rupture'       │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 16      │ 'deepCut'       │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 17      │ 'reopening'     │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 18      │ 'scar'          │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 19      │ 'explosive'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 20      │ 'highExplosive' │ 4    │ 4   │ 3   │ 0     │ 0      │ 3      │
+│ 21      │ 'stickyCharge'  │ 1    │ 1   │ 1   │ 0     │ 0      │ 2      │
+│ 22      │ 'flatNose'      │ 1    │ 1   │ 1   │ 0     │ 4      │ 1      │
+│ 23      │ 'reducedImpact' │ 1    │ 1   │ 1   │ 0     │ 2      │ 0      │
+│ 24      │ 'hammer'        │ 1    │ 1   │ 1   │ 0     │ 6      │ 3      │
+│ 25      │ 'impactRelay'   │ 1    │ 1   │ 1   │ 0     │ 1      │ 1      │
+│ 26      │ 'resonance'     │ 1    │ 1   │ 1   │ 0     │ 2      │ 1      │
+│ 27      │ 'heavy'         │ 3    │ 3   │ 2   │ 0     │ 2      │ 2      │
+│ 28      │ 'incendiary'    │ 5    │ 4   │ 4   │ 0     │ 0      │ 1      │
+│ 29      │ 'highHeat'      │ 5    │ 4   │ 4   │ 0     │ 0      │ 3      │
+│ 30      │ 'lowHeat'       │ 3    │ 3   │ 2   │ 0     │ 0      │ 0      │
+│ 31      │ 'accelerant'    │ 2    │ 2   │ 2   │ 0     │ 0      │ 1      │
+│ 32      │ 'ignition'      │ 2    │ 2   │ 2   │ 0     │ 0      │ 1      │
+│ 33      │ 'kindling'      │ 4    │ 4   │ 3   │ 0     │ 0      │ 1      │
+│ 34      │ 'mimic'         │ 0    │ 0   │ 0   │ 0     │ 0      │ 1      │
+│ 35      │ 'alternator'    │ 2    │ 2   │ 2   │ 0     │ 0      │ 1      │
+│ 36      │ 'bridge'        │ 1    │ 1   │ 1   │ 0     │ 0      │ 0      │
+│ 37      │ 'afterimage'    │ 1    │ 1   │ 1   │ 0     │ 0      │ 0      │
+│ 38      │ 'opening'       │ 6    │ 5   │ 5   │ 0     │ 0      │ 1      │
+│ 39      │ 'finisher'      │ 7    │ 6   │ 6   │ 0     │ 0      │ 1      │
+│ 40      │ 'core'          │ 4    │ 4   │ 3   │ 0     │ 0      │ 1      │
+│ 41      │ 'crosslink'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 42      │ 'mosaic'        │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 43      │ 'focus'         │ 6    │ 5   │ 5   │ 0     │ 0      │ 1      │
+│ 44      │ 'lightLoad'     │ 10   │ 9   │ 8   │ 0     │ 0      │ 0      │
+│ 45      │ 'mirror'        │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+└─────────┴─────────────────┴──────┴─────┴─────┴───────┴────────┴────────┘
+
+stdout | src/simulation/BalanceSimulator.test.ts > 초기 밸런스 감사 > 일반 적의 시작 거리와 체력에서 대표 탄창의 처치 시점을 비교한다
+┌─────────┬─────────────┬──────────┬───────┬────────┬───────┬────────┬──────────┐
+│ (index) │ name        │ hpDamage │ wound │ impact │ shots │ killed │ distance │
+├─────────┼─────────────┼──────────┼───────┼────────┼───────┼────────┼──────────┤
+│ 0       │ '기본'      │ 16       │ 0     │ 0      │ 4     │ false  │ 8        │
+│ 1       │ '상처 연계' │ 15       │ 6     │ 0      │ 4     │ false  │ 8        │
+│ 2       │ '반동 전환' │ 22       │ 0     │ 0      │ 4     │ true   │ 8        │
+│ 3       │ '충격 제압' │ 14       │ 0     │ 4      │ 4     │ false  │ 8        │
+│ 4       │ '이동 연계' │ 17       │ 0     │ 0      │ 4     │ false  │ 8        │
+└─────────┴─────────────┴──────────┴───────┴────────┴───────┴────────┴──────────┘
+
+ ✓ src/simulation/BalanceSimulator.test.ts (4 tests) 19ms
+ ✓ tools/ammo-export.local/baseline/src/combat/Explosion.test.ts (11 tests) 17ms
+ ✓ src/combat/WoundAmmo.test.ts (9 tests) 16ms
+ ✓ src/combat/FirepowerBreakdown.test.ts (7 tests) 13ms
+ ✓ tools/ammo-export.local/baseline/src/combat/WoundThreshold.test.ts (27 tests) 15ms
+stdout | tools/ammo-export.local/baseline/src/simulation/BalanceSimulator.test.ts > 초기 밸런스 감사 > 모든 탄약을 기본 권총의 세 거리에서 비교한다
+┌─────────┬─────────────────┬──────┬─────┬─────┬───────┬────────┬────────┐
+│ (index) │ ammo            │ near │ mid │ far │ wound │ impact │ recoil │
+├─────────┼─────────────────┼──────┼─────┼─────┼───────┼────────┼────────┤
+│ 0       │ 'ball'          │ 5    │ 4   │ 4   │ 0     │ 0      │ 0      │
+│ 1       │ 'hollowPoint'   │ 6    │ 5   │ 5   │ 0     │ 0      │ 1      │
+│ 2       │ 'lowRecoil'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 0      │
+│ 3       │ 'plusP'         │ 8    │ 7   │ 6   │ 0     │ 0      │ 3      │
+│ 4       │ 'relay'         │ 2    │ 2   │ 2   │ 0     │ 0      │ 0      │
+│ 5       │ 'frangible'     │ 4    │ 4   │ 3   │ 0     │ 0      │ 1      │
+│ 6       │ 'suppression'   │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 7       │ 'execution'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 8       │ 'kickback'      │ 2    │ 2   │ 2   │ 0     │ 0      │ 0      │
+│ 9       │ 'laceration'    │ 5    │ 4   │ 4   │ 0     │ 0      │ 1      │
+│ 10      │ 'retreat'       │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 11      │ 'advance'       │ 6    │ 5   │ 5   │ 0     │ 0      │ 2      │
+│ 12      │ 'wounding'      │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 13      │ 'serrated'      │ 2    │ 2   │ 2   │ 5     │ 0      │ 3      │
+│ 14      │ 'retreatCutter' │ 1    │ 1   │ 1   │ 2     │ 0      │ 1      │
+│ 15      │ 'rupture'       │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 16      │ 'deepCut'       │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 17      │ 'reopening'     │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 18      │ 'scar'          │ 2    │ 2   │ 2   │ 3     │ 0      │ 1      │
+│ 19      │ 'explosive'     │ 3    │ 3   │ 2   │ 0     │ 0      │ 1      │
+│ 20      │ 'highExplosive' │ 4    │ 4   │ 3   │ 0     │ 0      │ 3      │
+│ 21      │ 'stickyCharge'  │ 1    │ 1   │ 1   │ 0     │ 0      │ 2      │
+│ 22      │ 'flatNose'      │ 1    │ 1   │ 1   │ 0     │ 4      │ 1      │
+│ 23      │ 'reducedImpact' │ 1    │ 1   │ 1   │ 0     │ 2      │ 0      │
+│ 24      │ 'hammer'        │ 1    │ 1   │ 1   │ 0     │ 6      │ 3      │
+│ 25      │ 'impactRelay'   │ 1    │ 1   │ 1   │ 0     │ 1      │ 1      │
+│ 26      │ 'resonance'     │ 1    │ 1   │ 1   │ 0     │ 2      │ 1      │
+│ 27      │ 'heavy'         │ 3    │ 3   │ 2   │ 0     │ 2      │ 2      │
+│ 28      │ 'incendiary'    │ 5    │ 4   │ 4   │ 0     │ 0      │ 1      │
+│ 29      │ 'highHeat'      │ 5    │ 4   │ 4   │ 0     │ 0      │ 3      │
+│ 30      │ 'lowHeat'       │ 3    │ 3   │ 2   │ 0     │ 0      │ 0      │
+│ 31      │ 'accelerant'    │ 2    │ 2   │ 2   │ 0     │ 0      │ 1      │
+│ 32      │ 'ignition'      │ 2    │ 2   │ 2   │ 0     │ 0      │ 1      │
+│ 33      │ 'kindling'      │ 4    │ 4   │ 3   │ 0     │ 0      │ 1      │
+└─────────┴─────────────────┴──────┴─────┴─────┴───────┴────────┴────────┘
+
+stdout | tools/ammo-export.local/baseline/src/simulation/BalanceSimulator.test.ts > 초기 밸런스 감사 > 일반 적의 시작 거리와 체력에서 대표 탄창의 처치 시점을 비교한다
+┌─────────┬─────────────┬──────────┬───────┬────────┬───────┬────────┬──────────┐
+│ (index) │ name        │ hpDamage │ wound │ impact │ shots │ killed │ distance │
+├─────────┼─────────────┼──────────┼───────┼────────┼───────┼────────┼──────────┤
+│ 0       │ '기본'      │ 18       │ 0     │ 0      │ 4     │ false  │ 8        │
+│ 1       │ '상처 연계' │ 17       │ 6     │ 0      │ 4     │ false  │ 8        │
+│ 2       │ '반동 전환' │ 22       │ 0     │ 0      │ 4     │ true   │ 8        │
+│ 3       │ '충격 제압' │ 15       │ 0     │ 4      │ 4     │ false  │ 8        │
+│ 4       │ '이동 연계' │ 17       │ 0     │ 0      │ 4     │ false  │ 8        │
+└─────────┴─────────────┴──────────┴───────┴────────┴───────┴────────┴──────────┘
+
+ ✓ tools/ammo-export.local/baseline/src/simulation/BalanceSimulator.test.ts (4 tests) 15ms
+ ✓ tools/ammo-export.local/baseline/src/combat/WoundAmmo.test.ts (9 tests) 16ms
+ ✓ src/combat/RecoilPenalty.test.ts (6 tests) 12ms
+ ✓ tools/ammo-export.local/baseline/src/combat/FirepowerBreakdown.test.ts (7 tests) 11ms
+ ✓ tools/ammo-export.local/baseline/src/combat/RecoilPenalty.test.ts (6 tests) 10ms
+ ✓ src/data/gameModes.test.ts (11 tests) 6ms
+ ✓ src/data/trainingEnemy.test.ts (2 tests) 10ms
+ ✓ tools/ammo-export.local/baseline/src/entities/Player.test.ts (8 tests) 10ms
+ ✓ src/presentation/PresentationMath.test.ts (21 tests) 11ms
+ ✓ tools/ammo-export.local/baseline/src/presentation/PresentationMath.test.ts (21 tests) 10ms
+ ✓ src/ui/EnemyActionView.test.ts (3 tests) 6ms
+ ✓ tools/ammo-export.local/baseline/src/data/trainingEnemy.test.ts (2 tests) 7ms
+ ✓ src/core/GameStateMachine.test.ts (10 tests) 6ms
+ ✓ tools/ammo-export.local/baseline/src/presentation/AudioPreferences.test.ts (3 tests) 5ms
+ ✓ tools/ammo-export.local/baseline/src/core/GameStateMachine.test.ts (8 tests) 5ms
+ ✓ src/presentation/AudioPreferences.test.ts (3 tests) 5ms
+ ✓ src/core/Game.test.ts (33 tests) 1878ms
+   ✓ 탐험 런 통합 > p220는 실제 전투와 보상·이벤트·상인·최종 조우를 거쳐 탈출하고 재시작한다  506ms
+   ✓ 탐험 런 통합 > m1911는 실제 전투와 보상·이벤트·상인·최종 조우를 거쳐 탈출하고 재시작한다  458ms
+   ✓ 탐험 런 통합 > desertEagle는 실제 전투와 보상·이벤트·상인·최종 조우를 거쳐 탈출하고 재시작한다  338ms
+   ✓ 탐험 런 통합 > m500는 실제 전투와 보상·이벤트·상인·최종 조우를 거쳐 탈출하고 재시작한다  344ms
+ ✓ tools/ammo-export.local/baseline/src/presentation/ResponsiveLayout.test.ts (12 tests) 4ms
+ ✓ src/presentation/PresentationPreferences.test.ts (3 tests) 3ms
+ ✓ tools/ammo-export.local/baseline/src/combat/Magazine.test.ts (2 tests) 4ms
+ ✓ tools/ammo-export.local/baseline/src/presentation/PresentationPreferences.test.ts (3 tests) 4ms
+ ✓ src/combat/Magazine.test.ts (2 tests) 3ms
+ ✓ src/ui/PlayerDebuffView.test.ts (2 tests) 3ms
+ ✓ src/presentation/ResponsiveLayout.test.ts (12 tests) 4ms
+ ✓ tools/ammo-export.local/baseline/src/ui/PlayerDebuffView.test.ts (2 tests) 3ms
+ ✓ tools/ammo-export.local/baseline/src/presentation/presentationConfig.test.ts (2 tests) 3ms
+ ✓ src/presentation/presentationConfig.test.ts (2 tests) 2ms
+
+ Test Files  58 passed (58)
+      Tests  879 passed (879)
+   Start at  23:34:04
+   Duration  3.24s (transform 2.73s, setup 0ms, collect 9.98s, tests 3.91s, environment 11ms, prepare 12.30s)
+
+
