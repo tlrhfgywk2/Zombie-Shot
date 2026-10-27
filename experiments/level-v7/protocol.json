@@ -1,8 +1,9 @@
 {
-  "version": "level-v7-1.0",
+  "version": "level-v7-1.1-strict-basic-counterfactual",
   "baselineRevision": "85e6d228a232f148eb550781e5e3512ac73fea23",
   "exploratory": { "firstSeed": 21001, "count": 80 },
-  "holdout": { "firstSeed": 1730001, "count": 80 },
+  "holdout": { "firstSeed": 2730001, "count": 80 },
+  "retiredHoldout": { "firstSeed": 1730001, "count": 80, "reason": "v1은 첫 탄창 기본탄 처치만 제외해 안전한 기본탄 2턴 처치를 기회로 과대 집계. 원본 결과/난이도 실패 보존. 후보 튜닝 없이 정의를 엄격히 수정한 v1.1에 새 검증 시드 사용." },
   "archetypes": ["wound", "heat", "blast", "recoil", "cauterize", "concussion"],
   "strategies": ["random", "damage", "heuristic", "competent", "optimized"],
   "variants": ["nine-original-pacing", "nine-linked", "twelve-linked", "eighteen-v7"],
@@ -17,7 +18,7 @@
     "F": { "eachArchetypeMajorEncounterOpportunity": 0.7, "keepOriginalWeakEnemies": true },
     "G": { "requiresProductionAndCandidateBrowserEvidence": true, "v7ProductionParityRequired": true }
   },
-  "meaningfulOpportunity": "후반 실제 도달 상태에서 보유 탄약만 사용. 정의 시너지 실제 발동 및 교차효과 제거 반사실 대비 생존/턴수/유효피해 개선, 동일 첫 턴 표준탄만으로 확정 처치 가능한 적 제외. 기회(관측 상태의 제한 탐색)와 실제 선택 발동을 별도 집계.",
+  "meaningfulOpportunity": "후반 실제 도달 상태에서 보유 탄약만 사용. 정의 시너지 실제 발동 및 교차효과 제거 반사실 대비 생존/턴수 개선. 같은 현재 상태에서 매 턴 기본탄만 사용해 안전하게 처치 가능한 적은 전부 제외(첫 턴뿐 아니라 12턴 한도 전체 전투). 기회(관측 상태의 제한 탐색)와 실제 선택 발동을 별도 집계.",
   "midpoint": { "nine": 5, "twelve": 7, "eighteen": 9 },
   "lateStart": { "nine": 6, "twelve": 9, "eighteen": 13 },
   "independence": "동일 시드의 빌드/전략은 군집. 홀드아웃 최초 실행 후 후보 변경 금지, 변경 시 새로운 구간 선언.",

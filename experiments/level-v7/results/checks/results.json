@@ -1,0 +1,71 @@
+{
+  "node": "v24.22.1",
+  "results": {
+    "tests": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run"
+      ],
+      "status": 0,
+      "milliseconds": 3911
+    },
+    "lint": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/eslint/bin/eslint.js",
+        "."
+      ],
+      "status": 0,
+      "milliseconds": 2425
+    },
+    "typecheck": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ],
+      "status": 0,
+      "milliseconds": 1629
+    },
+    "build": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/vite/bin/vite.js",
+        "build"
+      ],
+      "status": 0,
+      "milliseconds": 1988
+    },
+    "ammo-spec": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "tools/check-ammo-spec.mjs"
+      ],
+      "status": 0,
+      "milliseconds": 1455
+    },
+    "original-v7": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "--test",
+        "simulation/model.check.mjs"
+      ],
+      "status": 0,
+      "milliseconds": 287
+    },
+    "invariants": {
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "--test",
+        "tools/level-v7/invariants.check.mjs"
+      ],
+      "status": 0,
+      "milliseconds": 243
+    },
+    "productionSourcesUnchanged": {
+      "pass": true,
+      "files": []
+    }
+  }
+}

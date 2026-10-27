@@ -1,5 +1,4 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
-import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 import { production, root } from './runtime.mjs';
 import { rng, shuffle } from '../../experiments/level-v7/random.mjs';
@@ -8,6 +7,8 @@ import { createModel as createAblation } from '../../experiments/level-v7/model-
 import { LevelSession, autoNoncombat, observe, chooseRounds, templates, activate, coherent, complete } from '../../experiments/level-v7/engine.mjs';
 import { DEFAULT_SETTINGS } from '../../experiments/level-v7/design.mjs';
 import { quantile, mean, wilson } from '../../simulation/common.mjs';
+import { assertFreshOrExactReplay } from '../../simulation/exposure.mjs';
+import { levelFingerprint } from './provenance.mjs';
 
 const protocol = JSON.parse(await readFile(new URL('experiments/level-v7/protocol.json', root)));
 const config = JSON.parse(await readFile(new URL('experiments/level-v7/v7-config.json', root)));
@@ -19,19 +20,15 @@ const variantArgs = process.argv[4]?.split(',');
 const variants = variantArgs ?? protocol.variants;
 const { firstSeed, count } = protocol[split];
 const output = new URL('experiments/level-v7/results/', root); await mkdir(output, { recursive: true });
-const files = ['experiments/level-v7/engine.mjs', 'experiments/level-v7/design.mjs', 'experiments/level-v7/protocol.json', 'experiments/level-v7/model-portable.mjs', 'experiments/level-v7/model-ablation.mjs', 'tools/level-v7/evaluate.mjs', 'package-lock.json'];
-const hash = createHash('sha256');
-for (const file of files) hash.update(file).update((await readFile(new URL(file, root), 'utf8')).replace(/\r\n/g, '\n'));
-// 실제 적 행동·무기·부착물을 포함한 의존 그래프는 원래 v7 fingerprint에도 포함된다.
-const { fingerprint } = await import('../../simulation/provenance.mjs');
-hash.update(await fingerprint(config, protocol)).update(JSON.stringify(settings));
-const fingerprintValue = hash.digest('hex');
+const { hash: fingerprintValue } = await levelFingerprint(settings);
 if (split === 'holdout') {
   if (variants.join() !== 'nine-linked') throw new Error('홀드아웃은 최종 9노드 후보 전체 전략/빌드만 평가');
   const path = new URL('holdout-registry.json', output);
   let registry = []; try { registry = JSON.parse(await readFile(path)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
-  if (registry.some(item => item.firstSeed === firstSeed && item.hash !== fingerprintValue)) throw new Error('이미 노출된 홀드아웃: 새 시드를 선언해야 함');
-  if (!registry.length) { registry.push({ firstSeed, count, hash: fingerprintValue, settings }); await writeFile(path, JSON.stringify(registry, null, 2)); }
+  assertFreshOrExactReplay(registry, { firstSeed, count, hash: fingerprintValue });
+  if (!registry.some(item => item.hash === fingerprintValue || item.portableHash === fingerprintValue)) {
+    registry.push({ firstSeed, count, hash: fingerprintValue, settings }); await writeFile(path, JSON.stringify(registry, null, 2));
+  }
 }
 
 function finishWithBasic(observation, rounds, engine, ablateEngine) {
@@ -51,6 +48,8 @@ function meaningful(observation, rounds) {
   const shot = model.resolve(rounds, observation.enemy, observation, { player: observation.player, trace: true });
   const basic = model.resolve(Array(capacity(observation, p, observation.player)).fill('ball'), observation.enemy, observation, { player: observation.player });
   if (basic.killed || !activate(observation.archetype, shot)) return false;
+  // 안전한 기본탄 2턴 처치도 성장 조합이 필요한 위협으로 과장하지 않는다.
+  if (finishWithBasic(observation, Array(capacity(observation, p, observation.player)).fill('ball'), model).won) return false;
   const actual = finishWithBasic(observation, rounds, model);
   const without = finishWithBasic(observation, rounds, ablation, observation.archetype);
   return actual.won && (!without.won || actual.turns < without.turns);
@@ -183,6 +182,6 @@ if (key('competent')) {
     G: { status: 'FAIL', reason: 'v7은 실험 페이지/시뮬레이터 전용이며 현행 실게임 탄약 계약과 의도된 차이가 있음. 브라우저 증거는 별도 보고.' },
   };
 }
-const summary = { split, settings, hash: fingerprintValue, firstSeed, count, runCount: rows.length, cells, byBuild, byActualBuild, byRole, order, gates };
+const summary = { split, protocolVersion: protocol.version, settings, hash: fingerprintValue, firstSeed, count, runCount: rows.length, cells, byBuild, byActualBuild, byRole, order, gates };
 await writeFile(new URL(`${settings.id}-${split}-summary.json`, output), JSON.stringify(summary, null, 2));
 console.log(JSON.stringify({ runCount: rows.length, gates: gates && Object.fromEntries(Object.entries(gates).map(([id, gate]) => [id, gate.status])) }));

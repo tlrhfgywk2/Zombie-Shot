@@ -11,6 +11,22 @@
       "workshopRanks": 2,
       "waves": 2,
       "ambushFraction": 0.25
+    },
+    "portableHash": "134c073eab0d43a22099f56a6e4499c4ebdae3493998a1f9e452947fabc4acd7",
+    "provenanceMigration": "지문 입력 그래프 확장과 노출 구간 중첩 검사만 수정. 수치 루프와 후보는 b4aa5ad 동치."
+  },
+  {
+    "firstSeed": 2730001,
+    "count": 80,
+    "hash": "32e65ea5b1e78cc07fe0806c5552ddce9a843891347df425514d8b8322465544",
+    "settings": {
+      "id": "candidate-4",
+      "bossDistance": 3.5,
+      "guard": "normal",
+      "dangerDistance": 3.2,
+      "workshopRanks": 2,
+      "waves": 2,
+      "ambushFraction": 0.25
     }
   }
 ]
