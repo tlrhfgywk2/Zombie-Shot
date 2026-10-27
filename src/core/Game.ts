@@ -32,6 +32,7 @@ export class Game {
   private boostedOpening = false;
   private cylinderDecided = false;
   private pendingAttachment?: AttachmentId;
+  private quickMode = true;
   private selectedMode: GameMode = 'free';
   private exploration?: ExplorationRun;
   private caveScreen: 'entry' | 'junction' | 'encounter' | 'reward' = 'entry';
@@ -40,7 +41,7 @@ export class Game {
 
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
-      onChooseMode: mode => this.chooseMode(mode),
+      onChooseMode: (mode, quickMode) => this.chooseMode(mode, quickMode),
       onReturnToMenu: () => this.returnToMenu(),
       onChooseWeapon: id => this.chooseWeapon(id),
       onCylinderDecision: spin => this.chooseCylinder(spin),
@@ -71,9 +72,10 @@ export class Game {
     this.ui.setLocked(true);
   }
 
-  private chooseMode(mode: GameMode): void {
+  private chooseMode(mode: GameMode, quickMode = true): void {
     if (this.state.phase !== 'MODE_SELECTION') return;
     this.selectedMode = mode;
+    this.quickMode = quickMode;
     this.ui.setGameMode(mode);
     this.state.transition('WEAPON_SELECTION');
     this.ui.showWeaponSelection(true, mode);
@@ -192,7 +194,7 @@ export class Game {
     this.ui.setLocked(true);
     this.ui.renderPreview(sequence);
     this.ui.setPhase('LOADING');
-    await this.presentation.animateLoading(rounds);
+    await this.presentation.animateLoading(rounds, this.quickMode);
     if (this.presentation.isDestroyed()) return;
     if (this.player.weapon.trait === 'cylinder') {
       this.state.transition('CYLINDER_CHOICE');
@@ -213,19 +215,24 @@ export class Game {
     const sequence = this.resolver.resolveSequence(committedMagazine.rounds, this.zombie.snapshot(), { ...this.combatContext(), committedMagazine });
     this.state.transition('FIRING');
     this.ui.setPhase('FIRING');
-    for (const shot of sequence.shots) {
-      if (shot.shotDistance !== shot.before.distance) await this.presentation.animateDistanceChange(shot.shotDistance);
-      this.ui.showShot(shot);
-      await this.presentation.animateShot(shot.ammoType, shot.explosiveConsumed);
-      this.ui.showRecoilAfterShot(shot.breakdown.recoilAfter);
-      this.player.fireRound(shot);
-      this.zombie.applyState(shot.after);
-      this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
-      const hasNextShot = shot !== sequence.shots.at(-1);
-      if (shot.after.distance !== shot.shotDistance) await this.presentation.animateDistanceChange(shot.after.distance);
-      this.syncEnemy();
-      if (hasNextShot) await this.presentation.animateReacquisition(shot.breakdown.recoilGenerated >= 3,
-        getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
+    this.presentation.setQuickFiring(this.quickMode);
+    try {
+      for (const shot of sequence.shots) {
+        if (shot.shotDistance !== shot.before.distance) await this.presentation.animateDistanceChange(shot.shotDistance);
+        this.ui.showShot(shot);
+        await this.presentation.animateShot(shot.ammoType, shot.explosiveConsumed);
+        this.ui.showRecoilAfterShot(shot.breakdown.recoilAfter);
+        this.player.fireRound(shot);
+        this.zombie.applyState(shot.after);
+        this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
+        const hasNextShot = shot !== sequence.shots.at(-1);
+        if (shot.after.distance !== shot.shotDistance) await this.presentation.animateDistanceChange(shot.after.distance);
+        this.syncEnemy();
+        if (hasNextShot) await this.presentation.animateReacquisition(shot.breakdown.recoilGenerated >= 3,
+          getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
+      }
+    } finally {
+      this.presentation.setQuickFiring(false);
     }
     await this.presentation.animateMagazineDiscard();
     this.player.magazine.clear();
