@@ -1,0 +1,68 @@
+{
+  "node": "v24.22.1",
+  "results": {
+    "tests": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run"
+      ]
+    },
+    "lint": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/eslint/bin/eslint.js",
+        "."
+      ]
+    },
+    "typecheck": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "-b"
+      ]
+    },
+    "build": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "node_modules/vite/bin/vite.js",
+        "build"
+      ]
+    },
+    "ammo": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "tools/check-ammo-spec.mjs"
+      ]
+    },
+    "v7": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "--test",
+        "simulation/model.check.mjs"
+      ]
+    },
+    "contracts": {
+      "status": 0,
+      "command": [
+        "C:\\Users\\tlrhf\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\node\\bin\\node.exe",
+        "--test",
+        "tools/hp-balance/contracts.check.mjs"
+      ]
+    },
+    "frozenEvaluation": {
+      "status": 0,
+      "hash": "03c103952b4fb6e266679ff611872f0782a28b10db262db95ce9aabaa92d7a59"
+    },
+    "hpOnlyRules": {
+      "status": 0,
+      "changed": ""
+    }
+  }
+}

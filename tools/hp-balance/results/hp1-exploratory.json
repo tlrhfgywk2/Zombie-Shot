@@ -3,7 +3,7 @@
   "split": "exploratory",
   "firstSeed": 5110001,
   "count": 80,
-  "hash": "bd83515f463225d8c1449c84c04e1a6e30992f23b00d66374a56d97e53dd7868",
+  "hash": "912012b8bbebf1cd53090f112746ed085a88485628f27ccda4f66ab56345a681",
   "sources": [
     "experiments/level-v7/candidate-6.json",
     "experiments/level-v7/design.mjs",
@@ -22,6 +22,7 @@
     "src/combat/Magazine.ts",
     "src/combat/RecoilPenalty.ts",
     "src/combat/WeaponTraits.ts",
+    "src/core/Game.ts",
     "src/data/ammoDefinitions.ts",
     "src/data/attachmentDefinitions.ts",
     "src/data/enemyActionDefinitions.ts",
@@ -31,14 +32,17 @@
     "src/data/trainingEnemy.ts",
     "src/data/weaponDefinitions.ts",
     "src/entities/Player.ts",
+    "src/entities/Zombie.ts",
     "src/exploration/ExplorationRun.ts",
     "src/progression/AmmoRewards.ts",
     "src/progression/AttachmentRewards.ts",
     "tools/hp-balance/PROTOCOL.md",
     "tools/hp-balance/bridge.ts",
+    "tools/hp-balance/campaign.mjs",
     "tools/hp-balance/combat.mjs",
     "tools/hp-balance/evaluate.mjs",
     "tools/hp-balance/inventory.mjs",
+    "tools/hp-balance/provenance.mjs",
     "tools/hp-balance/runtime.mjs"
   ],
   "candidate": {
@@ -155,7 +159,7 @@
       }
     }
   },
-  "observations": 9750,
+  "observations": 10724,
   "acquisition": [
     {
       "seed": 5110001,
@@ -9336,6 +9340,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "exploration/entry/basic/search/pure": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "exploration/entry/basic/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "exploration/early/basic/heuristic/pure": {
       "n": 80,
       "wins": 80,
@@ -9416,6 +9460,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "exploration/early/basic/search/pure": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7.6875,
+      "winningTurns": 2.25,
+      "enemyActions": 1.25,
+      "special": 0.3125,
+      "activationRate": 0,
+      "damage": 496,
+      "potential": 520,
+      "utilization": 0.9538461538461539,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "exploration/early/basic/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7.6875,
+      "winningTurns": 2.25,
+      "enemyActions": 1.25,
+      "special": 0.3125,
+      "activationRate": 0,
+      "damage": 496,
+      "potential": 520,
+      "utilization": 0.9538461538461539,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "exploration/middle/basic/heuristic/pure": {
       "n": 121,
       "wins": 121,
@@ -9424,15 +9508,15 @@
         1,
         1
       ],
-      "winningShots": 16.173553719008265,
-      "winningTurns": 4.2727272727272725,
-      "enemyActions": 3.272727272727273,
-      "special": 1.7603305785123966,
+      "winningShots": 16.074380165289256,
+      "winningTurns": 4.239669421487603,
+      "enemyActions": 3.239669421487603,
+      "special": 2.396694214876033,
       "activationRate": 0,
       "damage": 8887,
-      "potential": 9094,
-      "utilization": 0.9772377391686826,
-      "overkill": 207,
+      "potential": 9111,
+      "utilization": 0.9754143343211502,
+      "overkill": 224,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -9444,15 +9528,15 @@
         1,
         1
       ],
-      "winningShots": 17.65289256198347,
-      "winningTurns": 4.7190082644628095,
-      "enemyActions": 3.71900826446281,
-      "special": 3.43801652892562,
+      "winningShots": 17.231404958677686,
+      "winningTurns": 4.586776859504132,
+      "enemyActions": 3.5867768595041323,
+      "special": 3.7768595041322315,
       "activationRate": 0,
       "damage": 8887,
-      "potential": 9071,
-      "utilization": 0.9797155771138794,
-      "overkill": 184,
+      "potential": 9067,
+      "utilization": 0.9801477886842396,
+      "overkill": 180,
       "extraTurnLosses": 0,
       "maxWinningTurns": 7
     },
@@ -9464,15 +9548,15 @@
         1,
         1
       ],
-      "winningShots": 16.24793388429752,
-      "winningTurns": 4.289256198347108,
-      "enemyActions": 3.2892561983471076,
-      "special": 1.4710743801652892,
+      "winningShots": 16.198347107438018,
+      "winningTurns": 4.2809917355371905,
+      "enemyActions": 3.28099173553719,
+      "special": 1.9008264462809918,
       "activationRate": 0,
       "damage": 8887,
-      "potential": 9104,
-      "utilization": 0.976164323374341,
-      "overkill": 217,
+      "potential": 9126,
+      "utilization": 0.9738110891957046,
+      "overkill": 239,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -9484,96 +9568,176 @@
         1,
         1
       ],
-      "winningShots": 16.24793388429752,
-      "winningTurns": 4.289256198347108,
-      "enemyActions": 3.2892561983471076,
-      "special": 1.4710743801652892,
+      "winningShots": 16.198347107438018,
+      "winningTurns": 4.2809917355371905,
+      "enemyActions": 3.28099173553719,
+      "special": 1.9008264462809918,
       "activationRate": 0,
       "damage": 8887,
-      "potential": 9104,
-      "utilization": 0.976164323374341,
-      "overkill": 217,
+      "potential": 9126,
+      "utilization": 0.9738110891957046,
+      "overkill": 239,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 6
+    },
+    "exploration/middle/basic/search/pure": {
+      "n": 22,
+      "wins": 22,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 16,
+      "winningTurns": 4.363636363636363,
+      "enemyActions": 3.3636363636363638,
+      "special": 1.7727272727272727,
+      "activationRate": 0,
+      "damage": 1599,
+      "potential": 1643,
+      "utilization": 0.9732197200243458,
+      "overkill": 44,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 6
+    },
+    "exploration/middle/basic/search/utility": {
+      "n": 22,
+      "wins": 22,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 16,
+      "winningTurns": 4.363636363636363,
+      "enemyActions": 3.3636363636363638,
+      "special": 1.7727272727272727,
+      "activationRate": 0,
+      "damage": 1599,
+      "potential": 1643,
+      "utilization": 0.9732197200243458,
+      "overkill": 44,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
     "exploration/late/basic/heuristic/pure": {
       "n": 80,
-      "wins": 24,
-      "winRate": 0.3,
+      "wins": 30,
+      "winRate": 0.375,
       "ci95": [
-        0.2125,
-        0.4
+        0.275,
+        0.4875
       ],
-      "winningShots": 20,
+      "winningShots": 19.966666666666665,
       "winningTurns": 5,
-      "enemyActions": 3.6,
-      "special": 2.05,
+      "enemyActions": 3.525,
+      "special": 2.7625,
       "activationRate": 0,
-      "damage": 5940,
-      "potential": 5956,
-      "utilization": 0.9973136333109469,
-      "overkill": 16,
-      "extraTurnLosses": 12,
+      "damage": 5973,
+      "potential": 6008,
+      "utilization": 0.9941744340878829,
+      "overkill": 35,
+      "extraTurnLosses": 6,
       "maxWinningTurns": 5
     },
     "exploration/late/basic/heuristic/utility": {
       "n": 80,
-      "wins": 31,
-      "winRate": 0.3875,
+      "wins": 24,
+      "winRate": 0.3,
       "ci95": [
-        0.2996875,
-        0.5125
+        0.2,
+        0.4
       ],
-      "winningShots": 22.387096774193548,
-      "winningTurns": 6,
-      "enemyActions": 3.9,
-      "special": 3.75,
+      "winningShots": 22,
+      "winningTurns": 5.916666666666667,
+      "enemyActions": 3.875,
+      "special": 4.0875,
       "activationRate": 0,
-      "damage": 5662,
-      "potential": 5708,
-      "utilization": 0.9919411352487737,
-      "overkill": 46,
-      "extraTurnLosses": 5,
+      "damage": 5752,
+      "potential": 5795,
+      "utilization": 0.9925798101811907,
+      "overkill": 43,
+      "extraTurnLosses": 12,
       "maxWinningTurns": 6
     },
     "exploration/late/basic/competent/pure": {
       "n": 80,
-      "wins": 24,
-      "winRate": 0.3,
+      "wins": 30,
+      "winRate": 0.375,
       "ci95": [
-        0.2125,
-        0.4
+        0.275,
+        0.4875
       ],
       "winningShots": 20,
       "winningTurns": 5,
-      "enemyActions": 3.6,
-      "special": 2.05,
+      "enemyActions": 3.525,
+      "special": 2.6875,
       "activationRate": 0,
-      "damage": 5940,
-      "potential": 5956,
-      "utilization": 0.9973136333109469,
-      "overkill": 16,
-      "extraTurnLosses": 12,
+      "damage": 5976,
+      "potential": 6007,
+      "utilization": 0.9948393540868986,
+      "overkill": 31,
+      "extraTurnLosses": 6,
       "maxWinningTurns": 5
     },
     "exploration/late/basic/competent/utility": {
       "n": 80,
-      "wins": 24,
-      "winRate": 0.3,
+      "wins": 30,
+      "winRate": 0.375,
       "ci95": [
-        0.2125,
-        0.4
+        0.275,
+        0.4875
       ],
       "winningShots": 20,
       "winningTurns": 5,
-      "enemyActions": 3.6,
-      "special": 2.05,
+      "enemyActions": 3.525,
+      "special": 2.6875,
       "activationRate": 0,
-      "damage": 5940,
-      "potential": 5956,
-      "utilization": 0.9973136333109469,
-      "overkill": 16,
-      "extraTurnLosses": 12,
+      "damage": 5976,
+      "potential": 6007,
+      "utilization": 0.9948393540868986,
+      "overkill": 31,
+      "extraTurnLosses": 6,
+      "maxWinningTurns": 5
+    },
+    "exploration/late/basic/search/pure": {
+      "n": 16,
+      "wins": 4,
+      "winRate": 0.25,
+      "ci95": [
+        0.0625,
+        0.4375
+      ],
+      "winningShots": 20,
+      "winningTurns": 5,
+      "enemyActions": 3.5,
+      "special": 2.5,
+      "activationRate": 0,
+      "damage": 1157,
+      "potential": 1160,
+      "utilization": 0.9974137931034482,
+      "overkill": 3,
+      "extraTurnLosses": 2,
+      "maxWinningTurns": 5
+    },
+    "exploration/late/basic/search/utility": {
+      "n": 16,
+      "wins": 4,
+      "winRate": 0.25,
+      "ci95": [
+        0.0625,
+        0.4375
+      ],
+      "winningShots": 20,
+      "winningTurns": 5,
+      "enemyActions": 3.5,
+      "special": 2.5,
+      "activationRate": 0,
+      "damage": 1157,
+      "potential": 1160,
+      "utilization": 0.9974137931034482,
+      "overkill": 3,
+      "extraTurnLosses": 2,
       "maxWinningTurns": 5
     },
     "exploration/entry/wound/heuristic/utility": {
@@ -9613,6 +9777,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "exploration/entry/wound/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -9656,6 +9840,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "exploration/early/wound/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7.5625,
+      "winningTurns": 2.25,
+      "enemyActions": 1.25,
+      "special": 0.375,
+      "activationRate": 0,
+      "damage": 496,
+      "potential": 514,
+      "utilization": 0.9649805447470817,
+      "overkill": 18,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "exploration/middle/wound/heuristic/utility": {
       "n": 121,
       "wins": 121,
@@ -9664,17 +9868,17 @@
         1,
         1
       ],
-      "winningShots": 17.96694214876033,
-      "winningTurns": 4.8347107438016526,
-      "enemyActions": 3.834710743801653,
-      "special": 4.462809917355372,
-      "activationRate": 0.04132231404958678,
+      "winningShots": 17.66115702479339,
+      "winningTurns": 4.75206611570248,
+      "enemyActions": 3.7520661157024793,
+      "special": 5.041322314049586,
+      "activationRate": 0.15702479338842976,
       "damage": 8887,
-      "potential": 9108,
-      "utilization": 0.9757356170399649,
-      "overkill": 221,
+      "potential": 9132,
+      "utilization": 0.9731712658782304,
+      "overkill": 245,
       "extraTurnLosses": 0,
-      "maxWinningTurns": 7
+      "maxWinningTurns": 8
     },
     "exploration/middle/wound/competent/utility": {
       "n": 121,
@@ -9684,56 +9888,96 @@
         1,
         1
       ],
-      "winningShots": 16.132231404958677,
-      "winningTurns": 4.2727272727272725,
-      "enemyActions": 3.272727272727273,
-      "special": 1.4545454545454546,
-      "activationRate": 0.01652892561983471,
+      "winningShots": 15.933884297520661,
+      "winningTurns": 4.256198347107438,
+      "enemyActions": 3.256198347107438,
+      "special": 1.7520661157024793,
+      "activationRate": 0.0743801652892562,
       "damage": 8887,
-      "potential": 9130,
-      "utilization": 0.9733844468784227,
-      "overkill": 243,
+      "potential": 9144,
+      "utilization": 0.9718941382327209,
+      "overkill": 257,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 6
+    },
+    "exploration/middle/wound/search/utility": {
+      "n": 22,
+      "wins": 22,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 15.545454545454545,
+      "winningTurns": 4.181818181818182,
+      "enemyActions": 3.1818181818181817,
+      "special": 2.090909090909091,
+      "activationRate": 0.09090909090909091,
+      "damage": 1599,
+      "potential": 1640,
+      "utilization": 0.975,
+      "overkill": 41,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
     "exploration/late/wound/heuristic/utility": {
       "n": 80,
-      "wins": 24,
-      "winRate": 0.3,
+      "wins": 22,
+      "winRate": 0.275,
       "ci95": [
-        0.2,
-        0.4125
+        0.1746875,
+        0.375
       ],
-      "winningShots": 22.75,
-      "winningTurns": 6.041666666666667,
-      "enemyActions": 3.9125,
-      "special": 4.5375,
-      "activationRate": 0.1125,
-      "damage": 5698,
-      "potential": 5734,
-      "utilization": 0.9937216602720614,
+      "winningShots": 22.272727272727273,
+      "winningTurns": 5.863636363636363,
+      "enemyActions": 3.8625,
+      "special": 4.9,
+      "activationRate": 0.2125,
+      "damage": 5799,
+      "potential": 5835,
+      "utilization": 0.9938303341902314,
       "overkill": 36,
-      "extraTurnLosses": 12,
+      "extraTurnLosses": 15,
       "maxWinningTurns": 7
     },
     "exploration/late/wound/competent/utility": {
       "n": 80,
-      "wins": 28,
-      "winRate": 0.35,
+      "wins": 34,
+      "winRate": 0.425,
       "ci95": [
-        0.25,
-        0.4625
+        0.3125,
+        0.5375
       ],
-      "winningShots": 20.107142857142858,
-      "winningTurns": 5.214285714285714,
-      "enemyActions": 3.925,
-      "special": 3.0875,
-      "activationRate": 0.0375,
-      "damage": 6305,
-      "potential": 6352,
-      "utilization": 0.9926007556675063,
-      "overkill": 47,
-      "extraTurnLosses": 26,
+      "winningShots": 20.08823529411765,
+      "winningTurns": 5.205882352941177,
+      "enemyActions": 4.0125,
+      "special": 3.6125,
+      "activationRate": 0.1125,
+      "damage": 6545,
+      "potential": 6602,
+      "utilization": 0.9913662526507119,
+      "overkill": 57,
+      "extraTurnLosses": 28,
+      "maxWinningTurns": 6
+    },
+    "exploration/late/wound/search/utility": {
+      "n": 16,
+      "wins": 5,
+      "winRate": 0.3125,
+      "ci95": [
+        0.125,
+        0.5625
+      ],
+      "winningShots": 20.4,
+      "winningTurns": 5.2,
+      "enemyActions": 3.8125,
+      "special": 3.8125,
+      "activationRate": 0.0625,
+      "damage": 1251,
+      "potential": 1256,
+      "utilization": 0.9960191082802548,
+      "overkill": 5,
+      "extraTurnLosses": 5,
       "maxWinningTurns": 6
     },
     "v7/entry/basic/heuristic/pure": {
@@ -9813,6 +10057,46 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/basic/search/pure": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/basic/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -9896,6 +10180,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/early/basic/search/pure": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.75,
+      "winningTurns": 2.125,
+      "enemyActions": 1.125,
+      "special": 0.125,
+      "activationRate": 0,
+      "damage": 454,
+      "potential": 506,
+      "utilization": 0.8972332015810277,
+      "overkill": 52,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/early/basic/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.75,
+      "winningTurns": 2.125,
+      "enemyActions": 1.125,
+      "special": 0.375,
+      "activationRate": 0,
+      "damage": 454,
+      "potential": 500,
+      "utilization": 0.908,
+      "overkill": 46,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/middle/basic/heuristic/pure": {
       "n": 160,
       "wins": 100,
@@ -9974,6 +10298,46 @@
       "utilization": 0.9857957387216165,
       "overkill": 142,
       "extraTurnLosses": 44,
+      "maxWinningTurns": 5
+    },
+    "v7/middle/basic/search/pure": {
+      "n": 32,
+      "wins": 24,
+      "winRate": 0.75,
+      "ci95": [
+        0.59375,
+        0.90625
+      ],
+      "winningShots": 12.916666666666666,
+      "winningTurns": 3.5,
+      "enemyActions": 2.4375,
+      "special": 1.1875,
+      "activationRate": 0,
+      "damage": 1840,
+      "potential": 1886,
+      "utilization": 0.975609756097561,
+      "overkill": 46,
+      "extraTurnLosses": 2,
+      "maxWinningTurns": 5
+    },
+    "v7/middle/basic/search/utility": {
+      "n": 32,
+      "wins": 24,
+      "winRate": 0.75,
+      "ci95": [
+        0.59375,
+        0.90625
+      ],
+      "winningShots": 13.375,
+      "winningTurns": 3.7916666666666665,
+      "enemyActions": 2.8125,
+      "special": 2.5625,
+      "activationRate": 0,
+      "damage": 1929,
+      "potential": 1969,
+      "utilization": 0.9796851193499239,
+      "overkill": 40,
+      "extraTurnLosses": 7,
       "maxWinningTurns": 5
     },
     "v7/late/basic/heuristic/pure": {
@@ -10056,6 +10420,46 @@
       "extraTurnLosses": 39,
       "maxWinningTurns": 3
     },
+    "v7/late/basic/search/pure": {
+      "n": 30,
+      "wins": 5,
+      "winRate": 0.16666666666666666,
+      "ci95": [
+        0.03125,
+        0.3125
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1.7666666666666666,
+      "special": 2.3333333333333335,
+      "activationRate": 0,
+      "damage": 1590,
+      "potential": 1598,
+      "utilization": 0.9949937421777222,
+      "overkill": 8,
+      "extraTurnLosses": 8,
+      "maxWinningTurns": 2
+    },
+    "v7/late/basic/search/utility": {
+      "n": 30,
+      "wins": 8,
+      "winRate": 0.26666666666666666,
+      "ci95": [
+        0.12421875000000004,
+        0.40625
+      ],
+      "winningShots": 10.5,
+      "winningTurns": 2.625,
+      "enemyActions": 2.2666666666666666,
+      "special": 3.6,
+      "activationRate": 0,
+      "damage": 1917,
+      "potential": 1928,
+      "utilization": 0.9942946058091287,
+      "overkill": 11,
+      "extraTurnLosses": 15,
+      "maxWinningTurns": 4
+    },
     "v7/entry/wound/heuristic/utility": {
       "n": 80,
       "wins": 80,
@@ -10093,6 +10497,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/wound/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -10136,6 +10560,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/wound/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.5,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0.25,
+      "activationRate": 0.125,
+      "damage": 454,
+      "potential": 502,
+      "utilization": 0.9043824701195219,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/wound/heuristic/utility": {
       "n": 160,
       "wins": 146,
@@ -10174,6 +10618,26 @@
       "utilization": 0.9692083447207798,
       "overkill": 338,
       "extraTurnLosses": 6,
+      "maxWinningTurns": 4
+    },
+    "v7/middle/wound/search/utility": {
+      "n": 32,
+      "wins": 31,
+      "winRate": 0.96875,
+      "ci95": [
+        0.90625,
+        1
+      ],
+      "winningShots": 9.064516129032258,
+      "winningTurns": 2.4193548387096775,
+      "enemyActions": 1.46875,
+      "special": 2.625,
+      "activationRate": 0.71875,
+      "damage": 2011,
+      "potential": 2062,
+      "utilization": 0.975266731328807,
+      "overkill": 51,
+      "extraTurnLosses": 1,
       "maxWinningTurns": 4
     },
     "v7/late/wound/heuristic/utility": {
@@ -10216,6 +10680,26 @@
       "extraTurnLosses": 37,
       "maxWinningTurns": 4
     },
+    "v7/late/wound/search/utility": {
+      "n": 32,
+      "wins": 28,
+      "winRate": 0.875,
+      "ci95": [
+        0.78125,
+        0.96875
+      ],
+      "winningShots": 5.321428571428571,
+      "winningTurns": 1.3214285714285714,
+      "enemyActions": 0.5625,
+      "special": 4,
+      "activationRate": 0.78125,
+      "damage": 2414,
+      "potential": 2615,
+      "utilization": 0.9231357552581262,
+      "overkill": 201,
+      "extraTurnLosses": 4,
+      "maxWinningTurns": 3
+    },
     "v7/entry/heat/heuristic/utility": {
       "n": 80,
       "wins": 80,
@@ -10253,6 +10737,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/heat/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -10296,6 +10800,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/heat/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.3125,
+      "winningTurns": 1.9375,
+      "enemyActions": 0.9375,
+      "special": 0.3125,
+      "activationRate": 0.125,
+      "damage": 454,
+      "potential": 502,
+      "utilization": 0.9043824701195219,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/heat/heuristic/utility": {
       "n": 160,
       "wins": 160,
@@ -10333,6 +10857,26 @@
       "potential": 10860,
       "utilization": 0.9815837937384899,
       "overkill": 200,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/middle/heat/search/utility": {
+      "n": 32,
+      "wins": 32,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.09375,
+      "winningTurns": 1.71875,
+      "enemyActions": 0.71875,
+      "special": 2.40625,
+      "activationRate": 0.71875,
+      "damage": 2012,
+      "potential": 2096,
+      "utilization": 0.9599236641221374,
+      "overkill": 84,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -10376,6 +10920,26 @@
       "extraTurnLosses": 16,
       "maxWinningTurns": 4
     },
+    "v7/late/heat/search/utility": {
+      "n": 32,
+      "wins": 28,
+      "winRate": 0.875,
+      "ci95": [
+        0.75,
+        0.96875
+      ],
+      "winningShots": 3.607142857142857,
+      "winningTurns": 1.1071428571428572,
+      "enemyActions": 0.40625,
+      "special": 3,
+      "activationRate": 0.84375,
+      "damage": 2369,
+      "potential": 2804,
+      "utilization": 0.8448644793152639,
+      "overkill": 435,
+      "extraTurnLosses": 3,
+      "maxWinningTurns": 3
+    },
     "v7/entry/blast/heuristic/utility": {
       "n": 80,
       "wins": 80,
@@ -10413,6 +10977,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/blast/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -10456,6 +11040,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/blast/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.25,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0.375,
+      "activationRate": 0.125,
+      "damage": 454,
+      "potential": 502,
+      "utilization": 0.9043824701195219,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/blast/heuristic/utility": {
       "n": 160,
       "wins": 159,
@@ -10493,6 +11097,26 @@
       "potential": 11001,
       "utilization": 0.9690028179256431,
       "overkill": 341,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/middle/blast/search/utility": {
+      "n": 32,
+      "wins": 32,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7.84375,
+      "winningTurns": 2.125,
+      "enemyActions": 1.125,
+      "special": 2.34375,
+      "activationRate": 0.71875,
+      "damage": 2012,
+      "potential": 2078,
+      "utilization": 0.9682386910490857,
+      "overkill": 66,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -10536,6 +11160,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/late/blast/search/utility": {
+      "n": 32,
+      "wins": 32,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.1875,
+      "winningTurns": 1.40625,
+      "enemyActions": 0.40625,
+      "special": 2.96875,
+      "activationRate": 1,
+      "damage": 2442,
+      "potential": 2501,
+      "utilization": 0.9764094362255098,
+      "overkill": 59,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/entry/recoil/heuristic/utility": {
       "n": 80,
       "wins": 80,
@@ -10573,6 +11217,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/recoil/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -10616,6 +11280,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/recoil/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.5,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0.25,
+      "activationRate": 0.0625,
+      "damage": 454,
+      "potential": 501,
+      "utilization": 0.906187624750499,
+      "overkill": 47,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/recoil/heuristic/utility": {
       "n": 160,
       "wins": 129,
@@ -10654,6 +11338,26 @@
       "utilization": 0.9788041466123658,
       "overkill": 229,
       "extraTurnLosses": 11,
+      "maxWinningTurns": 4
+    },
+    "v7/middle/recoil/search/utility": {
+      "n": 32,
+      "wins": 30,
+      "winRate": 0.9375,
+      "ci95": [
+        0.84375,
+        1
+      ],
+      "winningShots": 10.033333333333333,
+      "winningTurns": 2.566666666666667,
+      "enemyActions": 1.59375,
+      "special": 3.125,
+      "activationRate": 0.71875,
+      "damage": 2004,
+      "potential": 2059,
+      "utilization": 0.9732880038853813,
+      "overkill": 55,
+      "extraTurnLosses": 2,
       "maxWinningTurns": 4
     },
     "v7/late/recoil/heuristic/utility": {
@@ -10696,6 +11400,26 @@
       "extraTurnLosses": 44,
       "maxWinningTurns": 4
     },
+    "v7/late/recoil/search/utility": {
+      "n": 32,
+      "wins": 29,
+      "winRate": 0.90625,
+      "ci95": [
+        0.8125,
+        1
+      ],
+      "winningShots": 6.896551724137931,
+      "winningTurns": 1.8275862068965518,
+      "enemyActions": 0.90625,
+      "special": 4.21875,
+      "activationRate": 0.90625,
+      "damage": 2414,
+      "potential": 2495,
+      "utilization": 0.9675350701402805,
+      "overkill": 81,
+      "extraTurnLosses": 3,
+      "maxWinningTurns": 3
+    },
     "v7/entry/cauterize/heuristic/utility": {
       "n": 80,
       "wins": 80,
@@ -10733,6 +11457,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/cauterize/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -10776,6 +11520,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/early/cauterize/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.75,
+      "winningTurns": 2.125,
+      "enemyActions": 1.125,
+      "special": 0.375,
+      "activationRate": 0,
+      "damage": 454,
+      "potential": 500,
+      "utilization": 0.908,
+      "overkill": 46,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/middle/cauterize/heuristic/utility": {
       "n": 160,
       "wins": 158,
@@ -10813,6 +11577,26 @@
       "potential": 10977,
       "utilization": 0.971121435729252,
       "overkill": 317,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
+    "v7/middle/cauterize/search/utility": {
+      "n": 32,
+      "wins": 32,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.84375,
+      "winningTurns": 1.9375,
+      "enemyActions": 0.9375,
+      "special": 2.875,
+      "activationRate": 0.71875,
+      "damage": 2012,
+      "potential": 2130,
+      "utilization": 0.9446009389671362,
+      "overkill": 118,
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
@@ -10856,6 +11640,26 @@
       "extraTurnLosses": 24,
       "maxWinningTurns": 3
     },
+    "v7/late/cauterize/search/utility": {
+      "n": 32,
+      "wins": 26,
+      "winRate": 0.8125,
+      "ci95": [
+        0.6875,
+        0.90625
+      ],
+      "winningShots": 5.230769230769231,
+      "winningTurns": 1.2307692307692308,
+      "enemyActions": 0.59375,
+      "special": 3.71875,
+      "activationRate": 0.75,
+      "damage": 2349,
+      "potential": 2795,
+      "utilization": 0.8404293381037568,
+      "overkill": 446,
+      "extraTurnLosses": 5,
+      "maxWinningTurns": 3
+    },
     "v7/entry/concussion/heuristic/utility": {
       "n": 80,
       "wins": 80,
@@ -10893,6 +11697,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/concussion/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -10936,6 +11760,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/concussion/search/utility": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.3125,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0.3125,
+      "activationRate": 0,
+      "damage": 454,
+      "potential": 500,
+      "utilization": 0.908,
+      "overkill": 46,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/concussion/heuristic/utility": {
       "n": 160,
       "wins": 160,
@@ -10976,6 +11820,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/concussion/search/utility": {
+      "n": 32,
+      "wins": 32,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.09375,
+      "winningTurns": 1.3125,
+      "enemyActions": 0.3125,
+      "special": 2.75,
+      "activationRate": 0.71875,
+      "damage": 2012,
+      "potential": 2239,
+      "utilization": 0.8986154533273782,
+      "overkill": 227,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/concussion/heuristic/utility": {
       "n": 160,
       "wins": 155,
@@ -11014,6 +11878,26 @@
       "utilization": 0.917129977460556,
       "overkill": 1103,
       "extraTurnLosses": 2,
+      "maxWinningTurns": 4
+    },
+    "v7/late/concussion/search/utility": {
+      "n": 32,
+      "wins": 32,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.75,
+      "winningTurns": 1.1875,
+      "enemyActions": 0.1875,
+      "special": 3,
+      "activationRate": 0.9375,
+      "damage": 2442,
+      "potential": 2527,
+      "utilization": 0.9663632766125841,
+      "overkill": 85,
+      "extraTurnLosses": 0,
       "maxWinningTurns": 4
     }
   },
@@ -11098,6 +11982,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "exploration/entry/basic/search/pure/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "exploration/entry/basic/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "exploration/early/basic/heuristic/pure/normal/8": {
       "n": 43,
       "wins": 43,
@@ -11178,6 +12102,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "exploration/early/basic/search/pure/normal/8": {
+      "n": 12,
+      "wins": 12,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 336,
+      "potential": 348,
+      "utilization": 0.9655172413793104,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "exploration/early/basic/search/utility/normal/8": {
+      "n": 12,
+      "wins": 12,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 336,
+      "potential": 348,
+      "utilization": 0.9655172413793104,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "exploration/middle/basic/heuristic/pure/brute/9": {
       "n": 47,
       "wins": 47,
@@ -11186,15 +12150,15 @@
         1,
         1
       ],
-      "winningShots": 17.106382978723403,
+      "winningShots": 17.02127659574468,
       "winningTurns": 4.702127659574468,
       "enemyActions": 3.702127659574468,
-      "special": 1.7446808510638299,
+      "special": 2.702127659574468,
       "activationRate": 0,
       "damage": 3658,
-      "potential": 3726,
-      "utilization": 0.9817498658078369,
-      "overkill": 68,
+      "potential": 3751,
+      "utilization": 0.9752066115702479,
+      "overkill": 93,
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
@@ -11206,15 +12170,15 @@
         1,
         1
       ],
-      "winningShots": 18.93617021276596,
-      "winningTurns": 4.957446808510638,
-      "enemyActions": 3.9574468085106385,
-      "special": 3.702127659574468,
+      "winningShots": 18.382978723404257,
+      "winningTurns": 4.872340425531915,
+      "enemyActions": 3.872340425531915,
+      "special": 4.276595744680851,
       "activationRate": 0,
       "damage": 3658,
-      "potential": 3730,
-      "utilization": 0.9806970509383378,
-      "overkill": 72,
+      "potential": 3739,
+      "utilization": 0.9783364535972185,
+      "overkill": 81,
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
@@ -11226,15 +12190,15 @@
         1,
         1
       ],
-      "winningShots": 17.106382978723403,
+      "winningShots": 17.04255319148936,
       "winningTurns": 4.702127659574468,
       "enemyActions": 3.702127659574468,
-      "special": 1.702127659574468,
+      "special": 2.3617021276595747,
       "activationRate": 0,
       "damage": 3658,
-      "potential": 3724,
-      "utilization": 0.9822771213748658,
-      "overkill": 66,
+      "potential": 3740,
+      "utilization": 0.9780748663101604,
+      "overkill": 82,
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
@@ -11246,96 +12210,176 @@
         1,
         1
       ],
-      "winningShots": 17.106382978723403,
+      "winningShots": 17.04255319148936,
       "winningTurns": 4.702127659574468,
       "enemyActions": 3.702127659574468,
-      "special": 1.702127659574468,
+      "special": 2.3617021276595747,
       "activationRate": 0,
       "damage": 3658,
-      "potential": 3724,
-      "utilization": 0.9822771213748658,
-      "overkill": 66,
+      "potential": 3740,
+      "utilization": 0.9780748663101604,
+      "overkill": 82,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
+    "exploration/middle/basic/search/pure/brute/9": {
+      "n": 12,
+      "wins": 12,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 17.083333333333332,
+      "winningTurns": 4.75,
+      "enemyActions": 3.75,
+      "special": 2.5833333333333335,
+      "activationRate": 0,
+      "damage": 942,
+      "potential": 960,
+      "utilization": 0.98125,
+      "overkill": 18,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
+    "exploration/middle/basic/search/utility/brute/9": {
+      "n": 12,
+      "wins": 12,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 17.083333333333332,
+      "winningTurns": 4.75,
+      "enemyActions": 3.75,
+      "special": 2.5833333333333335,
+      "activationRate": 0,
+      "damage": 942,
+      "potential": 960,
+      "utilization": 0.98125,
+      "overkill": 18,
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
     "exploration/late/basic/heuristic/pure/screecher/7": {
       "n": 36,
-      "wins": 24,
-      "winRate": 0.6666666666666666,
+      "wins": 30,
+      "winRate": 0.8333333333333334,
       "ci95": [
-        0.5277777777777778,
-        0.8333333333333334
+        0.7222222222222222,
+        0.9166666666666666
       ],
-      "winningShots": 20,
+      "winningShots": 19.966666666666665,
       "winningTurns": 5,
-      "enemyActions": 4.333333333333333,
-      "special": 2.111111111111111,
+      "enemyActions": 4.166666666666667,
+      "special": 2.9444444444444446,
       "activationRate": 0,
-      "damage": 3300,
-      "potential": 3316,
-      "utilization": 0.9951749095295537,
-      "overkill": 16,
-      "extraTurnLosses": 12,
+      "damage": 3306,
+      "potential": 3341,
+      "utilization": 0.9895240945824604,
+      "overkill": 35,
+      "extraTurnLosses": 6,
       "maxWinningTurns": 5
     },
     "exploration/late/basic/heuristic/utility/screecher/7": {
       "n": 36,
-      "wins": 31,
-      "winRate": 0.8611111111111112,
+      "wins": 24,
+      "winRate": 0.6666666666666666,
       "ci95": [
-        0.75,
-        0.9444444444444444
+        0.5,
+        0.8055555555555556
       ],
-      "winningShots": 22.387096774193548,
-      "winningTurns": 6,
-      "enemyActions": 5,
-      "special": 4.111111111111111,
+      "winningShots": 22,
+      "winningTurns": 5.916666666666667,
+      "enemyActions": 4.944444444444445,
+      "special": 4.638888888888889,
       "activationRate": 0,
-      "damage": 3278,
-      "potential": 3324,
-      "utilization": 0.9861612515042117,
-      "overkill": 46,
-      "extraTurnLosses": 5,
+      "damage": 3265,
+      "potential": 3308,
+      "utilization": 0.9870012091898428,
+      "overkill": 43,
+      "extraTurnLosses": 12,
       "maxWinningTurns": 6
     },
     "exploration/late/basic/competent/pure/screecher/7": {
       "n": 36,
-      "wins": 24,
-      "winRate": 0.6666666666666666,
+      "wins": 30,
+      "winRate": 0.8333333333333334,
       "ci95": [
-        0.5277777777777778,
-        0.8333333333333334
+        0.7222222222222222,
+        0.9166666666666666
       ],
       "winningShots": 20,
       "winningTurns": 5,
-      "enemyActions": 4.333333333333333,
-      "special": 2.111111111111111,
+      "enemyActions": 4.166666666666667,
+      "special": 2.6944444444444446,
       "activationRate": 0,
-      "damage": 3300,
-      "potential": 3316,
-      "utilization": 0.9951749095295537,
-      "overkill": 16,
-      "extraTurnLosses": 12,
+      "damage": 3306,
+      "potential": 3337,
+      "utilization": 0.9907102187593647,
+      "overkill": 31,
+      "extraTurnLosses": 6,
       "maxWinningTurns": 5
     },
     "exploration/late/basic/competent/utility/screecher/7": {
       "n": 36,
-      "wins": 24,
+      "wins": 30,
+      "winRate": 0.8333333333333334,
+      "ci95": [
+        0.7222222222222222,
+        0.9166666666666666
+      ],
+      "winningShots": 20,
+      "winningTurns": 5,
+      "enemyActions": 4.166666666666667,
+      "special": 2.6944444444444446,
+      "activationRate": 0,
+      "damage": 3306,
+      "potential": 3337,
+      "utilization": 0.9907102187593647,
+      "overkill": 31,
+      "extraTurnLosses": 6,
+      "maxWinningTurns": 5
+    },
+    "exploration/late/basic/search/pure/screecher/7": {
+      "n": 6,
+      "wins": 4,
       "winRate": 0.6666666666666666,
       "ci95": [
-        0.5277777777777778,
-        0.8333333333333334
+        0.3333333333333333,
+        1
       ],
       "winningShots": 20,
       "winningTurns": 5,
       "enemyActions": 4.333333333333333,
-      "special": 2.111111111111111,
+      "special": 2.1666666666666665,
       "activationRate": 0,
-      "damage": 3300,
-      "potential": 3316,
-      "utilization": 0.9951749095295537,
-      "overkill": 16,
-      "extraTurnLosses": 12,
+      "damage": 550,
+      "potential": 553,
+      "utilization": 0.9945750452079566,
+      "overkill": 3,
+      "extraTurnLosses": 2,
+      "maxWinningTurns": 5
+    },
+    "exploration/late/basic/search/utility/screecher/7": {
+      "n": 6,
+      "wins": 4,
+      "winRate": 0.6666666666666666,
+      "ci95": [
+        0.3333333333333333,
+        1
+      ],
+      "winningShots": 20,
+      "winningTurns": 5,
+      "enemyActions": 4.333333333333333,
+      "special": 2.1666666666666665,
+      "activationRate": 0,
+      "damage": 550,
+      "potential": 553,
+      "utilization": 0.9945750452079566,
+      "overkill": 3,
+      "extraTurnLosses": 2,
       "maxWinningTurns": 5
     },
     "exploration/entry/wound/heuristic/utility/normal/8": {
@@ -11375,6 +12419,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "exploration/entry/wound/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -11418,6 +12482,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "exploration/early/wound/search/utility/normal/8": {
+      "n": 12,
+      "wins": 12,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 336,
+      "potential": 348,
+      "utilization": 0.9655172413793104,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "exploration/middle/wound/heuristic/utility/brute/9": {
       "n": 47,
       "wins": 47,
@@ -11426,15 +12510,15 @@
         1,
         1
       ],
-      "winningShots": 19.127659574468087,
-      "winningTurns": 5.085106382978723,
-      "enemyActions": 4.085106382978723,
-      "special": 5.0212765957446805,
-      "activationRate": 0.06382978723404255,
+      "winningShots": 18.893617021276597,
+      "winningTurns": 5.0212765957446805,
+      "enemyActions": 4.0212765957446805,
+      "special": 5.468085106382978,
+      "activationRate": 0.1276595744680851,
       "damage": 3658,
-      "potential": 3757,
-      "utilization": 0.9736491881820601,
-      "overkill": 99,
+      "potential": 3753,
+      "utilization": 0.9746869171329603,
+      "overkill": 95,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -11446,56 +12530,96 @@
         1,
         1
       ],
-      "winningShots": 16.914893617021278,
-      "winningTurns": 4.659574468085107,
-      "enemyActions": 3.6595744680851063,
-      "special": 1.8297872340425532,
-      "activationRate": 0.0425531914893617,
+      "winningShots": 16.76595744680851,
+      "winningTurns": 4.617021276595745,
+      "enemyActions": 3.617021276595745,
+      "special": 2,
+      "activationRate": 0.0851063829787234,
       "damage": 3658,
-      "potential": 3737,
-      "utilization": 0.9788600481669789,
-      "overkill": 79,
+      "potential": 3744,
+      "utilization": 0.9770299145299145,
+      "overkill": 86,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
+    "exploration/middle/wound/search/utility/brute/9": {
+      "n": 12,
+      "wins": 12,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 16.833333333333332,
+      "winningTurns": 4.666666666666667,
+      "enemyActions": 3.6666666666666665,
+      "special": 2.5833333333333335,
+      "activationRate": 0.08333333333333333,
+      "damage": 942,
+      "potential": 963,
+      "utilization": 0.9781931464174455,
+      "overkill": 21,
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
     "exploration/late/wound/heuristic/utility/screecher/7": {
       "n": 36,
-      "wins": 24,
-      "winRate": 0.6666666666666666,
+      "wins": 22,
+      "winRate": 0.6111111111111112,
       "ci95": [
-        0.4993055555555556,
-        0.8055555555555556
+        0.4166666666666667,
+        0.7777777777777778
       ],
-      "winningShots": 22.75,
-      "winningTurns": 6.041666666666667,
-      "enemyActions": 5.027777777777778,
-      "special": 5.944444444444445,
-      "activationRate": 0.1111111111111111,
-      "damage": 3210,
-      "potential": 3246,
-      "utilization": 0.988909426987061,
+      "winningShots": 22.272727272727273,
+      "winningTurns": 5.863636363636363,
+      "enemyActions": 4.916666666666667,
+      "special": 6.305555555555555,
+      "activationRate": 0.2222222222222222,
+      "damage": 3228,
+      "potential": 3264,
+      "utilization": 0.9889705882352942,
       "overkill": 36,
-      "extraTurnLosses": 12,
+      "extraTurnLosses": 14,
       "maxWinningTurns": 7
     },
     "exploration/late/wound/competent/utility/screecher/7": {
       "n": 36,
-      "wins": 26,
-      "winRate": 0.7222222222222222,
+      "wins": 27,
+      "winRate": 0.75,
       "ci95": [
-        0.5555555555555556,
-        0.8611111111111112
+        0.5833333333333334,
+        0.8888888888888888
       ],
-      "winningShots": 20.115384615384617,
-      "winningTurns": 5.230769230769231,
+      "winningShots": 20.14814814814815,
+      "winningTurns": 5.2592592592592595,
       "enemyActions": 4.277777777777778,
-      "special": 2.5555555555555554,
-      "activationRate": 0.05555555555555555,
-      "damage": 3193,
-      "potential": 3236,
-      "utilization": 0.9867119901112484,
-      "overkill": 43,
-      "extraTurnLosses": 10,
+      "special": 2.7222222222222223,
+      "activationRate": 0.08333333333333333,
+      "damage": 3224,
+      "potential": 3264,
+      "utilization": 0.9877450980392157,
+      "overkill": 40,
+      "extraTurnLosses": 9,
+      "maxWinningTurns": 6
+    },
+    "exploration/late/wound/search/utility/screecher/7": {
+      "n": 6,
+      "wins": 4,
+      "winRate": 0.6666666666666666,
+      "ci95": [
+        0.3333333333333333,
+        1
+      ],
+      "winningShots": 20.75,
+      "winningTurns": 5.25,
+      "enemyActions": 4.166666666666667,
+      "special": 4,
+      "activationRate": 0.16666666666666666,
+      "damage": 532,
+      "potential": 536,
+      "utilization": 0.9925373134328358,
+      "overkill": 4,
+      "extraTurnLosses": 2,
       "maxWinningTurns": 6
     },
     "v7/entry/basic/heuristic/pure/normal/8": {
@@ -11575,6 +12699,46 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/basic/search/pure/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/basic/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -11658,6 +12822,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/basic/search/pure/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/basic/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/basic/heuristic/pure/tough/8": {
       "n": 15,
       "wins": 15,
@@ -11735,6 +12939,46 @@
       "potential": 1157,
       "utilization": 0.9853068280034573,
       "overkill": 17,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
+    "v7/middle/basic/search/pure/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 16.5,
+      "winningTurns": 4.5,
+      "enemyActions": 3.5,
+      "special": 1.75,
+      "activationRate": 0,
+      "damage": 304,
+      "potential": 317,
+      "utilization": 0.9589905362776026,
+      "overkill": 13,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
+    "v7/middle/basic/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 17.5,
+      "winningTurns": 5,
+      "enemyActions": 4,
+      "special": 3.75,
+      "activationRate": 0,
+      "damage": 304,
+      "potential": 315,
+      "utilization": 0.9650793650793651,
+      "overkill": 11,
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
@@ -11818,6 +13062,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/basic/search/pure/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/basic/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/basic/heuristic/pure/screecher/3.5": {
       "n": 21,
       "wins": 10,
@@ -11896,6 +13180,46 @@
       "utilization": 0.9827044025157232,
       "overkill": 22,
       "extraTurnLosses": 4,
+      "maxWinningTurns": 2
+    },
+    "v7/late/basic/search/pure/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 2,
+      "activationRate": 0,
+      "damage": 288,
+      "potential": 296,
+      "utilization": 0.972972972972973,
+      "overkill": 8,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/late/basic/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 2,
+      "activationRate": 0,
+      "damage": 288,
+      "potential": 296,
+      "utilization": 0.972972972972973,
+      "overkill": 8,
+      "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
     "v7/late/basic/heuristic/pure/groundshaker/3.5": {
@@ -11978,6 +13302,46 @@
       "extraTurnLosses": 29,
       "maxWinningTurns": 3
     },
+    "v7/late/basic/search/pure/groundshaker/3.5": {
+      "n": 19,
+      "wins": 1,
+      "winRate": 0.05263157894736842,
+      "ci95": [
+        0,
+        0.21428571428571427
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1.9473684210526316,
+      "special": 2.473684210526316,
+      "activationRate": 0,
+      "damage": 1015,
+      "potential": 1015,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 8,
+      "maxWinningTurns": 2
+    },
+    "v7/late/basic/search/utility/groundshaker/3.5": {
+      "n": 19,
+      "wins": 4,
+      "winRate": 0.21052631578947367,
+      "ci95": [
+        0,
+        0.42857142857142855
+      ],
+      "winningShots": 13,
+      "winningTurns": 3.25,
+      "enemyActions": 2.4210526315789473,
+      "special": 3.8421052631578947,
+      "activationRate": 0,
+      "damage": 1232,
+      "potential": 1235,
+      "utilization": 0.9975708502024292,
+      "overkill": 3,
+      "extraTurnLosses": 13,
+      "maxWinningTurns": 4
+    },
     "v7/entry/wound/heuristic/utility/normal/8": {
       "n": 80,
       "wins": 80,
@@ -12015,6 +13379,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/wound/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12058,6 +13442,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/wound/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/wound/heuristic/utility/tough/8": {
       "n": 15,
       "wins": 15,
@@ -12095,6 +13499,26 @@
       "potential": 1163,
       "utilization": 0.9802235597592434,
       "overkill": 23,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/middle/wound/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 10,
+      "winningTurns": 2.75,
+      "enemyActions": 1.75,
+      "special": 3.5,
+      "activationRate": 1,
+      "damage": 304,
+      "potential": 307,
+      "utilization": 0.990228013029316,
+      "overkill": 3,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -12138,6 +13562,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/wound/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/wound/heuristic/utility/screecher/3.5": {
       "n": 21,
       "wins": 21,
@@ -12175,6 +13619,26 @@
       "potential": 1592,
       "utilization": 0.949748743718593,
       "overkill": 80,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/late/wound/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.5,
+      "winningTurns": 1.25,
+      "enemyActions": 0.25,
+      "special": 3.75,
+      "activationRate": 1,
+      "damage": 288,
+      "potential": 322,
+      "utilization": 0.8944099378881988,
+      "overkill": 34,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12218,6 +13682,26 @@
       "extraTurnLosses": 30,
       "maxWinningTurns": 4
     },
+    "v7/late/wound/search/utility/groundshaker/3.5": {
+      "n": 21,
+      "wins": 17,
+      "winRate": 0.8095238095238095,
+      "ci95": [
+        0.6875,
+        0.96875
+      ],
+      "winningShots": 6.0588235294117645,
+      "winningTurns": 1.4705882352941178,
+      "enemyActions": 0.8095238095238095,
+      "special": 4.0476190476190474,
+      "activationRate": 0.6666666666666666,
+      "damage": 1568,
+      "potential": 1686,
+      "utilization": 0.930011862396204,
+      "overkill": 118,
+      "extraTurnLosses": 4,
+      "maxWinningTurns": 3
+    },
     "v7/entry/heat/heuristic/utility/normal/8": {
       "n": 80,
       "wins": 80,
@@ -12255,6 +13739,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/heat/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12298,6 +13802,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/heat/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/heat/heuristic/utility/tough/8": {
       "n": 15,
       "wins": 15,
@@ -12335,6 +13859,26 @@
       "potential": 1180,
       "utilization": 0.9661016949152542,
       "overkill": 40,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/heat/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.25,
+      "winningTurns": 1.5,
+      "enemyActions": 0.5,
+      "special": 3.75,
+      "activationRate": 1,
+      "damage": 304,
+      "potential": 318,
+      "utilization": 0.9559748427672956,
+      "overkill": 14,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12378,6 +13922,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/heat/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/heat/heuristic/utility/screecher/3.5": {
       "n": 21,
       "wins": 21,
@@ -12415,6 +13979,26 @@
       "potential": 1926,
       "utilization": 0.7850467289719626,
       "overkill": 414,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/heat/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 288,
+      "potential": 372,
+      "utilization": 0.7741935483870968,
+      "overkill": 84,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
@@ -12458,6 +14042,26 @@
       "extraTurnLosses": 16,
       "maxWinningTurns": 4
     },
+    "v7/late/heat/search/utility/groundshaker/3.5": {
+      "n": 21,
+      "wins": 17,
+      "winRate": 0.8095238095238095,
+      "ci95": [
+        0.5625,
+        0.96875
+      ],
+      "winningShots": 4,
+      "winningTurns": 1.1764705882352942,
+      "enemyActions": 0.6190476190476191,
+      "special": 3,
+      "activationRate": 0.7619047619047619,
+      "damage": 1523,
+      "potential": 1781,
+      "utilization": 0.8551375631667603,
+      "overkill": 258,
+      "extraTurnLosses": 3,
+      "maxWinningTurns": 3
+    },
     "v7/entry/blast/heuristic/utility/normal/8": {
       "n": 80,
       "wins": 80,
@@ -12495,6 +14099,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/blast/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12538,6 +14162,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/blast/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/blast/heuristic/utility/tough/8": {
       "n": 15,
       "wins": 15,
@@ -12578,6 +14222,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/blast/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.75,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 3.25,
+      "activationRate": 1,
+      "damage": 304,
+      "potential": 311,
+      "utilization": 0.977491961414791,
+      "overkill": 7,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/blast/heuristic/utility/fast/3.2": {
       "n": 29,
       "wins": 29,
@@ -12615,6 +14279,26 @@
       "potential": 1018,
       "utilization": 0.9685658153241651,
       "overkill": 32,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/blast/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12658,6 +14342,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/late/blast/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.25,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 288,
+      "potential": 294,
+      "utilization": 0.9795918367346939,
+      "overkill": 6,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/blast/heuristic/utility/groundshaker/3.5": {
       "n": 100,
       "wins": 100,
@@ -12695,6 +14399,26 @@
       "potential": 7788,
       "utilization": 0.9758602978941961,
       "overkill": 188,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/late/blast/search/utility/groundshaker/3.5": {
+      "n": 21,
+      "wins": 21,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.190476190476191,
+      "winningTurns": 1.380952380952381,
+      "enemyActions": 0.38095238095238093,
+      "special": 2.9523809523809526,
+      "activationRate": 1,
+      "damage": 1596,
+      "potential": 1640,
+      "utilization": 0.973170731707317,
+      "overkill": 44,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12738,6 +14462,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/entry/recoil/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/recoil/heuristic/utility/fast/5": {
       "n": 21,
       "wins": 21,
@@ -12775,6 +14519,26 @@
       "potential": 588,
       "utilization": 0.8571428571428571,
       "overkill": 84,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/recoil/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12818,6 +14582,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
+    "v7/middle/recoil/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 13.75,
+      "winningTurns": 3.25,
+      "enemyActions": 2.25,
+      "special": 4.75,
+      "activationRate": 1,
+      "damage": 304,
+      "potential": 310,
+      "utilization": 0.9806451612903225,
+      "overkill": 6,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
     "v7/middle/recoil/heuristic/utility/fast/3.2": {
       "n": 29,
       "wins": 29,
@@ -12855,6 +14639,26 @@
       "potential": 1018,
       "utilization": 0.9685658153241651,
       "overkill": 32,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/recoil/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -12898,6 +14702,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/late/recoil/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.25,
+      "winningTurns": 1.75,
+      "enemyActions": 0.75,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 288,
+      "potential": 299,
+      "utilization": 0.9632107023411371,
+      "overkill": 11,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/recoil/heuristic/utility/groundshaker/3.5": {
       "n": 98,
       "wins": 49,
@@ -12938,6 +14762,26 @@
       "extraTurnLosses": 30,
       "maxWinningTurns": 4
     },
+    "v7/late/recoil/search/utility/groundshaker/3.5": {
+      "n": 21,
+      "wins": 19,
+      "winRate": 0.9047619047619048,
+      "ci95": [
+        0.78046875,
+        1
+      ],
+      "winningShots": 7.2631578947368425,
+      "winningTurns": 1.9473684210526316,
+      "enemyActions": 1.0476190476190477,
+      "special": 4.142857142857143,
+      "activationRate": 0.8571428571428571,
+      "damage": 1575,
+      "potential": 1627,
+      "utilization": 0.968039336201598,
+      "overkill": 52,
+      "extraTurnLosses": 2,
+      "maxWinningTurns": 3
+    },
     "v7/entry/cauterize/heuristic/utility/normal/8": {
       "n": 80,
       "wins": 80,
@@ -12975,6 +14819,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/cauterize/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -13018,6 +14882,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/cauterize/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/cauterize/heuristic/utility/tough/8": {
       "n": 15,
       "wins": 15,
@@ -13055,6 +14939,26 @@
       "potential": 1171,
       "utilization": 0.9735269000853971,
       "overkill": 31,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/middle/cauterize/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7.25,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 4.25,
+      "activationRate": 1,
+      "damage": 304,
+      "potential": 309,
+      "utilization": 0.9838187702265372,
+      "overkill": 5,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -13098,6 +15002,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/cauterize/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/cauterize/heuristic/utility/screecher/3.5": {
       "n": 21,
       "wins": 21,
@@ -13137,6 +15061,26 @@
       "overkill": 54,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
+    },
+    "v7/late/cauterize/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.5,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3.5,
+      "activationRate": 1,
+      "damage": 288,
+      "potential": 302,
+      "utilization": 0.9536423841059603,
+      "overkill": 14,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
     },
     "v7/late/cauterize/heuristic/utility/groundshaker/3.5": {
       "n": 100,
@@ -13178,6 +15122,26 @@
       "extraTurnLosses": 14,
       "maxWinningTurns": 3
     },
+    "v7/late/cauterize/search/utility/groundshaker/3.5": {
+      "n": 21,
+      "wins": 15,
+      "winRate": 0.7142857142857143,
+      "ci95": [
+        0.5,
+        0.90625
+      ],
+      "winningShots": 5.866666666666666,
+      "winningTurns": 1.3333333333333333,
+      "enemyActions": 0.8571428571428571,
+      "special": 3.7142857142857144,
+      "activationRate": 0.6190476190476191,
+      "damage": 1503,
+      "potential": 1727,
+      "utilization": 0.8702953097857556,
+      "overkill": 224,
+      "extraTurnLosses": 5,
+      "maxWinningTurns": 3
+    },
     "v7/entry/concussion/heuristic/utility/normal/8": {
       "n": 80,
       "wins": 80,
@@ -13215,6 +15179,26 @@
       "potential": 2000,
       "utilization": 0.88,
       "overkill": 240,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/entry/concussion/search/utility/normal/8": {
+      "n": 16,
+      "wins": 16,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 352,
+      "potential": 400,
+      "utilization": 0.88,
+      "overkill": 48,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -13258,6 +15242,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/concussion/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 144,
+      "potential": 168,
+      "utilization": 0.8571428571428571,
+      "overkill": 24,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/concussion/heuristic/utility/tough/8": {
       "n": 15,
       "wins": 15,
@@ -13295,6 +15299,26 @@
       "potential": 1180,
       "utilization": 0.9661016949152542,
       "overkill": 40,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/concussion/search/utility/tough/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5,
+      "winningTurns": 1.25,
+      "enemyActions": 0.25,
+      "special": 3.75,
+      "activationRate": 1,
+      "damage": 304,
+      "potential": 337,
+      "utilization": 0.9020771513353115,
+      "overkill": 33,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -13338,6 +15362,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/concussion/search/utility/fast/3.2": {
+      "n": 9,
+      "wins": 9,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 306,
+      "potential": 315,
+      "utilization": 0.9714285714285714,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/concussion/heuristic/utility/screecher/3.5": {
       "n": 21,
       "wins": 21,
@@ -13375,6 +15419,26 @@
       "potential": 1657,
       "utilization": 0.9124924562462281,
       "overkill": 145,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/concussion/search/utility/screecher/3.5": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 288,
+      "potential": 295,
+      "utilization": 0.976271186440678,
+      "overkill": 7,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
@@ -13418,6 +15482,26 @@
       "extraTurnLosses": 2,
       "maxWinningTurns": 4
     },
+    "v7/late/concussion/search/utility/groundshaker/3.5": {
+      "n": 21,
+      "wins": 21,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.142857142857143,
+      "winningTurns": 1.2857142857142858,
+      "enemyActions": 0.2857142857142857,
+      "special": 3,
+      "activationRate": 0.9047619047619048,
+      "damage": 1596,
+      "potential": 1657,
+      "utilization": 0.9631864815932408,
+      "overkill": 61,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
     "exploration/middle/basic/heuristic/pure/fast/5": {
       "n": 36,
       "wins": 36,
@@ -13426,15 +15510,15 @@
         1,
         1
       ],
-      "winningShots": 8.027777777777779,
-      "winningTurns": 2.2222222222222223,
-      "enemyActions": 1.2222222222222223,
-      "special": 1.8055555555555556,
+      "winningShots": 7.888888888888889,
+      "winningTurns": 2.111111111111111,
+      "enemyActions": 1.1111111111111112,
+      "special": 2.111111111111111,
       "activationRate": 0,
       "damage": 1365,
-      "potential": 1438,
-      "utilization": 0.9492350486787204,
-      "overkill": 73,
+      "potential": 1424,
+      "utilization": 0.9585674157303371,
+      "overkill": 59,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -13446,9 +15530,9 @@
         1,
         1
       ],
-      "winningShots": 8.555555555555555,
-      "winningTurns": 2.3333333333333335,
-      "enemyActions": 1.3333333333333333,
+      "winningShots": 8.25,
+      "winningTurns": 2.1944444444444446,
+      "enemyActions": 1.1944444444444444,
       "special": 2.7777777777777777,
       "activationRate": 0,
       "damage": 1365,
@@ -13466,15 +15550,15 @@
         1,
         1
       ],
-      "winningShots": 8.277777777777779,
-      "winningTurns": 2.2777777777777777,
-      "enemyActions": 1.2777777777777777,
-      "special": 0.8888888888888888,
+      "winningShots": 8.25,
+      "winningTurns": 2.25,
+      "enemyActions": 1.25,
+      "special": 0.9166666666666666,
       "activationRate": 0,
       "damage": 1365,
-      "potential": 1450,
-      "utilization": 0.9413793103448276,
-      "overkill": 85,
+      "potential": 1446,
+      "utilization": 0.9439834024896265,
+      "overkill": 81,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -13486,15 +15570,55 @@
         1,
         1
       ],
-      "winningShots": 8.277777777777779,
-      "winningTurns": 2.2777777777777777,
-      "enemyActions": 1.2777777777777777,
-      "special": 0.8888888888888888,
+      "winningShots": 8.25,
+      "winningTurns": 2.25,
+      "enemyActions": 1.25,
+      "special": 0.9166666666666666,
       "activationRate": 0,
       "damage": 1365,
-      "potential": 1450,
-      "utilization": 0.9413793103448276,
-      "overkill": 85,
+      "potential": 1446,
+      "utilization": 0.9439834024896265,
+      "overkill": 81,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "exploration/middle/basic/search/pure/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.5,
+      "winningTurns": 2.5,
+      "enemyActions": 1.5,
+      "special": 0.5,
+      "activationRate": 0,
+      "damage": 225,
+      "potential": 246,
+      "utilization": 0.9146341463414634,
+      "overkill": 21,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "exploration/middle/basic/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.5,
+      "winningTurns": 2.5,
+      "enemyActions": 1.5,
+      "special": 0.5,
+      "activationRate": 0,
+      "damage": 225,
+      "potential": 246,
+      "utilization": 0.9146341463414634,
+      "overkill": 21,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -13506,15 +15630,15 @@
         1,
         1
       ],
-      "winningShots": 22.736842105263158,
+      "winningShots": 22.657894736842106,
       "winningTurns": 5.684210526315789,
       "enemyActions": 4.684210526315789,
-      "special": 1.736842105263158,
+      "special": 2.289473684210526,
       "activationRate": 0,
       "damage": 3864,
-      "potential": 3930,
-      "utilization": 0.983206106870229,
-      "overkill": 66,
+      "potential": 3936,
+      "utilization": 0.9817073170731707,
+      "overkill": 72,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -13526,15 +15650,15 @@
         1,
         1
       ],
-      "winningShots": 24.68421052631579,
-      "winningTurns": 6.684210526315789,
-      "enemyActions": 5.684210526315789,
-      "special": 3.736842105263158,
+      "winningShots": 24.31578947368421,
+      "winningTurns": 6.5,
+      "enemyActions": 5.5,
+      "special": 4.105263157894737,
       "activationRate": 0,
       "damage": 3864,
-      "potential": 3948,
-      "utilization": 0.9787234042553191,
-      "overkill": 84,
+      "potential": 3935,
+      "utilization": 0.9819567979669631,
+      "overkill": 71,
       "extraTurnLosses": 0,
       "maxWinningTurns": 7
     },
@@ -13546,15 +15670,15 @@
         1,
         1
       ],
-      "winningShots": 22.736842105263158,
+      "winningShots": 22.68421052631579,
       "winningTurns": 5.684210526315789,
       "enemyActions": 4.684210526315789,
-      "special": 1.736842105263158,
+      "special": 2.263157894736842,
       "activationRate": 0,
       "damage": 3864,
-      "potential": 3930,
-      "utilization": 0.983206106870229,
-      "overkill": 66,
+      "potential": 3940,
+      "utilization": 0.9807106598984772,
+      "overkill": 76,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -13566,15 +15690,55 @@
         1,
         1
       ],
-      "winningShots": 22.736842105263158,
+      "winningShots": 22.68421052631579,
       "winningTurns": 5.684210526315789,
       "enemyActions": 4.684210526315789,
-      "special": 1.736842105263158,
+      "special": 2.263157894736842,
       "activationRate": 0,
       "damage": 3864,
-      "potential": 3930,
-      "utilization": 0.983206106870229,
-      "overkill": 66,
+      "potential": 3940,
+      "utilization": 0.9807106598984772,
+      "overkill": 76,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 6
+    },
+    "exploration/middle/basic/search/pure/tough/10": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 24,
+      "winningTurns": 6,
+      "enemyActions": 5,
+      "special": 1.25,
+      "activationRate": 0,
+      "damage": 432,
+      "potential": 437,
+      "utilization": 0.988558352402746,
+      "overkill": 5,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 6
+    },
+    "exploration/middle/basic/search/utility/tough/10": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 24,
+      "winningTurns": 6,
+      "enemyActions": 5,
+      "special": 1.25,
+      "activationRate": 0,
+      "damage": 432,
+      "potential": 437,
+      "utilization": 0.988558352402746,
+      "overkill": 5,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -13589,10 +15753,10 @@
       "winningShots": null,
       "winningTurns": null,
       "enemyActions": 3,
-      "special": 2,
+      "special": 2.6136363636363638,
       "activationRate": 0,
-      "damage": 2640,
-      "potential": 2640,
+      "damage": 2667,
+      "potential": 2667,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -13609,10 +15773,10 @@
       "winningShots": null,
       "winningTurns": null,
       "enemyActions": 3,
-      "special": 3.4545454545454546,
+      "special": 3.6363636363636362,
       "activationRate": 0,
-      "damage": 2384,
-      "potential": 2384,
+      "damage": 2487,
+      "potential": 2487,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -13629,10 +15793,10 @@
       "winningShots": null,
       "winningTurns": null,
       "enemyActions": 3,
-      "special": 2,
+      "special": 2.6818181818181817,
       "activationRate": 0,
-      "damage": 2640,
-      "potential": 2640,
+      "damage": 2670,
+      "potential": 2670,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -13649,10 +15813,50 @@
       "winningShots": null,
       "winningTurns": null,
       "enemyActions": 3,
-      "special": 2,
+      "special": 2.6818181818181817,
       "activationRate": 0,
-      "damage": 2640,
-      "potential": 2640,
+      "damage": 2670,
+      "potential": 2670,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
+    "exploration/late/basic/search/pure/groundshaker/6.5": {
+      "n": 10,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 3,
+      "special": 2.7,
+      "activationRate": 0,
+      "damage": 607,
+      "potential": 607,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
+    "exploration/late/basic/search/utility/groundshaker/6.5": {
+      "n": 10,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 3,
+      "special": 2.7,
+      "activationRate": 0,
+      "damage": 607,
+      "potential": 607,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -13666,15 +15870,15 @@
         1,
         1
       ],
-      "winningShots": 8.805555555555555,
+      "winningShots": 8.722222222222221,
       "winningTurns": 2.5833333333333335,
       "enemyActions": 1.5833333333333333,
-      "special": 2.75,
-      "activationRate": 0,
+      "special": 2.861111111111111,
+      "activationRate": 0.05555555555555555,
       "damage": 1365,
-      "potential": 1418,
-      "utilization": 0.96262341325811,
-      "overkill": 53,
+      "potential": 1436,
+      "utilization": 0.9505571030640668,
+      "overkill": 71,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -13689,12 +15893,32 @@
       "winningShots": 8.277777777777779,
       "winningTurns": 2.2777777777777777,
       "enemyActions": 1.2777777777777777,
-      "special": 0.6666666666666666,
+      "special": 0.6388888888888888,
       "activationRate": 0,
       "damage": 1365,
-      "potential": 1458,
-      "utilization": 0.9362139917695473,
-      "overkill": 93,
+      "potential": 1459,
+      "utilization": 0.9355723098012337,
+      "overkill": 94,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "exploration/middle/wound/search/utility/fast/5": {
+      "n": 6,
+      "wins": 6,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.166666666666666,
+      "winningTurns": 2.1666666666666665,
+      "enemyActions": 1.1666666666666667,
+      "special": 0.6666666666666666,
+      "activationRate": 0,
+      "damage": 225,
+      "potential": 239,
+      "utilization": 0.9414225941422594,
+      "overkill": 14,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -13706,17 +15930,17 @@
         1,
         1
       ],
-      "winningShots": 25.210526315789473,
-      "winningTurns": 6.657894736842105,
-      "enemyActions": 5.657894736842105,
-      "special": 5.394736842105263,
-      "activationRate": 0.05263157894736842,
+      "winningShots": 24.605263157894736,
+      "winningTurns": 6.473684210526316,
+      "enemyActions": 5.473684210526316,
+      "special": 6.578947368421052,
+      "activationRate": 0.2894736842105263,
       "damage": 3864,
-      "potential": 3933,
-      "utilization": 0.9824561403508771,
-      "overkill": 69,
+      "potential": 3943,
+      "utilization": 0.979964494040071,
+      "overkill": 79,
       "extraTurnLosses": 0,
-      "maxWinningTurns": 7
+      "maxWinningTurns": 8
     },
     "exploration/middle/wound/competent/utility/tough/10": {
       "n": 38,
@@ -13726,15 +15950,35 @@
         1,
         1
       ],
-      "winningShots": 22.605263157894736,
+      "winningShots": 22.157894736842106,
       "winningTurns": 5.684210526315789,
       "enemyActions": 4.684210526315789,
-      "special": 1.736842105263158,
-      "activationRate": 0,
+      "special": 2.5,
+      "activationRate": 0.13157894736842105,
       "damage": 3864,
-      "potential": 3935,
-      "utilization": 0.9819567979669631,
-      "overkill": 71,
+      "potential": 3941,
+      "utilization": 0.9804618117229129,
+      "overkill": 77,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 6
+    },
+    "exploration/middle/wound/search/utility/tough/10": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 22.75,
+      "winningTurns": 5.75,
+      "enemyActions": 4.75,
+      "special": 2.75,
+      "activationRate": 0.25,
+      "damage": 432,
+      "potential": 438,
+      "utilization": 0.9863013698630136,
+      "overkill": 6,
       "extraTurnLosses": 0,
       "maxWinningTurns": 6
     },
@@ -13749,33 +15993,53 @@
       "winningShots": null,
       "winningTurns": null,
       "enemyActions": 3,
-      "special": 3.3863636363636362,
-      "activationRate": 0.11363636363636363,
-      "damage": 2488,
-      "potential": 2488,
+      "special": 3.75,
+      "activationRate": 0.20454545454545456,
+      "damage": 2571,
+      "potential": 2571,
       "utilization": 1,
       "overkill": 0,
-      "extraTurnLosses": 0,
+      "extraTurnLosses": 1,
       "maxWinningTurns": null
     },
     "exploration/late/wound/competent/utility/groundshaker/6.5": {
       "n": 44,
-      "wins": 2,
-      "winRate": 0.045454545454545456,
+      "wins": 7,
+      "winRate": 0.1590909090909091,
+      "ci95": [
+        0.045454545454545456,
+        0.2727272727272727
+      ],
+      "winningShots": 19.857142857142858,
+      "winningTurns": 5,
+      "enemyActions": 3.7954545454545454,
+      "special": 4.340909090909091,
+      "activationRate": 0.13636363636363635,
+      "damage": 3321,
+      "potential": 3338,
+      "utilization": 0.9949071300179748,
+      "overkill": 17,
+      "extraTurnLosses": 19,
+      "maxWinningTurns": 5
+    },
+    "exploration/late/wound/search/utility/groundshaker/6.5": {
+      "n": 10,
+      "wins": 1,
+      "winRate": 0.1,
       "ci95": [
         0,
-        0.11363636363636363
+        0.3
       ],
-      "winningShots": 20,
+      "winningShots": 19,
       "winningTurns": 5,
-      "enemyActions": 3.6363636363636362,
-      "special": 3.522727272727273,
-      "activationRate": 0.022727272727272728,
-      "damage": 3112,
-      "potential": 3116,
-      "utilization": 0.9987163029525032,
-      "overkill": 4,
-      "extraTurnLosses": 16,
+      "enemyActions": 3.6,
+      "special": 3.7,
+      "activationRate": 0,
+      "damage": 719,
+      "potential": 720,
+      "utilization": 0.9986111111111111,
+      "overkill": 1,
+      "extraTurnLosses": 3,
       "maxWinningTurns": 5
     },
     "v7/early/basic/heuristic/pure/brute/5": {
@@ -13853,6 +16117,46 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/basic/search/pure/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/basic/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -13938,6 +16242,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
+    "v7/middle/basic/search/pure/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 15.571428571428571,
+      "winningTurns": 4,
+      "enemyActions": 3,
+      "special": 1.7142857142857142,
+      "activationRate": 0,
+      "damage": 532,
+      "potential": 543,
+      "utilization": 0.9797421731123389,
+      "overkill": 11,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
+    "v7/middle/basic/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 16.571428571428573,
+      "winningTurns": 4.714285714285714,
+      "enemyActions": 3.7142857142857144,
+      "special": 3.857142857142857,
+      "activationRate": 0,
+      "damage": 532,
+      "potential": 547,
+      "utilization": 0.9725776965265083,
+      "overkill": 15,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
     "v7/late/basic/heuristic/pure/screecher/0.5": {
       "n": 6,
       "wins": 0,
@@ -14018,6 +16362,46 @@
       "extraTurnLosses": 2,
       "maxWinningTurns": 2
     },
+    "v7/late/basic/search/pure/screecher/0.5": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 1,
+      "special": 1,
+      "activationRate": 0,
+      "damage": 21,
+      "potential": 21,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
+    "v7/late/basic/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 1,
+      "special": 1,
+      "activationRate": 0,
+      "damage": 21,
+      "potential": 21,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
     "v7/early/wound/heuristic/utility/brute/5": {
       "n": 19,
       "wins": 19,
@@ -14053,6 +16437,26 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/wound/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -14098,6 +16502,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/wound/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 10.142857142857142,
+      "winningTurns": 2.4285714285714284,
+      "enemyActions": 1.4285714285714286,
+      "special": 3.2857142857142856,
+      "activationRate": 1,
+      "damage": 532,
+      "potential": 541,
+      "utilization": 0.9833641404805915,
+      "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/late/wound/heuristic/utility/screecher/0.5": {
       "n": 6,
       "wins": 1,
@@ -14138,6 +16562,26 @@
       "extraTurnLosses": 3,
       "maxWinningTurns": 2
     },
+    "v7/late/wound/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 72,
+      "potential": 88,
+      "utilization": 0.8181818181818182,
+      "overkill": 16,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/early/heat/heuristic/utility/brute/5": {
       "n": 19,
       "wins": 19,
@@ -14173,6 +16617,26 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/heat/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -14218,6 +16682,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/heat/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 1.7142857142857142,
+      "enemyActions": 0.7142857142857143,
+      "special": 3.4285714285714284,
+      "activationRate": 1,
+      "damage": 532,
+      "potential": 569,
+      "utilization": 0.9349736379613357,
+      "overkill": 37,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/heat/heuristic/utility/screecher/0.5": {
       "n": 6,
       "wins": 6,
@@ -14258,6 +16742,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
+    "v7/late/heat/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 72,
+      "potential": 93,
+      "utilization": 0.7741935483870968,
+      "overkill": 21,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/early/blast/heuristic/utility/brute/5": {
       "n": 19,
       "wins": 19,
@@ -14293,6 +16797,26 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/blast/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -14338,6 +16862,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/blast/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.571428571428571,
+      "winningTurns": 2.2857142857142856,
+      "enemyActions": 1.2857142857142858,
+      "special": 3.2857142857142856,
+      "activationRate": 1,
+      "damage": 532,
+      "potential": 547,
+      "utilization": 0.9725776965265083,
+      "overkill": 15,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/late/blast/heuristic/utility/screecher/0.5": {
       "n": 6,
       "wins": 6,
@@ -14378,6 +16922,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
+    "v7/late/blast/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 72,
+      "potential": 73,
+      "utilization": 0.9863013698630136,
+      "overkill": 1,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/early/recoil/heuristic/utility/brute/5": {
       "n": 19,
       "wins": 19,
@@ -14413,6 +16977,26 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/recoil/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -14458,6 +17042,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
+    "v7/middle/recoil/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 11.428571428571429,
+      "winningTurns": 2.857142857142857,
+      "enemyActions": 1.8571428571428572,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 532,
+      "potential": 547,
+      "utilization": 0.9725776965265083,
+      "overkill": 15,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/late/recoil/heuristic/utility/screecher/0.5": {
       "n": 6,
       "wins": 0,
@@ -14498,6 +17102,26 @@
       "extraTurnLosses": 4,
       "maxWinningTurns": 2
     },
+    "v7/late/recoil/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 5,
+      "activationRate": 1,
+      "damage": 72,
+      "potential": 83,
+      "utilization": 0.8674698795180723,
+      "overkill": 11,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/early/cauterize/heuristic/utility/brute/5": {
       "n": 19,
       "wins": 19,
@@ -14533,6 +17157,26 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/cauterize/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -14578,6 +17222,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/cauterize/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.857142857142857,
+      "winningTurns": 1.8571428571428572,
+      "enemyActions": 0.8571428571428571,
+      "special": 3.857142857142857,
+      "activationRate": 1,
+      "damage": 532,
+      "potential": 558,
+      "utilization": 0.953405017921147,
+      "overkill": 26,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/late/cauterize/heuristic/utility/screecher/0.5": {
       "n": 6,
       "wins": 3,
@@ -14618,6 +17282,26 @@
       "extraTurnLosses": 1,
       "maxWinningTurns": 2
     },
+    "v7/late/cauterize/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 72,
+      "potential": 75,
+      "utilization": 0.96,
+      "overkill": 3,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/early/concussion/heuristic/utility/brute/5": {
       "n": 19,
       "wins": 19,
@@ -14653,6 +17337,26 @@
       "activationRate": 0,
       "damage": 722,
       "potential": 722,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/concussion/search/utility/brute/5": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 114,
+      "potential": 114,
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 0,
@@ -14698,6 +17402,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/concussion/search/utility/tough/6": {
+      "n": 7,
+      "wins": 7,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 532,
+      "potential": 625,
+      "utilization": 0.8512,
+      "overkill": 93,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/concussion/heuristic/utility/screecher/0.5": {
       "n": 6,
       "wins": 6,
@@ -14735,6 +17459,26 @@
       "potential": 454,
       "utilization": 0.9515418502202643,
       "overkill": 22,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/concussion/search/utility/screecher/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 72,
+      "potential": 74,
+      "utilization": 0.972972972972973,
+      "overkill": 2,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
@@ -14818,6 +17562,46 @@
       "extraTurnLosses": 18,
       "maxWinningTurns": null
     },
+    "v7/middle/basic/search/pure/screecher/3.2": {
+      "n": 4,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 2,
+      "special": 2,
+      "activationRate": 0,
+      "damage": 176,
+      "potential": 176,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 1,
+      "maxWinningTurns": null
+    },
+    "v7/middle/basic/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 2.75,
+      "special": 3.75,
+      "activationRate": 0,
+      "damage": 231,
+      "potential": 231,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 4,
+      "maxWinningTurns": null
+    },
     "v7/late/basic/heuristic/pure/contaminator/3.5": {
       "n": 19,
       "wins": 0,
@@ -14898,6 +17682,46 @@
       "extraTurnLosses": 2,
       "maxWinningTurns": 2
     },
+    "v7/late/basic/search/pure/contaminator/3.5": {
+      "n": 5,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 2,
+      "special": 2.2,
+      "activationRate": 0,
+      "damage": 227,
+      "potential": 227,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
+    "v7/late/basic/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 3.2,
+      "special": 4.8,
+      "activationRate": 0,
+      "damage": 338,
+      "potential": 338,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 2,
+      "maxWinningTurns": null
+    },
     "v7/middle/wound/heuristic/utility/screecher/3.2": {
       "n": 23,
       "wins": 20,
@@ -14936,6 +17760,26 @@
       "utilization": 0.9643312101910828,
       "overkill": 56,
       "extraTurnLosses": 1,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/wound/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7.5,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 3.75,
+      "activationRate": 1,
+      "damage": 264,
+      "potential": 276,
+      "utilization": 0.9565217391304348,
+      "overkill": 12,
+      "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
     "v7/late/wound/heuristic/utility/contaminator/3.5": {
@@ -14978,6 +17822,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/late/wound/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 410,
+      "potential": 443,
+      "utilization": 0.9255079006772009,
+      "overkill": 33,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/middle/heat/heuristic/utility/screecher/3.2": {
       "n": 23,
       "wins": 23,
@@ -15018,6 +17882,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/heat/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 264,
+      "potential": 268,
+      "utilization": 0.9850746268656716,
+      "overkill": 4,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/heat/heuristic/utility/contaminator/3.5": {
       "n": 21,
       "wins": 21,
@@ -15055,6 +17939,26 @@
       "potential": 1935,
       "utilization": 0.889922480620155,
       "overkill": 213,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/heat/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 410,
+      "potential": 465,
+      "utilization": 0.8817204301075269,
+      "overkill": 55,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
@@ -15098,6 +18002,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/blast/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 264,
+      "potential": 280,
+      "utilization": 0.9428571428571428,
+      "overkill": 16,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/blast/heuristic/utility/contaminator/3.5": {
       "n": 21,
       "wins": 21,
@@ -15135,6 +18059,26 @@
       "potential": 1749,
       "utilization": 0.9845626072041166,
       "overkill": 27,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/late/blast/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.2,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 410,
+      "potential": 416,
+      "utilization": 0.9855769230769231,
+      "overkill": 6,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -15178,6 +18122,26 @@
       "extraTurnLosses": 2,
       "maxWinningTurns": 3
     },
+    "v7/middle/recoil/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 3,
+      "winRate": 0.75,
+      "ci95": [
+        0.25,
+        1
+      ],
+      "winningShots": 7.666666666666667,
+      "winningTurns": 1.6666666666666667,
+      "enemyActions": 1,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 263,
+      "potential": 273,
+      "utilization": 0.9633699633699634,
+      "overkill": 10,
+      "extraTurnLosses": 1,
+      "maxWinningTurns": 2
+    },
     "v7/late/recoil/heuristic/utility/contaminator/3.5": {
       "n": 21,
       "wins": 18,
@@ -15215,6 +18179,26 @@
       "potential": 1786,
       "utilization": 0.9641657334826428,
       "overkill": 64,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/late/recoil/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.4,
+      "winningTurns": 1.6,
+      "enemyActions": 0.6,
+      "special": 4.6,
+      "activationRate": 1,
+      "damage": 410,
+      "potential": 417,
+      "utilization": 0.9832134292565947,
+      "overkill": 7,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -15258,6 +18242,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/cauterize/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.25,
+      "winningTurns": 1.5,
+      "enemyActions": 0.5,
+      "special": 3.75,
+      "activationRate": 1,
+      "damage": 264,
+      "potential": 319,
+      "utilization": 0.8275862068965517,
+      "overkill": 55,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/late/cauterize/heuristic/utility/contaminator/3.5": {
       "n": 21,
       "wins": 21,
@@ -15295,6 +18299,26 @@
       "potential": 1780,
       "utilization": 0.9674157303370786,
       "overkill": 58,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/late/cauterize/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.2,
+      "winningTurns": 1.2,
+      "enemyActions": 0.2,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 410,
+      "potential": 575,
+      "utilization": 0.7130434782608696,
+      "overkill": 165,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -15338,6 +18362,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/concussion/search/utility/screecher/3.2": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.75,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3.25,
+      "activationRate": 1,
+      "damage": 264,
+      "potential": 264,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/concussion/heuristic/utility/contaminator/3.5": {
       "n": 21,
       "wins": 21,
@@ -15377,6 +18421,26 @@
       "overkill": 62,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
+    },
+    "v7/late/concussion/search/utility/contaminator/3.5": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 410,
+      "potential": 422,
+      "utilization": 0.9715639810426541,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
     },
     "v7/middle/basic/heuristic/pure/groundshaker/3.2": {
       "n": 28,
@@ -15458,6 +18522,46 @@
       "extraTurnLosses": 18,
       "maxWinningTurns": null
     },
+    "v7/middle/basic/search/pure/groundshaker/3.2": {
+      "n": 3,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 2,
+      "special": 1.6666666666666667,
+      "activationRate": 0,
+      "damage": 133,
+      "potential": 133,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
+    "v7/middle/basic/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 2.6666666666666665,
+      "special": 3,
+      "activationRate": 0,
+      "damage": 169,
+      "potential": 169,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 2,
+      "maxWinningTurns": null
+    },
     "v7/middle/wound/heuristic/utility/groundshaker/3.2": {
       "n": 28,
       "wins": 17,
@@ -15498,6 +18602,26 @@
       "extraTurnLosses": 5,
       "maxWinningTurns": 3
     },
+    "v7/middle/wound/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 2,
+      "winRate": 0.6666666666666666,
+      "ci95": [
+        0,
+        1
+      ],
+      "winningShots": 8,
+      "winningTurns": 2,
+      "enemyActions": 1.6666666666666667,
+      "special": 4.666666666666667,
+      "activationRate": 1,
+      "damage": 215,
+      "potential": 221,
+      "utilization": 0.9728506787330317,
+      "overkill": 6,
+      "extraTurnLosses": 1,
+      "maxWinningTurns": 2
+    },
     "v7/middle/heat/heuristic/utility/groundshaker/3.2": {
       "n": 28,
       "wins": 28,
@@ -15534,6 +18658,26 @@
       "damage": 2016,
       "potential": 2018,
       "utilization": 0.9990089197224975,
+      "overkill": 2,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/heat/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.666666666666667,
+      "winningTurns": 1.3333333333333333,
+      "enemyActions": 0.3333333333333333,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 216,
+      "potential": 218,
+      "utilization": 0.9908256880733946,
       "overkill": 2,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
@@ -15578,6 +18722,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/blast/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6.666666666666667,
+      "winningTurns": 1.6666666666666667,
+      "enemyActions": 0.6666666666666666,
+      "special": 3.3333333333333335,
+      "activationRate": 1,
+      "damage": 216,
+      "potential": 224,
+      "utilization": 0.9642857142857143,
+      "overkill": 8,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/middle/recoil/heuristic/utility/groundshaker/3.2": {
       "n": 28,
       "wins": 8,
@@ -15618,6 +18782,26 @@
       "extraTurnLosses": 9,
       "maxWinningTurns": 3
     },
+    "v7/middle/recoil/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 2,
+      "winRate": 0.6666666666666666,
+      "ci95": [
+        0,
+        1
+      ],
+      "winningShots": 8.5,
+      "winningTurns": 2,
+      "enemyActions": 1.3333333333333333,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 209,
+      "potential": 215,
+      "utilization": 0.9720930232558139,
+      "overkill": 6,
+      "extraTurnLosses": 1,
+      "maxWinningTurns": 2
+    },
     "v7/middle/cauterize/heuristic/utility/groundshaker/3.2": {
       "n": 28,
       "wins": 26,
@@ -15655,6 +18839,26 @@
       "potential": 2070,
       "utilization": 0.9739130434782609,
       "overkill": 54,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/middle/cauterize/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 1.6666666666666667,
+      "enemyActions": 0.6666666666666666,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 216,
+      "potential": 233,
+      "utilization": 0.927038626609442,
+      "overkill": 17,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -15697,6 +18901,26 @@
       "overkill": 165,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
+    },
+    "v7/middle/concussion/search/utility/groundshaker/3.2": {
+      "n": 3,
+      "wins": 3,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4.333333333333333,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 216,
+      "potential": 251,
+      "utilization": 0.8605577689243028,
+      "overkill": 35,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
     },
     "v7/early/basic/heuristic/pure/fast/6": {
       "n": 17,
@@ -15778,6 +19002,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/basic/search/pure/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/basic/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/wound/heuristic/utility/fast/6": {
       "n": 17,
       "wins": 17,
@@ -15815,6 +19079,26 @@
       "potential": 476,
       "utilization": 0.8571428571428571,
       "overkill": 68,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/wound/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -15858,6 +19142,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/heat/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/blast/heuristic/utility/fast/6": {
       "n": 17,
       "wins": 17,
@@ -15895,6 +19199,26 @@
       "potential": 476,
       "utilization": 0.8571428571428571,
       "overkill": 68,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/blast/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -15938,6 +19262,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/recoil/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/cauterize/heuristic/utility/fast/6": {
       "n": 17,
       "wins": 17,
@@ -15978,6 +19322,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/cauterize/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/concussion/heuristic/utility/fast/6": {
       "n": 17,
       "wins": 17,
@@ -16015,6 +19379,26 @@
       "potential": 476,
       "utilization": 0.8571428571428571,
       "overkill": 68,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/concussion/search/utility/fast/6": {
+      "n": 5,
+      "wins": 5,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 6,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 0,
+      "activationRate": 0,
+      "damage": 120,
+      "potential": 140,
+      "utilization": 0.8571428571428571,
+      "overkill": 20,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -16098,6 +19482,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "exploration/early/basic/search/pure/brute/9": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9.75,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 1.25,
+      "activationRate": 0,
+      "damage": 160,
+      "potential": 172,
+      "utilization": 0.9302325581395349,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "exploration/early/basic/search/utility/brute/9": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9.75,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 1.25,
+      "activationRate": 0,
+      "damage": 160,
+      "potential": 172,
+      "utilization": 0.9302325581395349,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "exploration/early/wound/heuristic/utility/brute/9": {
       "n": 37,
       "wins": 37,
@@ -16135,6 +19559,26 @@
       "potential": 1592,
       "utilization": 0.9296482412060302,
       "overkill": 112,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "exploration/early/wound/search/utility/brute/9": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9.25,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 1.5,
+      "activationRate": 0,
+      "damage": 160,
+      "potential": 166,
+      "utilization": 0.963855421686747,
+      "overkill": 6,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -16218,6 +19662,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 5
     },
+    "v7/middle/basic/search/pure/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 18,
+      "winningTurns": 5,
+      "enemyActions": 4,
+      "special": 1.25,
+      "activationRate": 0,
+      "damage": 312,
+      "potential": 325,
+      "utilization": 0.96,
+      "overkill": 13,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
+    "v7/middle/basic/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 18,
+      "winningTurns": 5,
+      "enemyActions": 4,
+      "special": 3.25,
+      "activationRate": 0,
+      "damage": 312,
+      "potential": 317,
+      "utilization": 0.9842271293375394,
+      "overkill": 5,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 5
+    },
     "v7/middle/wound/heuristic/utility/contaminator/8": {
       "n": 16,
       "wins": 16,
@@ -16255,6 +19739,26 @@
       "potential": 1277,
       "utilization": 0.9772905246671887,
       "overkill": 29,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
+    "v7/middle/wound/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 12.5,
+      "winningTurns": 3.5,
+      "enemyActions": 2.5,
+      "special": 3.75,
+      "activationRate": 1,
+      "damage": 312,
+      "potential": 323,
+      "utilization": 0.9659442724458205,
+      "overkill": 11,
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
@@ -16298,6 +19802,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/heat/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.75,
+      "winningTurns": 2.5,
+      "enemyActions": 1.5,
+      "special": 3.25,
+      "activationRate": 1,
+      "damage": 312,
+      "potential": 318,
+      "utilization": 0.9811320754716981,
+      "overkill": 6,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/middle/blast/heuristic/utility/contaminator/8": {
       "n": 16,
       "wins": 16,
@@ -16335,6 +19859,26 @@
       "potential": 1290,
       "utilization": 0.9674418604651163,
       "overkill": 42,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/middle/blast/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 8.75,
+      "winningTurns": 2.5,
+      "enemyActions": 1.5,
+      "special": 3.5,
+      "activationRate": 1,
+      "damage": 312,
+      "potential": 320,
+      "utilization": 0.975,
+      "overkill": 8,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -16378,6 +19922,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
+    "v7/middle/recoil/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 12.5,
+      "winningTurns": 3.5,
+      "enemyActions": 2.5,
+      "special": 5.25,
+      "activationRate": 1,
+      "damage": 312,
+      "potential": 319,
+      "utilization": 0.9780564263322884,
+      "overkill": 7,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
     "v7/middle/cauterize/heuristic/utility/contaminator/8": {
       "n": 16,
       "wins": 16,
@@ -16415,6 +19979,26 @@
       "potential": 1271,
       "utilization": 0.981904012588513,
       "overkill": 23,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 4
+    },
+    "v7/middle/cauterize/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9,
+      "winningTurns": 2.75,
+      "enemyActions": 1.75,
+      "special": 4.25,
+      "activationRate": 1,
+      "damage": 312,
+      "potential": 317,
+      "utilization": 0.9842271293375394,
+      "overkill": 5,
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
@@ -16457,6 +20041,26 @@
       "overkill": 93,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
+    },
+    "v7/middle/concussion/search/utility/contaminator/8": {
+      "n": 4,
+      "wins": 4,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 312,
+      "potential": 357,
+      "utilization": 0.8739495798319328,
+      "overkill": 45,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
     },
     "v7/early/basic/heuristic/pure/brute/6": {
       "n": 23,
@@ -16538,6 +20142,46 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/early/basic/search/pure/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 1,
+      "activationRate": 0,
+      "damage": 76,
+      "potential": 84,
+      "utilization": 0.9047619047619048,
+      "overkill": 8,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/early/basic/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 3,
+      "activationRate": 0,
+      "damage": 76,
+      "potential": 78,
+      "utilization": 0.9743589743589743,
+      "overkill": 2,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/early/wound/heuristic/utility/brute/6": {
       "n": 23,
       "wins": 23,
@@ -16575,6 +20219,26 @@
       "potential": 922,
       "utilization": 0.9479392624728851,
       "overkill": 48,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/wound/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 2,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 80,
+      "utilization": 0.95,
+      "overkill": 4,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -16618,6 +20282,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/heat/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.5,
+      "winningTurns": 1.5,
+      "enemyActions": 0.5,
+      "special": 2.5,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 80,
+      "utilization": 0.95,
+      "overkill": 4,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/blast/heuristic/utility/brute/6": {
       "n": 23,
       "wins": 23,
@@ -16655,6 +20339,26 @@
       "potential": 920,
       "utilization": 0.95,
       "overkill": 46,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/blast/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 80,
+      "utilization": 0.95,
+      "overkill": 4,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -16698,6 +20402,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/early/recoil/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 7,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 2,
+      "activationRate": 0.5,
+      "damage": 76,
+      "potential": 79,
+      "utilization": 0.9620253164556962,
+      "overkill": 3,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
     "v7/early/cauterize/heuristic/utility/brute/6": {
       "n": 23,
       "wins": 23,
@@ -16738,6 +20462,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/early/cauterize/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 9,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 3,
+      "activationRate": 0,
+      "damage": 76,
+      "potential": 78,
+      "utilization": 0.9743589743589743,
+      "overkill": 2,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/early/concussion/heuristic/utility/brute/6": {
       "n": 23,
       "wins": 23,
@@ -16775,6 +20519,26 @@
       "potential": 888,
       "utilization": 0.9842342342342343,
       "overkill": 14,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 2
+    },
+    "v7/early/concussion/search/utility/brute/6": {
+      "n": 2,
+      "wins": 2,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5.5,
+      "winningTurns": 2,
+      "enemyActions": 1,
+      "special": 2.5,
+      "activationRate": 0,
+      "damage": 76,
+      "potential": 78,
+      "utilization": 0.9743589743589743,
+      "overkill": 2,
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
@@ -16858,6 +20622,46 @@
       "extraTurnLosses": 8,
       "maxWinningTurns": 5
     },
+    "v7/middle/basic/search/pure/contaminator/6": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 4,
+      "special": 1,
+      "activationRate": 0,
+      "damage": 77,
+      "potential": 77,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 1,
+      "maxWinningTurns": null
+    },
+    "v7/middle/basic/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 4,
+      "special": 3,
+      "activationRate": 0,
+      "damage": 75,
+      "potential": 75,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 1,
+      "maxWinningTurns": null
+    },
     "v7/late/basic/heuristic/pure/groundshaker/0.5": {
       "n": 3,
       "wins": 0,
@@ -16938,6 +20742,46 @@
       "extraTurnLosses": 1,
       "maxWinningTurns": null
     },
+    "v7/late/basic/search/pure/groundshaker/0.5": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 1,
+      "special": 3,
+      "activationRate": 0,
+      "damage": 39,
+      "potential": 39,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
+    "v7/late/basic/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 1,
+      "special": 2,
+      "activationRate": 0,
+      "damage": 38,
+      "potential": 38,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": null
+    },
     "v7/middle/wound/heuristic/utility/contaminator/6": {
       "n": 14,
       "wins": 14,
@@ -16975,6 +20819,26 @@
       "potential": 1124,
       "utilization": 0.9715302491103203,
       "overkill": 32,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
+    "v7/middle/wound/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 11,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 78,
+      "potential": 79,
+      "utilization": 0.9873417721518988,
+      "overkill": 1,
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
@@ -17018,6 +20882,26 @@
       "extraTurnLosses": 1,
       "maxWinningTurns": 1
     },
+    "v7/late/wound/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 76,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/middle/heat/heuristic/utility/contaminator/6": {
       "n": 14,
       "wins": 14,
@@ -17058,6 +20942,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/heat/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 78,
+      "potential": 90,
+      "utilization": 0.8666666666666667,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/heat/heuristic/utility/groundshaker/0.5": {
       "n": 3,
       "wins": 3,
@@ -17095,6 +20999,26 @@
       "potential": 279,
       "utilization": 0.8172043010752689,
       "overkill": 51,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/heat/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 3,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 93,
+      "utilization": 0.8172043010752689,
+      "overkill": 17,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
@@ -17138,6 +21062,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/blast/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 10,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 78,
+      "potential": 81,
+      "utilization": 0.9629629629629629,
+      "overkill": 3,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/late/blast/heuristic/utility/groundshaker/0.5": {
       "n": 3,
       "wins": 1,
@@ -17175,6 +21119,26 @@
       "potential": 190,
       "utilization": 0.9736842105263158,
       "overkill": 5,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/blast/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 5,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 78,
+      "utilization": 0.9743589743589743,
+      "overkill": 2,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
@@ -17218,6 +21182,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 4
     },
+    "v7/middle/recoil/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 13,
+      "winningTurns": 3,
+      "enemyActions": 2,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 78,
+      "potential": 80,
+      "utilization": 0.975,
+      "overkill": 2,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 3
+    },
     "v7/late/recoil/heuristic/utility/groundshaker/0.5": {
       "n": 3,
       "wins": 0,
@@ -17256,6 +21240,26 @@
       "utilization": 1,
       "overkill": 0,
       "extraTurnLosses": 3,
+      "maxWinningTurns": null
+    },
+    "v7/late/recoil/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 0,
+      "winRate": 0,
+      "ci95": [
+        0,
+        0
+      ],
+      "winningShots": null,
+      "winningTurns": null,
+      "enemyActions": 1,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 69,
+      "potential": 69,
+      "utilization": 1,
+      "overkill": 0,
+      "extraTurnLosses": 1,
       "maxWinningTurns": null
     },
     "v7/middle/cauterize/heuristic/utility/contaminator/6": {
@@ -17298,6 +21302,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 3
     },
+    "v7/middle/cauterize/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 78,
+      "potential": 79,
+      "utilization": 0.9873417721518988,
+      "overkill": 1,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/cauterize/heuristic/utility/groundshaker/0.5": {
       "n": 3,
       "wins": 0,
@@ -17337,6 +21361,26 @@
       "overkill": 2,
       "extraTurnLosses": 2,
       "maxWinningTurns": 2
+    },
+    "v7/late/cauterize/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 116,
+      "utilization": 0.6551724137931034,
+      "overkill": 40,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
     },
     "v7/middle/concussion/heuristic/utility/contaminator/6": {
       "n": 14,
@@ -17378,6 +21422,26 @@
       "extraTurnLosses": 0,
       "maxWinningTurns": 2
     },
+    "v7/middle/concussion/search/utility/contaminator/6": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 4,
+      "activationRate": 1,
+      "damage": 78,
+      "potential": 90,
+      "utilization": 0.8666666666666667,
+      "overkill": 12,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
     "v7/late/concussion/heuristic/utility/groundshaker/0.5": {
       "n": 3,
       "wins": 3,
@@ -17415,6 +21479,26 @@
       "potential": 237,
       "utilization": 0.9620253164556962,
       "overkill": 9,
+      "extraTurnLosses": 0,
+      "maxWinningTurns": 1
+    },
+    "v7/late/concussion/search/utility/groundshaker/0.5": {
+      "n": 1,
+      "wins": 1,
+      "winRate": 1,
+      "ci95": [
+        1,
+        1
+      ],
+      "winningShots": 4,
+      "winningTurns": 1,
+      "enemyActions": 0,
+      "special": 3,
+      "activationRate": 1,
+      "damage": 76,
+      "potential": 79,
+      "utilization": 0.9620253164556962,
+      "overkill": 3,
       "extraTurnLosses": 0,
       "maxWinningTurns": 1
     },
