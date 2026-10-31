@@ -93,7 +93,10 @@ export class LevelSession {
   }
   spawn() {
     const wave = this.node.waves[this.wave];
-    this.enemy = { ...this.p.createEnemyState(wave.enemy), distance: wave.distance }; this.phase = 'combat';
+    const state = this.p.createProgressionEnemyState
+      ? this.p.createProgressionEnemyState(wave.enemy, this.depth, 'v7', this.depth === 8 && this.wave >= 2)
+      : this.p.createEnemyState(wave.enemy);
+    this.enemy = { ...state, distance: wave.distance }; this.phase = 'combat';
   }
   add(id) { if (total(this.run.stock) < 14) this.run.stock[id] = (this.run.stock[id] ?? 0) + 1; }
   chooseDiscovery(build) {

@@ -1,23 +1,18 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
-import { createHash } from 'node:crypto';
-import { build } from 'esbuild';
-import { fileURLToPath } from 'node:url';
 import { production, root } from './runtime.mjs';
 import { createModel } from '../../simulation/model.mjs';
 import { mean, quantile, rng } from '../../simulation/common.mjs';
 import { combat, PACKS, productionModel, BASIC_IDS } from './combat.mjs';
 import { collectProduction, collectV7 } from './inventory.mjs';
+import { fingerprint } from './provenance.mjs';
 const p = await production(), config = JSON.parse(await readFile(new URL('simulation/candidates.json', root))).v7;
 const settings = JSON.parse(await readFile(new URL('experiments/level-v7/candidate-6.json', root)));
 const args = process.argv.slice(2), id = args[0] ?? 'baseline', split = args[1] ?? 'exploratory';
 const candidate = id === 'baseline' ? null : JSON.parse(await readFile(new URL(`tools/hp-balance/candidates/${id}.json`, root)));
 const firstSeed = split === 'holdout' ? 5810001 : 5110001, count = 80;
 const output = new URL('tools/hp-balance/results/', root); await mkdir(output, { recursive: true });
-const metadata = await build({ absWorkingDir: fileURLToPath(root), entryPoints: ['tools/hp-balance/evaluate.mjs', 'tools/hp-balance/bridge.ts'], outdir: 'unused', bundle: true, write: false, platform: 'node', packages: 'external', format: 'esm', metafile: true });
-const sources = [...new Set([...Object.keys(metadata.metafile.inputs), 'tools/hp-balance/PROTOCOL.md', 'package-lock.json', 'simulation/candidates.json', 'experiments/level-v7/candidate-6.json'])].sort();
-const hasher = createHash('sha256'); for (const source of sources) hasher.update(source).update((await readFile(new URL(source, root), 'utf8')).replace(/\r\n/g, '\n'));
-const hash = hasher.update(JSON.stringify(candidate)).digest('hex');
+const { hash, sources } = await fingerprint(candidate);
 if (split === 'holdout') {
   if (!candidate) throw new Error('홀드아웃은 최종 HP 후보에만 사용');
   const path = new URL('holdout-registry.json', output); let registry = [];
@@ -33,7 +28,7 @@ for (let seed = firstSeed; seed < firstSeed + count; seed++) {
     for (const archetype of profile === 'v7' ? Object.keys(PACKS) : ['basic', 'wound']) {
       const observations = profile === 'v7' ? collectV7(seed, archetype, p, config, settings) : collectProduction(seed, archetype, p);
       acquisition.push({ seed, profile, archetype, phases: observations.map(row => row.label) });
-      for (const observation of observations) for (const strategy of ['heuristic', 'competent']) {
+      for (const observation of observations) for (const strategy of seed < firstSeed + 16 ? ['heuristic', 'competent', 'search'] : ['heuristic', 'competent']) {
         for (const utility of archetype === 'basic' ? [false, true] : [true]) {
           const inventory = structuredClone(observation.inventory);
           if (archetype === 'basic' && !utility) inventory.stock = Object.fromEntries(Object.entries(inventory.stock).filter(([id]) => BASIC_IDS.has(id)));

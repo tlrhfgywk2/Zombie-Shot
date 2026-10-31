@@ -8,3 +8,4 @@ export { generateAttachmentReward } from '../../src/progression/AttachmentReward
 export { AMMO_DEFINITIONS } from '../../src/data/ammoDefinitions';
 export { Player } from '../../src/entities/Player';
 export { ExplorationRun } from '../../src/exploration/ExplorationRun';
+export { createProgressionEnemyState } from '../../src/data/enemyDefinitions';

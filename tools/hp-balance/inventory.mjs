@@ -3,7 +3,8 @@ import { createModel } from '../../simulation/model.mjs';
 import { BASIC_IDS } from './combat.mjs';
 export function collectV7(seed, build, p, config, settings) {
   const actualBuild = build === 'basic' ? 'wound' : build;
-  const session = new LevelSession(p, createModel(p, config), config, seed, actualBuild, 'nine-linked', settings);
+  const reference = { ...p, createProgressionEnemyState: type => p.createEnemyState(type) };
+  const session = new LevelSession(reference, createModel(p, config), config, seed, actualBuild, 'nine-linked', settings);
   const records = [];
   for (let step = 0; step < 200 && !['victory', 'defeat', 'timeout'].includes(session.phase); step++) {
     if (session.phase === 'combat') {

@@ -6,19 +6,32 @@ import { createModel } from '../../simulation/model.mjs';
 import { rng } from '../../simulation/common.mjs';
 import { choose, BASIC_IDS, PACKS, combat, productionModel, activated } from './combat.mjs';
 import { buyProductionBundle } from './inventory.mjs';
+import { fingerprint } from './provenance.mjs';
 const p = await production(), id = process.argv[2] ?? 'baseline';
 const curve = id === 'baseline' ? null : JSON.parse(await readFile(new URL(`tools/hp-balance/candidates/${id}.json`, root)));
+const split = process.argv[3] ?? 'exploratory', firstSeed = split === 'holdout' ? 5810001 : 5110001, count = 80;
+const output = new URL('tools/hp-balance/results/', root); await mkdir(output, { recursive: true });
+const proof = await fingerprint(curve);
+if (split === 'holdout') {
+  if (!curve) throw new Error('홀드아웃은 최종 후보만 실행');
+  const path = new URL('holdout-registry.json', output); let registry = [];
+  try { registry = JSON.parse(await readFile(path)); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  const { assertFreshOrExactReplay } = await import('../../simulation/exposure.mjs');
+  assertFreshOrExactReplay(registry, { firstSeed, count, hash: proof.hash });
+  if (!registry.some(row => row.hash === proof.hash)) { registry.push({ firstSeed, count, hash: proof.hash, id }); await writeFile(path, JSON.stringify(registry, null, 2)); }
+}
 const config = JSON.parse(await readFile(new URL('simulation/candidates.json', root))).v7;
 const settings = JSON.parse(await readFile(new URL('experiments/level-v7/candidate-6.json', root)));
 const rows = [];
 const hp = (type, depth, profile) => curve ? p.interpolateEnemyHp(type, depth, curve[profile]) : p.ENEMY_DEFINITIONS[type].hp;
-for (const profile of ['exploration', 'v7']) for (const archetype of profile === 'v7' ? Object.keys(PACKS) : ['basic', 'wound']) for (const strategy of ['heuristic', 'competent']) {
-  for (let seed = 5110001; seed <= 5110080; seed++) {
+for (const profile of ['exploration', 'v7']) for (const archetype of profile === 'v7' ? Object.keys(PACKS) : ['basic', 'wound']) for (const strategy of ['heuristic', 'competent', 'search']) {
+  for (let seed = firstSeed; seed < firstSeed + (strategy === 'search' ? 16 : count); seed++) {
     const logs = [];
     if (profile === 'v7') {
       let s;
       const getHp = type => s.depth === 8 && s.wave >= 2 && curve?.[profile].reserveHp?.[type] || hp(type, s.depth, profile);
-      const overlay = { ...p, createEnemyState: type => ({ ...p.createEnemyState(type), hp: getHp(type), maxHp: getHp(type) }) };
+      const makeEnemy = type => ({ ...p.createEnemyState(type), hp: getHp(type), maxHp: getHp(type) });
+      const overlay = { ...p, createEnemyState: makeEnemy, createProgressionEnemyState: makeEnemy };
       s = new LevelSession(overlay, createModel(p, config), config, seed, archetype === 'basic' ? 'wound' : archetype, 'nine-linked', settings);
       for (let step = 0; step < 250 && !['victory', 'defeat', 'timeout'].includes(s.phase); step++) {
         if (s.phase === 'combat') {
@@ -61,5 +74,5 @@ for (const profile of ['exploration', 'v7']) for (const archetype of profile ===
   const cell = rows.filter(row => row.profile === profile && row.archetype === archetype && row.strategy === strategy);
   console.log(`${id}/${profile}/${archetype}/${strategy}: ${cell.filter(row => row.won).length}/${cell.length}`);
 }
-const output = new URL('tools/hp-balance/results/', root); await mkdir(output, { recursive: true });
-await writeFile(new URL(`${id}-campaign.json.gz`, output), gzipSync(JSON.stringify(rows)));
+await writeFile(new URL(`${id}-${split}-campaign.json.gz`, output), gzipSync(JSON.stringify(rows)));
+await writeFile(new URL(`${id}-${split}-campaign-proof.json`, output), JSON.stringify({ ...proof, id, split, firstSeed, count }, null, 2));

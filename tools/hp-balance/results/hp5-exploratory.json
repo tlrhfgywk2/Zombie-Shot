@@ -3,7 +3,7 @@
   "split": "exploratory",
   "firstSeed": 5110001,
   "count": 80,
-  "hash": "6adfe205fd068ad579163fc362b8c99f42e7b10904227f425e1c97b55531cebf",
+  "hash": "2c0e74910f0033d270dcbd07b5d9f89bae104210831e9c871f280d03e21e6ceb",
   "sources": [
     "experiments/level-v7/candidate-6.json",
     "experiments/level-v7/design.mjs",
@@ -22,6 +22,7 @@
     "src/combat/Magazine.ts",
     "src/combat/RecoilPenalty.ts",
     "src/combat/WeaponTraits.ts",
+    "src/core/Game.ts",
     "src/data/ammoDefinitions.ts",
     "src/data/attachmentDefinitions.ts",
     "src/data/enemyActionDefinitions.ts",
@@ -31,14 +32,17 @@
     "src/data/trainingEnemy.ts",
     "src/data/weaponDefinitions.ts",
     "src/entities/Player.ts",
+    "src/entities/Zombie.ts",
     "src/exploration/ExplorationRun.ts",
     "src/progression/AmmoRewards.ts",
     "src/progression/AttachmentRewards.ts",
     "tools/hp-balance/PROTOCOL.md",
     "tools/hp-balance/bridge.ts",
+    "tools/hp-balance/campaign.mjs",
     "tools/hp-balance/combat.mjs",
     "tools/hp-balance/evaluate.mjs",
     "tools/hp-balance/inventory.mjs",
+    "tools/hp-balance/provenance.mjs",
     "tools/hp-balance/runtime.mjs"
   ],
   "candidate": {
@@ -141,14 +145,14 @@
         "groundshaker": [
           54,
           58,
-          66,
+          62,
           64,
           70
         ],
         "screecher": [
           46,
           50,
-          60,
+          56,
           58,
           64
         ]
