@@ -1,0 +1,49 @@
+hp2/exploratory: 20/80
+hp2/exploratory: 40/80
+hp2/exploratory: 60/80
+hp2/exploratory: 80/80
+exploration/entry/basic/competent/pure: 100.0% / 2.00턴
+exploration/entry/basic/competent/utility: 100.0% / 2.00턴
+exploration/early/basic/competent/pure: 100.0% / 2.46턴
+exploration/early/basic/competent/utility: 100.0% / 2.46턴
+exploration/middle/basic/competent/pure: 100.0% / 5.21턴
+exploration/middle/basic/competent/utility: 100.0% / 5.21턴
+exploration/late/basic/competent/pure: 0.0% / undefined턴
+exploration/late/basic/competent/utility: 0.0% / undefined턴
+exploration/entry/wound/competent/utility: 100.0% / 2.00턴
+exploration/early/wound/competent/utility: 100.0% / 2.46턴
+exploration/middle/wound/competent/utility: 98.3% / 5.09턴
+exploration/late/wound/competent/utility: 33.8% / 5.81턴
+v7/entry/basic/competent/pure: 100.0% / 2.00턴
+v7/entry/basic/competent/utility: 100.0% / 2.00턴
+v7/early/basic/competent/pure: 100.0% / 2.23턴
+v7/early/basic/competent/utility: 100.0% / 2.23턴
+v7/middle/basic/competent/pure: 28.1% / 3.40턴
+v7/middle/basic/competent/utility: 35.6% / 3.95턴
+v7/late/basic/competent/pure: 3.6% / 2.00턴
+v7/late/basic/competent/utility: 4.4% / 2.00턴
+v7/entry/wound/competent/utility: 100.0% / 2.00턴
+v7/early/wound/competent/utility: 100.0% / 2.00턴
+v7/middle/wound/competent/utility: 93.1% / 3.12턴
+v7/late/wound/competent/utility: 61.9% / 2.00턴
+v7/entry/heat/competent/utility: 100.0% / 2.00턴
+v7/early/heat/competent/utility: 100.0% / 1.98턴
+v7/middle/heat/competent/utility: 100.0% / 2.64턴
+v7/late/heat/competent/utility: 75.0% / 1.05턴
+v7/entry/blast/competent/utility: 100.0% / 2.00턴
+v7/early/blast/competent/utility: 100.0% / 2.00턴
+v7/middle/blast/competent/utility: 100.0% / 2.79턴
+v7/late/blast/competent/utility: 90.0% / 2.15턴
+v7/entry/recoil/competent/utility: 100.0% / 2.00턴
+v7/early/recoil/competent/utility: 100.0% / 2.00턴
+v7/middle/recoil/competent/utility: 84.4% / 3.73턴
+v7/late/recoil/competent/utility: 46.2% / 2.14턴
+v7/entry/cauterize/competent/utility: 100.0% / 2.00턴
+v7/early/cauterize/competent/utility: 100.0% / 2.17턴
+v7/middle/cauterize/competent/utility: 91.9% / 3.04턴
+v7/late/cauterize/competent/utility: 62.5% / 2.01턴
+v7/entry/concussion/competent/utility: 100.0% / 2.00턴
+v7/early/concussion/competent/utility: 100.0% / 1.96턴
+v7/middle/concussion/competent/utility: 100.0% / 2.59턴
+v7/late/concussion/competent/utility: 96.3% / 1.97턴
+

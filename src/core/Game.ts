@@ -574,7 +574,7 @@ export class Game {
       this.player.startStage();
       this.currentRoster = [active.enemy!];
       this.enemyIndex = 0;
-      this.zombie = new Zombie(active.enemy!);
+      this.zombie = new Zombie(active.enemy!, false, run.depth);
       this.zombie.applyState({ ...this.zombie.snapshot(), distance: Math.max(3, this.zombie.distance - run.nextDistancePenalty) });
       run.nextDistancePenalty = 0;
       this.ui.hideExploration();

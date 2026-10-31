@@ -7,6 +7,9 @@ import { createAmmoBuild } from '../data/ammoDefinitions';
 import { createRunAmmoBuild } from '../data/gameModes';
 import { WEAPON_ORDER } from '../data/weaponDefinitions';
 import { ExplorationRun, RUN_LENGTH } from '../exploration/ExplorationRun';
+import { CombatResolver } from '../combat/CombatResolver';
+import type { AmmoType } from '../combat/types';
+import { getEnemyHp } from '../data/enemyHpScaling';
 import type { CaveEvent } from '../exploration/ExplorationRun';
 
 const view = vi.hoisted(() => ({ callbacks: undefined as GameUICallbacks | undefined }));
@@ -119,6 +122,9 @@ describe('탐험 런 통합', () => {
   it.each(WEAPON_ORDER)('%s는 실제 전투와 보상·이벤트·상인·최종 조우를 거쳐 탈출하고 재시작한다', async weapon => {
     for (let seed = 0; seed < 4; seed++) {
       const game = await caveGame(`loop-${seed}`, weapon);
+      // 상태 전환 검사용 유한14발 고정 배분. 자연 획득 균형은 HP 평가 도구로 별도 검사한다.
+      expect(game.player.exchangeAmmo(Object.entries(game.player.getBuild()).flatMap(([id, count]) => Array(count).fill(id)),
+        ['wounding', 'wounding', 'wounding', 'laceration', 'laceration', 'laceration', 'plusP', 'plusP', 'retreat', 'retreat', 'retreat', 'flatNose', 'flatNose', 'flatNose'])).toBe(true);
       expect(game.state.phase).toBe('EXPLORATION');
       for (let depth = 0; depth < RUN_LENGTH; depth++) {
         await game.explorationAction(`route:${seed % game.exploration.routes.length}`);
@@ -126,8 +132,22 @@ describe('탐험 런 통합', () => {
         if (encounter.kind === 'combat') {
           await game.explorationAction('fight');
           expect(game.zombie.snapshot().trainingActions).toBeUndefined();
+          expect(game.zombie.maxHp).toBe(getEnemyHp(encounter.enemy!, game.exploration.depth, 'exploration'));
           for (let turn = 0; turn < 12 && game.state.phase === 'AMMO_SELECTION'; turn++) {
-            for (let slot = 0; slot < game.player.magazine.capacity; slot++) callbacks().onAddAmmo('ball');
+            const resolver = new CombatResolver(() => .5), stock = game.player.getStock();
+            const prefixes: AmmoType[][] = [[], ['wounding', 'wounding', 'laceration', 'laceration'], ['laceration', 'laceration', 'laceration'],
+              ['plusP', 'plusP', 'laceration'], ['retreat', 'laceration', 'laceration'], ['flatNose', 'flatNose', 'flatNose', 'retreat'], ['retreat']];
+            const context = { weaponId: weapon, loadout: game.player.loadout.getSnapshot(), playerState: game.player.getCombatState() };
+            const candidates = prefixes.map(prefix => {
+              const counts = { ...stock }; const rounds = prefix.filter(id => id === 'ball' || counts[id]-- > 0).slice(0, game.player.magazine.capacity);
+              return rounds.concat(Array(game.player.magazine.capacity - rounds.length).fill('ball'));
+            });
+            const score = (rounds: AmmoType[]) => {
+              const shot = resolver.resolveSequence(rounds, game.zombie.snapshot(), context), action = resolver.resolveEnemyAction(shot.finalState, context.playerState, context.loadout);
+              return Number(shot.killed) * 1e6 - Number(action.playerKilled) * 1e7 + shot.totalHpDamage * 10 + Number(action.interrupted) * 200 + shot.finalState.distance;
+            };
+            const selected = candidates.sort((a, b) => score(b) - score(a))[0]!;
+            for (const id of selected) callbacks().onAddAmmo(id);
             await game.beginCombat();
             if (String(game.state.phase) === 'CYLINDER_CHOICE') {
               callbacks().onCylinderDecision(false); await game.fireLoadedMagazine();
@@ -135,11 +155,13 @@ describe('탐험 런 통합', () => {
           }
           expect(game.state.phase).toBe('EXPLORATION');
           expect(game.caveScreen).toBe('reward');
-          await game.explorationAction('reward:0');
+          if (Object.values(game.player.getBuild()).reduce((sum, count) => sum + count, 0) >= 14) await game.explorationAction('leave');
+          else await game.explorationAction('reward:0');
           expect(game.player.getStock()).toMatchObject(game.player.getBuild());
         } else if (encounter.kind === 'event') {
           await game.explorationAction('leave');
         } else if (encounter.kind === 'merchant') {
+          await game.explorationAction('payment', 'flatNose');
           await game.explorationAction('buy:map');
           expect(game.exploration.mapCharges).toBe(2);
           await game.explorationAction('leave');

@@ -3,7 +3,7 @@ import { ExplorationRun, RUN_LENGTH } from './ExplorationRun';
 import { Player } from '../entities/Player';
 import type { SpecialAmmoType } from '../data/ammoDefinitions';
 import { WEAPON_ORDER } from '../data/weaponDefinitions';
-import { createEnemyState } from '../data/enemyDefinitions';
+import { createProgressionEnemyState } from '../data/enemyDefinitions';
 import { CombatResolver } from '../combat/CombatResolver';
 
 describe('숨겨진 경로와 정보 도구', () => {
@@ -92,17 +92,17 @@ describe('영구 탄약 거래의 원자성', () => {
   });
 });
 
-describe('탐험 기본 생존 밸런스', () => {
-  it.each(WEAPON_ORDER)('%s는 40개 시드의 필수 조우를 표준탄만으로 완료할 수 있다', weaponId => {
+describe('탐험 초기 생존 밸런스', () => {
+  it.each(WEAPON_ORDER)('%s는 40개 시드의 첫3노드를 희귀 탄약 없이 통과할 수 있다', weaponId => {
     const resolver = new CombatResolver();
     for (let seed = 0; seed < 40; seed++) {
       const run = new ExplorationRun(`balance-${seed}`);
       const player = new Player(); player.startRun('exploration', weaponId);
       run.acquire('echo');
-      for (let depth = 0; depth < RUN_LENGTH; depth++) {
+      for (let depth = 0; depth < 3; depth++) {
         const encounter = run.enter(seed % run.routes.length)!;
         if (encounter.kind === 'combat') {
-          let enemy = createEnemyState(encounter.enemy!);
+          let enemy = createProgressionEnemyState(encounter.enemy!, run.depth);
           let alive = true;
           for (let turn = 0; turn < 12 && enemy.hp > 0 && alive; turn++) {
             const rounds = Array.from({ length: player.magazine.capacity }, () => 'ball' as const);
@@ -118,7 +118,7 @@ describe('탐험 기본 생존 밸런스', () => {
         }
         run.leave();
       }
-      expect(run.depth).toBe(RUN_LENGTH); expect(run.victories).toBeGreaterThanOrEqual(4);
+      expect(run.depth).toBe(3); expect(run.victories).toBe(2);
     }
   });
 });

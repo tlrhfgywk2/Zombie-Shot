@@ -1,0 +1,461 @@
+{
+  "v7Seed": 5110004,
+  "productionSeed": 5110011,
+  "viewports": [
+    "1440x900",
+    "390x844"
+  ],
+  "productionRuns": 2,
+  "v7Runs": 12,
+  "shotsCompared": 680,
+  "findings": [
+    {
+      "name": "production-1-normal-22",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-3-brute-40",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-5-fast-48",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-6-tough-108",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-8-screecher-86",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-defeat",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-5-0-76",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-8-0-32",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-8-1-74",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-8-2-57",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-5-0-76",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-8-0-32",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-8-1-74",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-8-2-57",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-5-0-76",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-8-0-32",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-8-1-74",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-8-2-57",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-5-0-76",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-8-0-32",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-8-1-74",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-8-2-57",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-5-0-76",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-8-0-32",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-8-1-74",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-8-2-57",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-5-0-76",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-8-0-32",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-8-1-74",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-8-2-57",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-victory",
+      "viewport": "desktop",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-1-normal-22",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-3-brute-40",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-5-fast-48",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-6-tough-108",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-8-screecher-86",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "production-defeat",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-5-0-76",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-8-0-32",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-8-1-74",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-8-2-57",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-wound-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-5-0-76",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-8-0-32",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-8-1-74",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-8-2-57",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-heat-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-5-0-76",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-8-0-32",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-8-1-74",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-8-2-57",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-blast-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-5-0-76",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-8-0-32",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-8-1-74",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-8-2-57",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-recoil-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-5-0-76",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-8-0-32",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-8-1-74",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-8-2-57",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-cauterize-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-5-0-76",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-8-0-32",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-8-1-74",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-8-2-57",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    },
+    {
+      "name": "v7-concussion-victory",
+      "viewport": "portrait",
+      "overflow": false,
+      "clippedHp": []
+    }
+  ],
+  "errors": [],
+  "browser": "156.0.8078.74",
+  "volleysCompared": 188,
+  "status": "PASS"
+}

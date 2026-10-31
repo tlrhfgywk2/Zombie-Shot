@@ -1,0 +1,275 @@
+{
+  "count": 1390,
+  "examples": [
+    {
+      "seed": 5810001,
+      "profile": "exploration",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "wound",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "exploration",
+      "phase": "early",
+      "type": "normal",
+      "advanced": "wound",
+      "basicShots": 7,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "wound",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "heat",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "blast",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "recoil",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "cauterize",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "entry",
+      "type": "normal",
+      "advanced": "concussion",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "early",
+      "type": "fast",
+      "advanced": "wound",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "early",
+      "type": "fast",
+      "advanced": "heat",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "early",
+      "type": "fast",
+      "advanced": "blast",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "early",
+      "type": "fast",
+      "advanced": "recoil",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "early",
+      "type": "fast",
+      "advanced": "cauterize",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "early",
+      "type": "fast",
+      "advanced": "concussion",
+      "basicShots": 6,
+      "advancedShots": 6
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "middle",
+      "type": "fast",
+      "advanced": "wound",
+      "basicShots": 7,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "middle",
+      "type": "fast",
+      "advanced": "heat",
+      "basicShots": 7,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "middle",
+      "type": "fast",
+      "advanced": "blast",
+      "basicShots": 7,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "middle",
+      "type": "fast",
+      "advanced": "recoil",
+      "basicShots": 7,
+      "advancedShots": 8
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "middle",
+      "type": "fast",
+      "advanced": "cauterize",
+      "basicShots": 7,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "middle",
+      "type": "fast",
+      "advanced": "concussion",
+      "basicShots": 7,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "wound",
+      "basicShots": 8,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "heat",
+      "basicShots": 8,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "blast",
+      "basicShots": 8,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "cauterize",
+      "basicShots": 8,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "concussion",
+      "basicShots": 8,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "wound",
+      "basicShots": 5,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "heat",
+      "basicShots": 5,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "blast",
+      "basicShots": 5,
+      "advancedShots": 12
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "recoil",
+      "basicShots": 5,
+      "advancedShots": 7
+    },
+    {
+      "seed": 5810001,
+      "profile": "v7",
+      "phase": "late",
+      "type": "groundshaker",
+      "advanced": "cauterize",
+      "basicShots": 5,
+      "advancedShots": 12
+    }
+  ]
+}
