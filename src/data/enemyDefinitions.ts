@@ -1,5 +1,6 @@
 import type { EnemyIntentState, EnemyState, EnemyType } from '../combat/types';
 import { COMBAT_BALANCE } from './ammoDefinitions';
+import { getEnemyHp, type EnemyHpProfile } from './enemyHpScaling';
 export interface EnemyDefinition {
   id: EnemyType; name: string; role: string; hp: number; distance: number;
   advancePerTurn: number; shockResistance: number; special: boolean;
@@ -28,3 +29,10 @@ export const createEnemyState = (type: EnemyType): EnemyState => {
     advancePerTurn: definition.advancePerTurn, shockResistance: definition.shockResistance,
     actionShock: 0, special: definition.special, turnsElapsed: 0, intent };
 };
+
+/** 학습/단위 비교의 원형 상태는 보존하고 실제 진행 스폰에서만 HP 곡선을 적용한다. */
+export function createProgressionEnemyState(type: EnemyType, depth: number, profile: EnemyHpProfile = 'exploration', reserve = false): EnemyState {
+  const state = createEnemyState(type);
+  const hp = getEnemyHp(type, depth, profile, reserve);
+  return { ...state, hp, maxHp: hp };
+}

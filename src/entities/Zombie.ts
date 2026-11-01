@@ -1,11 +1,14 @@
 import type { EnemyState, EnemyType } from '../combat/types';
-import { createEnemyState } from '../data/enemyDefinitions';
+import { createEnemyState, createProgressionEnemyState } from '../data/enemyDefinitions';
 import { createTrainingEnemy } from '../data/trainingEnemy';
 
 export class Zombie {
   private state: EnemyState;
 
-  constructor(type: EnemyType = 'normal', training = false) { this.state = training ? createTrainingEnemy() : createEnemyState(type); }
+  constructor(type: EnemyType = 'normal', training = false, progressionDepth?: number) {
+    this.state = training ? createTrainingEnemy() : progressionDepth === undefined ? createEnemyState(type)
+      : createProgressionEnemyState(type, progressionDepth);
+  }
 
   get type(): EnemyType { return this.state.type; }
   get hp(): number { return this.state.hp; }

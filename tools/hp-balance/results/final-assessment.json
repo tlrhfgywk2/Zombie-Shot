@@ -1,0 +1,21 @@
+{
+  "candidate": "hp5",
+  "hash": "03c103952b4fb6e266679ff611872f0782a28b10db262db95ce9aabaa92d7a59",
+  "holdout": [
+    5810001,
+    80
+  ],
+  "observations": 10685,
+  "campaignRuns": 1584,
+  "goals": {
+    "earlySafety": "PASS",
+    "basicMiddle35to65": "FAIL",
+    "basicLateBelow30": "FAIL",
+    "allSixLate60to85": "FAIL",
+    "minimumSixProgression60": "PASS",
+    "hpOnlyRules": "PASS",
+    "trueOptimalUpperBound": "NOT VERIFIED",
+    "humanSatisfaction": "NOT VERIFIED"
+  },
+  "mergeRecommendation": "보류: 중반 기본 구성/일부 강한 빌드/전투 시간의 목표를 HP만으로 동시에 충족하지 못함. 기능 검사 통과와 균형 수락을 구별."
+}

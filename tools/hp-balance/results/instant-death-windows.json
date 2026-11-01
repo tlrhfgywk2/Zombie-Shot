@@ -1,0 +1,256 @@
+[
+  {
+    "type": "normal",
+    "distance": 8,
+    "lethalTurn": 5,
+    "standardDamageBeforeAttack": 92,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 16,
+        "action": "approach",
+        "distance": 6
+      },
+      {
+        "turn": 2,
+        "damage": 18,
+        "action": "approach",
+        "distance": 4
+      },
+      {
+        "turn": 3,
+        "damage": 18,
+        "action": "approach",
+        "distance": 2
+      },
+      {
+        "turn": 4,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0
+      },
+      {
+        "turn": 5,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0
+      }
+    ]
+  },
+  {
+    "type": "brute",
+    "distance": 9,
+    "lethalTurn": 6,
+    "standardDamageBeforeAttack": 112,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 16,
+        "action": "approach",
+        "distance": 7
+      },
+      {
+        "turn": 2,
+        "damage": 18,
+        "action": "approach",
+        "distance": 5
+      },
+      {
+        "turn": 3,
+        "damage": 18,
+        "action": "approach",
+        "distance": 3
+      },
+      {
+        "turn": 4,
+        "damage": 20,
+        "action": "approach",
+        "distance": 1
+      },
+      {
+        "turn": 5,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0
+      },
+      {
+        "turn": 6,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0
+      }
+    ]
+  },
+  {
+    "type": "fast",
+    "distance": 5,
+    "lethalTurn": 3,
+    "standardDamageBeforeAttack": 58,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 18,
+        "action": "approach",
+        "distance": 1.9
+      },
+      {
+        "turn": 2,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0
+      },
+      {
+        "turn": 3,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0
+      }
+    ]
+  },
+  {
+    "type": "tough",
+    "distance": 10,
+    "lethalTurn": 7,
+    "standardDamageBeforeAttack": 128,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 16,
+        "action": "approach",
+        "distance": 8.3
+      },
+      {
+        "turn": 2,
+        "damage": 16,
+        "action": "approach",
+        "distance": 6.6000000000000005
+      },
+      {
+        "turn": 3,
+        "damage": 18,
+        "action": "approach",
+        "distance": 4.9
+      },
+      {
+        "turn": 4,
+        "damage": 18,
+        "action": "approach",
+        "distance": 3.2
+      },
+      {
+        "turn": 5,
+        "damage": 20,
+        "action": "approach",
+        "distance": 1.5000000000000002
+      },
+      {
+        "turn": 6,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0
+      },
+      {
+        "turn": 7,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0
+      }
+    ]
+  },
+  {
+    "type": "contaminator",
+    "distance": 6,
+    "lethalTurn": 4,
+    "standardDamageBeforeAttack": 76,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 18,
+        "action": "contaminate",
+        "distance": 6
+      },
+      {
+        "turn": 2,
+        "damage": 18,
+        "action": "approach",
+        "distance": 3.2
+      },
+      {
+        "turn": 3,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0.40000000000000036
+      },
+      {
+        "turn": 4,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0.40000000000000036
+      }
+    ]
+  },
+  {
+    "type": "groundshaker",
+    "distance": 6.5,
+    "lethalTurn": 3,
+    "standardDamageBeforeAttack": 58,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 18,
+        "action": "approach",
+        "distance": 3.7
+      },
+      {
+        "turn": 2,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0.9000000000000004
+      },
+      {
+        "turn": 3,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0.9000000000000004
+      }
+    ]
+  },
+  {
+    "type": "screecher",
+    "distance": 7,
+    "lethalTurn": 5,
+    "standardDamageBeforeAttack": 90,
+    "turns": [
+      {
+        "turn": 1,
+        "damage": 18,
+        "action": "sonicPulse",
+        "distance": 7
+      },
+      {
+        "turn": 2,
+        "damage": 16,
+        "action": "approach",
+        "distance": 4
+      },
+      {
+        "turn": 3,
+        "damage": 16,
+        "action": "approach",
+        "distance": 1
+      },
+      {
+        "turn": 4,
+        "damage": 20,
+        "action": "approach",
+        "distance": 0
+      },
+      {
+        "turn": 5,
+        "damage": 20,
+        "action": "attack",
+        "distance": 0
+      }
+    ]
+  }
+]
