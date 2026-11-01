@@ -1,0 +1,58 @@
+[
+  {
+    "label": "desktop",
+    "scenario": "mixed",
+    "won": true,
+    "turns": 3,
+    "stockRestored": true
+  },
+  {
+    "label": "desktop",
+    "scenario": "dangerous",
+    "won": true,
+    "turns": 7,
+    "stockRestored": true
+  },
+  {
+    "label": "desktop",
+    "scenario": "ground",
+    "won": true,
+    "turns": 6,
+    "stockRestored": true
+  },
+  {
+    "label": "desktop",
+    "scenario": "scope-counter",
+    "won": true,
+    "turns": 6,
+    "stockRestored": true
+  },
+  {
+    "label": "portrait",
+    "scenario": "mixed",
+    "won": true,
+    "turns": 3,
+    "stockRestored": true
+  },
+  {
+    "label": "portrait",
+    "scenario": "dangerous",
+    "won": true,
+    "turns": 7,
+    "stockRestored": true
+  },
+  {
+    "label": "portrait",
+    "scenario": "ground",
+    "won": true,
+    "turns": 6,
+    "stockRestored": true
+  },
+  {
+    "label": "portrait",
+    "scenario": "scope-counter",
+    "won": true,
+    "turns": 6,
+    "stockRestored": true
+  }
+]
