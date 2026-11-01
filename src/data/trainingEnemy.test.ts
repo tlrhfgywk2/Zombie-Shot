@@ -1,12 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { CombatResolver, previewEnemyAction } from '../combat/CombatResolver';
 import { createTrainingActions, createTrainingEnemy } from './trainingEnemy';
-import { ENCOUNTER_STAGES } from './encounterDefinitions';
 
 describe('단일 훈련 표적', () => {
   it('체력 10000인 표적 하나와 모든 원거리 행동을 섞는다', () => {
-    expect(ENCOUNTER_STAGES).toHaveLength(1);
-    expect(ENCOUNTER_STAGES[0]?.normal.roster).toEqual(['normal']);
     expect(createTrainingEnemy()).toMatchObject({ hp: 10000, maxHp: 10000 });
     const actions = createTrainingActions(() => 0);
     expect(new Set(actions)).toEqual(new Set(['approach', 'contaminate', 'groundShock', 'sonicPulse']));

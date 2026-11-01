@@ -21,6 +21,7 @@ export interface CombatContext {
   targets?: readonly EnemyState[];
 }
 interface SequenceCursor { previousFamily?: AmmoFamily; previousPrimary?: PrimaryEffectValues; incoming: readonly PayloadModifier[]; recoil: number; distanceLossHundredths: number }
+export interface VolleyState { magazine: CommittedMagazine; index: number; cursor: SequenceCursor }
 const freshCursor = (): SequenceCursor => ({ recoil: 0, incoming: [], distanceLossHundredths: 0 });
 const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined });
 const clonePlayerState = (state: PlayerCombatState): PlayerCombatState => ({ ...state, disabledSlots: { ...state.disabledSlots } });
@@ -59,7 +60,7 @@ export const ACTION_NAMES: Record<EnemyActionType, string> = {
 };
 const canApproachIntoMelee = (enemy: EnemyState): boolean =>
   !isMeleeRange(enemy.distance) && isMeleeRange(Math.max(0, enemy.distance - enemy.advancePerTurn));
-const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
+export const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
   isMeleeRange(enemy.distance) ? 'attack'
     : enemy.delayedAction === 'attack' || canApproachIntoMelee(enemy) ? 'approach'
     : enemy.delayedAction && isActionSupported(enemy, enemy.delayedAction)
@@ -89,7 +90,7 @@ export const previewEnemyAction = (enemy: EnemyState): EnemyActionPreview => {
     suppressedIntent: isIgnited(enemy) && isSpecialAction(scheduled) ? scheduled : undefined,
     rangeDelayed, delayedAction: enemy.delayedAction };
 };
-const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
+export const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
   const next = clonePlayerState(state);
   if (next.heavyKickPenaltyTurns > 0) next.heavyKickPenaltyTurns -= 1;
   if (next.heavyKickPenaltyTurns === 0) next.heavyKickPenaltyBonus = 0;
@@ -105,6 +106,16 @@ const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
 
 export class CombatResolver {
   constructor(private readonly random: () => number = Math.random) {}
+  createVolley(magazine: CommittedMagazine): VolleyState { return { magazine, index: 0, cursor: freshCursor() }; }
+
+  resolveVolleyShot(volley: VolleyState, enemy: EnemyState, context: CombatContext = {}): ShotResult {
+    const ammo = volley.magazine.rounds[volley.index];
+    if (!ammo || enemy.hp <= 0) throw new Error('발사할 탄약과 살아 있는 표적이 필요합니다.');
+    const result = this.resolveRound(ammo, volley.index, enemy, context, volley.cursor, volley.magazine);
+    volley.cursor = result.next;
+    volley.index += 1;
+    return result.shot;
+  }
   private modifiers(context: CombatContext): AttachmentModifier[] {
     return getEnabledAttachmentIds(context.loadout ?? {}, context.playerState ?? createPlayerCombatState(), context.weaponId)
       .flatMap(id => ATTACHMENT_DEFINITIONS[id].modifiers);
@@ -127,26 +138,27 @@ export class CombatResolver {
     const magazine = commitMagazine([ammoType], context.magazineCapacity ?? getMagazineCapacity(context.loadout ?? {}, context.playerState, context.weaponId));
     return this.resolveRound(ammoType, index, enemyState, context, freshCursor(), magazine).shot;
   }
-  resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}): SequenceResult {
+  resolveSequence(rounds: readonly AmmoType[], enemyState: EnemyState, context: CombatContext = {}, volley?: VolleyState): SequenceResult {
     let current = cloneState(enemyState);
-    const magazine = context.committedMagazine ?? commitMagazine(rounds, context.magazineCapacity
+    const offset = volley?.index ?? 0;
+    const magazine = volley?.magazine ?? context.committedMagazine ?? commitMagazine(rounds, context.magazineCapacity
       ?? Math.max(rounds.length, getMagazineCapacity(context.loadout ?? {}, context.playerState, context.weaponId)));
-    if (magazine.rounds.length !== rounds.length || rounds.some((round, index) => round !== magazine.rounds[index]))
+    if (magazine.rounds.length - offset !== rounds.length || rounds.some((round, index) => round !== magazine.rounds[index + offset]))
       throw new Error('확정 탄창과 사격 순서가 일치하지 않습니다.');
-    let cursor = freshCursor();
+    let cursor = volley?.cursor ?? freshCursor();
     const shots: ShotResult[] = [];
     for (const [index, ammoType] of rounds.entries()) {
       if (current.hp <= 0) break;
-      const resolved = this.resolveRound(ammoType, index, current, context, cursor, magazine);
+      const resolved = this.resolveRound(ammoType, index + offset, current, context, cursor, magazine);
       shots.push(resolved.shot);
       current = cloneState(resolved.shot.after);
       cursor = resolved.next;
     }
     // 사망 뒤의 슬롯도 배치를 읽을 수 있도록, 높은 체력의 동일 상태에서 순서 수치를 생성한다.
     let previewState = cloneState(enemyState);
-    let previewCursor = freshCursor();
+    let previewCursor = volley?.cursor ?? freshCursor();
     const roundPreviews: RoundPreview[] = rounds.map((ammoType, index) => {
-      const resolved = this.resolveRound(ammoType, index, previewState, context, previewCursor, magazine);
+      const resolved = this.resolveRound(ammoType, index + offset, previewState, context, previewCursor, magazine);
       const shot = resolved.shot;
       previewState = cloneState({ ...shot.after, hp: Math.max(1, shot.after.hp) });
       previewCursor = resolved.next;

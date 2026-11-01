@@ -8,6 +8,7 @@ import { createRunAmmoBuild } from '../data/gameModes';
 import { WEAPON_ORDER } from '../data/weaponDefinitions';
 import { ExplorationRun, RUN_LENGTH } from '../exploration/ExplorationRun';
 import type { CaveEvent } from '../exploration/ExplorationRun';
+import { Encounter } from '../combat/Encounter';
 
 const view = vi.hoisted(() => ({ callbacks: undefined as GameUICallbacks | undefined }));
 const animations = vi.hoisted(() => ({ animateLoading: vi.fn(), animateShot: vi.fn(), animateMagazineDiscard: vi.fn(), setQuickFiring: vi.fn() }));
@@ -21,16 +22,17 @@ vi.mock('../ui/GameUI', () => ({ GameUI: class {
 vi.mock('../presentation/GamePresentation', () => ({ GamePresentation: class {
   constructor() { return new Proxy({}, { get: (_target, key) => key === 'isDestroyed' ? () => false : animations[key as keyof typeof animations] ?? vi.fn() }); }
 } }));
-vi.mock('../data/encounterDefinitions', () => ({ ENCOUNTER_STAGES: [
-  { normal: { kind: 'normal', roster: ['normal', 'normal'] } },
+vi.mock('../data/encounterDefinitions', async importOriginal => ({ ...await importOriginal<object>(), ENCOUNTER_STAGES: [
+  { normal: { kind: 'normal', roster: ['normal'] } },
   { normal: { kind: 'normal', roster: ['normal'] } },
 ] }));
 
 import { Game } from './Game';
 
 type GameInternals = {
-  player: Player; zombie: Zombie; state: GameStateMachine; busy: boolean;
+  player: Player; zombie: Zombie; encounter: Encounter; state: GameStateMachine; busy: boolean;
   beginCombat: () => Promise<void>; fireLoadedMagazine: () => Promise<void>;
+  fireNextShot: () => Promise<void>;
   chooseRoute: (kind: 'normal') => Promise<void>; sync: () => void;
   exploration: ExplorationRun; caveScreen: 'entry' | 'junction' | 'encounter' | 'reward';
   explorationAction: (action: string, payment?: Parameters<Player['supplyAmmo']>[0]) => Promise<void>;
@@ -43,9 +45,137 @@ const killWithOpening = async (game: GameInternals) => {
   await game.beginCombat();
 };
 
+describe('다수전 통합', () => {
+  const groupGame = (reinforcements = false) => {
+    const game = newGame();
+    callbacks().onChooseMode('free'); callbacks().onChooseWeapon('p220');
+    game.encounter = new Encounter(['normal', 'normal'], reinforcements ? ['fast'] : []);
+    game.sync();
+    return game;
+  };
+
+  it('탄창 장전 후 한 발씩 발사하며 재조준만으로 탄약·차례·배열이 변하지 않는다', async () => {
+    const game = groupGame();
+    const [first, second] = game.encounter.living;
+    callbacks().onAddAmmo('opening'); callbacks().onAddAmmo('flatNose'); callbacks().onAddAmmo('ball');
+    const stock = game.player.getStock();
+    await game.beginCombat();
+    expect(game.state.phase).toBe('AIMING');
+    expect(animations.animateShot).not.toHaveBeenCalled();
+    callbacks().onSelectTarget(second!.id);
+    expect(game.player.getStock()).toEqual(stock);
+    expect(game.player.magazine.getRounds()).toEqual(['opening', 'flatNose', 'ball']);
+    await game.fireNextShot();
+    expect(second!.zombie.hp).toBeLessThan(22);
+    expect(first!.zombie.hp).toBe(22);
+    callbacks().onSelectTarget(first!.id);
+    await game.fireNextShot();
+    expect(first!.zombie.snapshot().actionShock).toBeGreaterThan(0);
+    expect(second!.zombie.snapshot().actionShock).toBe(0);
+    expect(game.player.magazine.getRounds()).toEqual(['ball']);
+    expect(game.encounter.living.every(enemy => enemy.zombie.snapshot().turnsElapsed === 0)).toBe(true);
+    await game.fireNextShot();
+    expect(game.state.phase).toBe('AMMO_SELECTION');
+    expect(first!.zombie.snapshot().turnsElapsed).toBe(1);
+    expect(second!.zombie.snapshot().turnsElapsed).toBe(0);
+  });
+
+  it('첫 처치 뒤 잔탄·소진·플레이어 약화를 유지하고 마지막 처치에서만 복구한다', async () => {
+    const game = groupGame();
+    const [first, second] = game.encounter.living;
+    first!.zombie.applyState({ ...first!.zombie.snapshot(), hp: 1 });
+    game.player.applyCombatState({ ...game.player.getCombatState(), rangePenaltyTurns: 2, rangePenaltySteps: 1 });
+    callbacks().onAddAmmo('opening'); callbacks().onAddAmmo('ball');
+    await game.beginCombat(); await game.fireNextShot();
+    expect(game.encounter.selected.id).toBe(second!.id);
+    expect(game.player.getStock().opening).toBe(0);
+    expect(game.player.magazine.getRounds()).toEqual(['ball']);
+    expect(game.player.getCombatState().rangePenaltyTurns).toBe(2);
+    expect(game.state.phase).toBe('AIMING');
+    expect(animations.animateShot).toHaveBeenCalledTimes(1);
+    second!.zombie.applyState({ ...second!.zombie.snapshot(), hp: 1 });
+    await game.fireNextShot();
+    expect(game.state.phase).toBe('ROUTE_SELECTION');
+    expect(game.player.getStock()).toMatchObject(game.player.getBuild());
+    expect(game.player.getCombatState().rangePenaltyTurns).toBe(0);
+  });
+
+  it('예고한 적 처치 후 다른 근접 적이나 새 증원이 대신 공격하지 않는다', async () => {
+    const game = groupGame(true);
+    const [first, second] = game.encounter.living;
+    first!.zombie.applyState({ ...first!.zombie.snapshot(), hp: 1 });
+    second!.zombie.applyState({ ...second!.zombie.snapshot(), distance: 0 });
+    callbacks().onAddAmmo('opening');
+    await game.beginCombat(); await game.fireNextShot();
+    expect(game.state.phase).toBe('AMMO_SELECTION');
+    expect(game.encounter.living).toHaveLength(2);
+    expect(game.encounter.reinforcements).toHaveLength(0);
+    expect(game.encounter.living.map(enemy => enemy.zombie.snapshot().turnsElapsed)).toEqual([0, 0]);
+    expect(game.player.getStock().opening).toBe(0);
+    expect(game.player.isAlive).toBe(true);
+    await game.beginCombat();
+    expect(game.state.phase).toBe('GAME_OVER');
+  });
+
+  it('빈 턴도 한 마리만 행동하고 플레이어 효과는 한 번만 경과한다', async () => {
+    const game = groupGame();
+    game.player.applyCombatState({ ...game.player.getCombatState(), heavyKickPenaltyBonus: 1, heavyKickPenaltyTurns: 2 });
+    await Promise.all([game.beginCombat(), game.beginCombat()]);
+    expect(game.encounter.living.map(enemy => enemy.zombie.distance)).toEqual([6, 8]);
+    expect(game.player.getCombatState().heavyKickPenaltyTurns).toBe(1);
+    await game.beginCombat();
+    expect(game.encounter.living.map(enemy => enemy.zombie.distance)).toEqual([6, 6]);
+  });
+
+  it('연속 사격 입력을 잠그고 조준 단계에서 재시작·메뉴 복귀를 정리한다', async () => {
+    const game = groupGame();
+    callbacks().onAddAmmo('opening'); callbacks().onAddAmmo('ball');
+    await game.beginCombat();
+    await Promise.all([game.fireNextShot(), game.fireNextShot()]);
+    expect(animations.animateShot).toHaveBeenCalledTimes(1);
+    callbacks().onReturnToMenu();
+    expect(game.state.phase).toBe('MODE_SELECTION');
+    expect(game.player.magazine.size).toBe(0);
+    callbacks().onChooseMode('free'); callbacks().onChooseWeapon('p220');
+    expect(game.player.getStock()).toMatchObject(game.player.getBuild());
+    game.encounter = new Encounter(['normal', 'normal']);
+    callbacks().onAddAmmo('ball'); await game.beginCombat();
+    callbacks().onRestart();
+    expect(game.state.phase).toBe('AMMO_SELECTION');
+    expect(game.encounter.total).toBe(1);
+    expect(game.player.magazine.size).toBe(0);
+  });
+
+  it.each(WEAPON_ORDER)('%s는 상태탄 없이 표준탄만으로 무리·빠른 적과 거체·위험 조우를 처리할 수 있다', async weapon => {
+    for (const encounter of [new Encounter(['normal', 'normal']), new Encounter(['fast', 'tough']), new Encounter(['contaminator', 'screecher'], ['normal'])]) {
+      const game = groupGame();
+      game.encounter = encounter;
+      game.player.selectWeapon(weapon);
+      for (let turn = 0; turn < 12 && !game.encounter.complete; turn += 1) {
+        for (let index = 0; index < game.player.magazine.capacity; index += 1) callbacks().onAddAmmo('ball');
+        await game.beginCombat();
+        if (String(game.state.phase) === 'CYLINDER_CHOICE') { callbacks().onCylinderDecision(false); await game.fireLoadedMagazine(); }
+        while (String(game.state.phase) === 'AIMING') await game.fireNextShot();
+        expect(game.player.isAlive).toBe(true);
+      }
+      expect(game.encounter.complete).toBe(true);
+    }
+  });
+});
+
 beforeEach(() => { view.callbacks = undefined; Object.values(animations).forEach(animation => animation.mockClear()); });
 
 describe('퀵모드', () => {
+  it('강한 탄창은 일반 감염체를 한 번의 연속 사격으로 처치한다', async () => {
+    const game = newGame();
+    callbacks().onChooseMode('free'); callbacks().onChooseWeapon('p220');
+    for (let index = 0; index < 3; index += 1) callbacks().onSupplyAmmo('stickyCharge');
+    game.player.magazine.setRounds(['stickyCharge', 'stickyCharge', 'stickyCharge', 'flatNose']);
+    await game.beginCombat();
+    expect(game.state.phase).toBe('ROUTE_SELECTION');
+    expect(game.encounter.complete).toBe(true);
+    expect(animations.animateLoading).toHaveBeenCalledTimes(1);
+  });
   it.each([true, false] as const)('선택한 퀵모드 %s를 장전과 사격 연출에 전달하고 사격 후 해제한다', async quickMode => {
     const game = newGame();
     callbacks().onChooseMode('free', quickMode);
@@ -76,7 +206,7 @@ describe('빈 탄창 턴 넘김', () => {
       const hp = game.zombie.hp;
       await game.beginCombat();
       expect(game.state.phase).toBe('AMMO_SELECTION');
-      expect(game.zombie.distance).toBe(10);
+      expect(game.zombie.distance).toBe(6);
       expect(game.zombie.snapshot().turnsElapsed).toBe(1);
       expect(game.zombie.hp).toBe(hp);
       expect(game.player.magazine.size).toBe(0);
@@ -92,7 +222,7 @@ describe('빈 탄창 턴 넘김', () => {
     game.zombie.applyState({ ...game.zombie.snapshot(), trainingActions: ['approach'], vulnerableTurns: 2 });
     game.player.applyCombatState({ ...game.player.getCombatState(), heavyKickPenaltyBonus: 1, heavyKickPenaltyTurns: 2 });
     await Promise.all([game.beginCombat(), game.beginCombat()]);
-    expect(game.zombie.snapshot()).toMatchObject({ turnsElapsed: 1, distance: 10, vulnerableTurns: 1 });
+    expect(game.zombie.snapshot()).toMatchObject({ turnsElapsed: 1, distance: 6, vulnerableTurns: 1 });
     expect(game.player.getCombatState().heavyKickPenaltyTurns).toBe(1);
   });
 
@@ -126,12 +256,13 @@ describe('탐험 런 통합', () => {
         if (encounter.kind === 'combat') {
           await game.explorationAction('fight');
           expect(game.zombie.snapshot().trainingActions).toBeUndefined();
-          for (let turn = 0; turn < 12 && game.state.phase === 'AMMO_SELECTION'; turn++) {
+          for (let turn = 0; turn < 20 && game.state.phase === 'AMMO_SELECTION'; turn++) {
             for (let slot = 0; slot < game.player.magazine.capacity; slot++) callbacks().onAddAmmo('ball');
             await game.beginCombat();
             if (String(game.state.phase) === 'CYLINDER_CHOICE') {
               callbacks().onCylinderDecision(false); await game.fireLoadedMagazine();
             }
+            while (String(game.state.phase) === 'AIMING') await game.fireNextShot();
           }
           expect(game.state.phase).toBe('EXPLORATION');
           expect(game.caveScreen).toBe('reward');
@@ -272,11 +403,9 @@ describe('모드 선택과 실제 런 제어', () => {
     callbacks().onAddAmmo('flatNose');
     expect(game.player.magazine.size).toBe(0);
     await killWithOpening(game);
-    expect(game.state.phase).toBe('AMMO_SELECTION');
+    expect(game.state.phase).toBe('ROUTE_SELECTION');
     const persistent = createAmmoBuild({ opening: 2, flatNose: 1, mimic: 1 });
     expect(game.player.getStock()).toEqual({ ...persistent, ball: 'infinite' });
-    await killWithOpening(game);
-    expect(game.state.phase).toBe('ROUTE_SELECTION');
     expect(game.player.getBuild()).toEqual(persistent);
     await game.chooseRoute('normal');
     expect(game.player.getStock()).toEqual({ ...persistent, ball: 'infinite' });
@@ -310,7 +439,7 @@ describe('모드 선택과 실제 런 제어', () => {
     expect(game.state.phase).toBe('CYLINDER_CHOICE');
     callbacks().onCylinderDecision(false);
     await game.fireLoadedMagazine();
-    expect(game.state.phase).toBe('AMMO_SELECTION');
+    expect(game.state.phase).toBe('ROUTE_SELECTION');
     expect(game.player.getStock()).toMatchObject({ lightLoad: 1, relay: 1 });
   });
 

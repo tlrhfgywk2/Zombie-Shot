@@ -18,6 +18,7 @@ import type { AudioPreferences } from '../presentation/AudioPreferences';
 import { applyResponsiveLayoutMode } from '../presentation/ResponsiveLayout';
 import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
 import type { ExplorationScreen } from './ExplorationView';
+import type { Encounter } from '../combat/Encounter';
 
 export interface GameUICallbacks {
   onChooseMode: (mode: GameMode, quickMode?: boolean) => void;
@@ -25,6 +26,8 @@ export interface GameUICallbacks {
   onChooseWeapon: (id: WeaponId) => void;
   onCylinderDecision: (spin: boolean) => void;
   onFireCylinder: () => void;
+  onSelectTarget: (id: string) => void;
+  onFireShot: () => void;
   onAddAmmo: (ammo: AmmoType) => void;
   onRemoveAmmo: (index: number) => void;
   onReplaceAmmo: (index: number, ammo: AmmoType) => void;
@@ -46,7 +49,7 @@ export interface GameUICallbacks {
 }
 
 const PHASE_LABELS: Record<GamePhase, string> = {
-  MODE_SELECTION: '모드 선택', EXPLORATION: '동굴 탐험',
+  MODE_SELECTION: '모드 선택', EXPLORATION: '동굴 탐험', AIMING: '표적 선택 · 한 발 사격',
   WEAPON_SELECTION: '권총 선택', CYLINDER_CHOICE: '실린더 준비', ATTACHMENT_REWARD: '부착물 획득', AMMO_SELECTION: '전투 준비', LOADING: '장전 중', FIRING: '사격 중', ENEMY_ACTION: '적 행동', ROUTE_SELECTION: '경로 선택', GAME_OVER: '게임 오버', VICTORY: '실험 완료',
 };
 
@@ -367,7 +370,7 @@ export class GameUI {
     });
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
-    this.loadButton.addEventListener('click', () => { if (!this.locked) this.callbacks.onLoad(); });
+    this.loadButton.addEventListener('click', () => { if (this.phase === 'AIMING') this.callbacks.onFireShot(); else if (!this.locked) this.callbacks.onLoad(); });
     this.required(root, '#ammo-supply-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement, true));
     this.required(root, '#inventory-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
     this.required(root, '#attachment-supply-button').addEventListener('click', (event) => {
@@ -729,10 +732,12 @@ export class GameUI {
     this.phaseText.textContent = PHASE_LABELS[phase];
     (this.required(this.shell, '#ammo-supply-button') as HTMLButtonElement).disabled = ['MODE_SELECTION', 'WEAPON_SELECTION', 'GAME_OVER', 'VICTORY'].includes(phase);
     this.shell.querySelectorAll<HTMLButtonElement>('[data-restart-run], [data-return-to-menu]').forEach(button => {
-      button.disabled = !['AMMO_SELECTION', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD', 'EXPLORATION'].includes(phase);
+      button.disabled = !['AMMO_SELECTION', 'AIMING', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD', 'EXPLORATION'].includes(phase);
     });
     if (this.inventorySupplyMode && (phase === 'GAME_OVER' || phase === 'VICTORY')) this.closeAmmoInventory();
     document.body.dataset.phase = phase;
+    this.shell.querySelectorAll<HTMLButtonElement>('[data-select-target]').forEach(button => { button.disabled = !['AMMO_SELECTION', 'AIMING', 'CYLINDER_CHOICE'].includes(phase); });
+    this.updateLoadButton();
     if (phase !== 'AMMO_SELECTION' && this.firepowerTooltipMode === 'touch') this.hideTooltip();
   }
 
@@ -759,7 +764,7 @@ export class GameUI {
     this.rangeBandText.textContent = RANGE_NAMES[rangeBand];
     const enemyName = enemy.trainingActions ? '훈련 감염체' : ENEMY_DEFINITIONS[enemy.type].name;
     this.levelText.textContent = enemyName;
-    this.waveText.textContent = `조우 ${wave}/${waveCount} · 표적 ${enemyNumber}/${enemyCount}`;
+    this.waveText.textContent = `조우 ${wave}/${waveCount} · 처치 ${enemyNumber}/${enemyCount}`;
     this.nextAction.querySelector('small')!.textContent = '다음 행동';
     this.nextActionName.textContent = enemyActionPreviewText(action);
     this.nextAction.setAttribute('aria-label', `다음 행동: ${this.nextActionName.textContent}`);
@@ -787,6 +792,39 @@ export class GameUI {
     this.enemyContext.insertAdjacentHTML('beforeend', `<span><b>화상 ${enemy.burn}/${enemy.burnThreshold}</b> · 턴 사이에 유지되며 자동 피해는 없습니다. 한 발당 임계치를 한 번 소비해 초과분을 남기고 <b>점화</b>합니다. 다음 행동을 수행할 때 특수 행동을 일반 접근으로 바꾸고 점화가 해제됩니다. 충격으로 행동이 중단되면 점화는 유지됩니다.</span>`);
   }
 
+  renderEncounter(encounter: Encounter, actorId: string | undefined, loaded: boolean): void {
+    const multiple = encounter.total > 1;
+    this.shell.toggleAttribute('data-multi-enemy', multiple);
+    this.shell.toggleAttribute('data-can-retarget', encounter.living.length > 1 || encounter.reinforcements.length > 0);
+    let host = this.shell.querySelector<HTMLElement>('.encounter-targets');
+    if (!host) {
+      host = document.createElement('div');
+      host.className = 'encounter-targets';
+      host.setAttribute('aria-label', '표적 선택');
+      this.enemyCard.after(host);
+      new ResizeObserver(() => this.shell.style.setProperty('--encounter-tools-top', `${host!.offsetHeight + 12}px`)).observe(host);
+    }
+    host.hidden = !multiple;
+    if (!multiple) return;
+    const enabled = ['AMMO_SELECTION', 'AIMING', 'CYLINDER_CHOICE'].includes(this.phase);
+    host.innerHTML = `<div class="target-grid">${[...encounter.living].sort((a, b) => a.lane - b.lane).map(({ id, lane, zombie }) => {
+      const enemy = zombie.snapshot();
+      const action = previewEnemyAction(enemy);
+      const selected = encounter.selected.id === id;
+      const order = encounter.actionOrder(id);
+      const timing = actorId === id ? '이번 턴' : loaded && order === 1 && !encounter.living.some(target => target.id === actorId) ? '다음 턴' : `${order}턴 뒤`;
+      return `<button type="button" class="target-card" style="grid-column:${lane + 1}" data-target-lane="${lane}" data-select-target="${id}" data-selected="${selected}" aria-pressed="${selected}" ${enabled ? '' : 'disabled'}>
+        <span class="target-heading"><b>${lane + 1} · ${ENEMY_DEFINITIONS[enemy.type].name}</b><i>${selected ? '조준' : '선택'}</i></span>
+        <span class="target-health"><strong>${enemy.hp}/${enemy.maxHp}</strong><strong>${enemy.distance.toFixed(1)} m</strong></span>
+        <span class="hp-track"><span style="width:${Math.max(0, enemy.hp / enemy.maxHp) * 100}%"></span></span>
+        <span class="target-stats"><span title="상처 / 취약 발동 임계치">${COMBAT_STAT_ICONS.wound}<b>${enemy.wound}/${enemy.woundThreshold}</b></span><span title="화상 / 점화 임계치">${COMBAT_STAT_ICONS.burn}<b>${enemy.burn}/${enemy.burnThreshold}</b></span><span title="폭발 누적">${COMBAT_STAT_ICONS.explosive}<b>${enemy.explosive}</b></span><span title="충격 / 행동 중단 임계치">${COMBAT_STAT_ICONS.shock}<b>${enemy.actionShock}/${action.threshold}</b></span></span>
+        <span class="target-action" data-lethal="${action.selectedAction === 'attack'}"><b>${action.suppressedIntent ? `접근 ${action.movement.toFixed(1)} m` : enemyActionPreviewText(action)}</b><em>${timing}</em></span>
+        ${enemy.vulnerableTurns || enemy.ignitedActions ? `<span class="target-status">${enemy.vulnerableTurns ? `취약 ${enemy.vulnerableTurns}턴` : ''}${enemy.vulnerableTurns && enemy.ignitedActions ? ' · ' : ''}${enemy.ignitedActions ? '점화' : ''}</span>` : ''}
+      </button>`;
+    }).join('')}</div><div class="encounter-progress">처치 ${encounter.defeated}/${encounter.total}${encounter.reinforcements.length ? ` · 증원 ${encounter.reinforcements.length} · ${encounter.reinforcements.map(type => ENEMY_DEFINITIONS[type].name).join(' · ')}` : ''}${loaded && !encounter.living.some(enemy => enemy.id === actorId) ? ' · 이번 적 행동 취소' : ''}</div>`;
+    host.querySelectorAll<HTMLButtonElement>('[data-select-target]').forEach(button => button.addEventListener('click', () => this.callbacks.onSelectTarget(button.dataset.selectTarget!)));
+  }
+
   showEnemyAction(action: EnemyActionResult): void {
     this.nextAction.querySelector('small')!.textContent = '행동 결과';
     this.nextActionName.textContent = enemyActionResultText(action);
@@ -807,7 +845,7 @@ export class GameUI {
       content?.querySelector('.sequence-stats')?.remove();
       content?.querySelector('.trait-bonus')?.remove();
       content?.querySelector('.sequence-burn-state')?.remove();
-      const predictedUnfired = Boolean(sequence?.killed && index >= sequence.shots.length && index < sequence.roundPreviews.length);
+      const predictedUnfired = Boolean(!this.shell.hasAttribute('data-can-retarget') && sequence?.killed && index >= sequence.shots.length && index < sequence.roundPreviews.length);
       slot.classList.toggle('will-not-fire', predictedUnfired);
       const round = sequence?.roundPreviews[index];
       if (!round || !content) return;
@@ -829,7 +867,7 @@ export class GameUI {
     }
     this.setRecoilAmount(sequence.shots.at(-1)?.breakdown.recoilAfter ?? 0, '예상 반동');
     this.updateForecastVisibility();
-    this.updateFirepowerPanel(sequence.firepowerBreakdown, '총 화력');
+    this.updateFirepowerPanel(sequence.firepowerBreakdown, this.shell.hasAttribute('data-multi-enemy') ? '선택 표적 화력' : '총 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${sequence.totalWoundApplied}`;
     this.required(this.previewOutcome, '#forecast-explosive-value').textContent = String(sequence.finalState.explosive);
     this.renderBurnForecast(sequence.finalState);
@@ -1066,9 +1104,10 @@ export class GameUI {
 
   private updateLoadButton(): void {
     const label = this.loadButton.querySelector<HTMLElement>('span')!;
-    label.textContent = this.rounds.length === 0 ? '턴 넘김' : this.weapon.trait === 'cylinder' ? '실린더 장전' : '탄창 장전';
-    this.loadButton.disabled = this.locked;
-    this.loadButton.setAttribute('aria-label', this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '턴 넘김');
+    const aiming = this.phase === 'AIMING';
+    label.textContent = aiming ? '한 발 사격' : this.rounds.length === 0 ? '턴 넘김' : this.weapon.trait === 'cylinder' ? '실린더 장전' : '탄창 장전';
+    this.loadButton.disabled = !aiming && this.locked;
+    this.loadButton.setAttribute('aria-label', aiming ? '다음 탄 한 발 사격' : this.rounds.length ? `${this.rounds.length}발 탄창 장전` : '턴 넘김');
   }
 
   private consumeSuppressedClick(): boolean {
@@ -1115,11 +1154,16 @@ export class GameUI {
     const target = event.target;
     if (target instanceof Element && target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
     if (!this.shell.isConnected || this.shell.querySelector('[role="dialog"]:not([hidden])')) return;
-    if (this.phase !== 'AMMO_SELECTION' && this.phase !== 'CYLINDER_CHOICE') return;
+    if (this.phase !== 'AMMO_SELECTION' && this.phase !== 'CYLINDER_CHOICE' && this.phase !== 'AIMING') return;
     const code = event.code;
     if (code !== 'Space' && code !== 'KeyR' && code !== 'KeyE' && !/^(Digit|Numpad)[1-9]$/.test(code)) return;
     event.preventDefault();
     if (event.repeat) return;
+    if (this.phase === 'AIMING') {
+      if (code === 'KeyR') this.loadButton.click();
+      if (code === 'Digit1' || code === 'Digit2' || code === 'Numpad1' || code === 'Numpad2') this.shell.querySelector<HTMLButtonElement>(`[data-target-lane="${Number(code.at(-1)) - 1}"]`)?.click();
+      return;
+    }
     if (this.phase === 'CYLINDER_CHOICE') {
       const selector = code === 'KeyE' ? '[data-cylinder-keep]' : code === 'KeyR' ? '[data-cylinder-fire], [data-cylinder-spin]' : undefined;
       if (selector) this.shell.querySelector<HTMLButtonElement>(selector)?.click();
