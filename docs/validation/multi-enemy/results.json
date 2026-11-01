@@ -1,0 +1,428 @@
+[
+  {
+    "label": "desktop",
+    "name": "single-empty",
+    "overflow": false,
+    "cards": [],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "group-empty",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "group-full",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "aiming",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "retarget",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "first-kill",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "last-target-unfired",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "dangerous-full",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 155.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 155.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "predicted-kill",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 155.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 155.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "reinforcement",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "desktop",
+    "name": "melee",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 380,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      },
+      {
+        "x": 724,
+        "y": 22,
+        "width": 336,
+        "height": 130.84375,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "single-empty",
+    "overflow": false,
+    "cards": [],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "group-empty",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "group-full",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "aiming",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "retarget",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "first-kill",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "last-target-unfired",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "dangerous-full",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 172.6875,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 172.6875,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "predicted-kill",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 172.6875,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 172.6875,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "reinforcement",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  },
+  {
+    "label": "portrait",
+    "name": "melee",
+    "overflow": false,
+    "cards": [
+      {
+        "x": 8,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      },
+      {
+        "x": 197.5,
+        "y": 8,
+        "width": 184.5,
+        "height": 153.5,
+        "overflow": false
+      }
+    ],
+    "diagnostics": false
+  }
+]
