@@ -1,0 +1,5546 @@
+{
+  "phase": "holdout",
+  "count": 5000,
+  "firstSeed": 2700001,
+  "parameters": {
+    "original": {
+      "chance": 0,
+      "strength": 0
+    },
+    "weak40": {
+      "chance": 0.4,
+      "strength": 3
+    },
+    "weak": {
+      "chance": 0.5,
+      "strength": 3
+    },
+    "weak60": {
+      "chance": 0.6,
+      "strength": 3
+    },
+    "strong": {
+      "chance": 1,
+      "strength": 12
+    }
+  },
+  "exploration": {
+    "original": {
+      "random-skip": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.7368,
+          "ci95": [
+            0.7244150993937687,
+            0.7488213036130732
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.2922,
+          "ci95": [
+            0.2797576791670494,
+            0.30496138947812923
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 0.9120521172638436,
+        "meanRewardOpportunities": 4.5054,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.3958,
+          "ci95": [
+            0.3823299717777392,
+            0.40943002318293265
+          ]
+        },
+        "directOnly": {
+          "rate": 0.7078,
+          "ci95": [
+            0.6950386105218708,
+            0.7202423208329506
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.192,
+          "ci95": [
+            0.1813204865157591,
+            0.20315243524899063
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.1488283723875871,
+          "ci95": [
+            0.1321256595484494,
+            0.16723569158106355
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.09626345788473717,
+          "ci95": [
+            0.08267955383259602,
+            0.1118071212712173
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "shares": {
+          "wound": 0.33948606587043073,
+          "recoil": 0.34437205935577275,
+          "follow-up": 0.3161418747737966
+        },
+        "effectiveDirections": 2.9979355802216237,
+        "offers": {
+          "wounding": 4017,
+          "hollowPoint": 4141,
+          "advance": 4118,
+          "relay": 4033,
+          "lowRecoil": 4066,
+          "hammer": 4021,
+          "finisher": 4070,
+          "laceration": 4137,
+          "retreat": 4180,
+          "opening": 4180,
+          "plusP": 4091
+        },
+        "meanSpecialCount": 7.2554,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.3216,
+              "ci95": [
+                0.2962863441217399,
+                0.3480068425136373
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0608,
+              "ci95": [
+                0.04885024778874882,
+                0.07544105025081216
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.4950248756218905,
+            "meanRewardOpportunities": 4.4912,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5048,
+              "ci95": [
+                0.47711047462907247,
+                0.5324601122775992
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9392,
+              "ci95": [
+                0.9245589497491878,
+                0.9511497522112512
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.0296,
+              "ci95": [
+                0.021550029143493,
+                0.04053245400270346
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.6837606837606838,
+              "ci95": [
+                0.5948031358796455,
+                0.7610345888773917
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.18803418803418803,
+              "ci95": [
+                0.12758105898852096,
+                0.26832233851697385
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.27819237147595355,
+              "follow-up": 0.5406301824212272,
+              "wound": 0.18117744610281927
+            },
+            "effectiveDirections": 2.712663265760341,
+            "offers": {},
+            "meanSpecialCount": 7.4912
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.516,
+            "orphanedWoundOrPayoff": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "directOnly": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.2464,
+              "ci95": [
+                0.22331230357319165,
+                0.27104168819099933
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.8724,
+              "follow-up": 0.08199999999999998,
+              "recoil": 0.04560000000000001
+            },
+            "effectiveDirections": 1.5919819090345393,
+            "offers": {},
+            "meanSpecialCount": 7.516
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0512,
+              "ci95": [
+                0.04029789258797618,
+                0.06485223163824187
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5024,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5384,
+              "ci95": [
+                0.5106877473751338,
+                0.5658769478782378
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9488,
+              "ci95": [
+                0.9351477683617582,
+                0.9597021074120238
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3552,
+              "ci95": [
+                0.3291498248432749,
+                0.38213747013880267
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7272727272727273,
+              "ci95": [
+                0.637432407306822,
+                0.8017743501526655
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.7272727272727273,
+              "ci95": [
+                0.637432407306822,
+                0.8017743501526655
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.8204,
+              "follow-up": 0.15599999999999997,
+              "wound": 0.023599999999999993
+            },
+            "effectiveDirections": 1.7171379823571984,
+            "offers": {},
+            "meanSpecialCount": 7.5024
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.6256,
+              "ci95": [
+                0.5984237527592625,
+                0.6520066046319742
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0568,
+              "ci95": [
+                0.0452743252679338,
+                0.07104148368273432
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.5,
+            "meanRewardOpportunities": 4.512,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.54,
+              "ci95": [
+                0.5122897886121974,
+                0.5674651022767315
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9432,
+              "ci95": [
+                0.9289585163172658,
+                0.9547256747320663
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1368,
+              "ci95": [
+                0.1188592652630007,
+                0.15696632546552516
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7352941176470589,
+              "ci95": [
+                0.6422706987161548,
+                0.811237184762553
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.49019607843137253,
+              "ci95": [
+                0.39531235331103515,
+                0.5857914848773521
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.8309889173060527,
+              "recoil": 0.09505541346973571,
+              "wound": 0.07395566922421141
+            },
+            "effectiveDirections": 1.7685212220482969,
+            "offers": {},
+            "meanSpecialCount": 6.512
+          }
+        }
+      },
+      "random-buy": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.5732,
+          "ci95": [
+            0.5594389851080621,
+            0.5868486191997961
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.1872,
+          "ci95": [
+            0.17662938561851171,
+            0.1982509063555588
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 0.9284389080307448,
+        "meanRewardOpportunities": 4.5054,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.4844,
+          "ci95": [
+            0.47056474426640726,
+            0.4982592089138853
+          ]
+        },
+        "directOnly": {
+          "rate": 0.8128,
+          "ci95": [
+            0.8017490936444411,
+            0.8233706143814883
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.1392,
+          "ci95": [
+            0.12988175175199956,
+            0.14907224231527866
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.662444585180494,
+          "ci95": [
+            0.6387508146510444,
+            0.6853498407777742
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.29005699810006336,
+          "ci95": [
+            0.26820490159803717,
+            0.31292816945594587
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0.0908,
+          "ci95": [
+            0.08314678852056764,
+            0.0990815218240284
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0.1846,
+          "ci95": [
+            0.1740894887639213,
+            0.1955947954068646
+          ]
+        },
+        "shares": {
+          "wound": 0.27419167248197257,
+          "recoil": 0.3898581065364038,
+          "follow-up": 0.3359502209816237
+        },
+        "effectiveDirections": 2.9697321050018273,
+        "offers": {
+          "wounding": 4017,
+          "hollowPoint": 4141,
+          "advance": 4118,
+          "relay": 4033,
+          "lowRecoil": 4066,
+          "hammer": 4021,
+          "finisher": 4070,
+          "laceration": 4137,
+          "retreat": 4180,
+          "opening": 4180,
+          "plusP": 4091
+        },
+        "meanSpecialCount": 11.4118,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.3592,
+              "ci95": [
+                0.3330717972985688,
+                0.38619098677240166
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1184,
+              "ci95": [
+                0.10164774517613993,
+                0.13749059574347866
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.30142566191446,
+            "meanRewardOpportunities": 4.4912,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.448,
+              "ci95": [
+                0.42063284880353713,
+                0.47568579304085534
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8816,
+              "ci95": [
+                0.8625094042565215,
+                0.8983522548238602
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.0432,
+              "ci95": [
+                0.03325938699022821,
+                0.05593975905820407
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8547008547008547,
+              "ci95": [
+                0.7795881846138782,
+                0.9072613771264496
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.27350427350427353,
+              "ci95": [
+                0.2009012531479607,
+                0.36050806284917936
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.008,
+              "ci95": [
+                0.004351148931146904,
+                0.014663693135027963
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0368,
+              "ci95": [
+                0.027701812266921186,
+                0.04873655123928247
+              ]
+            },
+            "shares": {
+              "recoil": 0.2546399406087602,
+              "follow-up": 0.4461766889383815,
+              "wound": 0.2991833704528582
+            },
+            "effectiveDirections": 2.91371785918767,
+            "offers": {},
+            "meanSpecialCount": 11.6496
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.6304,
+              "ci95": [
+                0.6032791854504314,
+                0.6567217588474767
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.3952,
+              "ci95": [
+                0.36845786080905957,
+                0.4225843250619468
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.516,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5088,
+              "ci95": [
+                0.4811012214071187,
+                0.5364448545884457
+              ]
+            },
+            "directOnly": {
+              "rate": 0.6048,
+              "ci95": [
+                0.5774156749380532,
+                0.6315421391909404
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1248,
+              "ci95": [
+                0.10762002538032413,
+                0.14427909808152306
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.6048,
+              "ci95": [
+                0.5774156749380532,
+                0.6315421391909404
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.2352,
+              "ci95": [
+                0.21252112164484496,
+                0.259501500670446
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.2352,
+              "ci95": [
+                0.21252112164484496,
+                0.259501500670446
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.3696,
+              "ci95": [
+                0.34327824115252326,
+                0.39672081454956853
+              ]
+            },
+            "shares": {
+              "wound": 0.5543570219966159,
+              "follow-up": 0.2929357021996616,
+              "recoil": 0.1527072758037225
+            },
+            "effectiveDirections": 2.6476711719515538,
+            "offers": {},
+            "meanSpecialCount": 11.6688
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.8128,
+              "ci95": [
+                0.7902290286732256,
+                0.8334542180781981
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1112,
+              "ci95": [
+                0.09494890621194274,
+                0.12983355434766863
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5024,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5032,
+              "ci95": [
+                0.4755146704507188,
+                0.5308657208203954
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8888,
+              "ci95": [
+                0.8701664456523315,
+                0.9050510937880574
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.2872,
+              "ci95": [
+                0.26279909536757406,
+                0.31290488510332437
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.9,
+              "ci95": [
+                0.8297634281701123,
+                0.9432404649585859
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.7636363636363637,
+              "ci95": [
+                0.6761905470088633,
+                0.8332892916441424
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0648,
+              "ci95": [
+                0.05244211782590242,
+                0.07982466930255146
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1872,
+              "ci95": [
+                0.16654578192180194,
+                0.20977097132677433
+              ]
+            },
+            "shares": {
+              "recoil": 0.7417979002624673,
+              "wound": 0.08234908136482937,
+              "follow-up": 0.1758530183727034
+            },
+            "effectiveDirections": 2.0809375941760093,
+            "offers": {},
+            "meanSpecialCount": 11.6464
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.4904,
+              "ci95": [
+                0.46275840892775155,
+                0.5181004172589055
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.124,
+              "ci95": [
+                0.10687261774028972,
+                0.1434314079037789
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.4066496163682864,
+            "meanRewardOpportunities": 4.512,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4776,
+              "ci95": [
+                0.4500202425708726,
+                0.5053170185313273
+              ]
+            },
+            "directOnly": {
+              "rate": 0.876,
+              "ci95": [
+                0.8565685920962212,
+                0.8931273822597103
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1016,
+              "ci95": [
+                0.08605306684923017,
+                0.11958821989703827
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8921568627450981,
+              "ci95": [
+                0.8171390383936558,
+                0.9387074340708573
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.47058823529411764,
+              "ci95": [
+                0.37655749862560384,
+                0.5667540159395578
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0552,
+              "ci95": [
+                0.04384876667010544,
+                0.0692768466450055
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1448,
+              "ci95": [
+                0.1263795249490943,
+                0.16539704395721735
+              ]
+            },
+            "shares": {
+              "follow-up": 0.5758564437194127,
+              "recoil": 0.21044045676998369,
+              "wound": 0.2137030995106036
+            },
+            "effectiveDirections": 2.6526936159239862,
+            "offers": {},
+            "meanSpecialCount": 10.6824
+          }
+        }
+      },
+      "adaptive-skip": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.8688,
+          "ci95": [
+            0.859157850225943,
+            0.8778758720245775
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.3714,
+          "ci95": [
+            0.3581104668879104,
+            0.38488699330347553
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 1.1217771639042358,
+        "meanRewardOpportunities": 4.5016,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.4384,
+          "ci95": [
+            0.42469878051614357,
+            0.4521958038368065
+          ]
+        },
+        "directOnly": {
+          "rate": 0.6286,
+          "ci95": [
+            0.6151130066965246,
+            0.6418895331120898
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.3914,
+          "ci95": [
+            0.3779598808508536,
+            0.40500687013502906
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.17349137931034483,
+          "ci95": [
+            0.15694259579864786,
+            0.19138900405372664
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.12984913793103448,
+          "ci95": [
+            0.11531769526409387,
+            0.14590971248934057
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "shares": {
+          "recoil": 0.2969229588704731,
+          "wound": 0.30336863106200146,
+          "follow-up": 0.39970841006752555
+        },
+        "effectiveDirections": 2.9711499823097918,
+        "offers": {
+          "wounding": 4040,
+          "hollowPoint": 4136,
+          "advance": 4150,
+          "relay": 3984,
+          "lowRecoil": 3969,
+          "hammer": 4116,
+          "finisher": 4172,
+          "plusP": 4096,
+          "opening": 4115,
+          "laceration": 4153,
+          "retreat": 4085
+        },
+        "meanSpecialCount": 7.2516,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.588,
+              "ci95": [
+                0.5604849747669987,
+                0.6149757851886448
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.168,
+              "ci95": [
+                0.14829790406745322,
+                0.1897365015544372
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.4326530612244897,
+            "meanRewardOpportunities": 4.5032,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5736,
+              "ci95": [
+                0.5459989631958413,
+                0.6007500360397879
+              ]
+            },
+            "directOnly": {
+              "rate": 0.832,
+              "ci95": [
+                0.8102634984455628,
+                0.8517020959325468
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.0952,
+              "ci95": [
+                0.0801476112333277,
+                0.11273289297071215
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.4956521739130435,
+              "ci95": [
+                0.4316396855314122,
+                0.5598075163351506
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.21304347826086956,
+              "ci95": [
+                0.1650650479268456,
+                0.2704502752662903
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.2521541950113379,
+              "wound": 0.2575963718820862,
+              "follow-up": 0.4902494331065759
+            },
+            "effectiveDirections": 2.8469838575946333,
+            "offers": {},
+            "meanSpecialCount": 7.5032
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5104,
+            "orphanedWoundOrPayoff": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "directOnly": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.4896,
+              "ci95": [
+                0.4619617431166637,
+                0.5173019852522147
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.7405333333333335,
+              "follow-up": 0.16053333333333328,
+              "recoil": 0.0989333333333331
+            },
+            "effectiveDirections": 2.1063664433844838,
+            "offers": {},
+            "meanSpecialCount": 7.5104
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1624,
+              "ci95": [
+                0.142993328524005,
+                0.18387539237343534
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5056,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.604,
+              "ci95": [
+                0.5766087012319612,
+                0.6307540150792539
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8376,
+              "ci95": [
+                0.8161246076265647,
+                0.857006671475995
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.6416,
+              "ci95": [
+                0.6146195562392403,
+                0.6677127575075679
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5656565656565656,
+              "ci95": [
+                0.49601321230853446,
+                0.6328006694680665
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.5656565656565656,
+              "ci95": [
+                0.49601321230853446,
+                0.6328006694680665
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.6668000000000003,
+              "follow-up": 0.2643999999999997,
+              "wound": 0.06879999999999989
+            },
+            "effectiveDirections": 2.239173406875493,
+            "offers": {},
+            "meanSpecialCount": 7.5056
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.8872,
+              "ci95": [
+                0.8684629708603557,
+                0.9035643729444758
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1552,
+              "ci95": [
+                0.13618583763571965,
+                0.17632700290171352
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.1190261496844003,
+            "meanRewardOpportunities": 4.4872,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.576,
+              "ci95": [
+                0.5484116475352333,
+                0.6031226451537314
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8448,
+              "ci95": [
+                0.8236729970982865,
+                0.8638141623642804
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3392,
+              "ci95": [
+                0.3134822235028816,
+                0.3659031151236244
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5393258426966292,
+              "ci95": [
+                0.4660413460980315,
+                0.6109487375791909
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.449438202247191,
+              "ci95": [
+                0.3781969562409524,
+                0.5228157933169045
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.7617974150886686,
+              "wound": 0.10535016531409672,
+              "recoil": 0.1328524195972347
+            },
+            "effectiveDirections": 2.0391181755228365,
+            "offers": {},
+            "meanSpecialCount": 6.4872
+          }
+        }
+      },
+      "adaptive-buy": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.7116,
+          "ci95": [
+            0.6988842959020098,
+            0.7239908007037661
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.219,
+          "ci95": [
+            0.2077545657633479,
+            0.2306768985739725
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 1.0560769591740966,
+        "meanRewardOpportunities": 4.5016,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.5318,
+          "ci95": [
+            0.5179496406079808,
+            0.5456015317552693
+          ]
+        },
+        "directOnly": {
+          "rate": 0.781,
+          "ci95": [
+            0.7693231014260277,
+            0.7922454342366522
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.2516,
+          "ci95": [
+            0.23976581383003107,
+            0.26381559450231906
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.6508620689655172,
+          "ci95": [
+            0.628883095002097,
+            0.6722178159572018
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.4110991379310345,
+          "ci95": [
+            0.38891991927131775,
+            0.43364561534195245
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0.1496,
+          "ci95": [
+            0.13998251310464033,
+            0.15975551217577627
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0.1432,
+          "ci95": [
+            0.13376461446083843,
+            0.15318323776533915
+          ]
+        },
+        "shares": {
+          "wound": 0.22390856286303187,
+          "recoil": 0.3647180063706202,
+          "follow-up": 0.4113734307663479
+        },
+        "effectiveDirections": 2.910581682036308,
+        "offers": {
+          "wounding": 4040,
+          "hollowPoint": 4136,
+          "advance": 4150,
+          "relay": 3984,
+          "lowRecoil": 3969,
+          "hammer": 4116,
+          "finisher": 4172,
+          "plusP": 4096,
+          "opening": 4115,
+          "laceration": 4153,
+          "retreat": 4085
+        },
+        "meanSpecialCount": 11.4138,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.5408,
+              "ci95": [
+                0.5130909161899312,
+                0.5682590725167761
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1456,
+              "ci95": [
+                0.12713268367513733,
+                0.16623898304895288
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.2948369565217392,
+            "meanRewardOpportunities": 4.5032,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5256,
+              "ci95": [
+                0.49788166294470004,
+                0.5531614672242144
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8544,
+              "ci95": [
+                0.8337610169510472,
+                0.8728673163248628
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1064,
+              "ci95": [
+                0.09049560308255547,
+                0.12471627057038442
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7695652173913043,
+              "ci95": [
+                0.7109804667661016,
+                0.8192930175070133
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.34347826086956523,
+              "ci95": [
+                0.2851300974052236,
+                0.4069691697910324
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0272,
+              "ci95": [
+                0.01952890429608261,
+                0.037768285396778116
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0512,
+              "ci95": [
+                0.04029789258797618,
+                0.06485223163824187
+              ]
+            },
+            "shares": {
+              "wound": 0.22879684418145954,
+              "recoil": 0.2657790927021696,
+              "follow-up": 0.5054240631163709
+            },
+            "effectiveDirections": 2.813750460870932,
+            "offers": {},
+            "meanSpecialCount": 11.6336
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.772,
+              "ci95": [
+                0.7479290823927102,
+                0.7944041756520063
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.4208,
+              "ci95": [
+                0.3937149003396995,
+                0.44837041570022135
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5104,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4992,
+              "ci95": [
+                0.47152639614767206,
+                0.5268785060345492
+              ]
+            },
+            "directOnly": {
+              "rate": 0.5792,
+              "ci95": [
+                0.5516295842997787,
+                0.6062850996603006
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.2848,
+              "ci95": [
+                0.260469145773067,
+                0.31044954124449564
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5792,
+              "ci95": [
+                0.5516295842997787,
+                0.6062850996603006
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.3512,
+              "ci95": [
+                0.32522986538624193,
+                0.3780819405069427
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.3512,
+              "ci95": [
+                0.32522986538624193,
+                0.3780819405069427
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.228,
+              "ci95": [
+                0.20559582434799376,
+                0.25207091760728995
+              ]
+            },
+            "shares": {
+              "wound": 0.40690846286701204,
+              "follow-up": 0.3882556131260794,
+              "recoil": 0.2048359240069086
+            },
+            "effectiveDirections": 2.8805485113048963,
+            "offers": {},
+            "meanSpecialCount": 11.632
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.8704,
+              "ci95": [
+                0.8506397989629287,
+                0.8878904906685526
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1632,
+              "ci95": [
+                0.1437506072169561,
+                0.18471321149826286
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5056,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.56,
+              "ci95": [
+                0.532339453365942,
+                0.5872928829674513
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8368,
+              "ci95": [
+                0.8152867885017372,
+                0.8562493927830439
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.42,
+              "ci95": [
+                0.3929244699954151,
+                0.4475657482267271
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7929292929292929,
+              "ci95": [
+                0.731174721422658,
+                0.8435333665037159
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.696969696969697,
+              "ci95": [
+                0.6297084141104701,
+                0.7567332312193331
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0904,
+              "ci95": [
+                0.07573296659975565,
+                0.1075769506976127
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1296,
+              "ci95": [
+                0.11210950933144731,
+                0.14936020103707132
+              ]
+            },
+            "shares": {
+              "recoil": 0.6511948529411766,
+              "wound": 0.10569852941176462,
+              "follow-up": 0.24310661764705893
+            },
+            "effectiveDirections": 2.3647313498016036,
+            "offers": {},
+            "meanSpecialCount": 11.6528
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.6632,
+              "ci95": [
+                0.6365348802694393,
+                0.6888650745573905
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1464,
+              "ci95": [
+                0.12788604270047613,
+                0.1670807218413927
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.0233918128654973,
+            "meanRewardOpportunities": 4.4872,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5424,
+              "ci95": [
+                0.514693385402606,
+                0.5698467989396586
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8536,
+              "ci95": [
+                0.8329192781586073,
+                0.8721139572995239
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1952,
+              "ci95": [
+                0.17417490836338956,
+                0.2180928230629725
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8426966292134831,
+              "ci95": [
+                0.7820445515306904,
+                0.8888690347993902
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.601123595505618,
+              "ci95": [
+                0.5277829751742322,
+                0.6701915257100539
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.1296,
+              "ci95": [
+                0.11210950933144731,
+                0.14936020103707132
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.164,
+              "ci95": [
+                0.14450806019336151,
+                0.185550856339636
+              ]
+            },
+            "shares": {
+              "follow-up": 0.5824286288701246,
+              "wound": 0.16204262163248895,
+              "recoil": 0.2555287494973865
+            },
+            "effectiveDirections": 2.6074697895796817,
+            "offers": {},
+            "meanSpecialCount": 10.7368
+          }
+        }
+      }
+    },
+    "weak": {
+      "random-skip": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.7732,
+          "ci95": [
+            0.7613853218041645,
+            0.7845951904486613
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.2924,
+          "ci95": [
+            0.27995499711797334,
+            0.30516376443515025
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 0.9384376616658044,
+        "meanRewardOpportunities": 4.5054,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.389,
+          "ci95": [
+            0.37557668024559526,
+            0.4025937558449478
+          ]
+        },
+        "directOnly": {
+          "rate": 0.7076,
+          "ci95": [
+            0.6948362355648499,
+            0.7200450028820267
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.2658,
+          "ci95": [
+            0.25373826893079476,
+            0.2782213358656481
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.12385919165580182,
+          "ci95": [
+            0.10830741318608014,
+            0.14129020467001116
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.08018252933507171,
+          "ci95": [
+            0.06761732695822323,
+            0.09484517893315075
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "shares": {
+          "wound": 0.3094930160372479,
+          "recoil": 0.31401965856182107,
+          "follow-up": 0.376487325400931
+        },
+        "effectiveDirections": 2.987652333186518,
+        "offers": {
+          "advance": 4283,
+          "laceration": 4359,
+          "relay": 4426,
+          "hollowPoint": 3826,
+          "hammer": 3968,
+          "wounding": 3970,
+          "opening": 3920,
+          "finisher": 3856,
+          "retreat": 3916,
+          "lowRecoil": 4191,
+          "plusP": 4339
+        },
+        "meanSpecialCount": 7.2554,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.3568,
+              "ci95": [
+                0.3307183731145844,
+                0.38375911750305025
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0576,
+              "ci95": [
+                0.045988161886239935,
+                0.07192274488220672
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.437219730941704,
+            "meanRewardOpportunities": 4.4912,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.524,
+              "ci95": [
+                0.4962821804507662,
+                0.5515707540825912
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9424,
+              "ci95": [
+                0.9280772551177934,
+                0.9540118381137601
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.0512,
+              "ci95": [
+                0.04029789258797618,
+                0.06485223163824187
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.638095238095238,
+              "ci95": [
+                0.5428081976800062,
+                0.7236340449919133
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.17142857142857143,
+              "ci95": [
+                0.11127695984061492,
+                0.2547742558710247
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.5571748878923767,
+              "recoil": 0.29596412556053814,
+              "wound": 0.1468609865470852
+            },
+            "effectiveDirections": 2.6325119168650972,
+            "offers": {},
+            "meanSpecialCount": 7.4912
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.516,
+            "orphanedWoundOrPayoff": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "directOnly": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3072,
+              "ci95": [
+                0.2822480925820295,
+                0.3333333333333333
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.8410666666666669,
+              "follow-up": 0.10266666666666661,
+              "recoil": 0.056266666666666666
+            },
+            "effectiveDirections": 1.7180471119293097,
+            "offers": {},
+            "meanSpecialCount": 7.516
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0632,
+              "ci95": [
+                0.05100354692891972,
+                0.07807304456397701
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5024,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5216,
+              "ci95": [
+                0.4938834882548025,
+                0.549184152825219
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9368,
+              "ci95": [
+                0.921926955436023,
+                0.9489964530710804
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.5272,
+              "ci95": [
+                0.4994814290854223,
+                0.5547518967190492
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7010309278350515,
+              "ci95": [
+                0.6036901803954189,
+                0.783054972398666
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.7010309278350515,
+              "ci95": [
+                0.6036901803954189,
+                0.783054972398666
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.7328000000000001,
+              "wound": 0.027999999999999983,
+              "follow-up": 0.2391999999999999
+            },
+            "effectiveDirections": 1.9544229620384574,
+            "offers": {},
+            "meanSpecialCount": 7.5024
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.736,
+              "ci95": [
+                0.7108670153426964,
+                0.7596868409019839
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0488,
+              "ci95": [
+                0.03817694904665696,
+                0.06218788172622537
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.277173913043478,
+            "meanRewardOpportunities": 4.512,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5104,
+              "ci95": [
+                0.48269801474778523,
+                0.5380382568833363
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9512,
+              "ci95": [
+                0.9378121182737748,
+                0.9618230509533431
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1776,
+              "ci95": [
+                0.15741048357014134,
+                0.19976509586509197
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.6707317073170732,
+              "ci95": [
+                0.5633818520351263,
+                0.7628003253707004
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.45121951219512196,
+              "ci95": [
+                0.3481109278812157,
+                0.5586941642885482
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.1039855072463768,
+              "follow-up": 0.8474637681159422,
+              "wound": 0.048550724637681154
+            },
+            "effectiveDirections": 1.6862480492763454,
+            "offers": {},
+            "meanSpecialCount": 6.512
+          }
+        }
+      },
+      "random-buy": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.6188,
+          "ci95": [
+            0.6052512478299451,
+            0.6321663394893658
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.185,
+          "ci95": [
+            0.1744801903393953,
+            0.19600347964728057
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 0.9679211922202576,
+        "meanRewardOpportunities": 4.5054,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.4874,
+          "ci95": [
+            0.473560097841862,
+            0.5012592489576051
+          ]
+        },
+        "directOnly": {
+          "rate": 0.815,
+          "ci95": [
+            0.8039965203527195,
+            0.8255198096606047
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.18,
+          "ci95": [
+            0.16959779480144505,
+            0.1908935524866066
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.6642764015645372,
+          "ci95": [
+            0.6402595507334155,
+            0.6874725121786556
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.3194263363754889,
+          "ci95": [
+            0.29656944274247427,
+            0.34318539286608246
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0.1138,
+          "ci95": [
+            0.10529234169732149,
+            0.12290065306094583
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0.175,
+          "ci95": [
+            0.1647184489581638,
+            0.18578057563126366
+          ]
+        },
+        "shares": {
+          "wound": 0.2398190045248869,
+          "recoil": 0.37669683257918557,
+          "follow-up": 0.3834841628959276
+        },
+        "effectiveDirections": 2.9380856248150007,
+        "offers": {
+          "advance": 4207,
+          "laceration": 4246,
+          "relay": 4545,
+          "finisher": 3894,
+          "hollowPoint": 3839,
+          "hammer": 4046,
+          "opening": 3869,
+          "wounding": 3981,
+          "retreat": 3887,
+          "lowRecoil": 4209,
+          "plusP": 4331
+        },
+        "meanSpecialCount": 11.4118,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.4136,
+              "ci95": [
+                0.3866036755587124,
+                0.44112576012120125
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1208,
+              "ci95": [
+                0.1038854593077469,
+                0.1400381750652074
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.3014440433212995,
+            "meanRewardOpportunities": 4.4912,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4688,
+              "ci95": [
+                0.4412732714638436,
+                0.4965179136427919
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8792,
+              "ci95": [
+                0.8599618249347926,
+                0.8961145406922532
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.0536,
+              "ci95": [
+                0.04242612307515873,
+                0.06750929460439505
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8476190476190476,
+              "ci95": [
+                0.7667252612512719,
+                0.9039741771987323
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.26666666666666666,
+              "ci95": [
+                0.19141558416037008,
+                0.35838890235948995
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0176,
+              "ci95": [
+                0.011651067154511521,
+                0.026504948725006278
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0328,
+              "ci95": [
+                0.024269132219557694,
+                0.044193742197753086
+              ]
+            },
+            "shares": {
+              "follow-up": 0.46550612508059314,
+              "wound": 0.2643455834945197,
+              "recoil": 0.27014829142488717
+            },
+            "effectiveDirections": 2.88988600858812,
+            "offers": {},
+            "meanSpecialCount": 11.6496
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.6632,
+              "ci95": [
+                0.6365348802694393,
+                0.6888650745573905
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.3824,
+              "ci95": [
+                0.35585820464990037,
+                0.4096624161366488
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.516,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5184,
+              "ci95": [
+                0.49068622357152614,
+                0.5460010262373811
+              ]
+            },
+            "directOnly": {
+              "rate": 0.6176,
+              "ci95": [
+                0.5903375838633513,
+                0.6441417953500996
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1752,
+              "ci95": [
+                0.15513015217183035,
+                0.19726013381006724
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.6176,
+              "ci95": [
+                0.5903375838633513,
+                0.6441417953500996
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.2808,
+              "ci95": [
+                0.2565878186188174,
+                0.30635537930985235
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.2808,
+              "ci95": [
+                0.2565878186188174,
+                0.30635537930985235
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.3368,
+              "ci95": [
+                0.3111349254426095,
+                0.36346511973056067
+              ]
+            },
+            "shares": {
+              "wound": 0.4802975472456775,
+              "follow-up": 0.3488138319260152,
+              "recoil": 0.17088862082830722
+            },
+            "effectiveDirections": 2.7774101994863676,
+            "offers": {},
+            "meanSpecialCount": 11.6688
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.8368,
+              "ci95": [
+                0.8152867885017372,
+                0.8562493927830439
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1136,
+              "ci95": [
+                0.09717940423497734,
+                0.1323883497779698
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5024,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4928,
+              "ci95": [
+                0.4651488303729486,
+                0.5204952892670442
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8864,
+              "ci95": [
+                0.8676116502220302,
+                0.9028205957650227
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3864,
+              "ci95": [
+                0.3597934992297922,
+                0.41370261064564984
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8865979381443299,
+              "ci95": [
+                0.8082535953989312,
+                0.9354870830512321
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.6907216494845361,
+              "ci95": [
+                0.5929522976148841,
+                0.7739597704205298
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0688,
+              "ci95": [
+                0.05604858945750497,
+                0.0841936867598418
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1632,
+              "ci95": [
+                0.1437506072169561,
+                0.18471321149826286
+              ]
+            },
+            "shares": {
+              "recoil": 0.6824410452517526,
+              "wound": 0.07680050987890373,
+              "follow-up": 0.24075844486934359
+            },
+            "effectiveDirections": 2.227074955507002,
+            "offers": {},
+            "meanSpecialCount": 11.6464
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.5616,
+              "ci95": [
+                0.5339453675416869,
+                0.5888771644272636
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1232,
+              "ci95": [
+                0.10612545525795515,
+                0.1425834725683349
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.2132596685082873,
+            "meanRewardOpportunities": 4.512,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4696,
+              "ci95": [
+                0.4420680958155812,
+                0.49731818710883285
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8768,
+              "ci95": [
+                0.8574165274316652,
+                0.8938745447420449
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1048,
+              "ci95": [
+                0.0890135296049236,
+                0.12300814841245918
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8780487804878049,
+              "ci95": [
+                0.7898683447569095,
+                0.9323921909274209
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.5365853658536586,
+              "ci95": [
+                0.42944534622716574,
+                0.6404508346455114
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.088,
+              "ci95": [
+                0.07353059581680327,
+                0.10499402802722935
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1672,
+              "ci95": [
+                0.14753959472484243,
+                0.18889971307926937
+              ]
+            },
+            "shares": {
+              "follow-up": 0.5766856600189934,
+              "wound": 0.18067426400759734,
+              "recoil": 0.24264007597340928
+            },
+            "effectiveDirections": 2.638489775163536,
+            "offers": {},
+            "meanSpecialCount": 10.6824
+          }
+        }
+      },
+      "adaptive-skip": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.9022,
+          "ci95": [
+            0.8936549493176477,
+            0.9101274885596825
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.377,
+          "ci95": [
+            0.36366586192110995,
+            0.39052299969273496
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 1.0857902904012413,
+        "meanRewardOpportunities": 4.5016,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.4178,
+          "ci95": [
+            0.40419749044483105,
+            0.43152872438978734
+          ]
+        },
+        "directOnly": {
+          "rate": 0.623,
+          "ci95": [
+            0.6094770003072651,
+            0.63633413807889
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.5032,
+          "ci95": [
+            0.48934385498663796,
+            0.5170512315404814
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.1492785793562708,
+          "ci95": [
+            0.13357127583180745,
+            0.1664780751190179
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.11653718091009989,
+          "ci95": [
+            0.10253111339597851,
+            0.13217474341892707
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "shares": {
+          "follow-up": 0.4390748540604436,
+          "wound": 0.2790216507795764,
+          "recoil": 0.28190349515998
+        },
+        "effectiveDirections": 2.9285318826158377,
+        "offers": {
+          "advance": 4196,
+          "laceration": 4359,
+          "relay": 4450,
+          "opening": 3928,
+          "finisher": 3895,
+          "hollowPoint": 3860,
+          "wounding": 4011,
+          "retreat": 3845,
+          "plusP": 4270,
+          "lowRecoil": 4246,
+          "hammer": 3956
+        },
+        "meanSpecialCount": 7.2516,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.6632,
+              "ci95": [
+                0.6365348802694393,
+                0.6888650745573905
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1872,
+              "ci95": [
+                0.16654578192180194,
+                0.20977097132677433
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.278648974668275,
+            "meanRewardOpportunities": 4.5032,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5616,
+              "ci95": [
+                0.5339453675416869,
+                0.5888771644272636
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8128,
+              "ci95": [
+                0.7902290286732256,
+                0.8334542180781981
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1752,
+              "ci95": [
+                0.15513015217183035,
+                0.19726013381006724
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.463519313304721,
+              "ci95": [
+                0.4005988734314078,
+                0.5276231956645618
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.2446351931330472,
+              "ci95": [
+                0.1938731985114208,
+                0.30368128516036663
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.49638118214716526,
+              "recoil": 0.2635705669481303,
+              "wound": 0.24004825090470444
+            },
+            "effectiveDirections": 2.8338987928682293,
+            "offers": {},
+            "meanSpecialCount": 7.5032
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5104,
+            "orphanedWoundOrPayoff": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "directOnly": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.5576,
+              "ci95": [
+                0.5299311233684698,
+                0.5849159195115878
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.7009333333333335,
+              "follow-up": 0.19493333333333343,
+              "recoil": 0.10413333333333298
+            },
+            "effectiveDirections": 2.2330418131474805,
+            "offers": {},
+            "meanSpecialCount": 7.5104
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1888,
+              "ci95": [
+                0.16807044330622697,
+                0.21143650557790641
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5056,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5568,
+              "ci95": [
+                0.5291284908750693,
+                0.5841234541872096
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8112,
+              "ci95": [
+                0.7885634944220936,
+                0.831929556693773
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.832,
+              "ci95": [
+                0.8102634984455628,
+                0.8517020959325468
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.46842105263157896,
+              "ci95": [
+                0.3987959903571229,
+                0.5392977934333534
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.46842105263157896,
+              "ci95": [
+                0.3987959903571229,
+                0.5392977934333534
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.5641333333333339,
+              "wound": 0.07453333333333326,
+              "follow-up": 0.36133333333333273
+            },
+            "effectiveDirections": 2.4212736412332925,
+            "offers": {},
+            "meanSpecialCount": 7.5056
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.9456,
+              "ci95": [
+                0.9316065575832227,
+                0.956862926919445
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.132,
+              "ci95": [
+                0.11435740522936445,
+                0.15189759859248997
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 1.844331641285956,
+            "meanRewardOpportunities": 4.4872,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5528,
+              "ci95": [
+                0.5251164079164478,
+                0.5801600480569383
+              ]
+            },
+            "directOnly": {
+              "rate": 0.868,
+              "ci95": [
+                0.8481024014075101,
+                0.8856425947706356
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.448,
+              "ci95": [
+                0.42063284880353713,
+                0.47568579304085534
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5581395348837209,
+              "ci95": [
+                0.47199083463500835,
+                0.6409256011802784
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.49612403100775193,
+              "ci95": [
+                0.41121117474868096,
+                0.5812610628636332
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.7392836999435985,
+              "recoil": 0.18429216018048508,
+              "wound": 0.0764241398759165
+            },
+            "effectiveDirections": 2.078237915408958,
+            "offers": {},
+            "meanSpecialCount": 6.4872
+          }
+        }
+      },
+      "adaptive-buy": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.7916,
+          "ci95": [
+            0.7801199258828418,
+            0.802632333900921
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.2256,
+          "ci95": [
+            0.21422747055117505,
+            0.23739385974832924
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 1.0726867335562988,
+        "meanRewardOpportunities": 4.5016,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.506,
+          "ci95": [
+            0.49214241858386304,
+            0.5198483686544861
+          ]
+        },
+        "directOnly": {
+          "rate": 0.7744,
+          "ci95": [
+            0.7626061402516707,
+            0.785772529448825
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.3362,
+          "ci95": [
+            0.32323568883686055,
+            0.349415819556211
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.6431742508324084,
+          "ci95": [
+            0.6207718288325723,
+            0.6649675184058566
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.45782463928967815,
+          "ci95": [
+            0.4349349417451997,
+            0.48089377767293756
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0.1722,
+          "ci95": [
+            0.16198738535205634,
+            0.18291593852614155
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0.1072,
+          "ci95": [
+            0.09892432825050786,
+            0.11607880054557555
+          ]
+        },
+        "shares": {
+          "wound": 0.19744820616473027,
+          "follow-up": 0.459070237493683,
+          "recoil": 0.3434815563415867
+        },
+        "effectiveDirections": 2.8427675075220575,
+        "offers": {
+          "advance": 4128,
+          "laceration": 4269,
+          "relay": 4688,
+          "opening": 3886,
+          "hollowPoint": 3773,
+          "hammer": 3984,
+          "retreat": 3848,
+          "wounding": 4019,
+          "finisher": 3903,
+          "plusP": 4298,
+          "lowRecoil": 4220
+        },
+        "meanSpecialCount": 11.4138,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.6392,
+              "ci95": [
+                0.6121881668516442,
+                0.6653588534418282
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1528,
+              "ci95": [
+                0.13391996717398721,
+                0.17380757991011017
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.2511627906976743,
+            "meanRewardOpportunities": 4.5032,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5136,
+              "ci95": [
+                0.4858924496451742,
+                0.5412242132570615
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8472,
+              "ci95": [
+                0.8261924200898898,
+                0.8660800328260128
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1584,
+              "ci95": [
+                0.1392095858838273,
+                0.1796836459247202
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8497854077253219,
+              "ci95": [
+                0.7982567385318186,
+                0.8899669519009431
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.4721030042918455,
+              "ci95": [
+                0.40897395538338227,
+                0.5361370386311828
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0368,
+              "ci95": [
+                0.027701812266921186,
+                0.04873655123928247
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0512,
+              "ci95": [
+                0.04029789258797618,
+                0.06485223163824187
+              ]
+            },
+            "shares": {
+              "wound": 0.1987901543596162,
+              "follow-up": 0.51543596161869,
+              "recoil": 0.28577388402169374
+            },
+            "effectiveDirections": 2.77512306098169,
+            "offers": {},
+            "meanSpecialCount": 11.6336
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.8424,
+              "ci95": [
+                0.821155241027403,
+                0.8615466249818282
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.4328,
+              "ci95": [
+                0.4055801292323856,
+                0.46043165407421394
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5104,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4856,
+              "ci95": [
+                0.4579794744077833,
+                0.5133087648722022
+              ]
+            },
+            "directOnly": {
+              "rate": 0.5672,
+              "ci95": [
+                0.5395683459257861,
+                0.5944198707676145
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3448,
+              "ci95": [
+                0.3189621562942917,
+                0.3715888670566643
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5672,
+              "ci95": [
+                0.5395683459257861,
+                0.5944198707676145
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.4096,
+              "ci95": [
+                0.3826555791286136,
+                0.43709836746240716
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.4096,
+              "ci95": [
+                0.3826555791286136,
+                0.43709836746240716
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1576,
+              "ci95": [
+                0.1384533750181718,
+                0.17884475897259705
+              ]
+            },
+            "shares": {
+              "wound": 0.36815447926559036,
+              "follow-up": 0.42750870528648277,
+              "recoil": 0.20433681544792695
+            },
+            "effectiveDirections": 2.8738479267145913,
+            "offers": {},
+            "meanSpecialCount": 11.632
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.916,
+              "ci95": [
+                0.8993186008576521,
+                0.9301322643872083
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1664,
+              "ci95": [
+                0.1467814546886352,
+                0.18806275529769798
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5056,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.536,
+              "ci95": [
+                0.5082852199161383,
+                0.5634941818838977
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8336,
+              "ci95": [
+                0.8119372447023021,
+                0.8532185453113648
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.5928,
+              "ci95": [
+                0.5653189584069779,
+                0.6197123884553372
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7947368421052632,
+              "ci95": [
+                0.7317373594861444,
+                0.8460539918027431
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.7105263157894737,
+              "ci95": [
+                0.6423728246819324,
+                0.7703352833815585
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0984,
+              "ci95": [
+                0.083097687462256,
+                0.11616320801289813
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.084,
+              "ci95": [
+                0.06986773561279176,
+                0.10068139914234799
+              ]
+            },
+            "shares": {
+              "recoil": 0.5627365356623001,
+              "wound": 0.09330422125181946,
+              "follow-up": 0.3439592430858804
+            },
+            "effectiveDirections": 2.489130694856153,
+            "offers": {},
+            "meanSpecialCount": 11.6528
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.7688,
+              "ci95": [
+                0.74462542637563,
+                0.7913274403979722
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1504,
+              "ci95": [
+                0.13165579562726382,
+                0.1712864580034979
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 1.791111111111111,
+            "meanRewardOpportunities": 4.4872,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4888,
+              "ci95": [
+                0.4611651479850577,
+                0.5165034825660423
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8496,
+              "ci95": [
+                0.8287135419965022,
+                0.8683442043727363
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.2488,
+              "ci95": [
+                0.22562754373416286,
+                0.2735117414833638
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7829457364341085,
+              "ci95": [
+                0.7041840313317832,
+                0.845342622969279
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.5271317829457365,
+              "ci95": [
+                0.44144139337977595,
+                0.6112529433340247
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.144,
+              "ci95": [
+                0.12562656789276086,
+                0.16455490319577218
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.136,
+              "ci95": [
+                0.11810840460835721,
+                0.1561220883023901
+              ]
+            },
+            "shares": {
+              "follow-up": 0.5839403399236905,
+              "recoil": 0.2826916406520986,
+              "wound": 0.13336801942421084
+            },
+            "effectiveDirections": 2.5599190342740656,
+            "offers": {},
+            "meanSpecialCount": 10.7368
+          }
+        }
+      }
+    },
+    "strong": {
+      "random-skip": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.8774,
+          "ci95": [
+            0.8680180588310255,
+            0.8862024584611287
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.3116,
+          "ci95": [
+            0.2989109654440015,
+            0.32457831527183895
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 1.0442215637109642,
+        "meanRewardOpportunities": 4.5054,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.3278,
+          "ci95": [
+            0.3149251037939511,
+            0.3409393024654317
+          ]
+        },
+        "directOnly": {
+          "rate": 0.6884,
+          "ci95": [
+            0.6754216847281611,
+            0.7010890345559986
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.4374,
+          "ci95": [
+            0.42370301374460023,
+            0.451193106068625
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.08416169648774023,
+          "ci95": [
+            0.07118758605241064,
+            0.09924770604955167
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.061630218687872766,
+          "ci95": [
+            0.05057402206400075,
+            0.07491274403233081
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "shares": {
+          "wound": 0.26586125674340894,
+          "follow-up": 0.44719246257883094,
+          "recoil": 0.2869462806777602
+        },
+        "effectiveDirections": 2.9163541935746826,
+        "offers": {
+          "advance": 4431,
+          "laceration": 4915,
+          "relay": 5659,
+          "opening": 3359,
+          "wounding": 3584,
+          "plusP": 4653,
+          "retreat": 3358,
+          "hammer": 3656,
+          "finisher": 3304,
+          "lowRecoil": 4765,
+          "hollowPoint": 3370
+        },
+        "meanSpecialCount": 7.2554,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.58,
+              "ci95": [
+                0.5524342517732729,
+                0.6070755300045848
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0856,
+              "ci95": [
+                0.07133168704974795,
+                0.10240764334094894
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.2841379310344827,
+            "meanRewardOpportunities": 4.4912,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4448,
+              "ci95": [
+                0.4174616924795344,
+                0.4724765580937437
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9144,
+              "ci95": [
+                0.897592356659051,
+                0.9286683129502521
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.1376,
+              "ci95": [
+                0.11961034239064353,
+                0.1578103461556609
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.49523809523809526,
+              "ci95": [
+                0.40147502342062186,
+                0.5893373130389671
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.23809523809523808,
+              "ci95": [
+                0.1667896875185694,
+                0.3278888177588245
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.1308045977011494,
+              "follow-up": 0.5749425287356321,
+              "recoil": 0.2942528735632184
+            },
+            "effectiveDirections": 2.570883305687277,
+            "offers": {},
+            "meanSpecialCount": 7.4912
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.516,
+            "orphanedWoundOrPayoff": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "directOnly": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.4208,
+              "ci95": [
+                0.3937149003396995,
+                0.44837041570022135
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.7764000000000001,
+              "follow-up": 0.14799999999999994,
+              "recoil": 0.07559999999999985
+            },
+            "effectiveDirections": 1.9630104675616458,
+            "offers": {},
+            "meanSpecialCount": 7.516
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.0728,
+              "ci95": [
+                0.05966850604846981,
+                0.08854925925776987
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5024,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4472,
+              "ci95": [
+                0.4198399519430616,
+                0.4748835920835522
+              ]
+            },
+            "directOnly": {
+              "rate": 0.9272,
+              "ci95": [
+                0.9114507407422302,
+                0.9403314939515303
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.7968,
+              "ci95": [
+                0.773599472214034,
+                0.8181818181818181
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5131578947368421,
+              "ci95": [
+                0.4028849903549509,
+                0.622164607849494
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.5131578947368421,
+              "ci95": [
+                0.4028849903549509,
+                0.622164607849494
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "recoil": 0.5934666666666669,
+              "follow-up": 0.3782666666666665,
+              "wound": 0.028266666666666662
+            },
+            "effectiveDirections": 2.177528985440186,
+            "offers": {},
+            "meanSpecialCount": 7.5024
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.9296,
+              "ci95": [
+                0.9140625301218969,
+                0.9425049980251993
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.088,
+              "ci95": [
+                0.07353059581680327,
+                0.10499402802722935
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 1.8932874354561102,
+            "meanRewardOpportunities": 4.512,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4192,
+              "ci95": [
+                0.39213411307783147,
+                0.4467610073265323
+              ]
+            },
+            "directOnly": {
+              "rate": 0.912,
+              "ci95": [
+                0.8950059719727707,
+                0.9264694041831968
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3944,
+              "ci95": [
+                0.36766981223922446,
+                0.42177727581400326
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.46153846153846156,
+              "ci95": [
+                0.35532213417762043,
+                0.5713655161126965
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.3717948717948718,
+              "ci95": [
+                0.27293398524227175,
+                0.4826915157254513
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.7634825014343086,
+              "recoil": 0.1800057372346529,
+              "wound": 0.05651176133103843
+            },
+            "effectiveDirections": 1.9681237746604043,
+            "offers": {},
+            "meanSpecialCount": 6.512
+          }
+        }
+      },
+      "random-buy": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.7438,
+          "ci95": [
+            0.7315159316641561,
+            0.7557097231207596
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.1974,
+          "ci95": [
+            0.18660108930264274,
+            0.2086635409766211
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 1.0404729422464756,
+        "meanRewardOpportunities": 4.5054,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.4422,
+          "ci95": [
+            0.42848321060827343,
+            0.456005538995631
+          ]
+        },
+        "directOnly": {
+          "rate": 0.8026,
+          "ci95": [
+            0.791336459023379,
+            0.8133989106973573
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.3042,
+          "ci95": [
+            0.2916019032537468,
+            0.31709873986813
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.6222664015904572,
+          "ci95": [
+            0.5975230060642646,
+            0.6463888482898198
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.3797216699801193,
+          "ci95": [
+            0.35556919384977664,
+            0.4044849982084004
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0.143,
+          "ci95": [
+            0.13357040943851456,
+            0.15297774987971802
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0.1368,
+          "ci95": [
+            0.12755330819471222,
+            0.1466043709772264
+          ]
+        },
+        "shares": {
+          "wound": 0.1920767231334591,
+          "follow-up": 0.45558841982611764,
+          "recoil": 0.3523348570404232
+        },
+        "effectiveDirections": 2.8366221463558086,
+        "offers": {
+          "advance": 4280,
+          "laceration": 4588,
+          "relay": 6326,
+          "finisher": 3231,
+          "hollowPoint": 3256,
+          "hammer": 3885,
+          "retreat": 3265,
+          "opening": 3260,
+          "wounding": 3629,
+          "lowRecoil": 4551,
+          "plusP": 4783
+        },
+        "meanSpecialCount": 11.4118,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.5896,
+              "ci95": [
+                0.5620960058024865,
+                0.6165549497887143
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1208,
+              "ci95": [
+                0.1038854593077469,
+                0.1400381750652074
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.231060606060606,
+            "meanRewardOpportunities": 4.4912,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4312,
+              "ci95": [
+                0.40399715142422327,
+                0.45882443624681907
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8792,
+              "ci95": [
+                0.8599618249347926,
+                0.8961145406922532
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.136,
+              "ci95": [
+                0.11810840460835721,
+                0.1561220883023901
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8095238095238095,
+              "ci95": [
+                0.7240221679553136,
+                0.8731759621714026
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.4,
+              "ci95": [
+                0.31142450373600916,
+                0.4956345619153594
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0272,
+              "ci95": [
+                0.01952890429608261,
+                0.037768285396778116
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0456,
+              "ci95": [
+                0.03536124416281172,
+                0.05862319533895628
+              ]
+            },
+            "shares": {
+              "follow-up": 0.5393487109905021,
+              "recoil": 0.2856173677069199,
+              "wound": 0.17503392130257803
+            },
+            "effectiveDirections": 2.7072752511019855,
+            "offers": {},
+            "meanSpecialCount": 11.6496
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.7624,
+              "ci95": [
+                0.738023732692696,
+                0.7851683515386773
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.4152,
+              "ci95": [
+                0.3881834319440296,
+                0.44273619937144126
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.516,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.5216,
+              "ci95": [
+                0.4938834882548025,
+                0.549184152825219
+              ]
+            },
+            "directOnly": {
+              "rate": 0.5848,
+              "ci95": [
+                0.5572638006285588,
+                0.6118165680559704
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.2688,
+              "ci95": [
+                0.24495854478148324,
+                0.2940581858805078
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5848,
+              "ci95": [
+                0.5572638006285588,
+                0.6118165680559704
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.3472,
+              "ci95": [
+                0.32131193445904493,
+                0.3740243823452468
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.3472,
+              "ci95": [
+                0.32131193445904493,
+                0.3740243823452468
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.2376,
+              "ci95": [
+                0.2148316484613227,
+                0.26197626730730394
+              ]
+            },
+            "shares": {
+              "wound": 0.41570479188527454,
+              "follow-up": 0.3920951381601958,
+              "recoil": 0.19220006995452968
+            },
+            "effectiveDirections": 2.8547280455442614,
+            "offers": {},
+            "meanSpecialCount": 11.6688
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.8976,
+              "ci95": [
+                0.8795563296207363,
+                0.9132072858152167
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1272,
+              "ci95": [
+                0.10986369933840731,
+                0.14682071757677564
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5024,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.428,
+              "ci95": [
+                0.40083206838791147,
+                0.45560912801201653
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8728,
+              "ci95": [
+                0.8531792824232245,
+                0.8901363006615928
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.5568,
+              "ci95": [
+                0.5291284908750693,
+                0.5841234541872096
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7631578947368421,
+              "ci95": [
+                0.6563840337948657,
+                0.8446079302940304
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.6710526315789473,
+              "ci95": [
+                0.5594359811214032,
+                0.7662087955363791
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.084,
+              "ci95": [
+                0.06986773561279176,
+                0.10068139914234799
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1024,
+              "ci95": [
+                0.08679271418478332,
+                0.1204436703792637
+              ]
+            },
+            "shares": {
+              "recoil": 0.5888294711824125,
+              "follow-up": 0.34016636957813406,
+              "wound": 0.07100415923945337
+            },
+            "effectiveDirections": 2.378501403081161,
+            "offers": {},
+            "meanSpecialCount": 11.6464
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.7256,
+              "ci95": [
+                0.7002003466943602,
+                0.7496172379191987
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1264,
+              "ci95": [
+                0.10911556813907,
+                0.1459737509583344
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 1.8236889692585896,
+            "meanRewardOpportunities": 4.512,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.388,
+              "ci95": [
+                0.36136815289831836,
+                0.4153181526126808
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8736,
+              "ci95": [
+                0.8540262490416657,
+                0.8908844318609301
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.2552,
+              "ci95": [
+                0.23180629288714438,
+                0.2800937748726109
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.8333333333333334,
+              "ci95": [
+                0.7354422072155546,
+                0.8999314902683655
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.5897435897435898,
+              "ci95": [
+                0.4788794806670461,
+                0.6921826686555478
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.1136,
+              "ci95": [
+                0.09717940423497734,
+                0.1323883497779698
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.1616,
+              "ci95": [
+                0.14223622514660106,
+                0.18303739793306067
+              ]
+            },
+            "shares": {
+              "recoil": 0.28224917309812575,
+              "follow-up": 0.5970231532524807,
+              "wound": 0.12072767364939359
+            },
+            "effectiveDirections": 2.5098528102361923,
+            "offers": {},
+            "meanSpecialCount": 10.6824
+          }
+        }
+      },
+      "adaptive-skip": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.9538,
+          "ci95": [
+            0.9476247834751237,
+            0.9592784246520081
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.4126,
+          "ci95": [
+            0.3990262590795257,
+            0.4263079401485236
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 0.9578527993289998,
+        "meanRewardOpportunities": 4.5016,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.335,
+          "ci95": [
+            0.32204817677923747,
+            0.34820517416616426
+          ]
+        },
+        "directOnly": {
+          "rate": 0.5874,
+          "ci95": [
+            0.5736920598514765,
+            0.6009737409204745
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.6882,
+          "ci95": [
+            0.6752195873221722,
+            0.7008914390540424
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.059113300492610835,
+          "ci95": [
+            0.048649870039349355,
+            0.07165765865386012
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.050492610837438424,
+          "ci95": [
+            0.04086380158733478,
+            0.06224303632613298
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0,
+          "ci95": [
+            0,
+            0.000767730137580694
+          ]
+        },
+        "shares": {
+          "follow-up": 0.44848675473544286,
+          "wound": 0.25693716362619845,
+          "recoil": 0.2945760816383587
+        },
+        "effectiveDirections": 2.9119559706487443,
+        "offers": {
+          "advance": 4112,
+          "laceration": 5004,
+          "opening": 3513,
+          "relay": 5122,
+          "finisher": 3362,
+          "hollowPoint": 3494,
+          "wounding": 3958,
+          "retreat": 3440,
+          "plusP": 4439,
+          "lowRecoil": 4871,
+          "hammer": 3701
+        },
+        "meanSpecialCount": 7.2516,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.816,
+              "ci95": [
+                0.7935618829590766,
+                0.8365017550634614
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.2448,
+              "ci95": [
+                0.22176936038630823,
+                0.2693944357423256
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 2.9598039215686276,
+            "meanRewardOpportunities": 4.5032,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4288,
+              "ci95": [
+                0.4016232299505917,
+                0.456413064267115
+              ]
+            },
+            "directOnly": {
+              "rate": 0.7552,
+              "ci95": [
+                0.7306055642576744,
+                0.7782306396136919
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3792,
+              "ci95": [
+                0.352711352792599,
+                0.4064288767228358
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.26180257510729615,
+              "ci95": [
+                0.20954432936321424,
+                0.32178800414576386
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.2017167381974249,
+              "ci95": [
+                0.15521987841733575,
+                0.2578899806614747
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "follow-up": 0.4818627450980391,
+              "recoil": 0.27009803921568626,
+              "wound": 0.24803921568627457
+            },
+            "effectiveDirections": 2.8609816291348222,
+            "offers": {},
+            "meanSpecialCount": 7.5032
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5104,
+            "orphanedWoundOrPayoff": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "directOnly": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.672,
+              "ci95": [
+                0.6454806639288859,
+                0.6974653668935082
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.6248000000000006,
+              "follow-up": 0.2391999999999996,
+              "recoil": 0.1359999999999999
+            },
+            "effectiveDirections": 2.477764609297965,
+            "offers": {},
+            "meanSpecialCount": 7.5104
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 1,
+              "ci95": [
+                0.996936136111611,
+                1.0000000000000002
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.2536,
+              "ci95": [
+                0.23026096057331932,
+                0.2784489115508788
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5056,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4624,
+              "ci95": [
+                0.43491723622639095,
+                0.4901131663380159
+              ]
+            },
+            "directOnly": {
+              "rate": 0.7464,
+              "ci95": [
+                0.7215510884491211,
+                0.7697390394266806
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.9856,
+              "ci95": [
+                0.9773521653120011,
+                0.9908722100795956
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.17525773195876287,
+              "ci95": [
+                0.11239961612750933,
+                0.2628582139743534
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.17525773195876287,
+              "ci95": [
+                0.11239961612750933,
+                0.2628582139743534
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.08559999999999986,
+              "recoil": 0.4660000000000003,
+              "follow-up": 0.44839999999999997
+            },
+            "effectiveDirections": 2.5240941586423626,
+            "offers": {},
+            "meanSpecialCount": 7.5056
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.9992,
+              "ci95": [
+                0.9954822682660132,
+                0.9998587700278192
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.152,
+              "ci95": [
+                0.1331650529408656,
+                0.17296739632545322
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 1.2401921537229783,
+            "meanRewardOpportunities": 4.4872,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4488,
+              "ci95": [
+                0.42142581745582025,
+                0.4764879222063508
+              ]
+            },
+            "directOnly": {
+              "rate": 0.848,
+              "ci95": [
+                0.8270326036745468,
+                0.8668349470591343
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.716,
+              "ci95": [
+                0.6903690982752418,
+                0.7403073125249741
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.4090909090909091,
+              "ci95": [
+                0.2768764387900683,
+                0.5559050735339343
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.4090909090909091,
+              "ci95": [
+                0.2768764387900683,
+                0.5559050735339343
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0,
+              "ci95": [
+                0,
+                0.0030638638883890915
+              ]
+            },
+            "shares": {
+              "wound": 0.06752068321323722,
+              "follow-up": 0.6307712836936217,
+              "recoil": 0.3017080330931409
+            },
+            "effectiveDirections": 2.3029531121694244,
+            "offers": {},
+            "meanSpecialCount": 6.4872
+          }
+        }
+      },
+      "adaptive-buy": {
+        "runs": 5000,
+        "coherent": {
+          "rate": 0.9084,
+          "ci95": [
+            0.9000876651795842,
+            0.91608525284404
+          ]
+        },
+        "statusBuild": {
+          "rate": 0.2506,
+          "ci95": [
+            0.2387824708994819,
+            0.26280047289314346
+          ]
+        },
+        "firstSynergyOpportunityAmongAcquired": 0.9809703053115851,
+        "meanRewardOpportunities": 4.5016,
+        "orphanedWoundOrPayoff": {
+          "rate": 0.4294,
+          "ci95": [
+            0.4157389245417623,
+            0.4431694789536642
+          ]
+        },
+        "directOnly": {
+          "rate": 0.7494,
+          "ci95": [
+            0.7371995271068565,
+            0.7612175291005181
+          ]
+        },
+        "alternativeDiscovery": {
+          "rate": 0.5404,
+          "ci95": [
+            0.526560274929188,
+            0.5541776924756954
+          ]
+        },
+        "earlyWoundAbandoned": {
+          "rate": 0.5615763546798029,
+          "ci95": [
+            0.5373259193362843,
+            0.5855361576618707
+          ]
+        },
+        "earlyWoundPivot": {
+          "rate": 0.46921182266009853,
+          "ci95": [
+            0.44504088442541145,
+            0.49352807707551116
+          ]
+        },
+        "completedDirectionSwitched": {
+          "rate": 0.1706,
+          "ci95": [
+            0.160427228665399,
+            0.1812785519492392
+          ]
+        },
+        "completedDirectionLost": {
+          "rate": 0.0482,
+          "ci95": [
+            0.042602006949243626,
+            0.0544917140030743
+          ]
+        },
+        "shares": {
+          "wound": 0.16743725231175777,
+          "follow-up": 0.5126596213121968,
+          "recoil": 0.31990312637604545
+        },
+        "effectiveDirections": 2.7356536066326336,
+        "offers": {
+          "advance": 4164,
+          "laceration": 4530,
+          "opening": 3358,
+          "relay": 6083,
+          "hammer": 3839,
+          "retreat": 3272,
+          "wounding": 3932,
+          "plusP": 4624,
+          "finisher": 3279,
+          "lowRecoil": 4648,
+          "hollowPoint": 3287
+        },
+        "meanSpecialCount": 11.4138,
+        "byWeapon": {
+          "p220": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.7952,
+              "ci95": [
+                0.7719395729379904,
+                0.8166515218223048
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.1656,
+              "ci95": [
+                0.14602348493045694,
+                0.18722562723809769
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 3.03444976076555,
+            "meanRewardOpportunities": 4.5032,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4216,
+              "ci95": [
+                0.3945054040533189,
+                0.4491750098043804
+              ]
+            },
+            "directOnly": {
+              "rate": 0.8344,
+              "ci95": [
+                0.8127743727619023,
+                0.8539765150695431
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.3272,
+              "ci95": [
+                0.3017532968454494,
+                0.3537055745143779
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.776824034334764,
+              "ci95": [
+                0.7191153187698276,
+                0.8255525098548735
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.5407725321888412,
+              "ci95": [
+                0.4766407002730665,
+                0.6035816930902617
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0544,
+              "ci95": [
+                0.04313707308055507,
+                0.06839344241677728
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0416,
+              "ci95": [
+                0.03186324151928274,
+                0.05414570889359238
+              ]
+            },
+            "shares": {
+              "wound": 0.15895372233400407,
+              "follow-up": 0.5603621730382292,
+              "recoil": 0.28068410462776666
+            },
+            "effectiveDirections": 2.6471956847777687,
+            "offers": {},
+            "meanSpecialCount": 11.6336
+          },
+          "m1911": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.9304,
+              "ci95": [
+                0.9149341572545678,
+                0.9432284687103069
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.4968,
+              "ci95": [
+                0.4691342791796046,
+                0.5244853295492812
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5104,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4408,
+              "ci95": [
+                0.41349936605743737,
+                0.468463395426948
+              ]
+            },
+            "directOnly": {
+              "rate": 0.5032,
+              "ci95": [
+                0.4755146704507188,
+                0.5308657208203954
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.5,
+              "ci95": [
+                0.4723239097396819,
+                0.527676090260318
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.5032,
+              "ci95": [
+                0.4755146704507188,
+                0.5308657208203954
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.4336,
+              "ci95": [
+                0.4063717270387821,
+                0.4612351540855959
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.4336,
+              "ci95": [
+                0.4063717270387821,
+                0.4612351540855959
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0696,
+              "ci95": [
+                0.05677153128969319,
+                0.08506584274543215
+              ]
+            },
+            "shares": {
+              "wound": 0.34580108913728835,
+              "follow-up": 0.434795070220693,
+              "recoil": 0.2194038406420186
+            },
+            "effectiveDirections": 2.892543926143285,
+            "offers": {},
+            "meanSpecialCount": 11.632
+          },
+          "desertEagle": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.964,
+              "ci95": [
+                0.9521692666986683,
+                0.9729874676129067
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.192,
+              "ci95": [
+                0.17112152303833067,
+                0.21476581711691706
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 0,
+            "meanRewardOpportunities": 4.5056,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.448,
+              "ci95": [
+                0.42063284880353713,
+                0.47568579304085534
+              ]
+            },
+            "directOnly": {
+              "rate": 0.808,
+              "ci95": [
+                0.785234182883083,
+                0.8288784769616694
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.804,
+              "ci95": [
+                0.7810757806412412,
+                0.8250613901146184
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7216494845360825,
+              "ci95": [
+                0.6253217812082499,
+                0.8010895411031771
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.6597938144329897,
+              "ci95": [
+                0.561034006679396,
+                0.7463788070800048
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.0984,
+              "ci95": [
+                0.083097687462256,
+                0.11616320801289813
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.036,
+              "ci95": [
+                0.02701253238709335,
+                0.047830733301331724
+              ]
+            },
+            "shares": {
+              "recoil": 0.46265560165975117,
+              "follow-up": 0.4526970954356846,
+              "wound": 0.08464730290456426
+            },
+            "effectiveDirections": 2.5203441659162253,
+            "offers": {},
+            "meanSpecialCount": 11.6528
+          },
+          "m500": {
+            "runs": 1250,
+            "coherent": {
+              "rate": 0.944,
+              "ci95": [
+                0.9298404777472838,
+                0.9554388111198265
+              ]
+            },
+            "statusBuild": {
+              "rate": 0.148,
+              "ci95": [
+                0.12939335625948442,
+                0.1687636039179415
+              ]
+            },
+            "firstSynergyOpportunityAmongAcquired": 1.2287793047696038,
+            "meanRewardOpportunities": 4.4872,
+            "orphanedWoundOrPayoff": {
+              "rate": 0.4072,
+              "ci95": [
+                0.3802876115446629,
+                0.4346810415930222
+              ]
+            },
+            "directOnly": {
+              "rate": 0.852,
+              "ci95": [
+                0.8312363960820586,
+                0.8706066437405156
+              ]
+            },
+            "alternativeDiscovery": {
+              "rate": 0.5304,
+              "ci95": [
+                0.5026818128911671,
+                0.5579319041844187
+              ]
+            },
+            "earlyWoundAbandoned": {
+              "rate": 0.7272727272727273,
+              "ci95": [
+                0.581508453144907,
+                0.8365377660450867
+              ]
+            },
+            "earlyWoundPivot": {
+              "rate": 0.6818181818181818,
+              "ci95": [
+                0.5344282746687306,
+                0.8000087006832644
+              ]
+            },
+            "completedDirectionSwitched": {
+              "rate": 0.096,
+              "ci95": [
+                0.08088462043242335,
+                0.11359098158939505
+              ]
+            },
+            "completedDirectionLost": {
+              "rate": 0.0456,
+              "ci95": [
+                0.03536124416281172,
+                0.05862319533895628
+              ]
+            },
+            "shares": {
+              "follow-up": 0.6104519774011299,
+              "recoil": 0.3062146892655368,
+              "wound": 0.08333333333333336
+            },
+            "effectiveDirections": 2.3887330353515366,
+            "offers": {},
+            "meanSpecialCount": 10.7368
+          }
+        }
+      }
+    }
+  },
+  "isolated": {
+    "original": {
+      "wound": {
+        "firstOpportunity": {
+          "rate": 0.183,
+          "ci95": [
+            0.17252687243525283,
+            0.19395986847197333
+          ]
+        },
+        "byFive": {
+          "rate": 0.633,
+          "ci95": [
+            0.6195426464032321,
+            0.6462531373801714
+          ]
+        },
+        "conditionalMean": 2.5946287519747235,
+        "offers": {
+          "wounding": 915,
+          "advance": 895,
+          "relay": 908,
+          "retreat": 923,
+          "laceration": 899,
+          "plusP": 890,
+          "hammer": 946,
+          "opening": 930,
+          "hollowPoint": 884,
+          "finisher": 914,
+          "lowRecoil": 896
+        }
+      },
+      "heat": {
+        "firstOpportunity": {
+          "rate": 0.6624,
+          "ci95": [
+            0.6491718802778612,
+            0.6753787609734525
+          ]
+        },
+        "byFive": {
+          "rate": 0.9958,
+          "ci95": [
+            0.9935874720960507,
+            0.9972512466995245
+          ]
+        },
+        "conditionalMean": 1.4902590881703153,
+        "offers": {
+          "resonance": 267,
+          "heavy": 304,
+          "wounding": 275,
+          "impactRelay": 289,
+          "kindling": 793,
+          "deepCut": 306,
+          "afterimage": 271,
+          "ignition": 739,
+          "opening": 269,
+          "hammer": 283,
+          "plusP": 282,
+          "mirror": 283,
+          "alternator": 292,
+          "execution": 296,
+          "stickyCharge": 286,
+          "scar": 294,
+          "highHeat": 745,
+          "highExplosive": 287,
+          "accelerant": 742,
+          "hollowPoint": 271,
+          "serrated": 283,
+          "advance": 305,
+          "explosive": 277,
+          "mimic": 747,
+          "core": 256,
+          "reducedImpact": 270,
+          "suppression": 292,
+          "retreat": 279,
+          "mosaic": 259,
+          "reopening": 265,
+          "lowRecoil": 283,
+          "incendiary": 258,
+          "retreatCutter": 295,
+          "focus": 299,
+          "laceration": 310,
+          "kickback": 294,
+          "finisher": 274,
+          "crosslink": 255,
+          "relay": 274,
+          "flatNose": 274,
+          "lightLoad": 288,
+          "frangible": 277,
+          "lowHeat": 281,
+          "rupture": 272,
+          "bridge": 259
+        }
+      },
+      "blast": {
+        "firstOpportunity": {
+          "rate": 0.3084,
+          "ci95": [
+            0.2957498173572102,
+            0.32134437683151085
+          ]
+        },
+        "byFive": {
+          "rate": 0.8396,
+          "ci95": [
+            0.8291677693323309,
+            0.8495107883582242
+          ]
+        },
+        "conditionalMean": 2.2815626488804193,
+        "offers": {
+          "resonance": 267,
+          "heavy": 304,
+          "wounding": 275,
+          "impactRelay": 289,
+          "kindling": 793,
+          "deepCut": 306,
+          "afterimage": 271,
+          "ignition": 739,
+          "opening": 269,
+          "hammer": 283,
+          "plusP": 282,
+          "mirror": 283,
+          "alternator": 292,
+          "execution": 296,
+          "stickyCharge": 286,
+          "scar": 294,
+          "highHeat": 745,
+          "highExplosive": 287,
+          "accelerant": 742,
+          "hollowPoint": 271,
+          "serrated": 283,
+          "advance": 305,
+          "explosive": 277,
+          "mimic": 747,
+          "core": 256,
+          "reducedImpact": 270,
+          "suppression": 292,
+          "retreat": 279,
+          "mosaic": 259,
+          "reopening": 265,
+          "lowRecoil": 283,
+          "incendiary": 258,
+          "retreatCutter": 295,
+          "focus": 299,
+          "laceration": 310,
+          "kickback": 294,
+          "finisher": 274,
+          "crosslink": 255,
+          "relay": 274,
+          "flatNose": 274,
+          "lightLoad": 288,
+          "frangible": 277,
+          "lowHeat": 281,
+          "rupture": 272,
+          "bridge": 259
+        }
+      },
+      "recoil": {
+        "firstOpportunity": {
+          "rate": 0.3798,
+          "ci95": [
+            0.36644427556798304,
+            0.3933402867570915
+          ]
+        },
+        "byFive": {
+          "rate": 0.9128,
+          "ci95": [
+            0.9046594751476341,
+            0.9203066868507791
+          ]
+        },
+        "conditionalMean": 2.11262050832603,
+        "offers": {
+          "resonance": 267,
+          "heavy": 304,
+          "wounding": 275,
+          "impactRelay": 289,
+          "kindling": 793,
+          "deepCut": 306,
+          "afterimage": 271,
+          "ignition": 739,
+          "opening": 269,
+          "hammer": 283,
+          "plusP": 282,
+          "mirror": 283,
+          "alternator": 292,
+          "execution": 296,
+          "stickyCharge": 286,
+          "scar": 294,
+          "highHeat": 745,
+          "highExplosive": 287,
+          "accelerant": 742,
+          "hollowPoint": 271,
+          "serrated": 283,
+          "advance": 305,
+          "explosive": 277,
+          "mimic": 747,
+          "core": 256,
+          "reducedImpact": 270,
+          "suppression": 292,
+          "retreat": 279,
+          "mosaic": 259,
+          "reopening": 265,
+          "lowRecoil": 283,
+          "incendiary": 258,
+          "retreatCutter": 295,
+          "focus": 299,
+          "laceration": 310,
+          "kickback": 294,
+          "finisher": 274,
+          "crosslink": 255,
+          "relay": 274,
+          "flatNose": 274,
+          "lightLoad": 288,
+          "frangible": 277,
+          "lowHeat": 281,
+          "rupture": 272,
+          "bridge": 259
+        }
+      }
+    },
+    "weak": {
+      "wound": {
+        "firstOpportunity": {
+          "rate": 0.2208,
+          "ci95": [
+            0.20951948664518422,
+            0.23250921386364087
+          ]
+        },
+        "byFive": {
+          "rate": 0.7068,
+          "ci95": [
+            0.6940267651307226,
+            0.7192557016843741
+          ]
+        },
+        "conditionalMean": 2.5169779286926994,
+        "offers": {
+          "laceration": 866,
+          "advance": 955,
+          "retreat": 898,
+          "finisher": 901,
+          "plusP": 876,
+          "hollowPoint": 887,
+          "hammer": 847,
+          "wounding": 1104,
+          "relay": 876,
+          "opening": 869,
+          "lowRecoil": 921
+        }
+      },
+      "heat": {
+        "firstOpportunity": {
+          "rate": 0.6734,
+          "ci95": [
+            0.6602720118192865,
+            0.6862617393690006
+          ]
+        },
+        "byFive": {
+          "rate": 0.9966,
+          "ci95": [
+            0.9945614091827297,
+            0.9978760812446252
+          ]
+        },
+        "conditionalMean": 1.4683925346177003,
+        "offers": {
+          "heavy": 285,
+          "serrated": 275,
+          "lowRecoil": 287,
+          "focus": 299,
+          "retreatCutter": 283,
+          "afterimage": 380,
+          "ignition": 764,
+          "opening": 244,
+          "accelerant": 790,
+          "plusP": 287,
+          "mirror": 274,
+          "suppression": 256,
+          "execution": 299,
+          "impactRelay": 290,
+          "lightLoad": 311,
+          "incendiary": 282,
+          "deepCut": 258,
+          "relay": 287,
+          "finisher": 272,
+          "core": 274,
+          "hollowPoint": 272,
+          "kindling": 713,
+          "alternator": 266,
+          "highExplosive": 278,
+          "stickyCharge": 279,
+          "resonance": 297,
+          "highHeat": 729,
+          "explosive": 283,
+          "mimic": 751,
+          "hammer": 299,
+          "retreat": 292,
+          "rupture": 272,
+          "crosslink": 261,
+          "kickback": 261,
+          "mosaic": 269,
+          "flatNose": 274,
+          "lowHeat": 290,
+          "scar": 283,
+          "reducedImpact": 265,
+          "laceration": 277,
+          "wounding": 299,
+          "advance": 278,
+          "bridge": 287,
+          "reopening": 258,
+          "frangible": 270
+        }
+      },
+      "blast": {
+        "firstOpportunity": {
+          "rate": 0.3896,
+          "ci95": [
+            0.3761724481870892,
+            0.40319706662728866
+          ]
+        },
+        "byFive": {
+          "rate": 0.9188,
+          "ci95": [
+            0.9109034443778972,
+            0.9260535048588652
+          ]
+        },
+        "conditionalMean": 2.1247279059643014,
+        "offers": {
+          "heavy": 336,
+          "deepCut": 269,
+          "lowRecoil": 279,
+          "focus": 289,
+          "retreatCutter": 276,
+          "afterimage": 278,
+          "ignition": 736,
+          "opening": 240,
+          "kindling": 784,
+          "plusP": 274,
+          "mirror": 266,
+          "suppression": 235,
+          "execution": 286,
+          "impactRelay": 389,
+          "lightLoad": 295,
+          "incendiary": 245,
+          "relay": 283,
+          "finisher": 255,
+          "core": 280,
+          "hollowPoint": 259,
+          "alternator": 252,
+          "serrated": 258,
+          "highExplosive": 264,
+          "stickyCharge": 266,
+          "resonance": 385,
+          "highHeat": 744,
+          "explosive": 276,
+          "mimic": 726,
+          "hammer": 385,
+          "laceration": 267,
+          "retreat": 277,
+          "rupture": 267,
+          "crosslink": 253,
+          "kickback": 251,
+          "mosaic": 256,
+          "flatNose": 344,
+          "lowHeat": 257,
+          "scar": 264,
+          "reducedImpact": 366,
+          "advance": 260,
+          "bridge": 270,
+          "reopening": 256,
+          "wounding": 273,
+          "accelerant": 757,
+          "frangible": 272
+        }
+      },
+      "recoil": {
+        "firstOpportunity": {
+          "rate": 0.481,
+          "ci95": [
+            0.4671706135776254,
+            0.4948585601676027
+          ]
+        },
+        "byFive": {
+          "rate": 0.9608,
+          "ci95": [
+            0.9550573107844406,
+            0.9658351491207652
+          ]
+        },
+        "conditionalMean": 1.8813488759367194,
+        "offers": {
+          "heavy": 272,
+          "kickback": 388,
+          "lowRecoil": 384,
+          "focus": 291,
+          "retreatCutter": 269,
+          "afterimage": 362,
+          "ignition": 680,
+          "opening": 245,
+          "mimic": 903,
+          "plusP": 263,
+          "mirror": 267,
+          "suppression": 253,
+          "execution": 293,
+          "impactRelay": 292,
+          "lightLoad": 296,
+          "incendiary": 258,
+          "deepCut": 260,
+          "relay": 365,
+          "finisher": 247,
+          "core": 285,
+          "hollowPoint": 260,
+          "kindling": 739,
+          "alternator": 238,
+          "serrated": 258,
+          "highExplosive": 267,
+          "stickyCharge": 271,
+          "resonance": 281,
+          "highHeat": 708,
+          "explosive": 273,
+          "hammer": 292,
+          "retreat": 286,
+          "rupture": 269,
+          "crosslink": 249,
+          "mosaic": 264,
+          "flatNose": 252,
+          "lowHeat": 365,
+          "scar": 282,
+          "laceration": 267,
+          "reducedImpact": 259,
+          "advance": 257,
+          "bridge": 272,
+          "wounding": 273,
+          "accelerant": 717,
+          "reopening": 251,
+          "frangible": 277
+        }
+      }
+    },
+    "strong": {
+      "wound": {
+        "firstOpportunity": {
+          "rate": 0.4046,
+          "ci95": [
+            0.3910735846989061,
+            0.4182728982113445
+          ]
+        },
+        "byFive": {
+          "rate": 0.9252,
+          "ci95": [
+            0.9175771719160398,
+            0.9321699503749618
+          ]
+        },
+        "conditionalMean": 2.0644185041072203,
+        "offers": {
+          "laceration": 793,
+          "retreat": 820,
+          "finisher": 807,
+          "hammer": 770,
+          "wounding": 2023,
+          "plusP": 809,
+          "hollowPoint": 757,
+          "advance": 833,
+          "relay": 741,
+          "lowRecoil": 847,
+          "opening": 800
+        }
+      },
+      "heat": {
+        "firstOpportunity": {
+          "rate": 0.7556,
+          "ci95": [
+            0.7434951919679645,
+            0.7673123443857043
+          ]
+        },
+        "byFive": {
+          "rate": 0.999,
+          "ci95": [
+            0.9976610125116303,
+            0.9995727928110643
+          ]
+        },
+        "conditionalMean": 1.3187187187187188,
+        "offers": {
+          "heavy": 273,
+          "deepCut": 292,
+          "lowRecoil": 251,
+          "kindling": 597,
+          "reducedImpact": 255,
+          "ignition": 847,
+          "opening": 240,
+          "accelerant": 805,
+          "plusP": 268,
+          "mirror": 264,
+          "suppression": 231,
+          "execution": 266,
+          "scar": 248,
+          "stickyCharge": 243,
+          "afterimage": 1052,
+          "incendiary": 355,
+          "highHeat": 712,
+          "hollowPoint": 253,
+          "focus": 267,
+          "alternator": 258,
+          "explosive": 251,
+          "advance": 285,
+          "crosslink": 217,
+          "hammer": 250,
+          "core": 259,
+          "laceration": 277,
+          "retreat": 248,
+          "rupture": 265,
+          "retreatCutter": 253,
+          "kickback": 259,
+          "resonance": 263,
+          "lowHeat": 337,
+          "serrated": 256,
+          "highExplosive": 256,
+          "mimic": 801,
+          "mosaic": 254,
+          "finisher": 238,
+          "bridge": 264,
+          "flatNose": 257,
+          "lightLoad": 255,
+          "impactRelay": 252,
+          "wounding": 266,
+          "reopening": 229,
+          "frangible": 255,
+          "relay": 276
+        }
+      },
+      "blast": {
+        "firstOpportunity": {
+          "rate": 0.622,
+          "ci95": [
+            0.6084707717397413,
+            0.6353419021066891
+          ]
+        },
+        "byFive": {
+          "rate": 0.9916,
+          "ci95": [
+            0.9886657880069283,
+            0.9937793797218024
+          ]
+        },
+        "conditionalMean": 1.5685760387252925,
+        "offers": {
+          "heavy": 593,
+          "flatNose": 646,
+          "lowRecoil": 225,
+          "kindling": 777,
+          "reducedImpact": 615,
+          "ignition": 779,
+          "opening": 219,
+          "plusP": 221,
+          "lightLoad": 220,
+          "suppression": 212,
+          "mirror": 230,
+          "execution": 240,
+          "frangible": 233,
+          "scar": 225,
+          "stickyCharge": 218,
+          "impactRelay": 635,
+          "accelerant": 731,
+          "hammer": 625,
+          "highHeat": 741,
+          "hollowPoint": 211,
+          "core": 223,
+          "alternator": 223,
+          "advance": 225,
+          "crosslink": 192,
+          "explosive": 206,
+          "finisher": 231,
+          "laceration": 248,
+          "retreatCutter": 222,
+          "rupture": 233,
+          "kickback": 235,
+          "deepCut": 223,
+          "relay": 235,
+          "resonance": 573,
+          "lowHeat": 219,
+          "afterimage": 246,
+          "focus": 208,
+          "mimic": 734,
+          "mosaic": 217,
+          "serrated": 222,
+          "reopening": 196,
+          "bridge": 233,
+          "wounding": 215,
+          "retreat": 218,
+          "highExplosive": 219,
+          "incendiary": 208
+        }
+      },
+      "recoil": {
+        "firstOpportunity": {
+          "rate": 0.7712,
+          "ci95": [
+            0.7593509254914028,
+            0.7826326576819735
+          ]
+        },
+        "byFive": {
+          "rate": 0.9998,
+          "ci95": [
+            0.998867881829747,
+            0.9999646951247276
+          ]
+        },
+        "conditionalMean": 1.2934586917383477,
+        "offers": {
+          "heavy": 244,
+          "suppression": 210,
+          "lowRecoil": 649,
+          "kindling": 630,
+          "kickback": 678,
+          "ignition": 600,
+          "opening": 211,
+          "mimic": 1376,
+          "plusP": 235,
+          "lightLoad": 225,
+          "mirror": 231,
+          "execution": 249,
+          "scar": 213,
+          "stickyCharge": 225,
+          "lowHeat": 656,
+          "accelerant": 565,
+          "retreatCutter": 228,
+          "highHeat": 591,
+          "hollowPoint": 212,
+          "core": 231,
+          "alternator": 210,
+          "explosive": 212,
+          "advance": 242,
+          "crosslink": 190,
+          "afterimage": 668,
+          "hammer": 226,
+          "relay": 691,
+          "retreat": 233,
+          "rupture": 237,
+          "deepCut": 241,
+          "reducedImpact": 216,
+          "resonance": 216,
+          "wounding": 231,
+          "focus": 213,
+          "highExplosive": 217,
+          "mosaic": 233,
+          "serrated": 227,
+          "finisher": 234,
+          "bridge": 232,
+          "frangible": 247,
+          "impactRelay": 234,
+          "reopening": 204,
+          "laceration": 249,
+          "incendiary": 206,
+          "flatNose": 232
+        }
+      }
+    }
+  },
+  "v7": {
+    "original": {
+      "note": "기존 v7 획득 전용 비교: P220 상처 선호, 최초 2회 연결 초안·제작 유지. 생존율 아님. 현행 보정과 정의가 다른 별도 어댑터.",
+      "middle": {
+        "rate": 1,
+        "ci95": [
+          0.9992322698624194,
+          1.0000000000000002
+        ]
+      },
+      "final": {
+        "rate": 0.9956,
+        "ci95": [
+          0.9933465688042807,
+          0.9970924570833494
+        ]
+      },
+      "randomDraft": {
+        "note": "v7 획득 전용 비교: P220 상처 선호, 연결 초안 제외, 제작 유지. 생존율 아님. 현행 보정과 정의가 다른 별도 어댑터.",
+        "middle": {
+          "rate": 0.9044,
+          "ci95": [
+            0.8959363200917282,
+            0.9122427397729965
+          ]
+        },
+        "final": {
+          "rate": 0.9742,
+          "ci95": [
+            0.9694281148290672,
+            0.9782437699084513
+          ]
+        }
+      }
+    },
+    "weak": {
+      "note": "기존 v7 획득 전용 비교: P220 상처 선호, 최초 2회 연결 초안·제작 유지. 생존율 아님. 현행 보정과 정의가 다른 별도 어댑터.",
+      "middle": {
+        "rate": 1,
+        "ci95": [
+          0.9992322698624194,
+          1.0000000000000002
+        ]
+      },
+      "final": {
+        "rate": 0.9952,
+        "ci95": [
+          0.9928673977037032,
+          0.9967722423680367
+        ]
+      },
+      "randomDraft": {
+        "note": "v7 획득 전용 비교: P220 상처 선호, 연결 초안 제외, 제작 유지. 생존율 아님. 현행 보정과 정의가 다른 별도 어댑터.",
+        "middle": {
+          "rate": 0.938,
+          "ci95": [
+            0.930973353898922,
+            0.9443541145005572
+          ]
+        },
+        "final": {
+          "rate": 0.9786,
+          "ci95": [
+            0.9742060467288749,
+            0.9822590819834329
+          ]
+        }
+      }
+    },
+    "strong": {
+      "note": "기존 v7 획득 전용 비교: P220 상처 선호, 최초 2회 연결 초안·제작 유지. 생존율 아님. 현행 보정과 정의가 다른 별도 어댑터.",
+      "middle": {
+        "rate": 1,
+        "ci95": [
+          0.9992322698624194,
+          1.0000000000000002
+        ]
+      },
+      "final": {
+        "rate": 0.995,
+        "ci95": [
+          0.9926290246842813,
+          0.9966109224795139
+        ]
+      },
+      "randomDraft": {
+        "note": "v7 획득 전용 비교: P220 상처 선호, 연결 초안 제외, 제작 유지. 생존율 아님. 현행 보정과 정의가 다른 별도 어댑터.",
+        "middle": {
+          "rate": 0.9784,
+          "ci95": [
+            0.9739880084023371,
+            0.9820774274020259
+          ]
+        },
+        "final": {
+          "rate": 0.9868,
+          "ci95": [
+            0.9832419411906075,
+            0.989610596747444
+          ]
+        }
+      }
+    }
+  },
+  "provenance": {
+    "runtimeBundleSha256": "85c79f31788dbbf5e811965c50ff0c21bfd8a5dfd261b3567f0f182e0e90e0f1",
+    "simulatorSha256": "2053bdba04fe8557bb59fc72563902854070bd914a993dfa938c89876692d716",
+    "note": "부분 재실행 옵션은 동일 조건의 지표 추가·재현에만 사용한다. 운영 가중치나 확인 시드는 재조정하지 않는다."
+  }
+}

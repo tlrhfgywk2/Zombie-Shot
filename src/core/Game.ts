@@ -488,7 +488,7 @@ export class Game {
     } else if (this.caveScreen === 'reward' && active) {
       screen.title = '감염체의 흔적';
       screen.description = active.attachment ? `회수한 ${ATTACHMENT_DEFINITIONS[active.attachment].name} · 다음 전투 준비에서 장착` : '밀봉된 탄약 하나를 회수한다.';
-      screen.choices = [...active.rewards.map((ammo, index) => ({ id: `reward:${index}`, label: AMMO_DEFINITIONS[ammo].name, detail: AMMO_DEFINITIONS[ammo].role, ammo, amount: 1, disabled: full })),
+      screen.choices = [...run.combatRewards({ inventory: this.player.getBuild(), magazineCapacity: this.player.magazine.capacity }).map((ammo, index) => ({ id: `reward:${index}`, label: AMMO_DEFINITIONS[ammo].name, detail: AMMO_DEFINITIONS[ammo].role, ammo, amount: 1, disabled: full })),
         { id: 'leave', label: '계속 탐험', detail: full ? '휴대 한도 도달 · 보상 포기' : '보상 포기' }];
     } else if (active?.kind === 'combat') {
       screen.title = encounterName(active);
@@ -590,7 +590,7 @@ export class Game {
       if (!run.settleCombat(true)) return;
       this.leaveCaveEncounter();
     } else if (this.caveScreen === 'reward' && active && action.startsWith('reward:')) {
-      const ammo = active.rewards[Number(action.slice(7))];
+      const ammo = run.combatRewards({ inventory: this.player.getBuild(), magazineCapacity: this.player.magazine.capacity })[Number(action.slice(7))];
       if (!ammo || !this.player.exchangeAmmo([], [ammo])) return;
       this.leaveCaveEncounter();
     } else if (this.caveScreen === 'encounter' && active?.kind === 'merchant' && action.startsWith('buy:')) {
