@@ -1,7 +1,8 @@
 import { type WeaponId } from '../data/weaponDefinitions';
 import type { GameMode } from '../data/gameModes';
 import { spinCylinder } from '../combat/WeaponTraits';
-import { CombatResolver, getVisualKickScale, previewEnemyAction } from '../combat/CombatResolver';
+import { CombatResolver, getVisualKickScale, previewEnemyAction, tickPlayerEffects, type VolleyState } from '../combat/CombatResolver';
+import { Encounter } from '../combat/Encounter';
 import type { AmmoType, AttachmentSlot } from '../combat/types';
 import type { AttachmentId } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS, AMMO_ORDER, countAllocations, type SpecialAmmoType } from '../data/ammoDefinitions';
@@ -9,9 +10,8 @@ import { ATTACHMENT_DEFINITIONS } from '../data/attachmentDefinitions';
 import { ExplorationRun, EXPLORATION_TOOLS, EVENT_NAMES, RUN_LENGTH, encounterName, merchantOffers, seededRandom, type ExplorationTool } from '../exploration/ExplorationRun';
 import type { ExplorationChoice, ExplorationScreen } from '../ui/ExplorationView';
 import { generateAttachmentReward } from '../progression/AttachmentRewards';
-import { ENCOUNTER_STAGES, type RouteKind } from '../data/encounterDefinitions';
+import { ENCOUNTER_STAGES, explorationEncounter, type RouteKind } from '../data/encounterDefinitions';
 import { Player } from '../entities/Player';
-import { Zombie } from '../entities/Zombie';
 import { GamePresentation } from '../presentation/GamePresentation';
 import { type AudioPreferences, loadAudioPreferences, saveAudioPreferences } from '../presentation/AudioPreferences';
 import { GameUI } from '../ui/GameUI';
@@ -25,9 +25,10 @@ export class Game {
   private readonly presentation: GamePresentation;
   private audioPreferences: AudioPreferences = loadAudioPreferences();
   private waveIndex = 0;
-  private enemyIndex = 0;
-  private currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
-  private zombie = new Zombie(this.currentRoster[0] ?? 'normal', true);
+  private encounter = new Encounter(ENCOUNTER_STAGES[0]!.normal.roster);
+  private volley?: VolleyState;
+  private plannedActorId?: string;
+  private get zombie() { return this.encounter.selected.zombie; }
   private busy = false;
   private boostedOpening = false;
   private cylinderDecided = false;
@@ -46,6 +47,8 @@ export class Game {
       onChooseWeapon: id => this.chooseWeapon(id),
       onCylinderDecision: spin => this.chooseCylinder(spin),
       onFireCylinder: () => void this.fireLoadedMagazine(),
+      onSelectTarget: id => this.selectTarget(id),
+      onFireShot: () => void this.fireNextShot(),
       onAddAmmo: (ammo) => this.addAmmo(ammo),
       onRemoveAmmo: (index) => this.removeAmmo(index),
       onReplaceAmmo: (index, ammo) => this.replaceAmmo(index, ammo),
@@ -66,6 +69,7 @@ export class Game {
       onRestart: () => this.restart(),
     });
     this.presentation = new GamePresentation(this.ui.canvasHost);
+    this.presentation.onSelectTarget = id => this.selectTarget(id);
     this.setAudioPreferences(this.audioPreferences);
     this.sync();
     this.ui.showModeSelection();
@@ -97,7 +101,13 @@ export class Game {
 
   private combatContext() {
     return { weaponId: this.player.weapon.id, boostedOpening: this.boostedOpening, magazineCapacity: this.player.magazine.capacity,
-      loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() };
+      loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState(), targets: this.encounter.living.map(enemy => enemy.zombie.snapshot()) };
+  }
+
+  private selectTarget(id: string): void {
+    if (this.busy || !['AMMO_SELECTION', 'AIMING', 'CYLINDER_CHOICE'].includes(this.state.phase) || !this.encounter.select(id)) return;
+    this.sync();
+    if (this.volley) this.ui.showRecoilAfterShot(this.volley.cursor.recoil);
   }
 
   private chooseCylinder(spin: boolean): void {
@@ -182,6 +192,8 @@ export class Game {
     this.busy = true;
     this.boostedOpening = false;
     this.cylinderDecided = false;
+    this.plannedActorId = this.encounter.nextActorId;
+    this.encounter.announceActions();
     const rounds = this.player.magazine.getRounds();
     if (rounds.length === 0) {
       this.ui.setLocked(true);
@@ -211,33 +223,60 @@ export class Game {
     this.busy = true;
     this.ui.renderCylinderChoice(0, false, false);
     // 실린더 회전까지 결정한 최종 배열을 고정한다. 실제 사격의 remove(0)는 이 배열에 영향을 주지 않는다.
-    const committedMagazine = this.player.magazine.commit();
-    const sequence = this.resolver.resolveSequence(committedMagazine.rounds, this.zombie.snapshot(), { ...this.combatContext(), committedMagazine });
+    this.volley = this.resolver.createVolley(this.player.magazine.commit());
+    if (this.encounter.total > 1) {
+      this.readyNextShot();
+      return;
+    }
+    await this.fireNextShot(true);
+  }
+
+  private readyNextShot(): void {
+    this.state.transition('AIMING');
+    this.busy = false;
+    this.sync();
+    this.ui.showRecoilAfterShot(this.volley?.cursor.recoil ?? 0);
+  }
+
+  private async fireNextShot(automatic = false): Promise<void> {
+    if (!this.volley || (!automatic && (this.busy || this.state.phase !== 'AIMING'))) return;
+    this.busy = true;
     this.state.transition('FIRING');
     this.ui.setPhase('FIRING');
     this.presentation.setQuickFiring(this.quickMode);
     try {
-      for (const shot of sequence.shots) {
+      do {
+        const target = this.encounter.selected;
+        const shot = this.resolver.resolveVolleyShot(this.volley, target.zombie.snapshot(), this.combatContext());
         if (shot.shotDistance !== shot.before.distance) await this.presentation.animateDistanceChange(shot.shotDistance);
-        this.ui.showShot(shot);
+        this.ui.showShot({ ...shot, index: 0 });
         await this.presentation.animateShot(shot.ammoType, shot.explosiveConsumed);
-        this.ui.showRecoilAfterShot(shot.breakdown.recoilAfter);
+        if (this.presentation.isDestroyed()) return;
         this.player.fireRound(shot);
-        this.zombie.applyState(shot.after);
-        this.ui.renderAmmoStock(this.player.getStock(), this.player.getBuild(), this.player.getSpecialCapacity(), this.player.magazine.getRounds());
-        const hasNextShot = shot !== sequence.shots.at(-1);
+        this.encounter.applyShot(target.id, shot);
+        this.ui.showRecoilAfterShot(shot.breakdown.recoilAfter);
         if (shot.after.distance !== shot.shotDistance) await this.presentation.animateDistanceChange(shot.after.distance);
-        this.syncEnemy();
-        if (hasNextShot) await this.presentation.animateReacquisition(shot.breakdown.recoilGenerated >= 3,
-          getVisualKickScale(shot.before, { loadout: this.player.loadout.getSnapshot(), playerState: this.player.getCombatState() }));
-      }
-    } finally {
-      this.presentation.setQuickFiring(false);
-    }
+        if (shot.killed) {
+          await this.presentation.animateDeath();
+          const arrived = this.encounter.settleDeaths();
+          this.syncEnemy();
+          for (const enemy of arrived) await this.presentation.animateEnemySpawn(enemy.id, enemy.zombie.distance);
+        } else this.syncEnemy();
+        this.syncMagazine();
+        if (this.encounter.complete || this.player.magazine.size === 0) break;
+        await this.presentation.animateReacquisition(shot.breakdown.recoilGenerated >= 3, getVisualKickScale(shot.before, this.combatContext()));
+        if (!automatic) { this.readyNextShot(); return; }
+      } while (automatic);
+    } finally { this.presentation.setQuickFiring(false); }
+    await this.finishMagazine();
+  }
+
+  private async finishMagazine(): Promise<void> {
     await this.presentation.animateMagazineDiscard();
     this.player.magazine.clear();
     this.boostedOpening = false;
     this.cylinderDecided = false;
+    this.volley = undefined;
     this.syncMagazine();
     await this.resolveEnemyAction();
     this.busy = false;
@@ -246,14 +285,18 @@ export class Game {
   private async resolveEnemyAction(): Promise<void> {
     this.state.transition('ENEMY_ACTION');
     this.ui.setPhase('ENEMY_ACTION');
-    if (this.zombie.isDead) { await this.handleZombieDeath(); return; }
+    if (this.encounter.complete) { await this.handleZombieDeath(); return; }
 
-    const action = this.resolver.resolveEnemyAction(this.zombie.snapshot(), this.player.getCombatState(), this.player.loadout.getSnapshot());
-    this.zombie.applyState(action.after);
-    this.player.applyCombatState(action.playerAfter);
-    this.ui.showEnemyAction(action);
+    const actor = this.encounter.enemies.find(enemy => enemy.id === this.plannedActorId);
+    // 예고한 적이 죽으면 그 기회는 소멸한다. 다른 적이나 증원이 즉시 대신 공격하지 않는다.
+    const action = this.resolver.resolveEnemyAction(actor?.zombie.snapshot() ?? { ...this.zombie.snapshot(), hp: 0 }, this.player.getCombatState(), this.player.loadout.getSnapshot());
+    actor?.zombie.applyState(action.after);
+    this.player.applyCombatState(action.resolution === 'dead' ? tickPlayerEffects(action.playerAfter) : action.playerAfter);
+    if (actor?.id === this.encounter.selected.id) this.ui.showEnemyAction(action);
     if (action.intentDetail) await this.pause(420);
-    if (action.movement > 0) await this.presentation.animateAdvance(this.zombie.distance);
+    if (action.movement > 0 && actor) await this.presentation.animateEnemyAdvance(actor.id, actor.zombie.distance);
+    this.encounter.finishOpportunity(this.plannedActorId);
+    this.plannedActorId = undefined;
     if (action.playerKilled) {
       this.showBreach();
       return;
@@ -267,7 +310,6 @@ export class Game {
   }
 
   private async handleZombieDeath(): Promise<void> {
-    await this.presentation.animateDeath();
     this.player.endEncounter();
     this.syncMagazine();
 
@@ -282,7 +324,7 @@ export class Game {
       return;
     }
 
-    if (this.zombie.snapshot().special) {
+    if (this.encounter.special) {
       this.pendingAttachment = generateAttachmentReward(this.player.getOwnedAttachments(), this.player.loadout.weapon);
       this.state.transition('ATTACHMENT_REWARD');
       this.ui.setLocked(true);
@@ -316,12 +358,6 @@ export class Game {
   }
 
   private async continueAfterDeath(): Promise<void> {
-    if (this.enemyIndex + 1 < this.currentRoster.length) {
-      this.enemyIndex += 1;
-      await this.spawnCurrentEnemy();
-      return;
-    }
-
     if (this.waveIndex + 1 < ENCOUNTER_STAGES.length) {
       const nextStage = ENCOUNTER_STAGES[this.waveIndex + 1]!;
       this.state.transition('ROUTE_SELECTION');
@@ -332,7 +368,7 @@ export class Game {
 
     this.state.transition('VICTORY');
     this.ui.setPhase('VICTORY');
-    this.ui.showEndState('탄약 순서 검증 구간 생존', true);
+    this.ui.showEndState('모든 조우 생존', true);
   }
 
   private async chooseRoute(kind: RouteKind): Promise<void> {
@@ -342,9 +378,8 @@ export class Game {
     const option = kind === 'special' ? stage?.special : stage?.normal;
     if (!option) return;
     this.busy = true;
-    this.currentRoster = option.roster;
+    this.encounter = new Encounter(option.roster, option.reinforcements);
     this.waveIndex = nextIndex;
-    this.enemyIndex = 0;
     this.ui.hideRouteChoice();
     this.player.startStage();
     await this.spawnCurrentEnemy();
@@ -352,18 +387,16 @@ export class Game {
   }
 
   private async spawnCurrentEnemy(): Promise<void> {
-    const type = this.currentRoster[this.enemyIndex] ?? 'normal';
     this.player.clearCombatDisruptions();
-    this.zombie = new Zombie(type, true);
     this.sync();
-    await this.presentation.animateSpawn(this.zombie.distance);
+    for (const enemy of this.encounter.living) await this.presentation.animateEnemySpawn(enemy.id, enemy.zombie.distance);
     this.state.transition('AMMO_SELECTION');
     this.ui.setLocked(false);
     this.ui.setPhase('AMMO_SELECTION');
   }
 
   private restart(): void {
-    if (this.busy || !['AMMO_SELECTION', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD', 'EXPLORATION'].includes(this.state.phase)) return;
+    if (this.busy || !['AMMO_SELECTION', 'AIMING', 'GAME_OVER', 'VICTORY', 'ROUTE_SELECTION', 'ATTACHMENT_REWARD', 'EXPLORATION'].includes(this.state.phase)) return;
     this.player.reset();
     this.resetBattle();
     if (this.selectedMode === 'exploration') {
@@ -399,9 +432,9 @@ export class Game {
     this.pendingAttachment = undefined;
     this.ui.hideAttachmentReward();
     this.waveIndex = 0;
-    this.enemyIndex = 0;
-    this.currentRoster = ENCOUNTER_STAGES[0]?.normal.roster ?? ['normal'];
-    this.zombie = new Zombie(this.currentRoster[0] ?? 'normal', true);
+    this.encounter = new Encounter(ENCOUNTER_STAGES[0]!.normal.roster);
+    this.volley = undefined;
+    this.plannedActorId = undefined;
     this.busy = false;
     this.ui.showEndState('', false);
     this.ui.hideRouteChoice();
@@ -421,22 +454,22 @@ export class Game {
     this.ui.renderMagazine(rounds, this.player.getStock(), this.player.magazine.capacity, this.player.getBuild(), this.player.getSpecialCapacity());
     const context = this.combatContext();
     const enemy = this.zombie.snapshot();
-    const sequence = rounds.length > 0 ? this.resolver.resolveSequence(rounds, enemy, context) : undefined;
-    const ammoOptionPreviews = this.resolver.previewAppendedAmmo(rounds, AMMO_ORDER, enemy, context);
+    const sequence = rounds.length > 0 ? this.resolver.resolveSequence(rounds, enemy, context, this.volley) : undefined;
+    const ammoOptionPreviews = this.volley ? {} : this.resolver.previewAppendedAmmo(rounds, AMMO_ORDER, enemy, context);
     this.ui.renderPreview(sequence, ammoOptionPreviews);
   }
 
   private syncEnemy(): void {
     const enemy = this.zombie.snapshot();
     const context = this.combatContext();
-    const waveSize = this.currentRoster.length || 1;
-    this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.exploration?.depth ?? this.waveIndex + 1, this.exploration ? RUN_LENGTH : ENCOUNTER_STAGES.length, this.enemyIndex + 1, waveSize);
+    this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.exploration?.depth ?? this.waveIndex + 1, this.exploration ? RUN_LENGTH : ENCOUNTER_STAGES.length, this.encounter.defeated, this.encounter.total);
+    this.ui.renderEncounter(this.encounter, this.volley ? this.plannedActorId : this.encounter.nextActorId, Boolean(this.volley));
     this.ui.renderWeapon(this.player.weapon);
     this.ui.updateRecoilThreshold(this.resolver.getRecoilThreshold(context), context.playerState.heavyKickPenaltyBonus);
     this.ui.renderPlayerDebuffs(context.playerState);
     this.ui.renderLoadout(context.loadout, context.playerState, this.player.magazine.capacity, this.player.getOwnedAttachments());
     this.presentation.setAttachments(context.loadout, context.playerState);
-    this.presentation.setZombie(this.zombie.distance, this.zombie.hp / this.zombie.maxHp, this.waveIndex + 1, this.zombie.type, enemy.ignitedActions > 0);
+    this.presentation.setEnemies(this.encounter.living.map(target => ({ id: target.id, lane: target.lane, state: target.zombie.snapshot() })), this.encounter.selected.id, this.encounter.total > 1);
   }
 
   private pause(milliseconds: number): Promise<void> { return this.presentation.wait(milliseconds); }
@@ -494,6 +527,9 @@ export class Game {
       screen.title = encounterName(active);
       screen.description = run.isDisruptor() ? '공명이 감각을 덮는다. 지나칠 수 없다.' : '통로를 막은 감염체가 고개를 든다.';
       const required = active.enemy === 'fast' ? 3 : 2;
+      const configuration = explorationEncounter(active.enemy!);
+      const total = configuration.roster.length + (configuration.reinforcements?.length ?? 0);
+      screen.description += ` ${total > 2 ? '위험 조우' : total === 2 ? '무리 조우' : '단독 조우'} · 동시 ${configuration.roster.length}마리${configuration.reinforcements?.length ? ` · 증원 ${configuration.reinforcements.length}마리` : ''}`;
       screen.choices = [
         { id: 'fight', label: '전투 준비', detail: '처치하면 특수탄 획득 · 인지 +1' },
         { id: 'avoid', label: '소리 없이 우회', detail: run.isDisruptor() ? '인지 교란 · 회피 불가' : `인지 ${required} 이상 필요 · 보상 포기 · 인지 −1`, disabled: !run.canAvoid() },
@@ -572,15 +608,14 @@ export class Game {
     } else if (this.caveScreen === 'encounter' && active?.kind === 'combat' && action === 'fight') {
       this.busy = true;
       this.player.startStage();
-      this.currentRoster = [active.enemy!];
-      this.enemyIndex = 0;
-      this.zombie = new Zombie(active.enemy!);
-      this.zombie.applyState({ ...this.zombie.snapshot(), distance: Math.max(3, this.zombie.distance - run.nextDistancePenalty) });
+      const configuration = explorationEncounter(active.enemy!);
+      this.encounter = new Encounter(configuration.roster, configuration.reinforcements);
+      for (const { zombie } of this.encounter.living) zombie.applyState({ ...zombie.snapshot(), distance: Math.max(3, zombie.distance - run.nextDistancePenalty) });
       run.nextDistancePenalty = 0;
       this.ui.hideExploration();
       this.presentation.setExploring(false);
       this.sync();
-      await this.presentation.animateSpawn(this.zombie.distance);
+      for (const enemy of this.encounter.living) await this.presentation.animateEnemySpawn(enemy.id, enemy.zombie.distance);
       this.state.transition('AMMO_SELECTION');
       this.ui.setLocked(false);
       this.ui.setPhase('AMMO_SELECTION');

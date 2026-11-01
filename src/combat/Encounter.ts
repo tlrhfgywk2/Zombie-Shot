@@ -1,6 +1,6 @@
 import { Zombie } from '../entities/Zombie';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE } from '../data/ammoDefinitions';
-import { selectEnemyAction } from './CombatResolver';
+import { scheduledEnemyAction } from './CombatResolver';
 import type { EnemyState, EnemyType, ShotResult } from './types';
 
 export interface EncounterEnemy { id: string; lane: number; zombie: Zombie }
@@ -44,7 +44,7 @@ export class Encounter {
   announceActions(): void {
     for (const { zombie } of this.living) {
       const state = zombie.snapshot();
-      zombie.applyState({ ...state, telegraphedAction: selectEnemyAction(state) });
+      zombie.applyState({ ...state, telegraphedAction: state.telegraphedAction ?? scheduledEnemyAction(state) });
     }
   }
 

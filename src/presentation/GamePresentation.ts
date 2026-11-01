@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { AmmoType, AttachmentSlot, EnemyType, PlayerCombatState } from '../combat/types';
+import type { AmmoType, AttachmentSlot, EnemyState, EnemyType, PlayerCombatState } from '../combat/types';
 import type { AttachmentId, LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
@@ -34,7 +34,17 @@ export class GamePresentation {
   private readonly renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   private readonly clock = new THREE.Clock();
   private readonly audio = new AudioManager();
-  private readonly zombieModel = createZombieModel();
+  private readonly enemyActors = [0, 1].map(() => ({ id: '', model: createZombieModel(), targetZ: -6.1, fallen: false, special: false, x: 0 }));
+  private actorIndex = 0;
+  private get actor() { return this.enemyActors[this.actorIndex]!; }
+  private get zombieModel() { return this.actor.model; }
+  private get zombieTargetZ() { return this.actor.targetZ; }
+  private set zombieTargetZ(value: number) { this.actor.targetZ = value; }
+  private get zombieFallen() { return this.actor.fallen; }
+  private set zombieFallen(value: boolean) { this.actor.fallen = value; }
+  private get specialThreat() { return this.actor.special; }
+  private set specialThreat(value: boolean) { this.actor.special = value; }
+  onSelectTarget?: (id: string) => void;
   private readonly pistolModel = createPistolModel();
   private readonly magazineModel = createMagazineModel();
   private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 7);
@@ -61,16 +71,13 @@ export class GamePresentation {
   private layout: PresentationLayout = getPresentationLayout(1280, 720);
   private readonly baseAimQuaternion = new THREE.Quaternion();
   private readonly baseWeaponPosition = new THREE.Vector3();
-  private zombieTargetZ = -6.1;
   private elapsed = 0;
-  private zombieFallen = false;
   private paused = document.hidden;
   private windowBlurred = false;
   private animationInProgress = false;
   private resizeObserver?: ResizeObserver;
   private animationFrame = 0;
   private shotEffectSequence = 0;
-  private specialThreat = false;
   private playbackSpeed = 1;
   private firingSpeed = 1;
 
@@ -85,6 +92,7 @@ export class GamePresentation {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.domElement.setAttribute('aria-label', '다가오는 감염체와 장전 동작을 보여 주는 3D 전투 화면');
     this.host.append(this.renderer.domElement);
+    this.renderer.domElement.addEventListener('pointerup', this.pickEnemy);
     this.camera.position.copy(this.layout.cameraPosition);
     this.camera.lookAt(this.layout.cameraTarget);
     this.scene.fog = new THREE.FogExp2(0x0b110e, 0.044);
@@ -116,6 +124,7 @@ export class GamePresentation {
     window.removeEventListener('blur', this.handleBlur);
     window.removeEventListener('focus', this.handleFocus);
     this.resizeObserver?.disconnect();
+    this.renderer.domElement.removeEventListener('pointerup', this.pickEnemy);
     this.debugOverlay?.remove();
     this.audio.setActive(false);
     this.scene.traverse((object) => {
@@ -136,7 +145,7 @@ export class GamePresentation {
   }
 
   setExploring(exploring: boolean): void {
-    this.zombieModel.root.visible = !exploring;
+    for (const actor of this.enemyActors) actor.model.root.visible = !exploring && Boolean(actor.id);
     this.pistolModel.root.visible = !exploring;
     this.magazineModel.root.visible = !exploring;
   }
@@ -187,6 +196,52 @@ export class GamePresentation {
     this.zombieModel.threatHalo.visible = this.specialThreat;
     const haloMaterial = this.zombieModel.threatHalo.material as THREE.MeshBasicMaterial;
     haloMaterial.color.setHex(type === 'contaminator' ? 0x9bd24a : type === 'groundshaker' ? 0xff8a4c : 0x69c7ff);
+  }
+
+  setEnemies(enemies: readonly { id: string; lane: number; state: EnemyState }[], selectedId: string, multiple: boolean): void {
+    for (const [lane, actor] of this.enemyActors.entries()) {
+      const enemy = enemies.find(target => target.lane === lane);
+      actor.model.root.visible = Boolean(enemy);
+      if (!enemy) continue;
+      this.actorIndex = lane;
+      if (actor.id !== enemy.id) this.resetZombie(enemy.state.distance);
+      actor.id = enemy.id;
+      this.setZombie(enemy.state.distance, enemy.state.hp / enemy.state.maxHp, 1, enemy.state.type, enemy.state.ignitedActions > 0);
+      // 차선의 간격은 거리에 비례한다. 가까운 적도 세로 화면 밖으로 벗어나지 않는다.
+      actor.x = multiple ? (lane === 0 ? -1 : 1) * (0.78 + enemy.state.distance * 0.075) : 0;
+      actor.model.root.position.x = actor.x;
+      actor.model.threatHalo.visible = multiple && enemy.id === selectedId || actor.special;
+      if (multiple && enemy.id === selectedId) (actor.model.threatHalo.material as THREE.MeshBasicMaterial).color.setHex(0xc8ff4d);
+    }
+    this.actorIndex = Math.max(0, this.enemyActors.findIndex(actor => actor.id === selectedId));
+  }
+
+  private readonly pickEnemy = (event: PointerEvent): void => {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(pointer, this.camera);
+    const hits = this.enemyActors.filter(actor => actor.model.root.visible).map(actor => ({ actor, hit: ray.intersectObject(actor.model.root, true)[0] }))
+      .filter(result => result.hit).sort((a, b) => a.hit!.distance - b.hit!.distance);
+    if (hits[0]) this.onSelectTarget?.(hits[0].actor.id);
+  };
+
+  async animateEnemyAdvance(id: string, distance: number): Promise<void> {
+    const selected = this.actorIndex;
+    const actor = this.enemyActors.findIndex(actor => actor.id === id);
+    if (actor < 0) return;
+    this.actorIndex = actor;
+    try { await this.animateAdvance(distance); }
+    finally { this.actorIndex = selected; }
+  }
+
+  async animateEnemySpawn(id: string, distance: number): Promise<void> {
+    const selected = this.actorIndex;
+    const actor = this.enemyActors.findIndex(actor => actor.id === id);
+    if (actor < 0) return;
+    this.actorIndex = actor;
+    try { await this.animateSpawn(distance); }
+    finally { this.actorIndex = selected; }
   }
 
 
@@ -420,9 +475,9 @@ export class GamePresentation {
     const end = 1.1 - distance * 0.72;
     await this.tween(PRESENTATION_TIMING.advance, (progress) => {
       this.zombieModel.root.position.z = THREE.MathUtils.lerp(start, end, this.easeInOut(progress));
-      this.zombieModel.root.position.x = Math.sin(progress * Math.PI * 4) * 0.07;
+      this.zombieModel.root.position.x = this.actor.x + Math.sin(progress * Math.PI * 4) * 0.07;
     });
-    this.zombieModel.root.position.x = 0;
+    this.zombieModel.root.position.x = this.actor.x;
     this.zombieTargetZ = end;
   }
 
@@ -466,7 +521,7 @@ export class GamePresentation {
     const zombie = this.zombieModel.root;
     zombie.visible = true;
     zombie.rotation.set(0, 0, 0);
-    zombie.position.set(0, -0.9, 1.1 - distance * 0.72);
+    zombie.position.set(this.actor.x, -0.9, 1.1 - distance * 0.72);
     await this.tween(PRESENTATION_TIMING.spawn, (progress) => {
       zombie.position.y = THREE.MathUtils.lerp(-0.9, 0, this.easeOutBack(progress));
     });
@@ -486,8 +541,11 @@ export class GamePresentation {
   }
 
   private buildActors(): void {
-    this.zombieModel.root.position.z = this.zombieTargetZ;
-    this.scene.add(this.zombieModel.root);
+    for (const actor of this.enemyActors) {
+      actor.model.root.position.z = actor.targetZ;
+      actor.model.root.visible = false;
+      this.scene.add(actor.model.root);
+    }
     this.pistolModel.root.position.copy(this.layout.weaponRest);
     this.pistolModel.root.rotation.set(-0.02, -0.04, -0.08);
     const weaponFill = new THREE.PointLight(0xe0eee7, 2.2, 4.5);
@@ -1089,11 +1147,11 @@ export class GamePresentation {
     await this.gunTween(PRESENTATION_TIMING.hitReaction, (progress) => {
       const impulse = Math.sin(progress * Math.PI);
       this.zombieModel.root.rotation.z = impulse * strength;
-      this.zombieModel.root.position.x = -impulse * strength;
+      this.zombieModel.root.position.x = this.actor.x - impulse * strength;
       this.zombieModel.head.rotation.x = impulse * 0.12;
     });
     this.zombieModel.root.rotation.z = 0;
-    this.zombieModel.root.position.x = 0;
+    this.zombieModel.root.position.x = this.actor.x;
     this.zombieModel.head.rotation.x = 0;
   }
 
@@ -1307,21 +1365,24 @@ export class GamePresentation {
     this.elapsed += delta;
     this.updateShotEffects(delta);
     this.updatePresentationDebug();
-    if (!this.zombieFallen) {
-      this.zombieModel.root.position.y = Math.sin(this.elapsed * 2.35) * 0.032;
-      const stride = Math.sin(this.elapsed * 3.1) * 0.16;
-      this.zombieModel.leftLeg.rotation.x = stride;
-      this.zombieModel.rightLeg.rotation.x = -stride;
-      this.zombieModel.leftArm.rotation.z = -0.08 + stride * 0.35;
-      this.zombieModel.rightArm.rotation.z = 0.08 - stride * 0.35;
-      this.zombieModel.head.rotation.y = Math.sin(this.elapsed * 1.45) * 0.045;
-      if (this.specialThreat) {
-        const pulse = 1 + Math.sin(this.elapsed * 4.2) * 0.055;
-        this.zombieModel.threatHalo.scale.setScalar(pulse);
-        this.zombieModel.threatHalo.rotation.z = this.elapsed * 0.18;
+    for (const actor of this.enemyActors) {
+      const model = actor.model;
+      if (!actor.fallen) {
+        model.root.position.y = Math.sin(this.elapsed * 2.35) * 0.032;
+        const stride = Math.sin(this.elapsed * 3.1) * 0.16;
+        model.leftLeg.rotation.x = stride;
+        model.rightLeg.rotation.x = -stride;
+        model.leftArm.rotation.z = -0.08 + stride * 0.35;
+        model.rightArm.rotation.z = 0.08 - stride * 0.35;
+        model.head.rotation.y = Math.sin(this.elapsed * 1.45) * 0.045;
+        if (model.threatHalo.visible) {
+          const pulse = 1 + Math.sin(this.elapsed * 4.2) * 0.055;
+          model.threatHalo.scale.setScalar(pulse);
+          model.threatHalo.rotation.z = this.elapsed * 0.18;
+        }
       }
+      model.root.position.z += (actor.targetZ - model.root.position.z) * Math.min(delta * 4, 1);
     }
-    this.zombieModel.root.position.z += (this.zombieTargetZ - this.zombieModel.root.position.z) * Math.min(delta * 4, 1);
     this.renderer.render(this.scene, this.camera);
     this.animationFrame = requestAnimationFrame(this.tick);
   };

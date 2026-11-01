@@ -55,6 +55,18 @@ describe('동시 조우와 탄창 연계', () => {
     expect(special.living.map(enemy => previewEnemyAction(enemy.zombie.snapshot()).selectedAction)).toEqual(['contaminate', 'sonicPulse']);
   });
 
+  it('행동을 기다리는 적의 점화 봉쇄도 원래 특수 행동의 재사용 대기를 소비한다', () => {
+    const encounter = new Encounter(['normal', 'screecher']);
+    const waiting = encounter.living[1]!.zombie;
+    waiting.applyState({ ...waiting.snapshot(), ignitedActions: 1 });
+    encounter.announceActions();
+    expect(previewEnemyAction(waiting.snapshot()).suppressedIntent).toBe('sonicPulse');
+    const action = resolver.resolveEnemyAction(waiting.snapshot());
+    expect(action.executedAction).toBe('approach');
+    expect(action.after.intent!.countdown).toBe(action.after.intent!.cooldown);
+    expect(action.after.ignitedActions).toBe(0);
+  });
+
   it('처치한 차선에만 증원하며 표적을 자동 선택하고 마지막 적까지 조우를 유지한다', () => {
     const encounter = new Encounter(['normal', 'normal'], ['fast', 'tough']);
     const killed = encounter.selected;

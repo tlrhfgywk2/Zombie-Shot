@@ -60,7 +60,7 @@ export const ACTION_NAMES: Record<EnemyActionType, string> = {
 };
 const canApproachIntoMelee = (enemy: EnemyState): boolean =>
   !isMeleeRange(enemy.distance) && isMeleeRange(Math.max(0, enemy.distance - enemy.advancePerTurn));
-const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
+export const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
   isMeleeRange(enemy.distance) ? 'attack'
     : enemy.delayedAction === 'attack' || canApproachIntoMelee(enemy) ? 'approach'
     : enemy.delayedAction && isActionSupported(enemy, enemy.delayedAction)
