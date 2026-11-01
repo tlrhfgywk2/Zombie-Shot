@@ -1,6 +1,8 @@
 import type { EnemyType } from '../combat/types';
 import type { SpecialAmmoType } from '../data/ammoDefinitions';
 import type { AttachmentId } from '../data/attachmentDefinitions';
+import { generateAmmoRewards, type AmmoRewardOptions } from '../progression/AmmoRewards';
+import type { SynergyContext } from '../progression/AmmoSynergy';
 
 export type ExplorationTool = 'echo' | 'uv' | 'map';
 export const EXPLORATION_TOOLS: Record<ExplorationTool, { name: string; detail: string }> = {
@@ -30,7 +32,7 @@ export const merchantOffers = (encounter: CaveEncounter): MerchantOffer[] => [
   { id: 'capacity', name: '탄약 주머니', detail: '휴대 한도 +4', price: 1, capacity: 4 },
 ];
 
-/** 문자열 시드만 사용하며 결과는 런 생성 시 모두 확정한다. */
+/** 지도·상점은 런 시드, 전투 보상은 조우별 별도 시드를 사용한다. */
 export function seededRandom(seed: string): () => number {
   let value = 2166136261;
   for (const char of seed) value = Math.imul(value ^ char.charCodeAt(0), 16777619);
@@ -41,7 +43,8 @@ export function seededRandom(seed: string): () => number {
     return ((mixed ^ mixed >>> 14) >>> 0) / 4294967296;
   };
 }
-const rewardPool: readonly SpecialAmmoType[] = ['hollowPoint', 'plusP', 'lowRecoil', 'wounding', 'laceration', 'hammer', 'retreat', 'advance', 'relay', 'opening', 'finisher'];
+export const EXPLORATION_REWARD_POOL: readonly SpecialAmmoType[] = ['hollowPoint', 'plusP', 'lowRecoil', 'wounding', 'laceration', 'hammer', 'retreat', 'advance', 'relay', 'opening', 'finisher'];
+const rewardPool = EXPLORATION_REWARD_POOL;
 const eventPool: readonly CaveEvent[] = ['cache', 'survey', 'shrine', 'nest'];
 const pick = <T>(pool: readonly T[], random: () => number): T => pool[Math.floor(random() * pool.length)]!;
 export const RUN_LENGTH = 9;
@@ -59,6 +62,22 @@ export class ExplorationRun {
   readonly revealed = new Set<string>();
   readonly purchased = new Set<string>();
   private settled = false;
+  private rewardEarned = false;
+  private readonly claimedRewards = new Map<string, readonly SpecialAmmoType[]>();
+
+  /** 첫 표시의 소유량으로 고정한다. 재렌더링이나 거래로 재추첨하지 않는다. */
+  combatRewards(context: SynergyContext, guidance?: AmmoRewardOptions['guidance']): readonly SpecialAmmoType[] {
+    const encounter = this.active;
+    if (encounter?.kind !== 'combat' || !this.rewardEarned) return [];
+    let rewards = this.claimedRewards.get(encounter.id);
+    if (!rewards) {
+      rewards = Object.freeze(generateAmmoRewards(seededRandom(`${this.seed}:reward:${encounter.id}`), {
+        context, guidance, pool: rewardPool, choices: encounter.rewards.length, rarityFirst: false,
+      }));
+      this.claimedRewards.set(encounter.id, rewards);
+    }
+    return rewards;
+  }
 
   constructor(readonly seed: string) {
     const random = seededRandom(seed);
@@ -115,6 +134,7 @@ export class ExplorationRun {
     this.active = route;
     this.depth += 1;
     this.settled = false;
+    this.rewardEarned = false;
     return route;
   }
   isDisruptor(encounter = this.active): boolean { return encounter?.enemy === 'screecher' || encounter?.enemy === 'groundshaker'; }
@@ -126,7 +146,7 @@ export class ExplorationRun {
     if (this.active?.kind !== 'combat' || this.settled || (avoid && !this.canAvoid())) return false;
     this.settled = true;
     if (avoid) { this.avoided += 1; this.awareness -= 1; }
-    else { this.victories += 1; this.awareness = Math.min(3, this.awareness + 1); }
+    else { this.rewardEarned = true; this.victories += 1; this.awareness = Math.min(3, this.awareness + 1); }
     return true;
   }
   leave(): void { this.active = undefined; }
