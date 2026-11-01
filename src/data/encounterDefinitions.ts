@@ -1,4 +1,16 @@
 import type { EnemyType } from '../combat/types';
+import { ENEMY_DEFINITIONS } from './enemyDefinitions';
+
+/** 적 체력·탄약 수치를 건드리지 않는 다수전 배치 값. 증원에는 적용하지 않는다. */
+export const ENCOUNTER_SPACING = { pairedFast: 4, dangerousScreecher: 3.5, pairedGroundshaker: 4 } as const;
+export const encounterStartingDistances = (roster: readonly EnemyType[]): readonly number[] => roster.map(type => {
+  if (roster.length > 1) {
+    if (type === 'fast') return ENCOUNTER_SPACING.pairedFast;
+    if (type === 'groundshaker') return ENCOUNTER_SPACING.pairedGroundshaker;
+    if (type === 'screecher' && roster.includes('contaminator')) return ENCOUNTER_SPACING.dangerousScreecher;
+  }
+  return ENEMY_DEFINITIONS[type].distance;
+});
 export type RouteKind = 'normal' | 'special';
 export interface RouteOption { kind: RouteKind; title: string; subtitle: string; roster: readonly EnemyType[]; reinforcements?: readonly EnemyType[]; reward: string }
 export interface EncounterStage { normal: RouteOption; special?: RouteOption }

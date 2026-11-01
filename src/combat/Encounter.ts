@@ -1,6 +1,7 @@
 import { Zombie } from '../entities/Zombie';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE } from '../data/ammoDefinitions';
 import { scheduledEnemyAction } from './CombatResolver';
+import { encounterStartingDistances } from '../data/encounterDefinitions';
 import type { EnemyState, EnemyType, ShotResult } from './types';
 
 export interface EncounterEnemy { id: string; lane: number; zombie: Zombie }
@@ -23,7 +24,8 @@ export class Encounter {
     this.pending = [...reinforcements];
     this.total = roster.length + reinforcements.length;
     this.special = [...roster, ...reinforcements].some(type => ['contaminator', 'groundshaker', 'screecher'].includes(type));
-    roster.forEach((type, lane) => this.spawn(type, lane));
+    const distances = encounterStartingDistances(roster);
+    roster.forEach((type, lane) => this.spawn(type, lane, distances[lane]));
     this.selectedId = this.living[0]!.id;
   }
 
@@ -82,8 +84,9 @@ export class Encounter {
     return arrived;
   }
 
-  private spawn(type: EnemyType, lane: number): EncounterEnemy {
+  private spawn(type: EnemyType, lane: number, distance?: number): EncounterEnemy {
     const enemy = { id: `encounter-${this.serial}-enemy-${this.nextId++}`, lane, zombie: new Zombie(type) };
+    if (distance !== undefined) enemy.zombie.applyState({ ...enemy.zombie.snapshot(), distance });
     this.enemies.push(enemy);
     this.queue.push(enemy.id);
     return enemy;
