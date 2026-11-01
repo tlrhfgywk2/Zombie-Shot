@@ -52,7 +52,7 @@ describe('동시 조우와 탄창 연계', () => {
     expect(pair.living[0]!.zombie.snapshot().advancePerTurn).toBeGreaterThan(pair.living[1]!.zombie.snapshot().advancePerTurn);
     const special = new Encounter(['contaminator', 'screecher']);
     special.announceActions();
-    expect(special.living.map(enemy => previewEnemyAction(enemy.zombie.snapshot()).selectedAction)).toEqual(['contaminate', 'sonicPulse']);
+    expect(special.living.map(enemy => previewEnemyAction(enemy.zombie.snapshot()).selectedAction)).toEqual(['contaminate', 'approach']);
   });
 
   it('행동을 기다리는 적의 점화 봉쇄도 원래 특수 행동의 재사용 대기를 소비한다', () => {

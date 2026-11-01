@@ -9,6 +9,8 @@ import { WEAPON_ORDER } from '../data/weaponDefinitions';
 import { ExplorationRun, RUN_LENGTH } from '../exploration/ExplorationRun';
 import type { CaveEvent } from '../exploration/ExplorationRun';
 import { Encounter } from '../combat/Encounter';
+import { simulateEncounterBalance } from '../simulation/EncounterBalance';
+import type { EnemyType } from '../combat/types';
 
 const view = vi.hoisted(() => ({ callbacks: undefined as GameUICallbacks | undefined }));
 const animations = vi.hoisted(() => ({ animateLoading: vi.fn(), animateShot: vi.fn(), animateMagazineDiscard: vi.fn(), setQuickFiring: vi.fn() }));
@@ -146,7 +148,7 @@ describe('다수전 통합', () => {
     expect(game.player.magazine.size).toBe(0);
   });
 
-  it.each(WEAPON_ORDER)('%s는 상태탄 없이 표준탄만으로 무리·빠른 적과 거체·위험 조우를 처리할 수 있다', async weapon => {
+  it.each(WEAPON_ORDER)('%s는 위협에 맞춰 조준하면 상태탄 없이 무리·혼합·위험 조우를 처리할 수 있다', async weapon => {
     for (const encounter of [new Encounter(['normal', 'normal']), new Encounter(['fast', 'tough']), new Encounter(['contaminator', 'screecher'], ['normal'])]) {
       const game = groupGame();
       game.encounter = encounter;
@@ -155,10 +157,42 @@ describe('다수전 통합', () => {
         for (let index = 0; index < game.player.magazine.capacity; index += 1) callbacks().onAddAmmo('ball');
         await game.beginCombat();
         if (String(game.state.phase) === 'CYLINDER_CHOICE') { callbacks().onCylinderDecision(false); await game.fireLoadedMagazine(); }
-        while (String(game.state.phase) === 'AIMING') await game.fireNextShot();
+        while (String(game.state.phase) === 'AIMING') {
+          const nearest = [...game.encounter.living].sort((a, b) => a.zombie.distance - b.zombie.distance || a.lane - b.lane)[0]!;
+          callbacks().onSelectTarget(nearest.id);
+          await game.fireNextShot();
+        }
         expect(game.player.isAlive).toBe(true);
       }
       expect(game.encounter.complete).toBe(true);
+    }
+  });
+
+  it.each(WEAPON_ORDER)('%s의 혼합·위험 조우에서 실제 게임과 분석기의 턴별 상태가 일치한다', async weapon => {
+    for (const roster of [['fast', 'tough'], ['contaminator', 'screecher'], ['groundshaker', 'normal']] as EnemyType[][]) {
+      const scenario = { id: '교차 검증', roster, reinforcements: roster.includes('fast') ? [] : ['normal' as const] };
+      const magazines = [['wounding', 'wounding', 'laceration', 'ball']] as const;
+      const targets = [1, 1, 1, 0];
+      const expected = simulateEncounterBalance({ scenario, weapon, magazines, openingTargets: targets, policy: 'nearest' });
+      const game = groupGame(); game.player.selectWeapon(weapon);
+      game.encounter = new Encounter(roster, scenario.reinforcements);
+      for (const ammo of magazines.flat()) if (ammo !== 'ball') game.player.supplyAmmo(ammo);
+      const initialShots = animations.animateShot.mock.calls.length;
+      for (const [turn, record] of expected.trace.entries()) {
+        for (const ammo of magazines[turn] ?? Array.from({ length: game.player.magazine.capacity }, () => 'ball' as const)) callbacks().onAddAmmo(ammo);
+        await game.beginCombat();
+        if (String(game.state.phase) === 'CYLINDER_CHOICE') { callbacks().onCylinderDecision(false); await game.fireLoadedMagazine(); }
+        let shot = 0;
+        while (String(game.state.phase) === 'AIMING') {
+          const choice = turn === 0 ? game.encounter.living.find(enemy => enemy.lane === targets[shot])
+            : [...game.encounter.living].sort((a, b) => a.zombie.distance - b.zombie.distance || a.lane - b.lane)[0];
+          if (choice) callbacks().onSelectTarget(choice.id);
+          await game.fireNextShot(); shot += 1;
+        }
+        expect(game.encounter.living.map(enemy => enemy.zombie.snapshot())).toEqual(record.after);
+      }
+      expect(game.encounter.complete && game.player.isAlive).toBe(expected.won);
+      expect(animations.animateShot.mock.calls.length - initialShots).toBe(expected.shots);
     }
   });
 });
