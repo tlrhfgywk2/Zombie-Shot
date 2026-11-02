@@ -1,0 +1,258 @@
+{
+  "sameDistance": {
+    "distance": 7,
+    "guard": 15,
+    "windup": 35
+  },
+  "scenarios": [
+    {
+      "label": "일반 · 강한 초탄",
+      "won": true,
+      "breached": false,
+      "turns": 1,
+      "shots": 4,
+      "specialSpent": 3,
+      "enemyActions": 0,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 1,
+      "remainingHp": 0,
+      "hpPerShot": 5.5,
+      "actions": [
+        "complete"
+      ]
+    },
+    {
+      "label": "방패 · 즉시 연사",
+      "won": true,
+      "breached": false,
+      "turns": 2,
+      "shots": 7,
+      "specialSpent": 3,
+      "enemyActions": 1,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 2,
+      "remainingHp": 0,
+      "hpPerShot": 4.57,
+      "actions": [
+        "guard-broken",
+        "complete"
+      ]
+    },
+    {
+      "label": "방패 · 노출 활용",
+      "won": true,
+      "breached": false,
+      "turns": 2,
+      "shots": 5,
+      "specialSpent": 3,
+      "enemyActions": 1,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 2,
+      "remainingHp": 0,
+      "hpPerShot": 6.4,
+      "actions": [
+        "guard",
+        "complete"
+      ]
+    },
+    {
+      "label": "방패 · 강한 폭발 빌드",
+      "won": true,
+      "breached": false,
+      "turns": 1,
+      "shots": 5,
+      "specialSpent": 5,
+      "enemyActions": 0,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 1,
+      "remainingHp": 0,
+      "hpPerShot": 6.4,
+      "actions": [
+        "complete"
+      ]
+    },
+    {
+      "label": "방패 · 돌진 충격 중단",
+      "won": true,
+      "breached": false,
+      "turns": 4,
+      "shots": 8,
+      "specialSpent": 1,
+      "enemyActions": 2,
+      "interruptions": 1,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 4,
+      "remainingHp": 0,
+      "hpPerShot": 4,
+      "actions": [
+        "guard",
+        "shock-nullified",
+        "recover",
+        "complete"
+      ]
+    },
+    {
+      "label": "방패 · 돌진 후퇴",
+      "won": true,
+      "breached": false,
+      "turns": 3,
+      "shots": 6,
+      "specialSpent": 1,
+      "enemyActions": 2,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 3,
+      "remainingHp": 0,
+      "hpPerShot": 5.33,
+      "actions": [
+        "guard",
+        "charge",
+        "complete"
+      ]
+    },
+    {
+      "label": "광란 · 노출 처치",
+      "won": true,
+      "breached": false,
+      "turns": 1,
+      "shots": 3,
+      "specialSpent": 3,
+      "enemyActions": 0,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 1,
+      "remainingHp": 0,
+      "hpPerShot": 10.67,
+      "actions": [
+        "complete"
+      ]
+    },
+    {
+      "label": "광란 · 돌격 중단",
+      "won": true,
+      "breached": false,
+      "turns": 3,
+      "shots": 7,
+      "specialSpent": 2,
+      "enemyActions": 1,
+      "interruptions": 1,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 3,
+      "remainingHp": 0,
+      "hpPerShot": 4.57,
+      "actions": [
+        "shock-nullified",
+        "recover",
+        "complete"
+      ]
+    },
+    {
+      "label": "교란 · 예고 중단",
+      "won": true,
+      "breached": false,
+      "turns": 4,
+      "shots": 8,
+      "specialSpent": 1,
+      "enemyActions": 2,
+      "interruptions": 1,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 4,
+      "remainingHp": 0,
+      "hpPerShot": 4,
+      "actions": [
+        "prepareDisruption",
+        "shock-nullified",
+        "recover",
+        "complete"
+      ]
+    },
+    {
+      "label": "교란 · 수용 후 복원",
+      "won": true,
+      "breached": false,
+      "turns": 4,
+      "shots": 7,
+      "specialSpent": 0,
+      "enemyActions": 3,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 4,
+      "remainingHp": 0,
+      "hpPerShot": 4.57,
+      "actions": [
+        "prepareDisruption",
+        "disrupt",
+        "recover",
+        "complete"
+      ]
+    },
+    {
+      "label": "다수 · 방패와 광란",
+      "won": true,
+      "breached": false,
+      "turns": 4,
+      "shots": 13,
+      "specialSpent": 0,
+      "enemyActions": 3,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 2,
+      "remainingHp": 0,
+      "hpPerShot": 4.92,
+      "actions": [
+        "guard-broken",
+        "frenzy",
+        "recover",
+        "complete"
+      ]
+    },
+    {
+      "label": "다수 · 방패와 교란",
+      "won": true,
+      "breached": false,
+      "turns": 4,
+      "shots": 14,
+      "specialSpent": 0,
+      "enemyActions": 3,
+      "interruptions": 0,
+      "intents": 0,
+      "canceled": 0,
+      "dangerTurns": 0,
+      "firstKillTurn": 2,
+      "remainingHp": 0,
+      "hpPerShot": 4.57,
+      "actions": [
+        "guard-broken",
+        "prepareDisruption",
+        "disrupt",
+        "complete"
+      ]
+    }
+  ]
+}
