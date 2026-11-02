@@ -289,7 +289,7 @@ export class Game {
 
     const actor = this.encounter.enemies.find(enemy => enemy.id === this.plannedActorId);
     // 예고한 적이 죽으면 그 기회는 소멸한다. 다른 적이나 증원이 즉시 대신 공격하지 않는다.
-    const action = this.resolver.resolveEnemyAction(actor?.zombie.snapshot() ?? { ...this.zombie.snapshot(), hp: 0 }, this.player.getCombatState(), this.player.loadout.getSnapshot());
+    const action = this.resolver.resolveEnemyAction(actor?.zombie.snapshot() ?? { ...this.zombie.snapshot(), hp: 0 }, this.player.getCombatState(), this.player.loadout.getSnapshot(), this.player.weapon.id);
     actor?.zombie.applyState(action.after);
     this.player.applyCombatState(action.resolution === 'dead' ? tickPlayerEffects(action.playerAfter) : action.playerAfter);
     if (actor?.id === this.encounter.selected.id) this.ui.showEnemyAction(action);
@@ -462,8 +462,8 @@ export class Game {
   private syncEnemy(): void {
     const enemy = this.zombie.snapshot();
     const context = this.combatContext();
-    this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.exploration?.depth ?? this.waveIndex + 1, this.exploration ? RUN_LENGTH : ENCOUNTER_STAGES.length, this.encounter.defeated, this.encounter.total);
-    this.ui.renderEncounter(this.encounter, this.volley ? this.plannedActorId : this.encounter.nextActorId, Boolean(this.volley));
+    this.ui.updateEnemy(enemy, previewEnemyAction(enemy), this.exploration?.depth ?? this.waveIndex + 1, this.exploration ? RUN_LENGTH : ENCOUNTER_STAGES.length, this.encounter.defeated, this.encounter.total, context.loadout, context.playerState);
+    this.ui.renderEncounter(this.encounter, this.volley ? this.plannedActorId : this.encounter.nextActorId, Boolean(this.volley), context.loadout, context.playerState);
     this.ui.renderWeapon(this.player.weapon);
     this.ui.updateRecoilThreshold(this.resolver.getRecoilThreshold(context), context.playerState.heavyKickPenaltyBonus);
     this.ui.renderPlayerDebuffs(context.playerState);

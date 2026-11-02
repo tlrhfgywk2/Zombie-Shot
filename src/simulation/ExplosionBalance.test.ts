@@ -38,11 +38,12 @@ describe('폭발 탄약 밸런스', () => {
     const rows = (Object.keys(ENEMY_DEFINITIONS) as EnemyType[]).flatMap(type =>
       Object.entries(plans).map(([name, rounds]) => {
         const result = resolver.resolveSequence(rounds, createEnemyState(type));
-        return { enemy: ENEMY_DEFINITIONS[type].name, special: ENEMY_DEFINITIONS[type].special, name, hp: result.finalState.hp,
+        return { enemy: ENEMY_DEFINITIONS[type].name, special: ENEMY_DEFINITIONS[type].special, behavior: ENEMY_DEFINITIONS[type].behavior, name, hp: result.finalState.hp,
           shots: result.shots.length, killed: result.killed };
       }));
     console.table(rows);
-    expect(rows.filter(row => row.special).every(row => !row.killed)).toBe(true);
+    // 기존 고체력 교란체의 기준은 유지한다. 행동형은 강한 초탄 처치를 허용한다.
+    expect(rows.filter(row => row.special && !row.behavior).every(row => !row.killed)).toBe(true);
   });
 
   it('기폭하지 않은 폭발탄 연사는 표준탄보다 약하고 쌓인 수치는 남는다', () => {

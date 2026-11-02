@@ -169,7 +169,8 @@ describe('다수전 통합', () => {
   });
 
   it.each(WEAPON_ORDER)('%s의 혼합·위험 조우에서 실제 게임과 분석기의 턴별 상태가 일치한다', async weapon => {
-    for (const roster of [['fast', 'tough'], ['contaminator', 'screecher'], ['groundshaker', 'normal']] as EnemyType[][]) {
+    for (const roster of [['fast', 'tough'], ['contaminator', 'screecher'], ['groundshaker', 'normal'],
+      ['shieldCharger', 'disruptor'], ['frenzied', 'shieldCharger']] as EnemyType[][]) {
       const scenario = { id: '교차 검증', roster, reinforcements: roster.includes('fast') ? [] : ['normal' as const] };
       const magazines = [['wounding', 'wounding', 'laceration', 'ball']] as const;
       const targets = [1, 1, 1, 0];

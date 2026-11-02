@@ -1,4 +1,5 @@
 import type { EnemyType } from '../combat/types';
+import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { SpecialAmmoType } from '../data/ammoDefinitions';
 import type { AttachmentId } from '../data/attachmentDefinitions';
 import { generateAmmoRewards, type AmmoRewardOptions } from '../progression/AmmoRewards';
@@ -157,6 +158,4 @@ export const EVENT_NAMES: Record<CaveEvent, string> = {
 };
 export const encounterName = (encounter: CaveEncounter): string => encounter.kind === 'event' ? EVENT_NAMES[encounter.event!]
   : encounter.kind === 'merchant' ? '말하는 감염체' : encounter.kind === 'exit' ? '동굴 출구'
-  : encounter.enemy === 'screecher' ? '공명 비명체' : encounter.enemy === 'groundshaker' ? '지반 파쇄체'
-  : encounter.enemy === 'brute' ? '강인한 감염체' : encounter.enemy === 'fast' ? '질주 감염체'
-  : encounter.enemy === 'tough' ? '거대 감염체' : '일반 감염체';
+  : ENEMY_DEFINITIONS[encounter.enemy ?? 'normal'].name;

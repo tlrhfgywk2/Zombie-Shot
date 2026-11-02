@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { AmmoType, AttachmentSlot, EnemyState, EnemyType, PlayerCombatState } from '../combat/types';
+import { behaviorPhase } from '../combat/EnemyBehavior';
 import type { AttachmentId, LoadoutSnapshot } from '../data/attachmentDefinitions';
 import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 import { AudioManager } from './AudioManager';
@@ -34,7 +35,7 @@ export class GamePresentation {
   private readonly renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
   private readonly clock = new THREE.Clock();
   private readonly audio = new AudioManager();
-  private readonly enemyActors = [0, 1].map(() => ({ id: '', model: createZombieModel(), targetZ: -6.1, fallen: false, special: false, x: 0 }));
+  private readonly enemyActors = [0, 1].map(() => ({ id: '', model: createZombieModel(), targetZ: -6.1, fallen: false, special: false, x: 0, posture: '' }));
   private actorIndex = 0;
   private get actor() { return this.enemyActors[this.actorIndex]!; }
   private get zombieModel() { return this.actor.model; }
@@ -188,11 +189,12 @@ export class GamePresentation {
     const scale = 1 + Math.min(level - 1, 10) * 0.025;
     this.zombieModel.root.scale.setScalar(scale);
     const material = this.zombieModel.torso.material as THREE.MeshStandardMaterial;
-    const specialColors: Partial<Record<EnemyType, number>> = { contaminator: 0x67543f, groundshaker: 0x5b4b42, screecher: 0x3d5261 };
+    const specialColors: Partial<Record<EnemyType, number>> = { contaminator: 0x67543f, groundshaker: 0x5b4b42, screecher: 0x3d5261,
+      shieldCharger: 0x42596c, frenzied: 0x704239, disruptor: 0x59436e };
     material.color.setHex(specialColors[type] ?? 0x30443c);
     material.emissive.setHex(ignited ? 0xff5b0a : hpRatio < 0.35 ? 0x33110d : 0x08110a);
     material.emissiveIntensity = ignited ? 0.75 : 0.32;
-    this.specialThreat = type === 'contaminator' || type === 'groundshaker' || type === 'screecher';
+    this.specialThreat = Boolean(specialColors[type]);
     this.zombieModel.threatHalo.visible = this.specialThreat;
     const haloMaterial = this.zombieModel.threatHalo.material as THREE.MeshBasicMaterial;
     haloMaterial.color.setHex(type === 'contaminator' ? 0x9bd24a : type === 'groundshaker' ? 0xff8a4c : 0x69c7ff);
@@ -207,11 +209,15 @@ export class GamePresentation {
       if (actor.id !== enemy.id) this.resetZombie(enemy.state.distance);
       actor.id = enemy.id;
       this.setZombie(enemy.state.distance, enemy.state.hp / enemy.state.maxHp, 1, enemy.state.type, enemy.state.ignitedActions > 0);
+      const phase = behaviorPhase(enemy.state);
+      actor.posture = enemy.state.behavior?.phase ?? '';
+      if (phase) (actor.model.threatHalo.material as THREE.MeshBasicMaterial).color.setHex(phase.color);
+      actor.model.torso.rotation.x = actor.posture === 'guard' ? -.1 : actor.posture === 'windup' ? .14 : actor.posture === 'recovery' ? .08 : 0;
       // 차선의 간격은 거리에 비례한다. 가까운 적도 세로 화면 밖으로 벗어나지 않는다.
       actor.x = multiple ? (lane === 0 ? -1 : 1) * (0.78 + enemy.state.distance * 0.075) : 0;
       actor.model.root.position.x = actor.x;
       actor.model.threatHalo.visible = multiple && enemy.id === selectedId || actor.special;
-      if (multiple && enemy.id === selectedId) (actor.model.threatHalo.material as THREE.MeshBasicMaterial).color.setHex(0xc8ff4d);
+      if (multiple && enemy.id === selectedId && !phase) (actor.model.threatHalo.material as THREE.MeshBasicMaterial).color.setHex(0xc8ff4d);
     }
     this.actorIndex = Math.max(0, this.enemyActors.findIndex(actor => actor.id === selectedId));
   }
@@ -1374,6 +1380,10 @@ export class GamePresentation {
         model.rightLeg.rotation.x = -stride;
         model.leftArm.rotation.z = -0.08 + stride * 0.35;
         model.rightArm.rotation.z = 0.08 - stride * 0.35;
+        if (actor.posture) {
+          model.leftArm.rotation.x = actor.posture === 'guard' ? 1.55 : actor.posture === 'recovery' ? .35 : 1.1;
+          model.rightArm.rotation.x = actor.posture === 'guard' ? 1.65 : actor.posture === 'recovery' ? .4 : 1.25;
+        }
         model.head.rotation.y = Math.sin(this.elapsed * 1.45) * 0.045;
         if (model.threatHalo.visible) {
           const pulse = 1 + Math.sin(this.elapsed * 4.2) * 0.055;

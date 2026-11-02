@@ -20,4 +20,13 @@ describe('단독·무리·위험 조우 구성', () => {
     expect(explorationEncounter('tough').roster).toEqual(['normal', 'tough']);
     expect(explorationEncounter('screecher')).toEqual({ roster: ['screecher', 'normal'], reinforcements: ['normal'] });
   });
+  it('행동형 세 종류의 단독·다수 실험 조우가 기본 경로에 노출된다', () => {
+    const experimental = ENCOUNTER_STAGES.slice(3);
+    expect(experimental.map(stage => stage.normal.roster)).toEqual([['shieldCharger'], ['frenzied'], ['disruptor']]);
+    expect(experimental.every(stage => stage.special!.roster.length === 2)).toBe(true);
+    for (const type of ['shieldCharger', 'frenzied', 'disruptor'] as const) {
+      expect(new Encounter([type]).special).toBe(true);
+      expect(explorationEncounter(type)).toEqual({ roster: [type] });
+    }
+  });
 });

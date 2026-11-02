@@ -81,7 +81,7 @@ export function simulateEncounterBalance(options: EncounterBalanceOptions) {
     }
     player.magazine.clear();
     if (!encounter.complete) {
-      const action = resolver.resolveEnemyAction(actor?.zombie.snapshot() ?? { ...encounter.selected.zombie.snapshot(), hp: 0 }, player.getCombatState(), player.loadout.getSnapshot());
+      const action = resolver.resolveEnemyAction(actor?.zombie.snapshot() ?? { ...encounter.selected.zombie.snapshot(), hp: 0 }, player.getCombatState(), player.loadout.getSnapshot(), weapon);
       actor?.zombie.applyState(action.after);
       player.applyCombatState(action.resolution === 'dead' ? tickPlayerEffects(action.playerAfter) : action.playerAfter);
       if (action.resolution === 'dead') canceled += 1;
