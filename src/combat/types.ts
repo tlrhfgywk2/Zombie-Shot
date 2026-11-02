@@ -36,9 +36,22 @@ export type AmmoRarity = 'common' | 'uncommon';
 export type BuildTag = 'health' | 'wound' | 'explosive' | 'impact' | 'burn';
 export type RangeBand = 'melee' | 'near' | 'mid' | 'far';
 export type AttachmentSlot = 'barrel' | 'muzzle' | 'magazine' | 'optic' | 'rail' | 'grip';
-export type EnemyType = 'normal' | 'brute' | 'fast' | 'tough' | 'contaminator' | 'groundshaker' | 'screecher';
+export type EnemyType = 'normal' | 'brute' | 'fast' | 'tough' | 'contaminator' | 'groundshaker' | 'screecher'
+  | 'shieldCharger' | 'frenzied' | 'disruptor';
 export type EnemyIntentType = 'contaminate' | 'groundShock' | 'sonicPulse';
-export type EnemyActionType = 'approach' | 'attack' | EnemyIntentType;
+export type BehaviorArchetype = 'shieldCharger' | 'frenzied' | 'disruptor';
+export type BehaviorPhase = 'guard' | 'windup' | 'prepare' | 'disruption' | 'recovery';
+export type BehaviorAction = 'guard' | 'charge' | 'frenzy' | 'prepareDisruption' | 'disrupt' | 'recover';
+export type BehaviorOffensiveAction = 'charge' | 'frenzy' | 'disrupt';
+export type EnemyActionType = 'approach' | 'attack' | EnemyIntentType | BehaviorAction;
+export interface EnemyBehaviorState {
+  archetype: BehaviorArchetype;
+  phase: BehaviorPhase;
+  remaining: number;
+  guardPressure: number;
+  guardHits: number;
+  transition?: 'cycle' | 'shock' | 'guardBreak' | 'ignition';
+}
 
 export interface EnemyIntentState {
   type: EnemyIntentType;
@@ -65,6 +78,7 @@ export interface EnemyState {
   special: boolean;
   turnsElapsed: number;
   intent?: EnemyIntentState;
+  behavior?: EnemyBehaviorState;
   trainingActions?: readonly EnemyActionType[];
   /** 사격 시작 시 고정한다. 원거리 예고보다 근접 도달 가능한 접근이 우선한다. */
   telegraphedAction?: EnemyActionType;
@@ -116,6 +130,8 @@ export interface ShotBreakdown {
   directFirepower: number;
   ignitedBonus: number;
   finalFirepower: number;
+  behaviorDamagePercent: number;
+  behaviorDamageAdjustment: number;
 }
 export interface FirepowerBreakdown {
   prePenaltyFirepower: number;
@@ -126,6 +142,7 @@ export interface FirepowerBreakdown {
   detonationDamage: number;
   ruptureDamage: number;
   finalFirepower: number;
+  behaviorDamageAdjustment?: number;
 }
 export interface ShotResult {
   ammoType: AmmoType;
@@ -197,14 +214,14 @@ export interface SequenceResult {
 }
 export interface EnemyActionPreview {
   selectedAction: EnemyActionType; threshold: number; movement: number;
-  suppressedIntent?: EnemyIntentType;
+  suppressedIntent?: EnemyIntentType | BehaviorOffensiveAction;
   rangeDelayed?: boolean;
   delayedAction?: Exclude<EnemyActionType, 'approach'>;
 }
 export interface EnemyActionResult {
   selectedAction: EnemyActionType;
   executedAction?: EnemyActionType;
-  resolution: 'normal' | 'shock-nullified' | 'retreat-delayed' | 'dead';
+  resolution: 'normal' | 'shock-nullified' | 'retreat-delayed' | 'dead' | 'guard-broken';
   threshold: number;
   interrupted: boolean;
   shockConsumed: number;
@@ -216,6 +233,6 @@ export interface EnemyActionResult {
   playerAfter: PlayerCombatState;
   movement: number;
   intentResolved?: EnemyIntentType;
-  suppressedIntent?: EnemyIntentType;
+  suppressedIntent?: EnemyIntentType | BehaviorOffensiveAction;
   intentDetail?: string;
 }

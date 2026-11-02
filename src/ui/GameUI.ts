@@ -3,7 +3,8 @@ import { createRunAmmoBuild, GAME_MODE_NAMES, type GameMode } from '../data/game
 import { isAttachmentCompatible } from '../data/attachmentDefinitions';
 import { ammoStatsMarkup, ammoTooltipStatsMarkup, firingOrderStatEntries } from './AmmoView';
 import { commitMagazine, emptyPayload, layerActivations, ruleText } from '../combat/AmmoRules';
-import { ACTION_NAMES, getRangeBand, isIgnited, isVulnerable, previewEnemyAction } from '../combat/CombatResolver';
+import { ACTION_NAMES, getRangeBand, isIgnited, isSpecialAction, isVulnerable, previewEnemyAction } from '../combat/CombatResolver';
+import { behaviorMarkup, behaviorView } from './EnemyBehaviorView';
 import { ENEMY_RANGED_ACTIONS } from '../data/enemyActionDefinitions';
 import { enemyActionPreviewText, enemyActionResultText } from './EnemyActionView';
 import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
@@ -206,6 +207,7 @@ export class GameUI {
     this.enemyStatus = this.required(root, '#enemy-status');
     this.enemyContext = this.required(root, '#enemy-context');
     this.enemyCard = this.required(root, '.enemy-card');
+    new ResizeObserver(() => this.shell.style.setProperty('--enemy-tools-top', `${this.enemyCard.offsetHeight + 12}px`)).observe(this.enemyCard);
     this.nextAction = this.required(root, '#enemy-action') as HTMLButtonElement;
     this.nextActionName = this.required(root, '#next-action-name');
     this.nextActionShock = this.required(root, '#next-action-shock');
@@ -741,7 +743,8 @@ export class GameUI {
     if (phase !== 'AMMO_SELECTION' && this.firepowerTooltipMode === 'touch') this.hideTooltip();
   }
 
-  updateEnemy(enemy: EnemyState, action: EnemyActionPreview, wave: number, waveCount: number, enemyNumber: number, enemyCount: number): void {
+  updateEnemy(enemy: EnemyState, action: EnemyActionPreview, wave: number, waveCount: number, enemyNumber: number, enemyCount: number,
+    loadout?: LoadoutSnapshot, playerState?: PlayerCombatState): void {
     this.hpFill.style.width = `${Math.max(0, enemy.hp / enemy.maxHp) * 100}%`;
     this.hpText.textContent = `${enemy.hp} / ${enemy.maxHp}`;
     this.woundText.textContent = `${enemy.wound}/${enemy.woundThreshold}`;
@@ -755,6 +758,8 @@ export class GameUI {
     this.impactFill.style.width = `${Math.min(100, enemy.actionShock / action.threshold * 100)}%`;
     this.impactText.closest<HTMLElement>('.enemy-stat')?.toggleAttribute('data-empty', enemy.actionShock === 0);
     const statuses: string[] = [];
+    const behavior = behaviorView(enemy, loadout, playerState, this.weapon.id);
+    if (behavior) statuses.push(behaviorMarkup(enemy, loadout, playerState, this.weapon.id));
     if (isVulnerable(enemy)) statuses.push(`<span data-status="vulnerable">취약 ${enemy.vulnerableTurns}턴 · 체력 피해 +${COMBAT_BALANCE.vulnerableDamagePercent}%</span>`);
     if (isIgnited(enemy)) statuses.push('<span data-status="ignited">점화</span>');
     this.enemyStatus.innerHTML = statuses.join('');
@@ -779,20 +784,20 @@ export class GameUI {
       ? `${action.movement.toFixed(1)} m 접근합니다.`
       : action.selectedAction === 'attack'
         ? '방어선을 돌파해 전투를 끝냅니다.'
-        : enemy.intent?.description ?? ({
+        : behavior?.description ?? enemy.intent?.description ?? (isSpecialAction(action.selectedAction) ? {
           contaminate: '장착물 슬롯 하나를 2턴 동안 봉쇄합니다.',
           groundShock: '반동에 따른 화력 감소를 2턴 동안 강화합니다.',
           sonicPulse: '유효 거리 판정을 2턴 동안 1단계 악화합니다.',
-        }[action.selectedAction]);
+        }[action.selectedAction] : ACTION_NAMES[action.selectedAction]);
     const rangeAction = action.delayedAction ?? action.suppressedIntent ?? action.selectedAction;
-    const rangeText = rangeAction !== 'approach' && rangeAction !== 'attack'
+    const rangeText = isSpecialAction(rangeAction)
       ? ` · 사거리 1 m 이상 ~ ${ENEMY_RANGED_ACTIONS[rangeAction].maxRange} m` : '';
     this.enemyContext.innerHTML = `<span><b>상처 ${enemy.woundThreshold}</b>마다 소비하여 <b>취약 ${COMBAT_BALANCE.vulnerableTurns}턴</b>을 부여합니다. 발동 턴 포함, 후속 사격의 체력 피해만 +${COMBAT_BALANCE.vulnerableDamagePercent}% (열상탄 +100%).</span><span>초과 상처는 남고, 다시 발동하면 지속 시간을 갱신합니다. 심부 절개탄은 +1턴이며, 더 긴 남은 지속시간은 보존합니다.</span><span><b>폭발</b>은 한도 없이 누적됩니다. 충격 1 이상인 탄약이 명중하면 전량 소비해 <b>누적량 ×${COMBAT_BALANCE.explosionDamagePerStack} 피해</b>를 줍니다. 폭발 피해는 거리·반동·취약의 영향을 받지 않습니다.</span><span><b>충격</b> 중단 시 치명 공격은 근접이면 다시 예고하고, 멀면 접근합니다. 원거리는 다음에 다른 행동을 선택합니다. <b>후퇴</b>는 사거리 밖에서만 행동을 지연합니다. 능력별 사거리 밖에서는 접근합니다.</span><span class="intent-detail"><b>${ACTION_NAMES[rangeAction]}</b>${rangeText} · ${actionDescription}</span>`;
     this.enemyContext.parentElement?.setAttribute('aria-label', `${enemyName}, 체력 ${enemy.hp}/${enemy.maxHp}, 상처 ${enemy.wound}/${enemy.woundThreshold}, 취약 ${enemy.vulnerableTurns}턴, 폭발 ${enemy.explosive}, 화상 ${enemy.burn}/${enemy.burnThreshold}${isIgnited(enemy) ? ', 점화' : ''}, 충격 ${enemy.actionShock}/${action.threshold}, 다음 행동 ${this.nextActionName.textContent}`);
     this.enemyContext.insertAdjacentHTML('beforeend', `<span><b>화상 ${enemy.burn}/${enemy.burnThreshold}</b> · 턴 사이에 유지되며 자동 피해는 없습니다. 한 발당 임계치를 한 번 소비해 초과분을 남기고 <b>점화</b>합니다. 다음 행동을 수행할 때 특수 행동을 일반 접근으로 바꾸고 점화가 해제됩니다. 충격으로 행동이 중단되면 점화는 유지됩니다.</span>`);
   }
 
-  renderEncounter(encounter: Encounter, actorId: string | undefined, loaded: boolean): void {
+  renderEncounter(encounter: Encounter, actorId: string | undefined, loaded: boolean, loadout?: LoadoutSnapshot, playerState?: PlayerCombatState): void {
     const multiple = encounter.total > 1;
     this.shell.toggleAttribute('data-multi-enemy', multiple);
     this.shell.toggleAttribute('data-can-retarget', encounter.living.length > 1 || encounter.reinforcements.length > 0);
@@ -818,6 +823,7 @@ export class GameUI {
         <span class="target-health"><strong>${enemy.hp}/${enemy.maxHp}</strong><strong>${enemy.distance.toFixed(1)} m</strong></span>
         <span class="hp-track"><span style="width:${Math.max(0, enemy.hp / enemy.maxHp) * 100}%"></span></span>
         <span class="target-stats"><span title="상처 / 취약 발동 임계치">${COMBAT_STAT_ICONS.wound}<b>${enemy.wound}/${enemy.woundThreshold}</b></span><span title="화상 / 점화 임계치">${COMBAT_STAT_ICONS.burn}<b>${enemy.burn}/${enemy.burnThreshold}</b></span><span title="폭발 누적">${COMBAT_STAT_ICONS.explosive}<b>${enemy.explosive}</b></span><span title="충격 / 행동 중단 임계치">${COMBAT_STAT_ICONS.shock}<b>${enemy.actionShock}/${action.threshold}</b></span></span>
+        ${behaviorMarkup(enemy, loadout, playerState, this.weapon.id, order, encounter.living.length)}
         <span class="target-action" data-lethal="${action.selectedAction === 'attack'}"><b>${action.suppressedIntent ? `접근 ${action.movement.toFixed(1)} m` : enemyActionPreviewText(action)}</b><em>${timing}</em></span>
         ${enemy.vulnerableTurns || enemy.ignitedActions ? `<span class="target-status">${enemy.vulnerableTurns ? `취약 ${enemy.vulnerableTurns}턴` : ''}${enemy.vulnerableTurns && enemy.ignitedActions ? ' · ' : ''}${enemy.ignitedActions ? '점화' : ''}</span>` : ''}
       </button>`;
@@ -889,6 +895,7 @@ export class GameUI {
       detonationDamage: shot.detonationDamage,
       ruptureDamage: shot.ruptureDamage,
       finalFirepower: shot.finalFirepower,
+      behaviorDamageAdjustment: shot.behaviorDamageAdjustment,
     }, '현재 탄 화력');
     this.required(this.previewOutcome, '#forecast-wound-value').textContent = `+${result.woundApplied}`;
     this.required(this.previewOutcome, '#forecast-explosive-value').textContent = String(result.after.explosive);
@@ -1277,10 +1284,12 @@ export class GameUI {
   private renderFirepowerTooltip(): void {
     const breakdown = this.firepowerBreakdown;
     if (!breakdown) return;
-    const hasPenalty = breakdown.recoilReduction > 0 || breakdown.playerDebuffReduction > 0 || breakdown.distanceReduction > 0;
+    const phaseAdjustment = breakdown.behaviorDamageAdjustment ?? 0;
+    const hasPenalty = breakdown.recoilReduction > 0 || breakdown.playerDebuffReduction > 0 || breakdown.distanceReduction > 0 || phaseAdjustment !== 0;
     this.ammoTooltip.innerHTML = `<header><span>화력 상세</span><strong>${breakdown.finalFirepower}</strong></header><div class="firepower-breakdown">
       ${breakdown.detonationDamage > 0 ? `<span>기폭 피해 <b>+${breakdown.detonationDamage}</b></span>` : ''}
       ${breakdown.ruptureDamage > 0 ? `<span>파열 피해 <b>+${breakdown.ruptureDamage}</b></span>` : ''}
+      ${phaseAdjustment ? `<span>적 자세 <b>${phaseAdjustment > 0 ? '+' : ''}${phaseAdjustment}</b></span>` : ''}
       ${hasPenalty ? `<span>감쇠 전 탄약 화력 <b>${breakdown.prePenaltyFirepower - breakdown.detonationDamage - breakdown.ruptureDamage}</b></span>
       ${breakdown.distanceReduction > 0 ? `<span class="distance-reduction">거리 감소 <b>-${breakdown.distanceReduction}</b></span>` : ''}
       ${breakdown.recoilReduction > 0 ? `<span class="recoil-reduction">반동 <b>-${breakdown.recoilReduction}</b></span>` : ''}

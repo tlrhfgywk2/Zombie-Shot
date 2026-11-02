@@ -8,7 +8,9 @@ import { commitMagazine, resolveAmmoRules } from './AmmoRules';
 import { recoilFirepowerPenalty } from './RecoilPenalty';
 import { createTrainingActions } from '../data/trainingEnemy';
 import { ENEMY_RANGED_ACTIONS } from '../data/enemyActionDefinitions';
-import type { AmmoFamily, AmmoType, CommittedMagazine, PayloadModifier, PrimaryEffectValues, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyState,
+import { DISRUPTION_BALANCE } from '../data/enemyBehaviorDefinitions';
+import { advanceBehavior, applyDisruption, behaviorDamagePercent, behaviorPhase, guardBreakReady, isBehaviorOffense, recordGuardHit, transitionBehavior } from './EnemyBehavior';
+import type { AmmoFamily, AmmoType, CommittedMagazine, PayloadModifier, PrimaryEffectValues, EnemyActionPreview, EnemyActionType, EnemyActionResult, EnemyIntentType, EnemyState,
   FirepowerBreakdown, PlayerCombatState, RangeBand, RoundPreview, SequenceResult, ShotResult } from './types';
 
 export interface CombatContext {
@@ -23,7 +25,8 @@ export interface CombatContext {
 interface SequenceCursor { previousFamily?: AmmoFamily; previousPrimary?: PrimaryEffectValues; incoming: readonly PayloadModifier[]; recoil: number; distanceLossHundredths: number }
 export interface VolleyState { magazine: CommittedMagazine; index: number; cursor: SequenceCursor }
 const freshCursor = (): SequenceCursor => ({ recoil: 0, incoming: [], distanceLossHundredths: 0 });
-const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined });
+const cloneState = (state: EnemyState): EnemyState => ({ ...state, intent: state.intent ? { ...state.intent } : undefined,
+  behavior: state.behavior ? { ...state.behavior } : undefined });
 const clonePlayerState = (state: PlayerCombatState): PlayerCombatState => ({ ...state, disabledSlots: { ...state.disabledSlots } });
 const rangeOrder: readonly RangeBand[] = ['melee', 'near', 'mid', 'far'];
 export const roundPositiveFirepower = (value: number): number => {
@@ -54,14 +57,18 @@ export const isIgnited = (enemy: EnemyState): boolean => enemy.ignitedActions > 
 
 export const ACTION_SHOCK_THRESHOLDS: Record<EnemyActionType, number> = {
   approach: 4, attack: 8, contaminate: 6, groundShock: 7, sonicPulse: 6,
+  guard: 4, charge: 6, frenzy: 7, prepareDisruption: 4, disrupt: 6, recover: 4,
 };
 export const ACTION_NAMES: Record<EnemyActionType, string> = {
   approach: '접근', attack: '치명 공격', contaminate: '오염 투척', groundShock: '지반 충격', sonicPulse: '초음파 공명',
+  guard: '방어 접근', charge: '돌진', frenzy: '광란 돌격', prepareDisruption: '교란 준비', disrupt: '장비 교란', recover: '회복',
 };
 const canApproachIntoMelee = (enemy: EnemyState): boolean =>
   !isMeleeRange(enemy.distance) && isMeleeRange(Math.max(0, enemy.distance - enemy.advancePerTurn));
 export const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
-  isMeleeRange(enemy.distance) ? 'attack'
+  enemy.behavior ? (isMeleeRange(enemy.distance) && enemy.behavior.phase !== 'recovery'
+    && enemy.behavior.phase !== 'prepare' ? 'attack' : behaviorPhase(enemy)!.action)
+    : isMeleeRange(enemy.distance) ? 'attack'
     : enemy.delayedAction === 'attack' || canApproachIntoMelee(enemy) ? 'approach'
     : enemy.delayedAction && isActionSupported(enemy, enemy.delayedAction)
       ? isEnemyActionInRange(enemy, enemy.delayedAction) ? enemy.delayedAction : 'approach'
@@ -71,11 +78,14 @@ export const scheduledEnemyAction = (enemy: EnemyState): EnemyActionType =>
 export const isActionSupported = (enemy: EnemyState, action: EnemyActionType): boolean =>
   !isSpecialAction(action) || enemy.intent?.type === action || Boolean(enemy.trainingActions?.includes(action));
 export const isEnemyActionInRange = (enemy: EnemyState, action: EnemyActionType): boolean =>
-  action === 'approach' || (action === 'attack' ? isMeleeRange(enemy.distance) : !isMeleeRange(enemy.distance) && enemy.distance <= ENEMY_RANGED_ACTIONS[action].maxRange);
-export const isSpecialAction = (action: EnemyActionType): action is Exclude<EnemyActionType, 'approach' | 'attack'> =>
-  action !== 'approach' && action !== 'attack';
+  action === 'attack' ? isMeleeRange(enemy.distance)
+    : action === 'disrupt' ? !isMeleeRange(enemy.distance) && enemy.distance <= DISRUPTION_BALANCE.maxRange
+    : isSpecialAction(action) ? !isMeleeRange(enemy.distance) && enemy.distance <= ENEMY_RANGED_ACTIONS[action].maxRange : true;
+export const isSpecialAction = (action: EnemyActionType): action is EnemyIntentType =>
+  action === 'contaminate' || action === 'groundShock' || action === 'sonicPulse';
 export const selectEnemyAction = (enemy: EnemyState): EnemyActionType => {
   const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
+  if (enemy.behavior) return isIgnited(enemy) && isBehaviorOffense(scheduled) ? 'approach' : scheduled;
   if (isSpecialAction(scheduled) && canApproachIntoMelee(enemy)) return 'approach';
   return isIgnited(enemy) && isSpecialAction(scheduled) ? 'approach' : scheduled;
 };
@@ -84,10 +94,11 @@ export const getActionShockThreshold = (enemy: EnemyState, action = selectEnemyA
 export const previewEnemyAction = (enemy: EnemyState): EnemyActionPreview => {
   const selectedAction = selectEnemyAction(enemy);
   const rangeDelayed = !isEnemyActionInRange(enemy, selectedAction) || !isActionSupported(enemy, selectedAction);
-  const movement = selectedAction === 'approach' || rangeDelayed ? Math.min(enemy.distance, enemy.advancePerTurn) : 0;
+  const movement = selectedAction === 'approach' || rangeDelayed ? Math.min(enemy.distance, enemy.advancePerTurn)
+    : enemy.behavior && selectedAction !== 'attack' ? Math.min(enemy.distance, behaviorPhase(enemy)!.movement) : 0;
   const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
   return { selectedAction, threshold: getActionShockThreshold(enemy, selectedAction), movement,
-    suppressedIntent: isIgnited(enemy) && isSpecialAction(scheduled) ? scheduled : undefined,
+    suppressedIntent: isIgnited(enemy) && (isSpecialAction(scheduled) || enemy.behavior && isBehaviorOffense(scheduled)) ? scheduled as EnemyActionPreview['suppressedIntent'] : undefined,
     rangeDelayed, delayedAction: enemy.delayedAction };
 };
 export const tickPlayerEffects = (state: PlayerCombatState): PlayerCombatState => {
@@ -187,6 +198,7 @@ export class CombatResolver {
         .filter(percent => percent > 0))],
       detonationDamage: shots.reduce((sum, shot) => sum + shot.breakdown.detonationDamage, 0),
       ruptureDamage: shots.reduce((sum, shot) => sum + shot.breakdown.ruptureDamage, 0),
+      ...(enemyState.behavior ? { behaviorDamageAdjustment: shots.reduce((sum, shot) => sum + shot.breakdown.behaviorDamageAdjustment, 0) } : {}),
       finalFirepower: shots.reduce((sum, shot) => sum + shot.breakdown.finalFirepower, 0),
     };
     return { shots, roundPreviews, finalState: current,
@@ -267,11 +279,15 @@ export class CombatResolver {
     const recoilFirepowerReduction = directPrePenaltyFirepower - applyVulnerability(afterRecoilFirepower) + burnRecoilReduction;
     const playerDebuffFirepowerReduction = applyVulnerability(afterRecoilFirepower) - effectiveFirepower + burnDebuffReduction;
     // 거리 손실의 소수 부분은 탄창 안에서 이월해 작은 탄의 손실이 모두 반올림으로 사라지지 않게 한다.
-    const directFirepower = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
+    const directBeforeBehavior = calculateFinalVolleyFirepower(effectiveFirepower, range.percent,
       COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths);
+    const phasePercent = behaviorDamagePercent(before);
+    const directFirepower = directBeforeBehavior > 0 ? Math.max(1, roundPositiveFirepower(directBeforeBehavior * phasePercent / 100)) : 0;
+    const behaviorDamageAdjustment = directFirepower - directBeforeBehavior;
+    recordGuardHit(after, directBeforeBehavior);
     const burnDamage = calculateFinalVolleyFirepower(effectiveBurnDamage, range.percent,
       COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths + effectiveFirepower * range.percent);
-    const distanceFirepowerReduction = effectiveFirepower + effectiveBurnDamage - directFirepower - burnDamage;
+    const distanceFirepowerReduction = effectiveFirepower + effectiveBurnDamage - directBeforeBehavior - burnDamage;
     const burnBuildup = payload.burn;
     const burnFollowUpPercent = cursor.incoming.filter(mod => mod.target === 'burn' && mod.mode === 'percent').reduce((sum, mod) => sum + mod.amount, 0);
     const shockFollowUpBonus = cursor.incoming.filter(mod => mod.target === 'actionShock' && mod.mode === 'add').reduce((sum, mod) => sum + mod.amount, 0);
@@ -347,14 +363,15 @@ export class CombatResolver {
       playerDebuffFirepowerPenalty, playerDebuffFirepowerReduction,
       followUpBonus, conditionalBonus, vulnerableDamageBonus,
       rangePenaltyPercent: range.percent, distanceFirepowerReduction, shockFollowUpBonus, shockScaleBonus, projectedShock, detonationDamage, ruptureDamage: rupturePower, finalFirepower,
-      burnBuildup, burnFollowUpPercent, burnScaleBonus, burnDamage, effectiveBurnDamage, ignitedBonus, directFirepower };
+      burnBuildup, burnFollowUpPercent, burnScaleBonus, burnDamage, effectiveBurnDamage, ignitedBonus, directFirepower,
+      behaviorDamagePercent: phasePercent, behaviorDamageAdjustment };
     return { shot: { ammoType, index, damage: hpDamage, hpDamage, woundApplied, explosiveApplied, explosiveConsumed, explosionDamage, vulnerableTriggered, ruptureDamage, actionShockApplied,
       burnApplied, burnDamage: actualBurnDamage, ignitionTriggered,
       killed: after.hp <= 0, description: detail.join(' · '), breakdown,
       before, after, shotDistance, movement }, next };
   }
   private clampDistance(distance: number): number { return Math.max(0, Math.min(COMBAT_BALANCE.maxDistance, distance)); }
-  resolveEnemyAction(enemyState: EnemyState, playerState: PlayerCombatState = createPlayerCombatState(), loadout: LoadoutSnapshot = {}): EnemyActionResult {
+  resolveEnemyAction(enemyState: EnemyState, playerState: PlayerCombatState = createPlayerCombatState(), loadout: LoadoutSnapshot = {}, weapon: WeaponId = 'p220'): EnemyActionResult {
     const before = cloneState(enemyState);
     const after = cloneState(enemyState);
     const playerBefore = clonePlayerState(playerState);
@@ -367,6 +384,7 @@ export class CombatResolver {
         selectedAction: action.selectedAction, threshold: action.threshold, interrupted: false,
         shockConsumed: 0, shockRemaining: after.actionShock, playerKilled: false, resolution: 'dead' };
     }
+    if (before.behavior) return this.resolveBehaviorAction(before, playerBefore, loadout, weapon);
     const playerAfter = tickPlayerEffects(playerState);
     const interrupted = after.actionShock >= action.threshold;
     const shockConsumed = interrupted ? action.threshold : 0;
@@ -415,7 +433,7 @@ export class CombatResolver {
         if (!action.rangeDelayed && !after.delayedAction && after.intent) after.intent.countdown = action.suppressedIntent
           ? after.intent.cooldown : Math.max(1, after.intent.countdown - 1);
       } else if (executedAction === 'attack') playerKilled = true;
-      else {
+      else if (isSpecialAction(executedAction)) {
         intentResolved = executedAction;
         intentDetail = this.applyIntent(executedAction, after, playerAfter, loadout);
         if (after.intent) after.intent.countdown = after.intent.cooldown;
@@ -439,7 +457,51 @@ export class CombatResolver {
       shockConsumed, shockRemaining: after.actionShock,
       playerKilled, intentResolved, intentDetail, suppressedIntent: action.suppressedIntent };
   }
-  private applyIntent(type: Exclude<EnemyActionType, 'approach' | 'attack'>, enemy: EnemyState,
+  /** 전투의 기존 행동 기회에서만 호출한다. 명중 도중에는 어떤 단계도 전환하지 않는다. */
+  private resolveBehaviorAction(before: EnemyState, playerBefore: PlayerCombatState, loadout: LoadoutSnapshot, weapon: WeaponId): EnemyActionResult {
+    const after = cloneState(before);
+    const playerAfter = tickPlayerEffects(playerBefore);
+    const action = previewEnemyAction(before);
+    const broken = guardBreakReady(before);
+    const interrupted = !broken && before.actionShock >= action.threshold;
+    const shockConsumed = interrupted ? action.threshold : 0;
+    after.actionShock -= shockConsumed;
+    delete after.telegraphedAction;
+    let executedAction: EnemyActionType | undefined;
+    let resolution: EnemyActionResult['resolution'] = 'normal';
+    let movement = 0;
+    let playerKilled = false;
+    let intentDetail: string | undefined;
+    if (broken) {
+      resolution = 'guard-broken';
+      executedAction = 'recover';
+      transitionBehavior(after, 'recovery', 'guardBreak');
+    } else if (interrupted) {
+      resolution = 'shock-nullified';
+      transitionBehavior(after, after.behavior!.phase === 'recovery' ? behaviorPhase(after)!.next : 'recovery', 'shock');
+    } else {
+      executedAction = action.rangeDelayed ? 'approach' : action.selectedAction;
+      movement = action.movement;
+      after.distance = this.clampDistance(after.distance - movement);
+      // 돌진으로 근접에 도달해도 같은 기회에 공격하지 않는다. 고정된 치명 공격만 최종 사거리에서 실행한다.
+      if (executedAction === 'attack') playerKilled = true;
+      if (executedAction === 'disrupt') {
+        applyDisruption(playerAfter, playerBefore, loadout, weapon);
+        intentDetail = '장비 교란 · 1턴';
+      }
+      if (action.rangeDelayed) resolution = 'retreat-delayed';
+      else if (action.suppressedIntent) transitionBehavior(after, 'recovery', 'ignition');
+      else advanceBehavior(after);
+    }
+    after.vulnerableTurns = Math.max(0, after.vulnerableTurns - 1);
+    if (!interrupted) after.ignitedActions = Math.max(0, after.ignitedActions - 1);
+    after.turnsElapsed += 1;
+    after.telegraphedAction = scheduledEnemyAction(after);
+    return { before, after, playerBefore, playerAfter, movement, executedAction, resolution,
+      selectedAction: action.selectedAction, threshold: action.threshold, interrupted, shockConsumed,
+      shockRemaining: after.actionShock, playerKilled, suppressedIntent: action.suppressedIntent, intentDetail };
+  }
+  private applyIntent(type: EnemyIntentType, enemy: EnemyState,
     player: PlayerCombatState, loadout: LoadoutSnapshot): string {
     if (type === 'groundShock') {
       player.heavyKickPenaltyBonus = 1; player.heavyKickPenaltyTurns = 2;

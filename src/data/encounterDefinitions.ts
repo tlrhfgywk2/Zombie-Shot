@@ -21,10 +21,14 @@ export const ENCOUNTER_STAGES: readonly EncounterStage[] = [
   { normal: normal('통로의 감염체', ['normal']) },
   { normal: normal('무리 조우', ['normal', 'normal']), special: { ...normal('질주와 거체', ['fast', 'tough']), kind: 'special' } },
   { normal: normal('단독 조우', ['brute']), special: { kind: 'special', title: '위험 조우', subtitle: '오염·공명 동시 출현 · 일반 감염체 증원 1마리', roster: ['contaminator', 'screecher'], reinforcements: ['normal'], reward: '부착물' } },
+  { normal: normal('방어와 돌진', ['shieldCharger']), special: { ...normal('돌진체와 교란체', ['shieldCharger', 'disruptor']), kind: 'special', reward: '부착물' } },
+  { normal: normal('광란의 전조', ['frenzied']), special: { ...normal('광란과 교란', ['frenzied', 'disruptor']), kind: 'special', reward: '부착물' } },
+  { normal: normal('장비 교란', ['disruptor']), special: { ...normal('엇갈린 돌격', ['shieldCharger', 'frenzied']), kind: 'special', reward: '부착물' } },
 ];
 
 /** 탐험의 지도·보상은 유지하며 전투 구성만 확장한다. 진입 전에 같은 구성을 표시한다. */
 export const explorationEncounter = (type: EnemyType): Pick<RouteOption, 'roster' | 'reinforcements'> => {
+  if (ENEMY_DEFINITIONS[type].behavior) return { roster: [type] };
   if (['contaminator', 'groundshaker', 'screecher'].includes(type)) return { roster: [type, 'normal'], reinforcements: ['normal'] };
   if (type === 'fast') return { roster: ['fast', 'brute'] };
   if (type === 'tough') return { roster: ['normal', 'tough'] };

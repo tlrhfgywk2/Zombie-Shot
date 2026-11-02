@@ -2,6 +2,7 @@ import { Zombie } from '../entities/Zombie';
 import { AMMO_DEFINITIONS, COMBAT_BALANCE } from '../data/ammoDefinitions';
 import { scheduledEnemyAction } from './CombatResolver';
 import { encounterStartingDistances } from '../data/encounterDefinitions';
+import { ENEMY_DEFINITIONS } from '../data/enemyDefinitions';
 import type { EnemyState, EnemyType, ShotResult } from './types';
 
 export interface EncounterEnemy { id: string; lane: number; zombie: Zombie }
@@ -23,7 +24,7 @@ export class Encounter {
     if (roster.length < 1 || roster.length > ENCOUNTER_BALANCE.activeLimit) throw new Error('활성 감염체는 1~2마리여야 합니다.');
     this.pending = [...reinforcements];
     this.total = roster.length + reinforcements.length;
-    this.special = [...roster, ...reinforcements].some(type => ['contaminator', 'groundshaker', 'screecher'].includes(type));
+    this.special = [...roster, ...reinforcements].some(type => ENEMY_DEFINITIONS[type].special);
     const distances = encounterStartingDistances(roster);
     roster.forEach((type, lane) => this.spawn(type, lane, distances[lane]));
     this.selectedId = this.living[0]!.id;

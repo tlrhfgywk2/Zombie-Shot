@@ -60,7 +60,7 @@ describe('다음 턴 근접 공격을 준비하는 접근 우선권', () => {
   it.each(Object.keys(ENEMY_DEFINITIONS) as (keyof typeof ENEMY_DEFINITIONS)[])('%s는 한 번 접근해 1m 미만이 되면 원거리 예고보다 접근한다', type => {
     const enemy = createEnemyState(type);
     const distance = enemy.advancePerTurn + 0.5;
-    const state = { ...enemy, distance, trainingActions: ['sonicPulse'] as const, delayedAction: 'sonicPulse' as const };
+    const state = { ...enemy, behavior: undefined, distance, trainingActions: ['sonicPulse'] as const, delayedAction: 'sonicPulse' as const };
     expect(previewEnemyAction(state).selectedAction).toBe('approach');
     const result = resolver.resolveEnemyAction(state);
     expect(result).toMatchObject({ executedAction: 'approach', playerKilled: false });

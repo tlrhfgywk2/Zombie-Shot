@@ -21,12 +21,14 @@ export class Zombie {
     return {
       ...this.state,
       intent: this.state.intent ? { ...this.state.intent } : undefined,
+      behavior: this.state.behavior ? { ...this.state.behavior } : undefined,
     };
   }
   applyState(state: EnemyState): void {
     this.state = {
       ...state,
       intent: state.intent ? { ...state.intent } : undefined,
+      behavior: state.behavior ? { ...state.behavior } : undefined,
     };
   }
 }

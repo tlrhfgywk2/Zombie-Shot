@@ -1101,3 +1101,16 @@ body:is([data-phase="LOADING"], [data-phase="FIRING"], [data-phase="ENEMY_ACTION
 .game-shell[data-multi-enemy][data-layout="portrait"] .phase-panel > .eyebrow { display: none; }
 .game-shell[data-multi-enemy][data-layout="portrait"] .phase-panel > strong { font-size: .85rem; line-height: 1.3; }
 body[data-phase="AIMING"] .ammo-rack { opacity: .45; }
+
+/* 행동 단계: 핵심 배율과 붕괴 수치는 공용 전투 수치 크기로 표시한다. */
+.behavior-state { display: grid; gap: 3px; width: 100%; margin-top: 5px; padding: 5px 0; color: #ffd099; border-top: 1px solid #ffd09933; line-height: 1.25; }
+.behavior-state > span { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 8px; }
+.behavior-state b, .behavior-state strong, .behavior-state em { font-size: var(--combat-value-size); font-style: normal; font-variant-numeric: tabular-nums; }
+.behavior-state[data-behavior-phase="guard"] { color: #91c9f2; }
+.behavior-state[data-behavior-phase="recovery"] { color: #8ce9c5; }
+.behavior-state em { color: #dbe6dd; }
+.enemy-status-list:has(.behavior-state) { display: block; }
+.enemy-status-list .behavior-state, .enemy-status-list .behavior-state > span { background: none; border-radius: 0; border: 0; padding: 3px 0; }
+.game-shell[data-mobile-tools] .behavior-state { gap: 2px; padding-block: 3px; }
+.game-shell[data-mobile-tools] .behavior-state > span { display: grid; gap: 2px; }
+.game-shell[data-layout="portrait"]:not([data-multi-enemy]) .phase-panel { top: var(--enemy-tools-top, 128px); }
