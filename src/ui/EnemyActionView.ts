@@ -2,6 +2,7 @@ import { ACTION_NAMES } from '../combat/CombatResolver';
 import type { EnemyActionPreview, EnemyActionResult } from '../combat/types';
 
 export const enemyActionPreviewText = (action: EnemyActionPreview): string => {
+  if (action.guardBroken) return '방어 붕괴 · 행동 취소';
   const movement = `${action.movement.toFixed(1)} m`;
   if (action.suppressedIntent) return `${ACTION_NAMES[action.suppressedIntent]} 봉쇄 → 접근 ${movement}`;
   if (action.rangeDelayed) return `${ACTION_NAMES[action.selectedAction]} 지연 → 접근 ${movement}`;

@@ -98,6 +98,7 @@ export const previewEnemyAction = (enemy: EnemyState): EnemyActionPreview => {
     : enemy.behavior && selectedAction !== 'attack' ? Math.min(enemy.distance, behaviorPhase(enemy)!.movement) : 0;
   const scheduled = enemy.telegraphedAction ?? scheduledEnemyAction(enemy);
   return { selectedAction, threshold: getActionShockThreshold(enemy, selectedAction), movement,
+    ...(guardBreakReady(enemy) ? { guardBroken: true } : {}),
     suppressedIntent: isIgnited(enemy) && (isSpecialAction(scheduled) || enemy.behavior && isBehaviorOffense(scheduled)) ? scheduled as EnemyActionPreview['suppressedIntent'] : undefined,
     rangeDelayed, delayedAction: enemy.delayedAction };
 };
@@ -284,7 +285,6 @@ export class CombatResolver {
     const phasePercent = behaviorDamagePercent(before);
     const directFirepower = directBeforeBehavior > 0 ? Math.max(1, roundPositiveFirepower(directBeforeBehavior * phasePercent / 100)) : 0;
     const behaviorDamageAdjustment = directFirepower - directBeforeBehavior;
-    recordGuardHit(after, directBeforeBehavior);
     const burnDamage = calculateFinalVolleyFirepower(effectiveBurnDamage, range.percent,
       COMBAT_BALANCE.minimumFirepower, cursor.distanceLossHundredths + effectiveFirepower * range.percent);
     const distanceFirepowerReduction = effectiveFirepower + effectiveBurnDamage - directBeforeBehavior - burnDamage;
@@ -335,6 +335,7 @@ export class CombatResolver {
     if (ruptureDamage > 0 && after.hp <= 0) { after.burn = 0; after.ignitedActions = 0; after.vulnerableTurns = 0; }
     const actionShockApplied = after.hp > 0 ? projectedShock : 0;
     after.actionShock += actionShockApplied;
+    recordGuardHit(after, directBeforeBehavior + burnDamage + detonationDamage + rupturePower);
     if (definition.moveAfter) after.distance = this.clampDistance(after.distance + definition.moveAfter);
     const movement = after.distance - before.distance;
     const next: SequenceCursor = { previousFamily: definition.family, previousPrimary: rules.primary, recoil: recoilAfter, incoming: rules.outgoing,

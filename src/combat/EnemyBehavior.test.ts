@@ -61,12 +61,19 @@ describe('행동 단계와 강한 초탄', () => {
     const sequence = resolver.resolveSequence(['ball', 'ball', 'ball', 'ball'], enemy);
     expect(guardBreakReady(sequence.shots[1]!.after)).toBe(false);
     expect(guardBreakReady(sequence.shots[2]!.after)).toBe(true);
+    expect(previewEnemyAction(sequence.shots[2]!.after).guardBroken).toBe(true);
     expect(sequence.shots.every(shot => shot.after.behavior?.phase === 'guard' && shot.breakdown.behaviorDamagePercent === 60)).toBe(true);
     expect(resolver.resolveEnemyAction(sequence.finalState)).toMatchObject({ resolution: 'guard-broken', movement: 0,
       after: { behavior: { phase: 'recovery', transition: 'guardBreak' } } });
     const heavyHit = resolver.resolveShot('ball', 0, { ...enemy, behavior: { ...enemy.behavior!, guardPressure: 17 } });
     expect(guardBreakReady(heavyHit.after)).toBe(true);
     expect(enemy.behavior?.guardHits).toBe(0);
+  });
+  it('직접 화력이 적어도 강한 폭발 피해는 방어를 무너뜨린다', () => {
+    const sequence = resolver.resolveSequence(['stickyCharge', 'stickyCharge', 'stickyCharge', 'flatNose'], createEnemyState('shieldCharger'));
+    expect(sequence.killed).toBe(false);
+    expect(guardBreakReady(sequence.finalState)).toBe(true);
+    expect(resolver.resolveEnemyAction(sequence.finalState).resolution).toBe('guard-broken');
   });
   it('같은 거리·같은 탄창은 돌진 준비 노출에서 더 효율적이다', () => {
     const guard = { ...createEnemyState('shieldCharger'), hp: 1000, maxHp: 1000 };
@@ -166,6 +173,8 @@ describe('장착물 교란과 복원', () => {
   it('최초 예고부터 실제 장착물과 1턴 지속시간을 알려 주며 준비 뒤에만 발동한다', () => {
     const enemy = createEnemyState('disruptor');
     expect(behaviorView(enemy, loadout)?.detail).toBe('총구 봉쇄 1턴');
+    expect(behaviorView(enemy, loadout, undefined, 'p220', 2, 2)?.timing).toBe('교란 4턴 뒤');
+    expect(behaviorView({ ...enemy, telegraphedAction: 'attack', distance: .5 }, loadout)?.timing).toBe('');
     const prepare = resolver.resolveEnemyAction(enemy, undefined, loadout);
     expect(prepare.executedAction).toBe('prepareDisruption');
     expect(prepare.playerAfter.disabledSlots).toEqual({});

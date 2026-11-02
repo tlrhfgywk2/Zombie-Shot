@@ -1,4 +1,5 @@
 import { behaviorPhase, disruptionTarget, guardBreakReady } from '../combat/EnemyBehavior';
+import { previewEnemyAction } from '../combat/CombatResolver';
 import { createPlayerCombatState } from '../combat/AttachmentLoadout';
 import type { EnemyState, PlayerCombatState } from '../combat/types';
 import { ATTACHMENT_SLOT_NAMES, type LoadoutSnapshot } from '../data/attachmentDefinitions';
@@ -18,9 +19,10 @@ export function behaviorView(enemy: EnemyState, loadout: LoadoutSnapshot = {}, p
   const threshold = ENEMY_BEHAVIORS[state.archetype].guardBreak;
   const progress = state.phase === 'guard' && threshold
     ? guardBreakReady(enemy) ? '붕괴 예약' : `붕괴 ${state.guardPressure}/${threshold.pressure} · ${state.guardHits}/${threshold.hits}발` : '';
-  const disruption = state.archetype === 'disruptor' && state.phase !== 'recovery' ? disruptionText(loadout, player, weapon) : '';
-  const timing = state.phase === 'guard' && !guardBreakReady(enemy) ? `돌진 ${order + activeCount * state.remaining}턴 뒤`
-    : state.phase === 'prepare' ? `교란 ${order + activeCount * state.remaining}턴 뒤` : '';
+  const action = previewEnemyAction(enemy);
+  const disruption = state.archetype === 'disruptor' && state.phase !== 'recovery' && action.selectedAction !== 'attack' ? disruptionText(loadout, player, weapon) : '';
+  const timing = state.phase === 'guard' && !guardBreakReady(enemy) && action.selectedAction === 'guard' ? `돌진 ${order + activeCount * state.remaining}턴 뒤`
+    : state.phase === 'prepare' && action.selectedAction === 'prepareDisruption' ? `교란 ${order + activeCount * state.remaining}턴 뒤` : '';
   return {
     label: transition,
     phase: state.phase,

@@ -214,6 +214,7 @@ export interface SequenceResult {
 }
 export interface EnemyActionPreview {
   selectedAction: EnemyActionType; threshold: number; movement: number;
+  guardBroken?: boolean;
   suppressedIntent?: EnemyIntentType | BehaviorOffensiveAction;
   rangeDelayed?: boolean;
   delayedAction?: Exclude<EnemyActionType, 'approach'>;
