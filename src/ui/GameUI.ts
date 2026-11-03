@@ -1,3 +1,4 @@
+import { mountEnemyGuide } from './EnemyGuide';
 import { WEAPON_DEFINITIONS, WEAPON_ORDER, type WeaponDefinition, type WeaponId } from '../data/weaponDefinitions';
 import { createRunAmmoBuild, GAME_MODE_NAMES, type GameMode } from '../data/gameModes';
 import { isAttachmentCompatible } from '../data/attachmentDefinitions';
@@ -150,7 +151,7 @@ export class GameUI {
         <main class="game-stage" aria-label="전투 화면">
           <div id="canvas-host" class="canvas-host"></div>
           <header class="top-hud">
-            <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong></div>
+            <div class="brand"><span class="brand-mark"></span><strong>좀비 샷</strong><button type="button" class="enemy-guide-open" data-open-enemy-guide>감염체 도감</button></div>
             <div class="enemy-card" aria-live="polite"><div class="enemy-heading"><span id="level-text">일반 감염체</span><span id="hp-text">22 / 22</span></div><div class="hp-track" aria-label="체력"><span id="hp-fill"></span></div><div class="enemy-vitals">
               <div class="enemy-stat enemy-wound"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l14 16M19 4L5 20"/></svg><span><small>상처</small><strong id="wound-text">0/${COMBAT_BALANCE.woundThreshold}</strong></span></div>
               <div class="enemy-stat enemy-explosive">${COMBAT_STAT_ICONS.explosive}<span><small>폭발</small><strong id="explosive-text">0</strong></span></div>
@@ -172,7 +173,7 @@ export class GameUI {
           <aside id="ammo-tooltip" class="ammo-tooltip" role="tooltip" hidden></aside>
         </main>
         <section class="tactical-console" aria-label="전투 준비">
-          <nav class="mobile-tools" aria-label="전투 도구"><button type="button" data-mobile-panel="attachments" aria-haspopup="dialog" aria-controls="mobile-panel" aria-expanded="false">부착물 <b data-mobile-attachment-count>0</b></button><button type="button" data-mobile-panel="settings" aria-haspopup="dialog" aria-controls="mobile-panel" aria-expanded="false"><span data-mobile-weapon-name>P220</span> · 설정</button></nav>
+          <nav class="mobile-tools" aria-label="전투 도구"><button type="button" data-open-enemy-guide>감염체 도감</button><button type="button" data-mobile-panel="attachments" aria-haspopup="dialog" aria-controls="mobile-panel" aria-expanded="false">부착물 <b data-mobile-attachment-count>0</b></button><button type="button" data-mobile-panel="settings" aria-haspopup="dialog" aria-controls="mobile-panel" aria-expanded="false"><span data-mobile-weapon-name>P220</span> · 설정</button></nav>
           <div class="loadout" aria-label="탄창과 부착물 구성 영역">
           <div class="ammo-rack"><div class="section-label"><span>탄약</span><small id="ammo-capacity">보유 6</small></div><div class="ammo-options">
             ${AMMO_ORDER.map((ammo) => { const definition = AMMO_DEFINITIONS[ammo]; return `<button class="ammo-token ammo-${ammo}" style="--bullet:${definition.cssColor}" data-ammo="${ammo}" aria-label="${definition.name}: ${definition.role}"><span class="round-visual"><i></i></span><span><strong>${definition.name}</strong><small>${RARITY_NAMES[definition.rarity]} · ${BUILD_TAG_NAMES[definition.tags[0]!]}</small></span><b class="stock-count" data-stock="${ammo}"></b></button>`; }).join('')}
@@ -196,6 +197,7 @@ export class GameUI {
         <div id="game-over" class="game-over" hidden><div class="game-over-card"><h2 id="end-title">감염체가 방어선을 돌파했습니다</h2><button id="restart-button">다시 시작</button><button type="button" data-return-to-menu>모드 선택</button></div></div>
       </div>`;
 
+    mountEnemyGuide(root);
     this.shell = this.required(root, '.game-shell');
 
     this.hpFill = this.required(root, '#hp-fill');
@@ -428,7 +430,7 @@ export class GameUI {
     host.hidden = false;
     this.required(this.shell, '.game-stage').inert = true;
     this.required(this.shell, '.tactical-console').inert = true;
-    host.innerHTML = `<div class="route-card mode-selection-card"><span>좀비 샷</span><h2 id="weapon-selection-title">모드 선택</h2><div class="mode-options">
+    host.innerHTML = `<div class="route-card mode-selection-card"><span>좀비 샷</span><h2 id="weapon-selection-title">모드 선택</h2><button type="button" class="enemy-guide-open" data-open-enemy-guide>감염체 도감</button><div class="mode-options">
       <button type="button" class="mode-option" data-choose-mode="free"><strong>프리 모드</strong><span>권총별 초기 탄약 · 자유 보급 · 조우 종료 시 복구</span></button>
       <button type="button" class="mode-option" data-choose-mode="exploration"><strong>탐험 모드</strong><span>프로토타입 · 숨겨진 갈림길 · 감염체와 탄약 거래</span></button>
     </div><label class="quick-mode-option"><input type="checkbox" id="quick-mode" ${this.quickMode ? 'checked' : ''}>퀵모드</label></div>`;
@@ -445,7 +447,7 @@ export class GameUI {
     this.required(this.shell, '.game-stage').inert = show;
     this.required(this.shell, '.tactical-console').inert = show;
     if (!show) { this.shell.querySelector<HTMLButtonElement>('.ammo-token')?.focus(); return; }
-    host.innerHTML = `<div class="route-card weapon-selection-card"><header class="selection-header"><div><span>${GAME_MODE_NAMES[mode]}</span><h2 id="weapon-selection-title">권총 선택</h2></div><button type="button" data-selection-back>모드 선택</button></header><div class="weapon-options">${WEAPON_ORDER.map(id => {
+    host.innerHTML = `<div class="route-card weapon-selection-card"><header class="selection-header"><div><span>${GAME_MODE_NAMES[mode]}</span><h2 id="weapon-selection-title">권총 선택</h2></div><button type="button" class="enemy-guide-open" data-open-enemy-guide>감염체 도감</button><button type="button" data-selection-back>모드 선택</button></header><div class="weapon-options">${WEAPON_ORDER.map(id => {
       const weapon = WEAPON_DEFINITIONS[id];
       const rating = weapon.ratings;
       return `<article class="weapon-option"><h3>${weapon.name}</h3><p>${weapon.role}</p><dl>
@@ -691,7 +693,7 @@ export class GameUI {
     this.required(this.shell, '.game-stage').inert = true;
     this.required(this.shell, '.tactical-console').inert = true;
     host.hidden = false;
-    host.innerHTML = `<div class="route-card cave-card"><header class="cave-header"><span>${screen.progress}</span><div><button type="button" data-cave-action="restart">다시 시작</button><button type="button" data-cave-action="menu">모드 선택</button></div></header>
+    host.innerHTML = `<div class="route-card cave-card"><header class="cave-header"><span>${screen.progress}</span><div><button type="button" data-open-enemy-guide>감염체 도감</button><button type="button" data-cave-action="restart">다시 시작</button><button type="button" data-cave-action="menu">모드 선택</button></div></header>
       <div class="cave-illustration" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
       <h2 id="exploration-title">${screen.title}</h2><p>${screen.description}</p>
       <div class="cave-equipment"><strong>인지 ${screen.awareness}/3</strong>${screen.tools.map(tool => `<span>${tool}</span>`).join('')}${screen.capacity ? `<span>${screen.capacity}</span>` : ''}</div>

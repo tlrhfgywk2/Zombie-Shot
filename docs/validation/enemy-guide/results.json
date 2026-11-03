@@ -1,0 +1,50 @@
+[
+  {
+    "name": "desktop",
+    "state": "menu",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "desktop",
+    "state": "weapon",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "desktop",
+    "state": "free",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "desktop",
+    "state": "exploration",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "portrait",
+    "state": "menu",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "portrait",
+    "state": "weapon",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "portrait",
+    "state": "free",
+    "rows": 10,
+    "growth": 0
+  },
+  {
+    "name": "portrait",
+    "state": "exploration",
+    "rows": 10,
+    "growth": 0
+  }
+]

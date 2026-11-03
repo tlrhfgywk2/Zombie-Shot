@@ -1114,3 +1114,43 @@ body[data-phase="AIMING"] .ammo-rack { opacity: .45; }
 .game-shell[data-mobile-tools] .behavior-state { gap: 2px; padding-block: 3px; }
 .game-shell[data-mobile-tools] .behavior-state > span { display: grid; gap: 2px; }
 .game-shell[data-layout="portrait"]:not([data-multi-enemy]) .phase-panel { top: var(--enemy-tools-top, 128px); }
+
+.enemy-guide-open { border: 1px solid var(--line); padding: 8px 12px; background: #17251b; color: #e9efe8; cursor: pointer; font: inherit; white-space: nowrap; pointer-events: auto; }
+.brand { flex-wrap: wrap; }
+.brand .enemy-guide-open { font-size: .85rem; }
+.enemy-guide { width: min(1320px, calc(100vw - 24px)); max-width: none; height: min(800px, calc(100dvh - 24px)); max-height: none; padding: 20px; border: 1px solid #708452; background: #101a13; color: #e4ece5; box-sizing: border-box; }
+.enemy-guide[open] { display: flex; flex-direction: column; gap: 12px; }
+.enemy-guide::backdrop { background: #000c; }
+.enemy-guide header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.enemy-guide h2 { margin: 0; font-size: 1.5rem; }
+.enemy-guide p { margin: 5px 0 0; line-height: 1.5; }
+.enemy-guide header p, .enemy-guide footer { color: #b6c6b9; font-size: .85rem; line-height: 1.5; }
+.enemy-guide button { padding: 10px 16px; color: #dfff91; border: 1px solid #708452; background: #1b2a1e; cursor: pointer; flex-shrink: 0; }
+.enemy-guide-note { font-size: .9rem; }
+.enemy-guide-scroll { min-height: 0; overflow: auto; flex: 1; border: 1px solid #415344; overscroll-behavior: contain; }
+.enemy-guide table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: 100%; min-width: 1185px; font-variant-numeric: tabular-nums; }
+.enemy-guide .guide-name { width: 150px; }
+.enemy-guide .guide-hp { width: 65px; }
+.enemy-guide .guide-growth { width: 110px; }
+.enemy-guide .guide-distance, .enemy-guide .guide-move { width: 100px; }
+.enemy-guide .guide-shock, .enemy-guide .guide-threshold { width: 130px; }
+.enemy-guide .guide-pattern { width: 400px; }
+.enemy-guide thead th:first-child { left: 0; z-index: 3; }
+.enemy-guide caption { text-align: left; padding: 10px 12px; color: #c8ff4d; background: #101a13; }
+.enemy-guide th, .enemy-guide td { padding: 12px; text-align: left; border-bottom: 1px solid #334537; border-right: 1px solid #28392b; font-size: var(--combat-value-size); vertical-align: top; }
+.enemy-guide thead th { position: sticky; top: 0; background: #243628; z-index: 2; white-space: nowrap; }
+.enemy-guide tbody th { position: sticky; left: 0; z-index: 1; background: #17271b; min-width: 128px; }
+.enemy-guide td:not(.enemy-guide-pattern) { white-space: nowrap; font-weight: 700; }
+.enemy-guide-pattern { min-width: 390px; line-height: 1.55; }
+.enemy-guide-pattern span { display: block; margin-bottom: 6px; }
+.enemy-guide tbody tr:nth-child(even) td { background: #142118; }
+@media (max-width: 600px) {
+  .enemy-guide { padding: 12px; gap: 8px; }
+  .enemy-guide h2 { font-size: 1.2rem; }
+  .enemy-guide th, .enemy-guide td { padding: 10px; }
+  .enemy-guide tbody th { min-width: 100px; max-width: 110px; }
+  .enemy-guide table { width: 955px; min-width: 955px; }
+  .enemy-guide .guide-name { width: 110px; }
+  .enemy-guide .guide-pattern { width: 210px; }
+  .cave-header > div { flex-wrap: wrap; justify-content: end; }
+}
