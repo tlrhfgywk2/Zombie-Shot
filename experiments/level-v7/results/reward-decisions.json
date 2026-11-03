@@ -1,0 +1,282 @@
+[
+  {
+    "key": "ammo:mimic",
+    "chosen": 300,
+    "rejected": 134
+  },
+  {
+    "key": "attachment:reflexSight",
+    "chosen": 240,
+    "rejected": 36
+  },
+  {
+    "key": "ammo:retreat",
+    "chosen": 239,
+    "rejected": 214
+  },
+  {
+    "key": "attachment:extendedMagazine",
+    "chosen": 228,
+    "rejected": 0
+  },
+  {
+    "key": "ammo:lowRecoil",
+    "chosen": 173,
+    "rejected": 160
+  },
+  {
+    "key": "ammo:stickyCharge",
+    "chosen": 154,
+    "rejected": 227
+  },
+  {
+    "key": "ammo:ignition",
+    "chosen": 153,
+    "rejected": 262
+  },
+  {
+    "key": "ammo:laceration",
+    "chosen": 147,
+    "rejected": 291
+  },
+  {
+    "key": "ammo:wounding",
+    "chosen": 146,
+    "rejected": 240
+  },
+  {
+    "key": "ammo:relay",
+    "chosen": 137,
+    "rejected": 232
+  },
+  {
+    "key": "ammo:accelerant",
+    "chosen": 128,
+    "rejected": 272
+  },
+  {
+    "key": "ammo:explosive",
+    "chosen": 119,
+    "rejected": 200
+  },
+  {
+    "key": "ammo:resonance",
+    "chosen": 115,
+    "rejected": 337
+  },
+  {
+    "key": "ammo:incendiary",
+    "chosen": 112,
+    "rejected": 199
+  },
+  {
+    "key": "ammo:kickback",
+    "chosen": 106,
+    "rejected": 226
+  },
+  {
+    "key": "attachment:highCapacityMagazine",
+    "chosen": 102,
+    "rejected": 0
+  },
+  {
+    "key": "ammo:plusP",
+    "chosen": 85,
+    "rejected": 253
+  },
+  {
+    "key": "discovery:wound",
+    "chosen": 80,
+    "rejected": 400
+  },
+  {
+    "key": "discovery:heat",
+    "chosen": 80,
+    "rejected": 400
+  },
+  {
+    "key": "discovery:blast",
+    "chosen": 80,
+    "rejected": 400
+  },
+  {
+    "key": "discovery:recoil",
+    "chosen": 80,
+    "rejected": 400
+  },
+  {
+    "key": "discovery:cauterize",
+    "chosen": 80,
+    "rejected": 400
+  },
+  {
+    "key": "discovery:concussion",
+    "chosen": 80,
+    "rejected": 400
+  },
+  {
+    "key": "reinforcement:laceration",
+    "chosen": 80,
+    "rejected": 61
+  },
+  {
+    "key": "reinforcement:incendiary",
+    "chosen": 80,
+    "rejected": 104
+  },
+  {
+    "key": "reinforcement:stickyCharge",
+    "chosen": 80,
+    "rejected": 118
+  },
+  {
+    "key": "reinforcement:plusP",
+    "chosen": 80,
+    "rejected": 34
+  },
+  {
+    "key": "reinforcement:cauterize",
+    "chosen": 80,
+    "rejected": 21
+  },
+  {
+    "key": "reinforcement:resonance",
+    "chosen": 80,
+    "rejected": 48
+  },
+  {
+    "key": "ammo:flatNose",
+    "chosen": 71,
+    "rejected": 316
+  },
+  {
+    "key": "ammo:cauterize",
+    "chosen": 63,
+    "rejected": 277
+  },
+  {
+    "key": "attachment:compensator",
+    "chosen": 63,
+    "rejected": 135
+  },
+  {
+    "key": "attachment:laserSight",
+    "chosen": 61,
+    "rejected": 101
+  },
+  {
+    "key": "attachment:tacticalLight",
+    "chosen": 60,
+    "rejected": 125
+  },
+  {
+    "key": "ammo:advance",
+    "chosen": 56,
+    "rejected": 261
+  },
+  {
+    "key": "attachment:texturedGrip",
+    "chosen": 50,
+    "rejected": 135
+  },
+  {
+    "key": "attachment:extendedBarrel",
+    "chosen": 50,
+    "rejected": 118
+  },
+  {
+    "key": "ammo:opening",
+    "chosen": 37,
+    "rejected": 333
+  },
+  {
+    "key": "ammo:afterimage",
+    "chosen": 37,
+    "rejected": 322
+  },
+  {
+    "key": "attachment:muzzleBrake",
+    "chosen": 32,
+    "rejected": 58
+  },
+  {
+    "key": "attachment:pistolScope",
+    "chosen": 31,
+    "rejected": 71
+  },
+  {
+    "key": "attachment:laserLightModule",
+    "chosen": 30,
+    "rejected": 90
+  },
+  {
+    "key": "attachment:ergonomicGrip",
+    "chosen": 12,
+    "rejected": 90
+  },
+  {
+    "key": "reinforcement:flatNose",
+    "chosen": 0,
+    "rejected": 480
+  },
+  {
+    "key": "reinforcement:wounding",
+    "chosen": 0,
+    "rejected": 202
+  },
+  {
+    "key": "reinforcement:lowRecoil",
+    "chosen": 0,
+    "rejected": 126
+  },
+  {
+    "key": "reinforcement:retreat",
+    "chosen": 0,
+    "rejected": 159
+  },
+  {
+    "key": "reinforcement:ignition",
+    "chosen": 0,
+    "rejected": 153
+  },
+  {
+    "key": "reinforcement:accelerant",
+    "chosen": 0,
+    "rejected": 140
+  },
+  {
+    "key": "reinforcement:kickback",
+    "chosen": 0,
+    "rejected": 123
+  },
+  {
+    "key": "reinforcement:explosive",
+    "chosen": 0,
+    "rejected": 135
+  },
+  {
+    "key": "reinforcement:mimic",
+    "chosen": 0,
+    "rejected": 167
+  },
+  {
+    "key": "reinforcement:advance",
+    "chosen": 0,
+    "rejected": 53
+  },
+  {
+    "key": "reinforcement:opening",
+    "chosen": 0,
+    "rejected": 20
+  },
+  {
+    "key": "reinforcement:relay",
+    "chosen": 0,
+    "rejected": 102
+  },
+  {
+    "key": "reinforcement:afterimage",
+    "chosen": 0,
+    "rejected": 29
+  }
+]

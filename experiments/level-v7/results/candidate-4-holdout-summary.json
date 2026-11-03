@@ -1,0 +1,5115 @@
+{
+  "split": "holdout",
+  "protocolVersion": "level-v7-1.1-strict-basic-counterfactual",
+  "settings": {
+    "id": "candidate-4",
+    "bossDistance": 3.5,
+    "guard": "normal",
+    "dangerDistance": 3.2,
+    "workshopRanks": 2,
+    "waves": 2,
+    "ambushFraction": 0.25
+  },
+  "hash": "32e65ea5b1e78cc07fe0806c5552ddce9a843891347df425514d8b8322465544",
+  "firstSeed": 2730001,
+  "count": 80,
+  "runCount": 2400,
+  "cells": {
+    "nine-linked/random": {
+      "completion": {
+        "yes": 174,
+        "n": 480,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 438,
+        "n": 480,
+        "rate": 0.9125,
+        "ci95": [
+          0.8838345007902376,
+          0.9346151736486695
+        ]
+      },
+      "buildCompleted": {
+        "yes": 300,
+        "n": 480,
+        "rate": 0.625,
+        "ci95": [
+          0.5808581006253932,
+          0.6671569522348817
+        ]
+      },
+      "opportunities": {
+        "yes": 276,
+        "n": 480,
+        "rate": 0.575,
+        "ci95": [
+          0.5303518152547763,
+          0.6184572164613885
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 84,
+        "n": 480,
+        "rate": 0.175,
+        "ci95": [
+          0.14362508415058667,
+          0.21153577841269844
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 624,
+        "n": 5550,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.10438801053423097,
+          0.12101301638738668
+        ]
+      },
+      "effective": 83454,
+      "potential": 92964,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 9510,
+      "unused": 3570,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 54,
+        "6/screecher/attack": 66,
+        "8/groundshaker/attack": 72,
+        "8/screecher/attack": 42,
+        "6/groundshaker/attack": 72
+      }
+    },
+    "nine-linked/damage": {
+      "completion": {
+        "yes": 108,
+        "n": 480,
+        "rate": 0.225,
+        "ci95": [
+          0.14583333333333331,
+          0.30005208333333344
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 283,
+        "n": 480,
+        "rate": 0.5895833333333333,
+        "ci95": [
+          0.545034464107159,
+          0.6327096571093715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 480,
+        "rate": 0,
+        "ci95": [
+          -8.673617379884035e-19,
+          0.00793978855890027
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 5,
+        "n": 4789,
+        "rate": 0.0010440593025683859,
+        "ci95": [
+          0.0004460330111908319,
+          0.0024419405867682578
+        ]
+      },
+      "effective": 78983,
+      "potential": 84363,
+      "utilization": 0.9362279672368218,
+      "plannedUtilization": 0.7749053234699684,
+      "overkill": 5380,
+      "unused": 3652,
+      "turnsPerRun": 9.977083333333333,
+      "roundsPerRun": 34.77916666666667,
+      "specialPerRun": 6.116666666666666,
+      "deaths": {
+        "6/screecher/attack": 80,
+        "8/contaminator/attack": 47,
+        "8/screecher/attack": 51,
+        "8/groundshaker/attack": 67,
+        "6/groundshaker/attack": 127
+      }
+    },
+    "nine-linked/heuristic": {
+      "completion": {
+        "yes": 233,
+        "n": 480,
+        "rate": 0.48541666666666666,
+        "ci95": [
+          0.4103645833333332,
+          0.5625
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 264,
+        "n": 480,
+        "rate": 0.55,
+        "ci95": [
+          0.5052718108484551,
+          0.5939342102956551
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 189,
+        "n": 480,
+        "rate": 0.39375,
+        "ci95": [
+          0.3510502214566249,
+          0.4381369836121414
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 1726,
+        "n": 4972,
+        "rate": 0.3471440064360418,
+        "ci95": [
+          0.3340337317756076,
+          0.3604903061278498
+        ]
+      },
+      "effective": 93478,
+      "potential": 154171,
+      "utilization": 0.6063267410861964,
+      "plannedUtilization": 0.5267137721581753,
+      "overkill": 60693,
+      "unused": 4085,
+      "turnsPerRun": 10.358333333333333,
+      "roundsPerRun": 36.23125,
+      "specialPerRun": 26.560416666666665,
+      "deaths": {
+        "8/contaminator/attack": 59,
+        "8/screecher/attack": 84,
+        "8/groundshaker/attack": 102,
+        "6/groundshaker/attack": 2
+      }
+    },
+    "nine-linked/competent": {
+      "completion": {
+        "yes": 399,
+        "n": 480,
+        "rate": 0.83125,
+        "ci95": [
+          0.7666666666666667,
+          0.8855729166666666
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 341,
+        "n": 480,
+        "rate": 0.7104166666666667,
+        "ci95": [
+          0.6682959998510213,
+          0.7491960057971082
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 334,
+        "n": 480,
+        "rate": 0.6958333333333333,
+        "ci95": [
+          0.6532556793793367,
+          0.7353012367684273
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 1619,
+        "n": 3979,
+        "rate": 0.40688615229957276,
+        "ci95": [
+          0.3917188439788423,
+          0.42223308421232647
+        ]
+      },
+      "effective": 96388,
+      "potential": 113233,
+      "utilization": 0.8512359471178896,
+      "plannedUtilization": 0.7315033354329992,
+      "overkill": 16845,
+      "unused": 3830,
+      "turnsPerRun": 8.289583333333333,
+      "roundsPerRun": 27.416666666666668,
+      "specialPerRun": 12.964583333333334,
+      "deaths": {
+        "8/contaminator/attack": 19,
+        "8/screecher/attack": 23,
+        "8/groundshaker/attack": 39
+      }
+    },
+    "nine-linked/optimized": {
+      "completion": {
+        "yes": 415,
+        "n": 480,
+        "rate": 0.8645833333333334,
+        "ci95": [
+          0.8104166666666668,
+          0.9146354166666668
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 362,
+        "n": 480,
+        "rate": 0.7541666666666667,
+        "ci95": [
+          0.7137285417010657,
+          0.7905687324481601
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 279,
+        "n": 480,
+        "rate": 0.58125,
+        "ci95": [
+          0.5366395843401502,
+          0.6245702000190286
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 1172,
+        "n": 4345,
+        "rate": 0.26973532796317606,
+        "ci95": [
+          0.25674614801072604,
+          0.2831313218883845
+        ]
+      },
+      "effective": 96872,
+      "potential": 106887,
+      "utilization": 0.9063029180349341,
+      "plannedUtilization": 0.7839189473513846,
+      "overkill": 10015,
+      "unused": 3564,
+      "turnsPerRun": 9.052083333333334,
+      "roundsPerRun": 31.220833333333335,
+      "specialPerRun": 13.208333333333334,
+      "deaths": {
+        "8/contaminator/attack": 14,
+        "8/screecher/attack": 24,
+        "8/groundshaker/attack": 27
+      }
+    }
+  },
+  "byBuild": {
+    "nine-linked/random/wound": {
+      "completion": {
+        "yes": 29,
+        "n": 80,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 73,
+        "n": 80,
+        "rate": 0.9125,
+        "ci95": [
+          0.8302301722291654,
+          0.95696854535256
+        ]
+      },
+      "buildCompleted": {
+        "yes": 50,
+        "n": 80,
+        "rate": 0.625,
+        "ci95": [
+          0.515485228513904,
+          0.7230598374199522
+        ]
+      },
+      "opportunities": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.46569091970838705,
+          0.6774361198519266
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 14,
+        "n": 80,
+        "rate": 0.175,
+        "ci95": [
+          0.10720538981609888,
+          0.2725774387558749
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 104,
+        "n": 925,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.09365653707164955,
+          0.13441421255885797
+        ]
+      },
+      "effective": 13909,
+      "potential": 15494,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 1585,
+      "unused": 595,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "6/screecher/attack": 11,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 12
+      }
+    },
+    "nine-linked/random/heat": {
+      "completion": {
+        "yes": 29,
+        "n": 80,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 73,
+        "n": 80,
+        "rate": 0.9125,
+        "ci95": [
+          0.8302301722291654,
+          0.95696854535256
+        ]
+      },
+      "buildCompleted": {
+        "yes": 50,
+        "n": 80,
+        "rate": 0.625,
+        "ci95": [
+          0.515485228513904,
+          0.7230598374199522
+        ]
+      },
+      "opportunities": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.46569091970838705,
+          0.6774361198519266
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 14,
+        "n": 80,
+        "rate": 0.175,
+        "ci95": [
+          0.10720538981609888,
+          0.2725774387558749
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 104,
+        "n": 925,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.09365653707164955,
+          0.13441421255885797
+        ]
+      },
+      "effective": 13909,
+      "potential": 15494,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 1585,
+      "unused": 595,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "6/screecher/attack": 11,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 12
+      }
+    },
+    "nine-linked/random/blast": {
+      "completion": {
+        "yes": 29,
+        "n": 80,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 73,
+        "n": 80,
+        "rate": 0.9125,
+        "ci95": [
+          0.8302301722291654,
+          0.95696854535256
+        ]
+      },
+      "buildCompleted": {
+        "yes": 50,
+        "n": 80,
+        "rate": 0.625,
+        "ci95": [
+          0.515485228513904,
+          0.7230598374199522
+        ]
+      },
+      "opportunities": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.46569091970838705,
+          0.6774361198519266
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 14,
+        "n": 80,
+        "rate": 0.175,
+        "ci95": [
+          0.10720538981609888,
+          0.2725774387558749
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 104,
+        "n": 925,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.09365653707164955,
+          0.13441421255885797
+        ]
+      },
+      "effective": 13909,
+      "potential": 15494,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 1585,
+      "unused": 595,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "6/screecher/attack": 11,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 12
+      }
+    },
+    "nine-linked/random/recoil": {
+      "completion": {
+        "yes": 29,
+        "n": 80,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 73,
+        "n": 80,
+        "rate": 0.9125,
+        "ci95": [
+          0.8302301722291654,
+          0.95696854535256
+        ]
+      },
+      "buildCompleted": {
+        "yes": 50,
+        "n": 80,
+        "rate": 0.625,
+        "ci95": [
+          0.515485228513904,
+          0.7230598374199522
+        ]
+      },
+      "opportunities": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.46569091970838705,
+          0.6774361198519266
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 14,
+        "n": 80,
+        "rate": 0.175,
+        "ci95": [
+          0.10720538981609888,
+          0.2725774387558749
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 104,
+        "n": 925,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.09365653707164955,
+          0.13441421255885797
+        ]
+      },
+      "effective": 13909,
+      "potential": 15494,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 1585,
+      "unused": 595,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "6/screecher/attack": 11,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 12
+      }
+    },
+    "nine-linked/random/cauterize": {
+      "completion": {
+        "yes": 29,
+        "n": 80,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 73,
+        "n": 80,
+        "rate": 0.9125,
+        "ci95": [
+          0.8302301722291654,
+          0.95696854535256
+        ]
+      },
+      "buildCompleted": {
+        "yes": 50,
+        "n": 80,
+        "rate": 0.625,
+        "ci95": [
+          0.515485228513904,
+          0.7230598374199522
+        ]
+      },
+      "opportunities": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.46569091970838705,
+          0.6774361198519266
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 14,
+        "n": 80,
+        "rate": 0.175,
+        "ci95": [
+          0.10720538981609888,
+          0.2725774387558749
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 104,
+        "n": 925,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.09365653707164955,
+          0.13441421255885797
+        ]
+      },
+      "effective": 13909,
+      "potential": 15494,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 1585,
+      "unused": 595,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "6/screecher/attack": 11,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 12
+      }
+    },
+    "nine-linked/random/concussion": {
+      "completion": {
+        "yes": 29,
+        "n": 80,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 73,
+        "n": 80,
+        "rate": 0.9125,
+        "ci95": [
+          0.8302301722291654,
+          0.95696854535256
+        ]
+      },
+      "buildCompleted": {
+        "yes": 50,
+        "n": 80,
+        "rate": 0.625,
+        "ci95": [
+          0.515485228513904,
+          0.7230598374199522
+        ]
+      },
+      "opportunities": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.46569091970838705,
+          0.6774361198519266
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 14,
+        "n": 80,
+        "rate": 0.175,
+        "ci95": [
+          0.10720538981609888,
+          0.2725774387558749
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 104,
+        "n": 925,
+        "rate": 0.11243243243243244,
+        "ci95": [
+          0.09365653707164955,
+          0.13441421255885797
+        ]
+      },
+      "effective": 13909,
+      "potential": 15494,
+      "utilization": 0.8977023363882793,
+      "plannedUtilization": 0.7483187173831173,
+      "overkill": 1585,
+      "unused": 595,
+      "turnsPerRun": 11.5625,
+      "roundsPerRun": 40.275,
+      "specialPerRun": 20.65,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "6/screecher/attack": 11,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 12
+      }
+    },
+    "nine-linked/damage/wound": {
+      "completion": {
+        "yes": 18,
+        "n": 80,
+        "rate": 0.225,
+        "ci95": [
+          0.125,
+          0.3128124999999997
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 58,
+        "n": 80,
+        "rate": 0.725,
+        "ci95": [
+          0.618557347158301,
+          0.8108237715226401
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 5,
+        "n": 776,
+        "rate": 0.006443298969072165,
+        "ci95": [
+          0.0027551994952032715,
+          0.014994045992598352
+        ]
+      },
+      "effective": 13407,
+      "potential": 14279,
+      "utilization": 0.9389312977099237,
+      "plannedUtilization": 0.7733171829036165,
+      "overkill": 872,
+      "unused": 616,
+      "turnsPerRun": 9.7,
+      "roundsPerRun": 33.7125,
+      "specialPerRun": 6.2,
+      "deaths": {
+        "6/screecher/attack": 12,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 9,
+        "6/groundshaker/attack": 21,
+        "8/contaminator/attack": 8
+      }
+    },
+    "nine-linked/damage/heat": {
+      "completion": {
+        "yes": 12,
+        "n": 80,
+        "rate": 0.15,
+        "ci95": [
+          0.075,
+          0.225
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 786,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004863760024794845
+        ]
+      },
+      "effective": 12428,
+      "potential": 13201,
+      "utilization": 0.9414438300128778,
+      "plannedUtilization": 0.7908871070383098,
+      "overkill": 773,
+      "unused": 525,
+      "turnsPerRun": 9.825,
+      "roundsPerRun": 35,
+      "specialPerRun": 5.9,
+      "deaths": {
+        "6/screecher/attack": 19,
+        "8/groundshaker/attack": 10,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 25,
+        "8/contaminator/attack": 7
+      }
+    },
+    "nine-linked/damage/blast": {
+      "completion": {
+        "yes": 12,
+        "n": 80,
+        "rate": 0.15,
+        "ci95": [
+          0.075,
+          0.225
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 800,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004779050997111869
+        ]
+      },
+      "effective": 12430,
+      "potential": 13194,
+      "utilization": 0.9420948916174019,
+      "plannedUtilization": 0.7852179406190777,
+      "overkill": 764,
+      "unused": 550,
+      "turnsPerRun": 10,
+      "roundsPerRun": 35.375,
+      "specialPerRun": 3.1375,
+      "deaths": {
+        "6/screecher/attack": 19,
+        "8/groundshaker/attack": 10,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 25,
+        "8/contaminator/attack": 7
+      }
+    },
+    "nine-linked/damage/recoil": {
+      "completion": {
+        "yes": 37,
+        "n": 80,
+        "rate": 0.4625,
+        "ci95": [
+          0.35,
+          0.575
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 37,
+        "n": 80,
+        "rate": 0.4625,
+        "ci95": [
+          0.3574781238878701,
+          0.5709583563319731
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 845,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004525697138311788
+        ]
+      },
+      "effective": 15005,
+      "potential": 16388,
+      "utilization": 0.9156089821820844,
+      "plannedUtilization": 0.7390897448527238,
+      "overkill": 1383,
+      "unused": 826,
+      "turnsPerRun": 10.5625,
+      "roundsPerRun": 34.8625,
+      "specialPerRun": 11.1875,
+      "deaths": {
+        "8/contaminator/attack": 8,
+        "8/screecher/attack": 12,
+        "6/groundshaker/attack": 8,
+        "8/groundshaker/attack": 14,
+        "6/screecher/attack": 1
+      }
+    },
+    "nine-linked/damage/cauterize": {
+      "completion": {
+        "yes": 17,
+        "n": 80,
+        "rate": 0.2125,
+        "ci95": [
+          0.125,
+          0.3
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 787,
+        "rate": 0,
+        "ci95": [
+          -4.336808689942018e-19,
+          0.004857609918345215
+        ]
+      },
+      "effective": 13281,
+      "potential": 14110,
+      "utilization": 0.9412473423104182,
+      "plannedUtilization": 0.7822015430826315,
+      "overkill": 829,
+      "unused": 598,
+      "turnsPerRun": 9.8375,
+      "roundsPerRun": 34.45,
+      "specialPerRun": 7.075,
+      "deaths": {
+        "8/contaminator/attack": 10,
+        "8/screecher/attack": 9,
+        "8/groundshaker/attack": 11,
+        "6/groundshaker/attack": 23,
+        "6/screecher/attack": 10
+      }
+    },
+    "nine-linked/damage/concussion": {
+      "completion": {
+        "yes": 12,
+        "n": 80,
+        "rate": 0.15,
+        "ci95": [
+          0.075,
+          0.225
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 795,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004808963378972753
+        ]
+      },
+      "effective": 12432,
+      "potential": 13191,
+      "utilization": 0.9424607687059359,
+      "plannedUtilization": 0.7886323268206039,
+      "overkill": 759,
+      "unused": 537,
+      "turnsPerRun": 9.9375,
+      "roundsPerRun": 35.275,
+      "specialPerRun": 3.2,
+      "deaths": {
+        "6/screecher/attack": 19,
+        "8/groundshaker/attack": 10,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 25,
+        "8/contaminator/attack": 7
+      }
+    },
+    "nine-linked/heuristic/wound": {
+      "completion": {
+        "yes": 38,
+        "n": 80,
+        "rate": 0.475,
+        "ci95": [
+          0.375,
+          0.5753124999999997
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 461,
+        "n": 811,
+        "rate": 0.5684340320591862,
+        "ci95": [
+          0.5341017092967181,
+          0.6021210854157758
+        ]
+      },
+      "effective": 15670,
+      "potential": 19233,
+      "utilization": 0.8147454895232153,
+      "plannedUtilization": 0.6489150240185523,
+      "overkill": 3563,
+      "unused": 586,
+      "turnsPerRun": 10.1375,
+      "roundsPerRun": 36.4375,
+      "specialPerRun": 27.75,
+      "deaths": {
+        "8/contaminator/attack": 12,
+        "8/screecher/attack": 13,
+        "8/groundshaker/attack": 17
+      }
+    },
+    "nine-linked/heuristic/heat": {
+      "completion": {
+        "yes": 32,
+        "n": 80,
+        "rate": 0.4,
+        "ci95": [
+          0.3,
+          0.5125
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 45,
+        "n": 80,
+        "rate": 0.5625,
+        "ci95": [
+          0.4534093786865696,
+          0.6658631542803586
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 45,
+        "n": 80,
+        "rate": 0.5625,
+        "ci95": [
+          0.4534093786865696,
+          0.6658631542803586
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 340,
+        "n": 677,
+        "rate": 0.5022156573116692,
+        "ci95": [
+          0.4646454724648211,
+          0.5397608387829053
+        ]
+      },
+      "effective": 15359,
+      "potential": 28031,
+      "utilization": 0.5479290785202098,
+      "plannedUtilization": 0.5257050930996714,
+      "overkill": 12672,
+      "unused": 414,
+      "turnsPerRun": 8.4625,
+      "roundsPerRun": 31.625,
+      "specialPerRun": 22.9375,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "8/screecher/attack": 17,
+        "8/groundshaker/attack": 22
+      }
+    },
+    "nine-linked/heuristic/blast": {
+      "completion": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4375,
+          0.6375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 31,
+        "n": 80,
+        "rate": 0.3875,
+        "ci95": [
+          0.2882439968827771,
+          0.4970654437767524
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 243,
+        "n": 1010,
+        "rate": 0.24059405940594059,
+        "ci95": [
+          0.21524684060850463,
+          0.26790713531830684
+        ]
+      },
+      "effective": 15685,
+      "potential": 27659,
+      "utilization": 0.5670848548392928,
+      "plannedUtilization": 0.48619075664114564,
+      "overkill": 11974,
+      "unused": 1140,
+      "turnsPerRun": 12.625,
+      "roundsPerRun": 40.825,
+      "specialPerRun": 28.0875,
+      "deaths": {
+        "8/contaminator/attack": 8,
+        "8/screecher/attack": 14,
+        "8/groundshaker/attack": 14
+      }
+    },
+    "nine-linked/heuristic/recoil": {
+      "completion": {
+        "yes": 42,
+        "n": 80,
+        "rate": 0.525,
+        "ci95": [
+          0.425,
+          0.6253124999999997
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 43,
+        "n": 80,
+        "rate": 0.5375,
+        "ci95": [
+          0.4290416436680269,
+          0.6425218761121299
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 25,
+        "n": 80,
+        "rate": 0.3125,
+        "ci95": [
+          0.22150258327847644,
+          0.4206798178207392
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 209,
+        "n": 771,
+        "rate": 0.2710765239948119,
+        "ci95": [
+          0.24089149852871378,
+          0.30353151644621784
+        ]
+      },
+      "effective": 15557,
+      "potential": 16969,
+      "utilization": 0.9167894395662679,
+      "plannedUtilization": 0.7326457568051239,
+      "overkill": 1412,
+      "unused": 709,
+      "turnsPerRun": 9.6375,
+      "roundsPerRun": 32.6625,
+      "specialPerRun": 25.7625,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "8/screecher/attack": 11,
+        "8/groundshaker/attack": 16,
+        "6/groundshaker/attack": 2
+      }
+    },
+    "nine-linked/heuristic/cauterize": {
+      "completion": {
+        "yes": 31,
+        "n": 80,
+        "rate": 0.3875,
+        "ci95": [
+          0.2875,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 43,
+        "n": 80,
+        "rate": 0.5375,
+        "ci95": [
+          0.4290416436680269,
+          0.6425218761121299
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 238,
+        "n": 752,
+        "rate": 0.31648936170212766,
+        "ci95": [
+          0.2842506006957508,
+          0.35059352537510846
+        ]
+      },
+      "effective": 15517,
+      "potential": 24282,
+      "utilization": 0.6390330285808418,
+      "plannedUtilization": 0.5489051611305671,
+      "overkill": 8765,
+      "unused": 505,
+      "turnsPerRun": 9.4,
+      "roundsPerRun": 34.15,
+      "specialPerRun": 25.275,
+      "deaths": {
+        "8/contaminator/attack": 14,
+        "8/screecher/attack": 17,
+        "8/groundshaker/attack": 18
+      }
+    },
+    "nine-linked/heuristic/concussion": {
+      "completion": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.4625,
+          0.6875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 1,
+        "n": 80,
+        "rate": 0.0125,
+        "ci95": [
+          0.002209918618306224,
+          0.06746432423965451
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 235,
+        "n": 951,
+        "rate": 0.24710830704521555,
+        "ci95": [
+          0.22074784285356033,
+          0.2755036820066886
+        ]
+      },
+      "effective": 15690,
+      "potential": 37997,
+      "utilization": 0.4129273363686607,
+      "plannedUtilization": 0.3705190572899447,
+      "overkill": 22307,
+      "unused": 731,
+      "turnsPerRun": 11.8875,
+      "roundsPerRun": 41.6875,
+      "specialPerRun": 29.55,
+      "deaths": {
+        "8/contaminator/attack": 7,
+        "8/screecher/attack": 12,
+        "8/groundshaker/attack": 15
+      }
+    },
+    "nine-linked/competent/wound": {
+      "completion": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6875,
+          0.875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 57,
+        "n": 80,
+        "rate": 0.7125,
+        "ci95": [
+          0.6053944721715182,
+          0.8001321399160374
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 54,
+        "n": 80,
+        "rate": 0.675,
+        "ci95": [
+          0.5664032172496735,
+          0.7675598750577254
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 347,
+        "n": 770,
+        "rate": 0.45064935064935063,
+        "ci95": [
+          0.41583652898206036,
+          0.48595215748814236
+        ]
+      },
+      "effective": 15986,
+      "potential": 17750,
+      "utilization": 0.9006197183098592,
+      "plannedUtilization": 0.7261082848837209,
+      "overkill": 1764,
+      "unused": 681,
+      "turnsPerRun": 9.625,
+      "roundsPerRun": 32.3375,
+      "specialPerRun": 12.525,
+      "deaths": {
+        "8/contaminator/attack": 7,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 7
+      }
+    },
+    "nine-linked/competent/heat": {
+      "completion": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.6375,
+          0.8375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 291,
+        "n": 617,
+        "rate": 0.47163695299837927,
+        "ci95": [
+          0.4325443335886466,
+          0.5110805781440726
+        ]
+      },
+      "effective": 15910,
+      "potential": 18924,
+      "utilization": 0.8407313464383851,
+      "plannedUtilization": 0.7370859393097058,
+      "overkill": 3014,
+      "unused": 655,
+      "turnsPerRun": 7.7125,
+      "roundsPerRun": 24.8375,
+      "specialPerRun": 11.6,
+      "deaths": {
+        "8/contaminator/attack": 3,
+        "8/screecher/attack": 8,
+        "8/groundshaker/attack": 9
+      }
+    },
+    "nine-linked/competent/blast": {
+      "completion": {
+        "yes": 77,
+        "n": 80,
+        "rate": 0.9625,
+        "ci95": [
+          0.9125,
+          1
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6857763938182242,
+          0.8628772578296451
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 62,
+        "n": 80,
+        "rate": 0.775,
+        "ci95": [
+          0.6721300467523076,
+          0.8526690983021762
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 333,
+        "n": 589,
+        "rate": 0.565365025466893,
+        "ci95": [
+          0.5250354793186387,
+          0.6048474438770344
+        ]
+      },
+      "effective": 16224,
+      "potential": 20665,
+      "utilization": 0.7850955722235664,
+      "plannedUtilization": 0.7020945127228665,
+      "overkill": 4441,
+      "unused": 553,
+      "turnsPerRun": 7.3625,
+      "roundsPerRun": 24.7125,
+      "specialPerRun": 14.65,
+      "deaths": {
+        "8/screecher/attack": 1,
+        "8/contaminator/attack": 1,
+        "8/groundshaker/attack": 1
+      }
+    },
+    "nine-linked/competent/recoil": {
+      "completion": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.65,
+          0.8375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 43,
+        "n": 80,
+        "rate": 0.5375,
+        "ci95": [
+          0.4290416436680269,
+          0.6425218761121299
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 40,
+        "n": 80,
+        "rate": 0.5,
+        "ci95": [
+          0.392972274311075,
+          0.607027725688925
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 210,
+        "n": 718,
+        "rate": 0.2924791086350975,
+        "ci95": [
+          0.26037935954917135,
+          0.32678768651744494
+        ]
+      },
+      "effective": 15971,
+      "potential": 16868,
+      "utilization": 0.9468223855821675,
+      "plannedUtilization": 0.8010733811506244,
+      "overkill": 897,
+      "unused": 592,
+      "turnsPerRun": 8.975,
+      "roundsPerRun": 30.85,
+      "specialPerRun": 13.2,
+      "deaths": {
+        "8/contaminator/attack": 3,
+        "8/screecher/attack": 6,
+        "8/groundshaker/attack": 11
+      }
+    },
+    "nine-linked/competent/cauterize": {
+      "completion": {
+        "yes": 65,
+        "n": 80,
+        "rate": 0.8125,
+        "ci95": [
+          0.725,
+          0.8875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.6451511899886556,
+          0.8319389418790569
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.6451511899886556,
+          0.8319389418790569
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 225,
+        "n": 658,
+        "rate": 0.34194528875379937,
+        "ci95": [
+          0.30671104353974227,
+          0.37901436266017025
+        ]
+      },
+      "effective": 16046,
+      "potential": 18445,
+      "utilization": 0.8699376524803469,
+      "plannedUtilization": 0.7540059207743997,
+      "overkill": 2399,
+      "unused": 622,
+      "turnsPerRun": 8.225,
+      "roundsPerRun": 27.325,
+      "specialPerRun": 12.125,
+      "deaths": {
+        "8/contaminator/attack": 3,
+        "8/screecher/attack": 4,
+        "8/groundshaker/attack": 8
+      }
+    },
+    "nine-linked/competent/concussion": {
+      "completion": {
+        "yes": 74,
+        "n": 80,
+        "rate": 0.925,
+        "ci95": [
+          0.8625,
+          0.975
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 213,
+        "n": 627,
+        "rate": 0.3397129186602871,
+        "ci95": [
+          0.303717281851181,
+          0.3776607376072694
+        ]
+      },
+      "effective": 16251,
+      "potential": 20581,
+      "utilization": 0.7896117778533599,
+      "plannedUtilization": 0.6816694630872483,
+      "overkill": 4330,
+      "unused": 727,
+      "turnsPerRun": 7.8375,
+      "roundsPerRun": 24.4375,
+      "specialPerRun": 13.6875,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 1,
+        "8/groundshaker/attack": 3
+      }
+    },
+    "nine-linked/optimized/wound": {
+      "completion": {
+        "yes": 69,
+        "n": 80,
+        "rate": 0.8625,
+        "ci95": [
+          0.775,
+          0.9253124999999998
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 65,
+        "n": 80,
+        "rate": 0.8125,
+        "ci95": [
+          0.7134147429619243,
+          0.8829479218727162
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 281,
+        "n": 723,
+        "rate": 0.38865836791147995,
+        "ci95": [
+          0.35380453276995844,
+          0.42468915829010195
+        ]
+      },
+      "effective": 16109,
+      "potential": 17247,
+      "utilization": 0.9340175102916449,
+      "plannedUtilization": 0.7779870568917222,
+      "overkill": 1138,
+      "unused": 568,
+      "turnsPerRun": 9.0375,
+      "roundsPerRun": 31.3125,
+      "specialPerRun": 14.0375,
+      "deaths": {
+        "8/contaminator/attack": 5,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 3
+      }
+    },
+    "nine-linked/optimized/heat": {
+      "completion": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.7,
+          0.875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 288,
+        "n": 615,
+        "rate": 0.4682926829268293,
+        "ci95": [
+          0.4291737448911002,
+          0.5078052817289591
+        ]
+      },
+      "effective": 15984,
+      "potential": 18334,
+      "utilization": 0.8718228428057162,
+      "plannedUtilization": 0.7661410151943632,
+      "overkill": 2350,
+      "unused": 618,
+      "turnsPerRun": 7.6875,
+      "roundsPerRun": 25.2,
+      "specialPerRun": 11.8375,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 6,
+        "8/groundshaker/attack": 9
+      }
+    },
+    "nine-linked/optimized/blast": {
+      "completion": {
+        "yes": 68,
+        "n": 80,
+        "rate": 0.85,
+        "ci95": [
+          0.775,
+          0.925
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 68,
+        "n": 80,
+        "rate": 0.85,
+        "ci95": [
+          0.7558657249889396,
+          0.9120604596258579
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 6,
+        "n": 80,
+        "rate": 0.075,
+        "ci95": [
+          0.03482477485108787,
+          0.15412200097380097
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 33,
+        "n": 999,
+        "rate": 0.03303303303303303,
+        "ci95": [
+          0.02361649498485984,
+          0.04602720547591082
+        ]
+      },
+      "effective": 16140,
+      "potential": 17293,
+      "utilization": 0.9333256230844851,
+      "plannedUtilization": 0.7880859375,
+      "overkill": 1153,
+      "unused": 688,
+      "turnsPerRun": 12.4875,
+      "roundsPerRun": 44.8625,
+      "specialPerRun": 12.4875,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 5,
+        "8/groundshaker/attack": 5
+      }
+    },
+    "nine-linked/optimized/recoil": {
+      "completion": {
+        "yes": 70,
+        "n": 80,
+        "rate": 0.875,
+        "ci95": [
+          0.7875,
+          0.9375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 51,
+        "n": 80,
+        "rate": 0.6375,
+        "ci95": [
+          0.5281059097698362,
+          0.7342936627574055
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 39,
+        "n": 80,
+        "rate": 0.4875,
+        "ci95": [
+          0.38107693944368337,
+          0.5950685539629311
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 202,
+        "n": 699,
+        "rate": 0.28898426323319026,
+        "ci95": [
+          0.2566055086211262,
+          0.3236697625068208
+        ]
+      },
+      "effective": 16220,
+      "potential": 16958,
+      "utilization": 0.9564807170656917,
+      "plannedUtilization": 0.8340189222542164,
+      "overkill": 738,
+      "unused": 548,
+      "turnsPerRun": 8.7375,
+      "roundsPerRun": 30.425,
+      "specialPerRun": 13.7875,
+      "deaths": {
+        "8/screecher/attack": 4,
+        "8/groundshaker/attack": 4,
+        "8/contaminator/attack": 2
+      }
+    },
+    "nine-linked/optimized/cauterize": {
+      "completion": {
+        "yes": 71,
+        "n": 80,
+        "rate": 0.8875,
+        "ci95": [
+          0.8125,
+          0.95
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6857763938182242,
+          0.8628772578296451
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6857763938182242,
+          0.8628772578296451
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 197,
+        "n": 635,
+        "rate": 0.3102362204724409,
+        "ci95": [
+          0.2754871703111843,
+          0.34726751567044245
+        ]
+      },
+      "effective": 16176,
+      "potential": 18003,
+      "utilization": 0.8985169138476921,
+      "plannedUtilization": 0.7904999266969652,
+      "overkill": 1827,
+      "unused": 535,
+      "turnsPerRun": 7.9375,
+      "roundsPerRun": 27.2375,
+      "specialPerRun": 13.425,
+      "deaths": {
+        "8/contaminator/attack": 1,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 5
+      }
+    },
+    "nine-linked/optimized/concussion": {
+      "completion": {
+        "yes": 74,
+        "n": 80,
+        "rate": 0.925,
+        "ci95": [
+          0.8625,
+          0.975
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 171,
+        "n": 674,
+        "rate": 0.25370919881305637,
+        "ci95": [
+          0.22231754869472165,
+          0.2878925062797739
+        ]
+      },
+      "effective": 16243,
+      "potential": 19052,
+      "utilization": 0.8525614108754986,
+      "plannedUtilization": 0.751503655038401,
+      "overkill": 2809,
+      "unused": 607,
+      "turnsPerRun": 8.425,
+      "roundsPerRun": 28.2875,
+      "specialPerRun": 13.675,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 1
+      }
+    }
+  },
+  "byActualBuild": {
+    "nine-linked/random/wound": {
+      "completion": {
+        "yes": 12,
+        "n": 78,
+        "rate": 0.15384615384615385,
+        "ci95": [
+          0,
+          0.38461538461538464
+        ],
+        "independentSeeds": 13
+      },
+      "coherent": {
+        "yes": 72,
+        "n": 78,
+        "rate": 0.9230769230769231,
+        "ci95": [
+          0.842165824059759,
+          0.9642700227467552
+        ]
+      },
+      "buildCompleted": {
+        "yes": 42,
+        "n": 78,
+        "rate": 0.5384615384615384,
+        "ci95": [
+          0.42863448388730346,
+          0.6446778658223795
+        ]
+      },
+      "opportunities": {
+        "yes": 42,
+        "n": 78,
+        "rate": 0.5384615384615384,
+        "ci95": [
+          0.42863448388730346,
+          0.6446778658223795
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 12,
+        "n": 78,
+        "rate": 0.15384615384615385,
+        "ci95": [
+          0.09025416205339185,
+          0.2499346905594603
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 162,
+        "n": 942,
+        "rate": 0.17197452229299362,
+        "ci95": [
+          0.14922073687871176,
+          0.1973929032910587
+        ]
+      },
+      "effective": 13956,
+      "potential": 14700,
+      "utilization": 0.9493877551020408,
+      "plannedUtilization": 0.7971213159698424,
+      "overkill": 744,
+      "unused": 516,
+      "turnsPerRun": 12.076923076923077,
+      "roundsPerRun": 42.53846153846154,
+      "specialPerRun": 22,
+      "deaths": {
+        "8/screecher/attack": 6,
+        "8/contaminator/attack": 18,
+        "8/groundshaker/attack": 18,
+        "6/groundshaker/attack": 12,
+        "6/screecher/attack": 12
+      }
+    },
+    "nine-linked/random/heat": {
+      "completion": {
+        "yes": 18,
+        "n": 84,
+        "rate": 0.21428571428571427,
+        "ci95": [
+          0,
+          0.4303571428571412
+        ],
+        "independentSeeds": 14
+      },
+      "coherent": {
+        "yes": 72,
+        "n": 84,
+        "rate": 0.8571428571428571,
+        "ci95": [
+          0.7666970498084034,
+          0.9163506178114942
+        ]
+      },
+      "buildCompleted": {
+        "yes": 54,
+        "n": 84,
+        "rate": 0.6428571428571429,
+        "ci95": [
+          0.5362111603479548,
+          0.7370079067000043
+        ]
+      },
+      "opportunities": {
+        "yes": 60,
+        "n": 84,
+        "rate": 0.7142857142857143,
+        "ci95": [
+          0.6099775866784931,
+          0.7998510138934454
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 24,
+        "n": 84,
+        "rate": 0.2857142857142857,
+        "ci95": [
+          0.20014898610655452,
+          0.3900224133215068
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 102,
+        "n": 924,
+        "rate": 0.11038961038961038,
+        "ci95": [
+          0.09177401569294072,
+          0.13223146110396078
+        ]
+      },
+      "effective": 13446,
+      "potential": 14592,
+      "utilization": 0.9214638157894737,
+      "plannedUtilization": 0.7746284134116834,
+      "overkill": 1146,
+      "unused": 528,
+      "turnsPerRun": 11,
+      "roundsPerRun": 38.42857142857143,
+      "specialPerRun": 20.285714285714285,
+      "deaths": {
+        "8/groundshaker/attack": 12,
+        "6/screecher/attack": 24,
+        "6/groundshaker/attack": 24,
+        "8/contaminator/attack": 6
+      }
+    },
+    "nine-linked/random/blast": {
+      "completion": {
+        "yes": 54,
+        "n": 102,
+        "rate": 0.5294117647058824,
+        "ci95": [
+          0.29411764705882354,
+          0.7647058823529411
+        ],
+        "independentSeeds": 17
+      },
+      "coherent": {
+        "yes": 102,
+        "n": 102,
+        "rate": 1,
+        "ci95": [
+          0.9637042523922542,
+          1.0000000000000002
+        ]
+      },
+      "buildCompleted": {
+        "yes": 66,
+        "n": 102,
+        "rate": 0.6470588235294118,
+        "ci95": [
+          0.5505209704774588,
+          0.7329214566967336
+        ]
+      },
+      "opportunities": {
+        "yes": 84,
+        "n": 102,
+        "rate": 0.8235294117647058,
+        "ci95": [
+          0.7382155715042175,
+          0.8853577682790058
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 36,
+        "n": 102,
+        "rate": 0.35294117647058826,
+        "ci95": [
+          0.26707854330326647,
+          0.4494790295225413
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 264,
+        "n": 1110,
+        "rate": 0.23783783783783785,
+        "ci95": [
+          0.21372173842841236,
+          0.26376231316384274
+        ]
+      },
+      "effective": 18060,
+      "potential": 21636,
+      "utilization": 0.8347199112590128,
+      "plannedUtilization": 0.7090694935217904,
+      "overkill": 3576,
+      "unused": 816,
+      "turnsPerRun": 10.882352941176471,
+      "roundsPerRun": 38,
+      "specialPerRun": 19.88235294117647,
+      "deaths": {
+        "6/groundshaker/attack": 18,
+        "8/screecher/attack": 6,
+        "8/contaminator/attack": 12,
+        "8/groundshaker/attack": 6,
+        "6/screecher/attack": 6
+      }
+    },
+    "nine-linked/random/recoil": {
+      "completion": {
+        "yes": 24,
+        "n": 78,
+        "rate": 0.3076923076923077,
+        "ci95": [
+          0.07692307692307693,
+          0.6153846153846154
+        ],
+        "independentSeeds": 13
+      },
+      "coherent": {
+        "yes": 72,
+        "n": 78,
+        "rate": 0.9230769230769231,
+        "ci95": [
+          0.842165824059759,
+          0.9642700227467552
+        ]
+      },
+      "buildCompleted": {
+        "yes": 54,
+        "n": 78,
+        "rate": 0.6923076923076923,
+        "ci95": [
+          0.5828795777564898,
+          0.7836821707919256
+        ]
+      },
+      "opportunities": {
+        "yes": 42,
+        "n": 78,
+        "rate": 0.5384615384615384,
+        "ci95": [
+          0.42863448388730346,
+          0.6446778658223795
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 6,
+        "n": 78,
+        "rate": 0.07692307692307693,
+        "ci95": [
+          0.03572997725324493,
+          0.15783417594024104
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 78,
+        "n": 840,
+        "rate": 0.09285714285714286,
+        "ci95": [
+          0.07504050843113273,
+          0.11438082372409643
+        ]
+      },
+      "effective": 13194,
+      "potential": 13860,
+      "utilization": 0.951948051948052,
+      "plannedUtilization": 0.7999272462713715,
+      "overkill": 666,
+      "unused": 564,
+      "turnsPerRun": 10.76923076923077,
+      "roundsPerRun": 37.15384615384615,
+      "specialPerRun": 18.153846153846153,
+      "deaths": {
+        "6/screecher/attack": 12,
+        "8/groundshaker/attack": 18,
+        "6/groundshaker/attack": 12,
+        "8/screecher/attack": 12
+      }
+    },
+    "nine-linked/random/cauterize": {
+      "completion": {
+        "yes": 12,
+        "n": 54,
+        "rate": 0.2222222222222222,
+        "ci95": [
+          0,
+          0.5555555555555556
+        ],
+        "independentSeeds": 9
+      },
+      "coherent": {
+        "yes": 54,
+        "n": 54,
+        "rate": 1,
+        "ci95": [
+          0.9335841332189981,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 24,
+        "n": 54,
+        "rate": 0.4444444444444444,
+        "ci95": [
+          0.3200225687559781,
+          0.5762458608863554
+        ]
+      },
+      "opportunities": {
+        "yes": 18,
+        "n": 54,
+        "rate": 0.3333333333333333,
+        "ci95": [
+          0.22241243520150356,
+          0.466392853725497
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 54,
+        "rate": 0,
+        "ci95": [
+          6.938893903907228e-18,
+          0.06641586678100189
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 6,
+        "n": 684,
+        "rate": 0.008771929824561403,
+        "ci95": [
+          0.004026223138226726,
+          0.01900466071642818
+        ]
+      },
+      "effective": 8934,
+      "potential": 9690,
+      "utilization": 0.9219814241486068,
+      "plannedUtilization": 0.7060218112849692,
+      "overkill": 756,
+      "unused": 462,
+      "turnsPerRun": 12.666666666666666,
+      "roundsPerRun": 43,
+      "specialPerRun": 20.88888888888889,
+      "deaths": {
+        "8/contaminator/attack": 6,
+        "8/screecher/attack": 12,
+        "6/screecher/attack": 6,
+        "8/groundshaker/attack": 12,
+        "6/groundshaker/attack": 6
+      }
+    },
+    "nine-linked/random/concussion": {
+      "completion": {
+        "yes": 54,
+        "n": 84,
+        "rate": 0.6428571428571429,
+        "ci95": [
+          0.35714285714285715,
+          0.8589285714285697
+        ],
+        "independentSeeds": 14
+      },
+      "coherent": {
+        "yes": 66,
+        "n": 84,
+        "rate": 0.7857142857142857,
+        "ci95": [
+          0.6865046833134146,
+          0.8599334507825035
+        ]
+      },
+      "buildCompleted": {
+        "yes": 60,
+        "n": 84,
+        "rate": 0.7142857142857143,
+        "ci95": [
+          0.6099775866784931,
+          0.7998510138934454
+        ]
+      },
+      "opportunities": {
+        "yes": 30,
+        "n": 84,
+        "rate": 0.35714285714285715,
+        "ci95": [
+          0.2629920932999957,
+          0.46378883965204515
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 6,
+        "n": 84,
+        "rate": 0.07142857142857142,
+        "ci95": [
+          0.033145358330644366,
+          0.14719744052547845
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 12,
+        "n": 1050,
+        "rate": 0.011428571428571429,
+        "ci95": [
+          0.00654948823052321,
+          0.01986966242741248
+        ]
+      },
+      "effective": 15864,
+      "potential": 18486,
+      "utilization": 0.8581629341123012,
+      "plannedUtilization": 0.7198475360740539,
+      "overkill": 2622,
+      "unused": 684,
+      "turnsPerRun": 12.5,
+      "roundsPerRun": 43.92857142857143,
+      "specialPerRun": 22.857142857142858,
+      "deaths": {
+        "6/screecher/attack": 6,
+        "8/screecher/attack": 6,
+        "8/contaminator/attack": 12,
+        "8/groundshaker/attack": 6
+      }
+    },
+    "nine-linked/damage/wound": {
+      "completion": {
+        "yes": 18,
+        "n": 80,
+        "rate": 0.225,
+        "ci95": [
+          0.125,
+          0.3128124999999997
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 58,
+        "n": 80,
+        "rate": 0.725,
+        "ci95": [
+          0.618557347158301,
+          0.8108237715226401
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 5,
+        "n": 776,
+        "rate": 0.006443298969072165,
+        "ci95": [
+          0.0027551994952032715,
+          0.014994045992598352
+        ]
+      },
+      "effective": 13407,
+      "potential": 14279,
+      "utilization": 0.9389312977099237,
+      "plannedUtilization": 0.7733171829036165,
+      "overkill": 872,
+      "unused": 616,
+      "turnsPerRun": 9.7,
+      "roundsPerRun": 33.7125,
+      "specialPerRun": 6.2,
+      "deaths": {
+        "6/screecher/attack": 12,
+        "8/groundshaker/attack": 12,
+        "8/screecher/attack": 9,
+        "6/groundshaker/attack": 21,
+        "8/contaminator/attack": 8
+      }
+    },
+    "nine-linked/damage/heat": {
+      "completion": {
+        "yes": 12,
+        "n": 80,
+        "rate": 0.15,
+        "ci95": [
+          0.075,
+          0.225
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 786,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004863760024794845
+        ]
+      },
+      "effective": 12428,
+      "potential": 13201,
+      "utilization": 0.9414438300128778,
+      "plannedUtilization": 0.7908871070383098,
+      "overkill": 773,
+      "unused": 525,
+      "turnsPerRun": 9.825,
+      "roundsPerRun": 35,
+      "specialPerRun": 5.9,
+      "deaths": {
+        "6/screecher/attack": 19,
+        "8/groundshaker/attack": 10,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 25,
+        "8/contaminator/attack": 7
+      }
+    },
+    "nine-linked/damage/blast": {
+      "completion": {
+        "yes": 12,
+        "n": 80,
+        "rate": 0.15,
+        "ci95": [
+          0.075,
+          0.225
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 800,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004779050997111869
+        ]
+      },
+      "effective": 12430,
+      "potential": 13194,
+      "utilization": 0.9420948916174019,
+      "plannedUtilization": 0.7852179406190777,
+      "overkill": 764,
+      "unused": 550,
+      "turnsPerRun": 10,
+      "roundsPerRun": 35.375,
+      "specialPerRun": 3.1375,
+      "deaths": {
+        "6/screecher/attack": 19,
+        "8/groundshaker/attack": 10,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 25,
+        "8/contaminator/attack": 7
+      }
+    },
+    "nine-linked/damage/recoil": {
+      "completion": {
+        "yes": 37,
+        "n": 80,
+        "rate": 0.4625,
+        "ci95": [
+          0.35,
+          0.575
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 37,
+        "n": 80,
+        "rate": 0.4625,
+        "ci95": [
+          0.3574781238878701,
+          0.5709583563319731
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 845,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004525697138311788
+        ]
+      },
+      "effective": 15005,
+      "potential": 16388,
+      "utilization": 0.9156089821820844,
+      "plannedUtilization": 0.7390897448527238,
+      "overkill": 1383,
+      "unused": 826,
+      "turnsPerRun": 10.5625,
+      "roundsPerRun": 34.8625,
+      "specialPerRun": 11.1875,
+      "deaths": {
+        "8/contaminator/attack": 8,
+        "8/screecher/attack": 12,
+        "6/groundshaker/attack": 8,
+        "8/groundshaker/attack": 14,
+        "6/screecher/attack": 1
+      }
+    },
+    "nine-linked/damage/cauterize": {
+      "completion": {
+        "yes": 17,
+        "n": 80,
+        "rate": 0.2125,
+        "ci95": [
+          0.125,
+          0.3
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 787,
+        "rate": 0,
+        "ci95": [
+          -4.336808689942018e-19,
+          0.004857609918345215
+        ]
+      },
+      "effective": 13281,
+      "potential": 14110,
+      "utilization": 0.9412473423104182,
+      "plannedUtilization": 0.7822015430826315,
+      "overkill": 829,
+      "unused": 598,
+      "turnsPerRun": 9.8375,
+      "roundsPerRun": 34.45,
+      "specialPerRun": 7.075,
+      "deaths": {
+        "8/contaminator/attack": 10,
+        "8/screecher/attack": 9,
+        "8/groundshaker/attack": 11,
+        "6/groundshaker/attack": 23,
+        "6/screecher/attack": 10
+      }
+    },
+    "nine-linked/damage/concussion": {
+      "completion": {
+        "yes": 12,
+        "n": 80,
+        "rate": 0.15,
+        "ci95": [
+          0.075,
+          0.225
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 0,
+        "n": 80,
+        "rate": 0,
+        "ci95": [
+          -3.469446951953614e-18,
+          0.0458197362645751
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 0,
+        "n": 795,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.004808963378972753
+        ]
+      },
+      "effective": 12432,
+      "potential": 13191,
+      "utilization": 0.9424607687059359,
+      "plannedUtilization": 0.7886323268206039,
+      "overkill": 759,
+      "unused": 537,
+      "turnsPerRun": 9.9375,
+      "roundsPerRun": 35.275,
+      "specialPerRun": 3.2,
+      "deaths": {
+        "6/screecher/attack": 19,
+        "8/groundshaker/attack": 10,
+        "8/screecher/attack": 7,
+        "6/groundshaker/attack": 25,
+        "8/contaminator/attack": 7
+      }
+    },
+    "nine-linked/heuristic/wound": {
+      "completion": {
+        "yes": 38,
+        "n": 80,
+        "rate": 0.475,
+        "ci95": [
+          0.375,
+          0.5753124999999997
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 461,
+        "n": 811,
+        "rate": 0.5684340320591862,
+        "ci95": [
+          0.5341017092967181,
+          0.6021210854157758
+        ]
+      },
+      "effective": 15670,
+      "potential": 19233,
+      "utilization": 0.8147454895232153,
+      "plannedUtilization": 0.6489150240185523,
+      "overkill": 3563,
+      "unused": 586,
+      "turnsPerRun": 10.1375,
+      "roundsPerRun": 36.4375,
+      "specialPerRun": 27.75,
+      "deaths": {
+        "8/contaminator/attack": 12,
+        "8/screecher/attack": 13,
+        "8/groundshaker/attack": 17
+      }
+    },
+    "nine-linked/heuristic/heat": {
+      "completion": {
+        "yes": 32,
+        "n": 80,
+        "rate": 0.4,
+        "ci95": [
+          0.3,
+          0.5125
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 45,
+        "n": 80,
+        "rate": 0.5625,
+        "ci95": [
+          0.4534093786865696,
+          0.6658631542803586
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 45,
+        "n": 80,
+        "rate": 0.5625,
+        "ci95": [
+          0.4534093786865696,
+          0.6658631542803586
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 340,
+        "n": 677,
+        "rate": 0.5022156573116692,
+        "ci95": [
+          0.4646454724648211,
+          0.5397608387829053
+        ]
+      },
+      "effective": 15359,
+      "potential": 28031,
+      "utilization": 0.5479290785202098,
+      "plannedUtilization": 0.5257050930996714,
+      "overkill": 12672,
+      "unused": 414,
+      "turnsPerRun": 8.4625,
+      "roundsPerRun": 31.625,
+      "specialPerRun": 22.9375,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "8/screecher/attack": 17,
+        "8/groundshaker/attack": 22
+      }
+    },
+    "nine-linked/heuristic/blast": {
+      "completion": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4375,
+          0.6375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 31,
+        "n": 80,
+        "rate": 0.3875,
+        "ci95": [
+          0.2882439968827771,
+          0.4970654437767524
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 243,
+        "n": 1010,
+        "rate": 0.24059405940594059,
+        "ci95": [
+          0.21524684060850463,
+          0.26790713531830684
+        ]
+      },
+      "effective": 15685,
+      "potential": 27659,
+      "utilization": 0.5670848548392928,
+      "plannedUtilization": 0.48619075664114564,
+      "overkill": 11974,
+      "unused": 1140,
+      "turnsPerRun": 12.625,
+      "roundsPerRun": 40.825,
+      "specialPerRun": 28.0875,
+      "deaths": {
+        "8/contaminator/attack": 8,
+        "8/screecher/attack": 14,
+        "8/groundshaker/attack": 14
+      }
+    },
+    "nine-linked/heuristic/recoil": {
+      "completion": {
+        "yes": 42,
+        "n": 80,
+        "rate": 0.525,
+        "ci95": [
+          0.425,
+          0.6253124999999997
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 43,
+        "n": 80,
+        "rate": 0.5375,
+        "ci95": [
+          0.4290416436680269,
+          0.6425218761121299
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 25,
+        "n": 80,
+        "rate": 0.3125,
+        "ci95": [
+          0.22150258327847644,
+          0.4206798178207392
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 209,
+        "n": 771,
+        "rate": 0.2710765239948119,
+        "ci95": [
+          0.24089149852871378,
+          0.30353151644621784
+        ]
+      },
+      "effective": 15557,
+      "potential": 16969,
+      "utilization": 0.9167894395662679,
+      "plannedUtilization": 0.7326457568051239,
+      "overkill": 1412,
+      "unused": 709,
+      "turnsPerRun": 9.6375,
+      "roundsPerRun": 32.6625,
+      "specialPerRun": 25.7625,
+      "deaths": {
+        "8/contaminator/attack": 9,
+        "8/screecher/attack": 11,
+        "8/groundshaker/attack": 16,
+        "6/groundshaker/attack": 2
+      }
+    },
+    "nine-linked/heuristic/cauterize": {
+      "completion": {
+        "yes": 31,
+        "n": 80,
+        "rate": 0.3875,
+        "ci95": [
+          0.2875,
+          0.475
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 43,
+        "n": 80,
+        "rate": 0.5375,
+        "ci95": [
+          0.4290416436680269,
+          0.6425218761121299
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 238,
+        "n": 752,
+        "rate": 0.31648936170212766,
+        "ci95": [
+          0.2842506006957508,
+          0.35059352537510846
+        ]
+      },
+      "effective": 15517,
+      "potential": 24282,
+      "utilization": 0.6390330285808418,
+      "plannedUtilization": 0.5489051611305671,
+      "overkill": 8765,
+      "unused": 505,
+      "turnsPerRun": 9.4,
+      "roundsPerRun": 34.15,
+      "specialPerRun": 25.275,
+      "deaths": {
+        "8/contaminator/attack": 14,
+        "8/screecher/attack": 17,
+        "8/groundshaker/attack": 18
+      }
+    },
+    "nine-linked/heuristic/concussion": {
+      "completion": {
+        "yes": 46,
+        "n": 80,
+        "rate": 0.575,
+        "ci95": [
+          0.4625,
+          0.6875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 44,
+        "n": 80,
+        "rate": 0.55,
+        "ci95": [
+          0.4411931301173402,
+          0.6542248962562025
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 1,
+        "n": 80,
+        "rate": 0.0125,
+        "ci95": [
+          0.002209918618306224,
+          0.06746432423965451
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 235,
+        "n": 951,
+        "rate": 0.24710830704521555,
+        "ci95": [
+          0.22074784285356033,
+          0.2755036820066886
+        ]
+      },
+      "effective": 15690,
+      "potential": 37997,
+      "utilization": 0.4129273363686607,
+      "plannedUtilization": 0.3705190572899447,
+      "overkill": 22307,
+      "unused": 731,
+      "turnsPerRun": 11.8875,
+      "roundsPerRun": 41.6875,
+      "specialPerRun": 29.55,
+      "deaths": {
+        "8/contaminator/attack": 7,
+        "8/screecher/attack": 12,
+        "8/groundshaker/attack": 15
+      }
+    },
+    "nine-linked/competent/wound": {
+      "completion": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6875,
+          0.875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 57,
+        "n": 80,
+        "rate": 0.7125,
+        "ci95": [
+          0.6053944721715182,
+          0.8001321399160374
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 54,
+        "n": 80,
+        "rate": 0.675,
+        "ci95": [
+          0.5664032172496735,
+          0.7675598750577254
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 347,
+        "n": 770,
+        "rate": 0.45064935064935063,
+        "ci95": [
+          0.41583652898206036,
+          0.48595215748814236
+        ]
+      },
+      "effective": 15986,
+      "potential": 17750,
+      "utilization": 0.9006197183098592,
+      "plannedUtilization": 0.7261082848837209,
+      "overkill": 1764,
+      "unused": 681,
+      "turnsPerRun": 9.625,
+      "roundsPerRun": 32.3375,
+      "specialPerRun": 12.525,
+      "deaths": {
+        "8/contaminator/attack": 7,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 7
+      }
+    },
+    "nine-linked/competent/heat": {
+      "completion": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.6375,
+          0.8375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 291,
+        "n": 617,
+        "rate": 0.47163695299837927,
+        "ci95": [
+          0.4325443335886466,
+          0.5110805781440726
+        ]
+      },
+      "effective": 15910,
+      "potential": 18924,
+      "utilization": 0.8407313464383851,
+      "plannedUtilization": 0.7370859393097058,
+      "overkill": 3014,
+      "unused": 655,
+      "turnsPerRun": 7.7125,
+      "roundsPerRun": 24.8375,
+      "specialPerRun": 11.6,
+      "deaths": {
+        "8/contaminator/attack": 3,
+        "8/screecher/attack": 8,
+        "8/groundshaker/attack": 9
+      }
+    },
+    "nine-linked/competent/blast": {
+      "completion": {
+        "yes": 77,
+        "n": 80,
+        "rate": 0.9625,
+        "ci95": [
+          0.9125,
+          1
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6857763938182242,
+          0.8628772578296451
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 62,
+        "n": 80,
+        "rate": 0.775,
+        "ci95": [
+          0.6721300467523076,
+          0.8526690983021762
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 333,
+        "n": 589,
+        "rate": 0.565365025466893,
+        "ci95": [
+          0.5250354793186387,
+          0.6048474438770344
+        ]
+      },
+      "effective": 16224,
+      "potential": 20665,
+      "utilization": 0.7850955722235664,
+      "plannedUtilization": 0.7020945127228665,
+      "overkill": 4441,
+      "unused": 553,
+      "turnsPerRun": 7.3625,
+      "roundsPerRun": 24.7125,
+      "specialPerRun": 14.65,
+      "deaths": {
+        "8/screecher/attack": 1,
+        "8/contaminator/attack": 1,
+        "8/groundshaker/attack": 1
+      }
+    },
+    "nine-linked/competent/recoil": {
+      "completion": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.65,
+          0.8375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 43,
+        "n": 80,
+        "rate": 0.5375,
+        "ci95": [
+          0.4290416436680269,
+          0.6425218761121299
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 40,
+        "n": 80,
+        "rate": 0.5,
+        "ci95": [
+          0.392972274311075,
+          0.607027725688925
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 210,
+        "n": 718,
+        "rate": 0.2924791086350975,
+        "ci95": [
+          0.26037935954917135,
+          0.32678768651744494
+        ]
+      },
+      "effective": 15971,
+      "potential": 16868,
+      "utilization": 0.9468223855821675,
+      "plannedUtilization": 0.8010733811506244,
+      "overkill": 897,
+      "unused": 592,
+      "turnsPerRun": 8.975,
+      "roundsPerRun": 30.85,
+      "specialPerRun": 13.2,
+      "deaths": {
+        "8/contaminator/attack": 3,
+        "8/screecher/attack": 6,
+        "8/groundshaker/attack": 11
+      }
+    },
+    "nine-linked/competent/cauterize": {
+      "completion": {
+        "yes": 65,
+        "n": 80,
+        "rate": 0.8125,
+        "ci95": [
+          0.725,
+          0.8875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.6451511899886556,
+          0.8319389418790569
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 60,
+        "n": 80,
+        "rate": 0.75,
+        "ci95": [
+          0.6451511899886556,
+          0.8319389418790569
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 225,
+        "n": 658,
+        "rate": 0.34194528875379937,
+        "ci95": [
+          0.30671104353974227,
+          0.37901436266017025
+        ]
+      },
+      "effective": 16046,
+      "potential": 18445,
+      "utilization": 0.8699376524803469,
+      "plannedUtilization": 0.7540059207743997,
+      "overkill": 2399,
+      "unused": 622,
+      "turnsPerRun": 8.225,
+      "roundsPerRun": 27.325,
+      "specialPerRun": 12.125,
+      "deaths": {
+        "8/contaminator/attack": 3,
+        "8/screecher/attack": 4,
+        "8/groundshaker/attack": 8
+      }
+    },
+    "nine-linked/competent/concussion": {
+      "completion": {
+        "yes": 74,
+        "n": 80,
+        "rate": 0.925,
+        "ci95": [
+          0.8625,
+          0.975
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 213,
+        "n": 627,
+        "rate": 0.3397129186602871,
+        "ci95": [
+          0.303717281851181,
+          0.3776607376072694
+        ]
+      },
+      "effective": 16251,
+      "potential": 20581,
+      "utilization": 0.7896117778533599,
+      "plannedUtilization": 0.6816694630872483,
+      "overkill": 4330,
+      "unused": 727,
+      "turnsPerRun": 7.8375,
+      "roundsPerRun": 24.4375,
+      "specialPerRun": 13.6875,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 1,
+        "8/groundshaker/attack": 3
+      }
+    },
+    "nine-linked/optimized/wound": {
+      "completion": {
+        "yes": 69,
+        "n": 80,
+        "rate": 0.8625,
+        "ci95": [
+          0.775,
+          0.9253124999999998
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 65,
+        "n": 80,
+        "rate": 0.8125,
+        "ci95": [
+          0.7134147429619243,
+          0.8829479218727162
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 281,
+        "n": 723,
+        "rate": 0.38865836791147995,
+        "ci95": [
+          0.35380453276995844,
+          0.42468915829010195
+        ]
+      },
+      "effective": 16109,
+      "potential": 17247,
+      "utilization": 0.9340175102916449,
+      "plannedUtilization": 0.7779870568917222,
+      "overkill": 1138,
+      "unused": 568,
+      "turnsPerRun": 9.0375,
+      "roundsPerRun": 31.3125,
+      "specialPerRun": 14.0375,
+      "deaths": {
+        "8/contaminator/attack": 5,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 3
+      }
+    },
+    "nine-linked/optimized/heat": {
+      "completion": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.7,
+          0.875
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 59,
+        "n": 80,
+        "rate": 0.7375,
+        "ci95": [
+          0.6318083375343555,
+          0.8214272877399715
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 288,
+        "n": 615,
+        "rate": 0.4682926829268293,
+        "ci95": [
+          0.4291737448911002,
+          0.5078052817289591
+        ]
+      },
+      "effective": 15984,
+      "potential": 18334,
+      "utilization": 0.8718228428057162,
+      "plannedUtilization": 0.7661410151943632,
+      "overkill": 2350,
+      "unused": 618,
+      "turnsPerRun": 7.6875,
+      "roundsPerRun": 25.2,
+      "specialPerRun": 11.8375,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 6,
+        "8/groundshaker/attack": 9
+      }
+    },
+    "nine-linked/optimized/blast": {
+      "completion": {
+        "yes": 68,
+        "n": 80,
+        "rate": 0.85,
+        "ci95": [
+          0.775,
+          0.925
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 68,
+        "n": 80,
+        "rate": 0.85,
+        "ci95": [
+          0.7558657249889396,
+          0.9120604596258579
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 6,
+        "n": 80,
+        "rate": 0.075,
+        "ci95": [
+          0.03482477485108787,
+          0.15412200097380097
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 33,
+        "n": 999,
+        "rate": 0.03303303303303303,
+        "ci95": [
+          0.02361649498485984,
+          0.04602720547591082
+        ]
+      },
+      "effective": 16140,
+      "potential": 17293,
+      "utilization": 0.9333256230844851,
+      "plannedUtilization": 0.7880859375,
+      "overkill": 1153,
+      "unused": 688,
+      "turnsPerRun": 12.4875,
+      "roundsPerRun": 44.8625,
+      "specialPerRun": 12.4875,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 5,
+        "8/groundshaker/attack": 5
+      }
+    },
+    "nine-linked/optimized/recoil": {
+      "completion": {
+        "yes": 70,
+        "n": 80,
+        "rate": 0.875,
+        "ci95": [
+          0.7875,
+          0.9375
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 51,
+        "n": 80,
+        "rate": 0.6375,
+        "ci95": [
+          0.5281059097698362,
+          0.7342936627574055
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 39,
+        "n": 80,
+        "rate": 0.4875,
+        "ci95": [
+          0.38107693944368337,
+          0.5950685539629311
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 202,
+        "n": 699,
+        "rate": 0.28898426323319026,
+        "ci95": [
+          0.2566055086211262,
+          0.3236697625068208
+        ]
+      },
+      "effective": 16220,
+      "potential": 16958,
+      "utilization": 0.9564807170656917,
+      "plannedUtilization": 0.8340189222542164,
+      "overkill": 738,
+      "unused": 548,
+      "turnsPerRun": 8.7375,
+      "roundsPerRun": 30.425,
+      "specialPerRun": 13.7875,
+      "deaths": {
+        "8/screecher/attack": 4,
+        "8/groundshaker/attack": 4,
+        "8/contaminator/attack": 2
+      }
+    },
+    "nine-linked/optimized/cauterize": {
+      "completion": {
+        "yes": 71,
+        "n": 80,
+        "rate": 0.8875,
+        "ci95": [
+          0.8125,
+          0.95
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6857763938182242,
+          0.8628772578296451
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 63,
+        "n": 80,
+        "rate": 0.7875,
+        "ci95": [
+          0.6857763938182242,
+          0.8628772578296451
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 197,
+        "n": 635,
+        "rate": 0.3102362204724409,
+        "ci95": [
+          0.2754871703111843,
+          0.34726751567044245
+        ]
+      },
+      "effective": 16176,
+      "potential": 18003,
+      "utilization": 0.8985169138476921,
+      "plannedUtilization": 0.7904999266969652,
+      "overkill": 1827,
+      "unused": 535,
+      "turnsPerRun": 7.9375,
+      "roundsPerRun": 27.2375,
+      "specialPerRun": 13.425,
+      "deaths": {
+        "8/contaminator/attack": 1,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 5
+      }
+    },
+    "nine-linked/optimized/concussion": {
+      "completion": {
+        "yes": 74,
+        "n": 80,
+        "rate": 0.925,
+        "ci95": [
+          0.8625,
+          0.975
+        ],
+        "independentSeeds": 80
+      },
+      "coherent": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "buildCompleted": {
+        "yes": 80,
+        "n": 80,
+        "rate": 1,
+        "ci95": [
+          0.954180263735425,
+          1
+        ]
+      },
+      "opportunities": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "actualMeaningful": {
+        "yes": 56,
+        "n": 80,
+        "rate": 0.7,
+        "ci95": [
+          0.5923163971203269,
+          0.789355708373843
+        ]
+      },
+      "activatedVolleys": {
+        "yes": 171,
+        "n": 674,
+        "rate": 0.25370919881305637,
+        "ci95": [
+          0.22231754869472165,
+          0.2878925062797739
+        ]
+      },
+      "effective": 16243,
+      "potential": 19052,
+      "utilization": 0.8525614108754986,
+      "plannedUtilization": 0.751503655038401,
+      "overkill": 2809,
+      "unused": 607,
+      "turnsPerRun": 8.425,
+      "roundsPerRun": 28.2875,
+      "specialPerRun": 13.675,
+      "deaths": {
+        "8/contaminator/attack": 2,
+        "8/screecher/attack": 3,
+        "8/groundshaker/attack": 1
+      }
+    }
+  },
+  "byRole": {
+    "nine-linked/random/regular": {
+      "volleys": 1512,
+      "enemies": 822,
+      "effective": 18084,
+      "potential": 20520,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/random/dangerous": {
+      "volleys": 2022,
+      "enemies": 960,
+      "effective": 30156,
+      "potential": 33984,
+      "meaningful": 54,
+      "deaths": 138
+    },
+    "nine-linked/random/elite": {
+      "volleys": 1344,
+      "enemies": 480,
+      "effective": 21192,
+      "potential": 22914,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/random/boss": {
+      "volleys": 672,
+      "enemies": 342,
+      "effective": 14022,
+      "potential": 15546,
+      "meaningful": 36,
+      "deaths": 168
+    },
+    "nine-linked/damage/regular": {
+      "volleys": 1267,
+      "enemies": 753,
+      "effective": 16566,
+      "potential": 19324,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/damage/dangerous": {
+      "volleys": 1751,
+      "enemies": 960,
+      "effective": 29883,
+      "potential": 31455,
+      "meaningful": 0,
+      "deaths": 207
+    },
+    "nine-linked/damage/elite": {
+      "volleys": 1281,
+      "enemies": 480,
+      "effective": 21192,
+      "potential": 22012,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/damage/boss": {
+      "volleys": 490,
+      "enemies": 273,
+      "effective": 11342,
+      "potential": 11572,
+      "meaningful": 0,
+      "deaths": 165
+    },
+    "nine-linked/heuristic/regular": {
+      "volleys": 1596,
+      "enemies": 958,
+      "effective": 21076,
+      "potential": 53753,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/heuristic/dangerous": {
+      "volleys": 1623,
+      "enemies": 960,
+      "effective": 31576,
+      "potential": 49373,
+      "meaningful": 179,
+      "deaths": 2
+    },
+    "nine-linked/heuristic/elite": {
+      "volleys": 774,
+      "enemies": 480,
+      "effective": 21192,
+      "potential": 30950,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/heuristic/boss": {
+      "volleys": 979,
+      "enemies": 478,
+      "effective": 19634,
+      "potential": 20095,
+      "meaningful": 13,
+      "deaths": 245
+    },
+    "nine-linked/competent/regular": {
+      "volleys": 1440,
+      "enemies": 960,
+      "effective": 21120,
+      "potential": 27303,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/competent/dangerous": {
+      "volleys": 1257,
+      "enemies": 960,
+      "effective": 31584,
+      "potential": 35163,
+      "meaningful": 246,
+      "deaths": 0
+    },
+    "nine-linked/competent/elite": {
+      "volleys": 623,
+      "enemies": 480,
+      "effective": 21192,
+      "potential": 24176,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/competent/boss": {
+      "volleys": 659,
+      "enemies": 480,
+      "effective": 22492,
+      "potential": 26591,
+      "meaningful": 171,
+      "deaths": 81
+    },
+    "nine-linked/optimized/regular": {
+      "volleys": 1476,
+      "enemies": 960,
+      "effective": 21120,
+      "potential": 23195,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/optimized/dangerous": {
+      "volleys": 1417,
+      "enemies": 960,
+      "effective": 31584,
+      "potential": 34331,
+      "meaningful": 196,
+      "deaths": 0
+    },
+    "nine-linked/optimized/elite": {
+      "volleys": 717,
+      "enemies": 480,
+      "effective": 21192,
+      "potential": 23467,
+      "meaningful": 0,
+      "deaths": 0
+    },
+    "nine-linked/optimized/boss": {
+      "volleys": 735,
+      "enemies": 480,
+      "effective": 22976,
+      "potential": 25894,
+      "meaningful": 144,
+      "deaths": 65
+    }
+  },
+  "order": {
+    "nine-linked": {
+      "yes": 650,
+      "n": 821,
+      "rate": 0.7917174177831913,
+      "ci95": [
+        0.7626125700305839,
+        0.8181049883466853
+      ],
+      "excluded": 139,
+      "byBuild": {
+        "wound": {
+          "yes": 160,
+          "n": 160,
+          "rate": 1,
+          "ci95": [
+            0.9765529633499672,
+            1
+          ]
+        },
+        "heat": {
+          "yes": 160,
+          "n": 160,
+          "rate": 1,
+          "ci95": [
+            0.9765529633499672,
+            1
+          ]
+        },
+        "blast": {
+          "yes": 14,
+          "n": 21,
+          "rate": 0.6666666666666666,
+          "ci95": [
+            0.45373075657210293,
+            0.8280546356731631
+          ]
+        },
+        "recoil": {
+          "yes": 19,
+          "n": 160,
+          "rate": 0.11875,
+          "ci95": [
+            0.077354257102703,
+            0.1780241083429469
+          ]
+        },
+        "cauterize": {
+          "yes": 137,
+          "n": 160,
+          "rate": 0.85625,
+          "ci95": [
+            0.793529970004945,
+            0.9022640163819067
+          ]
+        },
+        "concussion": {
+          "yes": 160,
+          "n": 160,
+          "rate": 1,
+          "ci95": [
+            0.9765529633499672,
+            1
+          ]
+        }
+      }
+    }
+  },
+  "gates": {
+    "A": {
+      "status": "FAIL",
+      "rates": [
+        {
+          "yes": 57,
+          "n": 80,
+          "rate": 0.7125,
+          "ci95": [
+            0.6053944721715182,
+            0.8001321399160374
+          ]
+        },
+        {
+          "yes": 59,
+          "n": 80,
+          "rate": 0.7375,
+          "ci95": [
+            0.6318083375343555,
+            0.8214272877399715
+          ]
+        },
+        {
+          "yes": 63,
+          "n": 80,
+          "rate": 0.7875,
+          "ci95": [
+            0.6857763938182242,
+            0.8628772578296451
+          ]
+        },
+        {
+          "yes": 43,
+          "n": 80,
+          "rate": 0.5375,
+          "ci95": [
+            0.4290416436680269,
+            0.6425218761121299
+          ]
+        },
+        {
+          "yes": 60,
+          "n": 80,
+          "rate": 0.75,
+          "ci95": [
+            0.6451511899886556,
+            0.8319389418790569
+          ]
+        },
+        {
+          "yes": 59,
+          "n": 80,
+          "rate": 0.7375,
+          "ci95": [
+            0.6318083375343555,
+            0.8214272877399715
+          ]
+        }
+      ]
+    },
+    "B": {
+      "status": "PASS",
+      "value": {
+        "yes": 480,
+        "n": 480,
+        "rate": 1,
+        "ci95": [
+          0.9920602114410997,
+          1
+        ]
+      }
+    },
+    "C": {
+      "status": "PASS",
+      "relative": [
+        0.8181818181818181,
+        0.7792207792207793,
+        1,
+        0.7792207792207793,
+        0.8441558441558441,
+        0.961038961038961
+      ],
+      "note": "고유 이점과 혼합 기여는 보고서에서 별도 판정"
+    },
+    "D": {
+      "status": "PASS",
+      "value": {
+        "yes": 650,
+        "n": 821,
+        "rate": 0.7917174177831913,
+        "ci95": [
+          0.7626125700305839,
+          0.8181049883466853
+        ],
+        "excluded": 139,
+        "byBuild": {
+          "wound": {
+            "yes": 160,
+            "n": 160,
+            "rate": 1,
+            "ci95": [
+              0.9765529633499672,
+              1
+            ]
+          },
+          "heat": {
+            "yes": 160,
+            "n": 160,
+            "rate": 1,
+            "ci95": [
+              0.9765529633499672,
+              1
+            ]
+          },
+          "blast": {
+            "yes": 14,
+            "n": 21,
+            "rate": 0.6666666666666666,
+            "ci95": [
+              0.45373075657210293,
+              0.8280546356731631
+            ]
+          },
+          "recoil": {
+            "yes": 19,
+            "n": 160,
+            "rate": 0.11875,
+            "ci95": [
+              0.077354257102703,
+              0.1780241083429469
+            ]
+          },
+          "cauterize": {
+            "yes": 137,
+            "n": 160,
+            "rate": 0.85625,
+            "ci95": [
+              0.793529970004945,
+              0.9022640163819067
+            ]
+          },
+          "concussion": {
+            "yes": 160,
+            "n": 160,
+            "rate": 1,
+            "ci95": [
+              0.9765529633499672,
+              1
+            ]
+          }
+        }
+      }
+    },
+    "E": {
+      "status": "PASS",
+      "competent": {
+        "yes": 399,
+        "n": 480,
+        "rate": 0.83125,
+        "ci95": [
+          0.7666666666666667,
+          0.8855729166666666
+        ],
+        "independentSeeds": 80
+      },
+      "optimized": {
+        "yes": 415,
+        "n": 480,
+        "rate": 0.8645833333333334,
+        "ci95": [
+          0.8104166666666668,
+          0.9146354166666668
+        ],
+        "independentSeeds": 80
+      },
+      "random": {
+        "yes": 174,
+        "n": 480,
+        "rate": 0.3625,
+        "ci95": [
+          0.2625,
+          0.475
+        ],
+        "independentSeeds": 80
+      }
+    },
+    "F": {
+      "status": "FAIL",
+      "note": "일반 적 보존 및 역할별 피해 활용은 byRole 참조"
+    },
+    "G": {
+      "status": "FAIL",
+      "reason": "v7은 실험 페이지/시뮬레이터 전용이며 현행 실게임 탄약 계약과 의도된 차이가 있음. 브라우저 증거는 별도 보고."
+    }
+  }
+}

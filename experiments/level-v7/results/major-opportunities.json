@@ -1,0 +1,32 @@
+{
+  "wound": {
+    "yes": 68,
+    "n": 80,
+    "rate": 0.85
+  },
+  "heat": {
+    "yes": 68,
+    "n": 80,
+    "rate": 0.85
+  },
+  "blast": {
+    "yes": 68,
+    "n": 80,
+    "rate": 0.85
+  },
+  "recoil": {
+    "yes": 62,
+    "n": 80,
+    "rate": 0.775
+  },
+  "cauterize": {
+    "yes": 68,
+    "n": 80,
+    "rate": 0.85
+  },
+  "concussion": {
+    "yes": 68,
+    "n": 80,
+    "rate": 0.85
+  }
+}
