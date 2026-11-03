@@ -30,6 +30,8 @@ export function mountEnemyGuide(root: HTMLElement): void {
     <div class="enemy-guide-scroll" tabindex="0" role="region" aria-label="감염체 능력 표 · 가로와 세로 스크롤"><table><colgroup><col class="guide-name"><col class="guide-hp"><col class="guide-growth"><col class="guide-distance"><col class="guide-move"><col class="guide-shock"><col class="guide-threshold"><col class="guide-pattern"></colgroup><caption class="sr-only">감염체별 체력·이동·상태 임계치·행동 주기</caption><thead><tr><th scope="col">감염체</th><th scope="col">체력</th><th scope="col">스테이지당<br>체력 증가</th><th scope="col">시작 거리</th><th scope="col">일반 접근</th><th scope="col">중단 충격<br>접근 / 치명</th><th scope="col">상처 / 점화<br>임계치</th><th scope="col">행동 패턴</th></tr></thead><tbody>${enemyGuideRows().map(enemy => `<tr><th scope="row">${enemy.name}</th><td>${enemy.hp}</td><td>+${enemy.growth}</td><td>${enemy.distance} m</td><td>${enemy.advancePerTurn} m</td><td>${enemy.approachShock} / ${enemy.attackShock}</td><td>${enemy.wound} / ${enemy.burn}</td><td class="enemy-guide-pattern">${enemy.patterns.map(pattern => `<span>${pattern}</span>`).join('')}</td></tr>`).join('')}</tbody></table></div>
     <footer>좌우로 밀어 전체 표 확인 · 시작 거리는 다수 조우 배치와 탐험 상황에 따라 달라집니다. 회복 이후 주기 반복 · 근접 치명 공격은 예고 후 실행합니다.</footer>`;
   root.append(dialog);
+  // 네이티브 모달의 포인터 차단과 함께 문서 수준 전투 단축키도 격리한다.
+  dialog.addEventListener('keydown', event => event.stopPropagation());
   let opener: HTMLElement | undefined;
   root.addEventListener('click', event => {
     const button = (event.target as Element).closest<HTMLElement>('[data-open-enemy-guide]');

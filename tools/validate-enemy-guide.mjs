@@ -17,6 +17,13 @@ try {
       await button.click();
       await page.locator('.enemy-guide[open]').waitFor();
       assert.equal(await page.locator('.enemy-guide tbody tr').count(), 10);
+      if (state === 'free') {
+        const snapshot = () => page.locator('#hp-text, #phase-text, .magazine-slots').allTextContents();
+        const before = await snapshot();
+        await page.locator('.enemy-guide-scroll').focus();
+        await page.keyboard.press('1'); await page.keyboard.press('r'); await page.keyboard.press('Space');
+        assert.deepEqual(await snapshot(), before);
+      }
       assert.equal(await page.locator('.enemy-guide tbody tr td:nth-child(3)').allTextContents().then(v => v.every(x => x === '+0')), true);
       const rect = await page.locator('.enemy-guide').boundingBox();
       assert.ok(rect.x >= 0 && rect.y >= 0 && rect.x + rect.width <= viewport.width && rect.y + rect.height <= viewport.height);
