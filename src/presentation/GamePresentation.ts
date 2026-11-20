@@ -36,7 +36,7 @@ export class GamePresentation {
   private readonly clock = new THREE.Clock();
   private readonly audio = new AudioManager();
   private readonly enemyActors = [0, 1].map(() => ({ id: '', model: createZombieModel(), targetZ: -6.1, fallen: false, special: false, x: 0, posture: '' }));
-  firingStance: FiringStance = 'hip';
+  private firingStance: FiringStance = 'hip';
   private holdingAim = false;
   private actorIndex = 0;
   private get actor() { return this.enemyActors[this.actorIndex]!; }
@@ -141,6 +141,11 @@ export class GamePresentation {
 
   setAudioPreferences(preferences: AudioPreferences): void {
     this.audio.setPreferences(preferences);
+  }
+
+  setFiringStance(stance: FiringStance): void {
+    this.firingStance = stance;
+    if (this.holdingAim && !this.animationInProgress) this.aimPistolAtTarget(this.getZombieTarget());
   }
 
   setPlaybackSpeed(speed: number): void {

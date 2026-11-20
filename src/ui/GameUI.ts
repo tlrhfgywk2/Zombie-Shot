@@ -100,6 +100,7 @@ export class GameUI {
   private readonly phaseText: HTMLElement;
   private readonly playerDebuffs: HTMLElement;
   private readonly loadButton: HTMLButtonElement;
+  private readonly stanceSelect: HTMLSelectElement;
   private readonly slots: HTMLButtonElement[];
   private readonly overlay: HTMLElement;
   private readonly audioMute: HTMLButtonElement;
@@ -183,7 +184,13 @@ export class GameUI {
           </div></div>
           <div class="magazine-panel"><details id="weapon-panel" class="weapon-panel"><summary><strong data-weapon-name>P220</strong><span data-weapon-trait>표준탄 반동 0</span></summary><p data-weapon-detail></p><div class="run-controls"><button type="button" data-restart-run>다시 시작</button><button type="button" data-return-to-menu>모드 선택</button></div></details><div class="section-label"><span>발사 순서</span></div><div class="magazine-row"><div class="magazine-slots" role="group" aria-label="탄창 슬롯">
             ${Array.from({ length: COMBAT_BALANCE.maximumMagazineCapacity }, (_, index) => `<button class="mag-slot" data-slot="${index}" aria-label="${index + 1}번 탄창 슬롯"><span class="slot-index">0${index + 1}</span><span class="slot-empty">+</span></button>`).join('')}
-          </div><button id="load-button" class="load-button" disabled><span>탄창 장전</span></button></div><div id="cylinder-choice" class="cylinder-choice" hidden aria-label="실린더 시작 순서 선택"></div></div>
+          </div><div class="magazine-actions">
+            <select id="firing-stance" aria-label="사격 자세">
+              <option value="hip">지향사격</option>
+              <option value="aimed">조준사격</option>
+            </select>
+            <button id="load-button" class="load-button" disabled><span>탄창 장전</span></button>
+          </div></div><div id="cylinder-choice" class="cylinder-choice" hidden aria-label="실린더 시작 순서 선택"></div></div>
           <section id="attachment-bay" class="attachment-bay" aria-label="부착물 구성"><div class="section-label"><span>부착물</span><button id="attachment-supply-button" type="button" aria-haspopup="dialog" aria-controls="attachment-inventory">부착물 추가</button><small id="attachment-count">보유 0/${ATTACHMENT_ORDER.filter(id => isAttachmentCompatible(id, this.weapon.id)).length}</small></div><div class="attachment-workspace">
             <div class="attachment-tabs" role="tablist" aria-label="부착물 슬롯">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<button type="button" role="tab" class="attachment-slot-tab" data-attachment-slot="${slot}" aria-controls="attachment-group-${slot}" aria-selected="${index === 0}"><small>${ATTACHMENT_SLOT_NAMES[slot]}</small><strong data-current-attachment="${slot}">비어 있음</strong></button>`).join('')}</div>
             <div class="attachment-groups">${ATTACHMENT_SLOT_ORDER.map((slot, index) => `<section id="attachment-group-${slot}" class="attachment-group" data-attachment-group="${slot}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>${ATTACHMENT_ORDER.filter((id) => ATTACHMENT_DEFINITIONS[id].slot === slot).map((id) => { const item = ATTACHMENT_DEFINITIONS[id]; return `<button type="button" class="attachment-option" data-attachment="${id}"><span><strong>${item.name}</strong><small>${item.summary}</small></span><em><span class="attachment-rarity" data-rarity="${item.rarity}">${ATTACHMENT_RARITY_NAMES[item.rarity]}</span> · <span data-ownership>미획득</span></em></button>`; }).join('')}</section>`).join('')}</div>
@@ -227,6 +234,7 @@ export class GameUI {
     this.phaseText = this.required(root, '#phase-text');
     this.playerDebuffs = this.required(root, '#player-debuffs');
     this.loadButton = this.required(root, '#load-button') as HTMLButtonElement;
+    this.stanceSelect = this.required(root, '#firing-stance') as HTMLSelectElement;
     this.overlay = this.required(root, '#game-over');
     this.audioMute = this.required(root, '#audio-mute') as HTMLButtonElement;
     this.audioState = this.required(root, '#audio-state');
@@ -377,6 +385,9 @@ export class GameUI {
     });
     this.audioMute.addEventListener('click', () => this.callbacks.onAudioMutedChange(this.audioMute.getAttribute('aria-pressed') !== 'true'));
     this.audioVolume.addEventListener('input', () => this.callbacks.onAudioVolumeChange(Number(this.audioVolume.value)));
+    this.stanceSelect.addEventListener('change', () => {
+      if (!this.stanceSelect.disabled) this.callbacks.onStanceChange(this.stanceSelect.value === 'aimed' ? 'aimed' : 'hip');
+    });
     this.loadButton.addEventListener('click', () => { if (this.phase === 'AIMING') this.callbacks.onFireShot(); else if (!this.locked) this.callbacks.onLoad(); });
     this.required(root, '#ammo-supply-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement, true));
     this.required(root, '#inventory-button').addEventListener('click', (event) => this.openAmmoInventory(event.currentTarget as HTMLButtonElement));
@@ -425,7 +436,11 @@ export class GameUI {
 
   private quickMode = true;
 
-  showModeSelection(stance: FiringStance): void {
+  setFiringStance(stance: FiringStance): void {
+    this.stanceSelect.value = stance;
+  }
+
+  showModeSelection(): void {
     this.closeMobilePanel();
     this.closeAmmoInventory();
     this.hideTooltip();
@@ -436,10 +451,7 @@ export class GameUI {
     host.innerHTML = `<div class="route-card mode-selection-card"><span>좀비 샷</span><h2 id="weapon-selection-title">모드 선택</h2><button type="button" class="enemy-guide-open" data-open-enemy-guide>감염체 도감</button><div class="mode-options">
       <button type="button" class="mode-option" data-choose-mode="free"><strong>프리 모드</strong><span>권총별 초기 탄약 · 자유 보급 · 조우 종료 시 복구</span></button>
       <button type="button" class="mode-option" data-choose-mode="exploration"><strong>탐험 모드</strong><span>프로토타입 · 숨겨진 갈림길 · 감염체와 탄약 거래</span></button>
-    </div><div class="mode-preferences"><label>사격 자세 <select id="firing-stance"><option value="hip">지향사격</option><option value="aimed">조준사격</option></select></label><label class="quick-mode-option"><input type="checkbox" id="quick-mode" ${this.quickMode ? 'checked' : ''}>퀵모드</label></div></div>`;
-    const stanceSelect = host.querySelector<HTMLSelectElement>('#firing-stance')!;
-    stanceSelect.value = stance;
-    stanceSelect.addEventListener('change', () => this.callbacks.onStanceChange(stanceSelect.value === 'aimed' ? 'aimed' : 'hip'));
+    </div><label class="quick-mode-option"><input type="checkbox" id="quick-mode" ${this.quickMode ? 'checked' : ''}>퀵모드</label></div>`;
     const quickMode = host.querySelector<HTMLInputElement>('#quick-mode')!;
     quickMode.addEventListener('change', () => { this.quickMode = quickMode.checked; });
     host.querySelectorAll<HTMLButtonElement>('[data-choose-mode]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseMode(button.dataset.chooseMode as GameMode, quickMode.checked)));
@@ -737,6 +749,7 @@ export class GameUI {
 
   setPhase(phase: GamePhase): void {
     this.phase = phase;
+    this.stanceSelect.disabled = phase === 'FIRING';
     this.updateShortcutIndicators();
     if (phase !== 'AMMO_SELECTION') this.closeMobilePanel();
     this.phaseText.textContent = PHASE_LABELS[phase];

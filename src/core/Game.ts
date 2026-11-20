@@ -47,7 +47,9 @@ export class Game {
     this.ui = new GameUI(root, {
       onChooseMode: (mode, quickMode) => this.chooseMode(mode, quickMode),
       onStanceChange: stance => {
+        if (this.state.phase === 'FIRING') return;
         this.presentationPreferences.firingStance = stance;
+        this.presentation.setFiringStance(stance);
         savePresentationPreferences(this.presentationPreferences);
       },
       onReturnToMenu: () => this.returnToMenu(),
@@ -78,8 +80,10 @@ export class Game {
     this.presentation = new GamePresentation(this.ui.canvasHost);
     this.presentation.onSelectTarget = id => this.selectTarget(id);
     this.setAudioPreferences(this.audioPreferences);
+    this.ui.setFiringStance(this.presentationPreferences.firingStance);
+    this.presentation.setFiringStance(this.presentationPreferences.firingStance);
     this.sync();
-    this.ui.showModeSelection(this.presentationPreferences.firingStance);
+    this.ui.showModeSelection();
     this.ui.setLocked(true);
   }
 
@@ -87,7 +91,6 @@ export class Game {
     if (this.state.phase !== 'MODE_SELECTION') return;
     this.selectedMode = mode;
     this.quickMode = quickMode;
-    this.presentation.firingStance = this.presentationPreferences.firingStance;
     this.ui.setGameMode(mode);
     this.state.transition('WEAPON_SELECTION');
     this.ui.showWeaponSelection(true, mode);
@@ -425,7 +428,7 @@ export class Game {
     this.ui.setGameMode('free');
     this.resetBattle();
     this.sync();
-    this.ui.showModeSelection(this.presentationPreferences.firingStance);
+    this.ui.showModeSelection();
     this.ui.setLocked(true);
   }
 
