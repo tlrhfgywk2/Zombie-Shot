@@ -17,7 +17,10 @@ import { type AudioPreferences, loadAudioPreferences, saveAudioPreferences } fro
 import { GameUI } from '../ui/GameUI';
 import { GameStateMachine } from './GameStateMachine';
 
+import { loadPresentationPreferences, savePresentationPreferences } from '../presentation/PresentationPreferences';
+
 export class Game {
+  private readonly presentationPreferences = loadPresentationPreferences();
   private readonly player = new Player();
   private readonly resolver = new CombatResolver();
   private readonly state = new GameStateMachine();
@@ -43,6 +46,10 @@ export class Game {
   constructor(root: HTMLElement) {
     this.ui = new GameUI(root, {
       onChooseMode: (mode, quickMode) => this.chooseMode(mode, quickMode),
+      onStanceChange: stance => {
+        this.presentationPreferences.firingStance = stance;
+        savePresentationPreferences(this.presentationPreferences);
+      },
       onReturnToMenu: () => this.returnToMenu(),
       onChooseWeapon: id => this.chooseWeapon(id),
       onCylinderDecision: spin => this.chooseCylinder(spin),
@@ -72,7 +79,7 @@ export class Game {
     this.presentation.onSelectTarget = id => this.selectTarget(id);
     this.setAudioPreferences(this.audioPreferences);
     this.sync();
-    this.ui.showModeSelection();
+    this.ui.showModeSelection(this.presentationPreferences.firingStance);
     this.ui.setLocked(true);
   }
 
@@ -80,6 +87,7 @@ export class Game {
     if (this.state.phase !== 'MODE_SELECTION') return;
     this.selectedMode = mode;
     this.quickMode = quickMode;
+    this.presentation.firingStance = this.presentationPreferences.firingStance;
     this.ui.setGameMode(mode);
     this.state.transition('WEAPON_SELECTION');
     this.ui.showWeaponSelection(true, mode);
@@ -417,11 +425,12 @@ export class Game {
     this.ui.setGameMode('free');
     this.resetBattle();
     this.sync();
-    this.ui.showModeSelection();
+    this.ui.showModeSelection(this.presentationPreferences.firingStance);
     this.ui.setLocked(true);
   }
 
   private resetBattle(): void {
+    this.presentation.resetWeaponPose();
     this.presentation.setExploring(false);
     this.ui.hideExploration();
     this.exploration = undefined;

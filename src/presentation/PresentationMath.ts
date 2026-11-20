@@ -184,14 +184,14 @@ export const getPresentationLayout = (width: number, height: number, modeOverrid
   };
 };
 
-export const constrainWeaponPosition = (position: THREE.Vector3, layout: PresentationLayout): THREE.Vector3 => {
+export const constrainWeaponPosition = (position: THREE.Vector3, layout: PresentationLayout, aim = layout.weaponAim): THREE.Vector3 => {
   const horizontalMargin = 0.18;
   const verticalMargin = 0.3;
   const depthMargin = 0.35;
   return position.set(
-    THREE.MathUtils.clamp(position.x, Math.min(layout.weaponRest.x, layout.weaponAim.x) - horizontalMargin, Math.max(layout.weaponRest.x, layout.weaponAim.x) + horizontalMargin),
-    THREE.MathUtils.clamp(position.y, Math.min(layout.weaponRest.y, layout.weaponAim.y) - verticalMargin, Math.max(layout.weaponRest.y, layout.weaponAim.y) + verticalMargin),
-    THREE.MathUtils.clamp(position.z, Math.min(layout.weaponRest.z, layout.weaponAim.z) - depthMargin, Math.max(layout.weaponRest.z, layout.weaponAim.z) + depthMargin),
+    THREE.MathUtils.clamp(position.x, Math.min(layout.weaponRest.x, aim.x) - horizontalMargin, Math.max(layout.weaponRest.x, aim.x) + horizontalMargin),
+    THREE.MathUtils.clamp(position.y, Math.min(layout.weaponRest.y, aim.y) - verticalMargin, Math.max(layout.weaponRest.y, aim.y) + verticalMargin),
+    THREE.MathUtils.clamp(position.z, Math.min(layout.weaponRest.z, aim.z) - depthMargin, Math.max(layout.weaponRest.z, aim.z) + depthMargin),
   );
 };
 
