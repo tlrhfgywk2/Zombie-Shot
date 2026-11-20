@@ -22,7 +22,10 @@ import { playerDebuffEntries, type PlayerDebuffKind } from './PlayerDebuffView';
 import type { ExplorationScreen } from './ExplorationView';
 import type { Encounter } from '../combat/Encounter';
 
+import type { FiringStance } from '../presentation/PresentationPreferences';
+
 export interface GameUICallbacks {
+  onStanceChange: (stance: FiringStance) => void;
   onChooseMode: (mode: GameMode, quickMode?: boolean) => void;
   onReturnToMenu: () => void;
   onChooseWeapon: (id: WeaponId) => void;
@@ -422,7 +425,7 @@ export class GameUI {
 
   private quickMode = true;
 
-  showModeSelection(): void {
+  showModeSelection(stance: FiringStance): void {
     this.closeMobilePanel();
     this.closeAmmoInventory();
     this.hideTooltip();
@@ -433,7 +436,10 @@ export class GameUI {
     host.innerHTML = `<div class="route-card mode-selection-card"><span>좀비 샷</span><h2 id="weapon-selection-title">모드 선택</h2><button type="button" class="enemy-guide-open" data-open-enemy-guide>감염체 도감</button><div class="mode-options">
       <button type="button" class="mode-option" data-choose-mode="free"><strong>프리 모드</strong><span>권총별 초기 탄약 · 자유 보급 · 조우 종료 시 복구</span></button>
       <button type="button" class="mode-option" data-choose-mode="exploration"><strong>탐험 모드</strong><span>프로토타입 · 숨겨진 갈림길 · 감염체와 탄약 거래</span></button>
-    </div><label class="quick-mode-option"><input type="checkbox" id="quick-mode" ${this.quickMode ? 'checked' : ''}>퀵모드</label></div>`;
+    </div><div class="mode-preferences"><label>사격 자세 <select id="firing-stance"><option value="hip">지향사격</option><option value="aimed">조준사격</option></select></label><label class="quick-mode-option"><input type="checkbox" id="quick-mode" ${this.quickMode ? 'checked' : ''}>퀵모드</label></div></div>`;
+    const stanceSelect = host.querySelector<HTMLSelectElement>('#firing-stance')!;
+    stanceSelect.value = stance;
+    stanceSelect.addEventListener('change', () => this.callbacks.onStanceChange(stanceSelect.value === 'aimed' ? 'aimed' : 'hip'));
     const quickMode = host.querySelector<HTMLInputElement>('#quick-mode')!;
     quickMode.addEventListener('change', () => { this.quickMode = quickMode.checked; });
     host.querySelectorAll<HTMLButtonElement>('[data-choose-mode]').forEach(button => button.addEventListener('click', () => this.callbacks.onChooseMode(button.dataset.chooseMode as GameMode, quickMode.checked)));
