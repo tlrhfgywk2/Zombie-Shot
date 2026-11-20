@@ -1,0 +1,29 @@
+✔ unchanged ball, recoil, range and weapon traits match the production resolver (7.2983ms)
+✔ wound threshold affects subsequent shots, expires once per enemy action (0.4399ms)
+✔ laceration secondary wound cannot be copied as a primary effect (0.1491ms)
+✔ thermal build conserves heat and consumes it only once, with range loss (0.1185ms)
+✔ banked heat cannot create free repeated ignition from standard rounds (0.1409ms)
+✔ thermal-wound hybrid ablation preserves direct power and removes only cross-trigger (0.1486ms)
+✔ concussion converts banked control into one bounded charge burst (0.1079ms)
+✔ explosion ignores recoil, range, and vulnerable; only new impact detonates (0.1173ms)
+✔ kickback consumes actual accumulated recoil and cannot repeat consumption via mimic (0.1832ms)
+✔ relay is consumed by next round and never amplifies another relay rule (0.6932ms)
+✔ laser has an explicit useful vulnerable interaction after redundant ammo removal (0.205ms)
+✔ kill stops firing and does not spend later inventory (0.1677ms)
+✔ turn, magazine and inventory boundaries do not generate free resources (11.667ms)
+✔ reward tape is deterministic, policy-independent, finite and does not alter encounter seeds (0.6292ms)
+✔ attachment compatibility, slot exclusions, and contaminated capacity apply (0.346ms)
+✔ firing order uses a real permutation and changes a staged burst (0.4996ms)
+✔ instant melee death, interrupted attack, and special enemy actions are preserved (0.2235ms)
+✔ pre-volley enemy action commitment matches production across movement and special range boundaries (7.2417ms)
+✔ provenance covers actual transitive reward and enemy-action inputs (64.6608ms)
+✔ holdout protection rejects overlaps, containment and shifted replay but permits adjacency and exact replay (0.7378ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 321.129
+

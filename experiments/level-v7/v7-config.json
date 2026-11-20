@@ -1,0 +1,20 @@
+{
+  "description": "v6 탄약·보상 수치 유지. 첫 탄창 전 적 행동 확정을 원본과 일치시킨 검증 모델 수정",
+  "directRank": 4,
+  "heatRank": 6,
+  "chargeRank": 4,
+  "ventFactor": 2,
+  "vulnerableRank": 0.5,
+  "explosionFactor": 4,
+  "thermalFactor": 2,
+  "shockChargeFactor": 1,
+  "upgradeEvery": 3,
+  "maxRank": 3,
+  "flatPower": 4,
+  "cauterizeWoundGate": 3,
+  "linkedDraft": true,
+  "primaryOnly": true,
+  "lacerationWound": 2,
+  "vulnerableAttachment": true,
+  "pressureFirst": true
+}

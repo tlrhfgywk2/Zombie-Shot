@@ -1,0 +1,401 @@
+{
+  "commonSeed": 21001,
+  "findings": [
+    {
+      "label": "desktop",
+      "name": "early-empty",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "early-full",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "build-discovery",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "workshop-4",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "workshop-7",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "wound-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "wound-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "wound-victory",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "heat-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "heat-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "heat-victory",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "blast-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "blast-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "blast-victory",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "recoil-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "recoil-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "recoil-victory",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "cauterize-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "cauterize-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "cauterize-victory",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "concussion-late-combination",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "concussion-final-resource",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "concussion-victory",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "good-order",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "poor-order",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "scarcity-defeat",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "position-shock-survival",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "desktop",
+      "name": "six-long-name-unused",
+      "width": 1440,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "early-empty",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "early-full",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "build-discovery",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "workshop-4",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "workshop-7",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "wound-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "wound-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "wound-victory",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "heat-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "heat-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "heat-victory",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "blast-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "blast-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "blast-victory",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "recoil-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "recoil-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "recoil-victory",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "cauterize-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "cauterize-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "cauterize-victory",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "concussion-late-combination",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "concussion-final-resource",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "concussion-victory",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "good-order",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "poor-order",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "scarcity-defeat",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "position-shock-survival",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    },
+    {
+      "label": "portrait",
+      "name": "six-long-name-unused",
+      "width": 390,
+      "overflow": false,
+      "bad": []
+    }
+  ],
+  "errors": [],
+  "browser": "155.0.8059.84",
+  "naturalRuns": 12,
+  "fixtureScenarios": 10
+}
