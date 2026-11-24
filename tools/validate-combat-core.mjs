@@ -40,7 +40,7 @@ try {
     };
     await wait('planning');
     assert.equal(await loc('[data-slot]').count(), 4);
-    assert.equal(await loc('[data-round]').count(), 7);
+    assert.equal(await loc('[data-round]').count(), 10);
     assert.equal(await loc('.presentation-debug').count(), 0);
     assert.ok(await loc('canvas').isVisible());
     await capture('준비');

@@ -22,6 +22,13 @@ describe('탄 순서와 한 번의 최종 반올림', () => {
     [['vulnerability', 'standard', 'follow_up', 'reinforced'], [0, 13, 18, 25]],
     [['vulnerability', 'pain', 'follow_up', 'finisher'], [0, 15, 19, 20]],
     [['reinforced', 'vulnerability', 'follow_up', 'standard'], [20, 0, 10, 13]],
+    [['resonance', 'standard', 'standard', 'standard'], [18, 10, 10, 10]],
+    [['mixed', 'resonance', 'resonance', 'mixed'], [12, 14, 14, 12]],
+    [['mixed', 'mixed', 'mixed', 'mixed'], [10, 10, 10, 10]],
+    [['resonance', 'mixed', 'copy', 'follow_up'], [10, 16, 16, 16]],
+    [['vulnerability', 'pain', 'copy', 'copy'], [0, 15, 15, 15]],
+    [['reinforced', 'follow_up', 'copy', 'follow_up'], [20, 18, 18, 17]],
+    [['standard', 'standard', 'finisher', 'copy'], [10, 10, 8, 8]],
   ];
   it.each(cases)('%j 순서의 피해', (slots, expected) => {
     expect(volley(slots).damage).toEqual(expected);
@@ -36,6 +43,24 @@ describe('탄 순서와 한 번의 최종 반올림', () => {
       expect(volley(['execution'], { ...healthy, maxHp: 100, hp, vulnerable: status }).shots[0])
         .toMatchObject({ damage: expected, after: hp - expected });
     }
+  });
+  it('취약탄의 상태 부여도 복제하며 다음 탄의 피해에 반영한다', () => {
+    const result = volley(['vulnerability', 'copy', 'resonance', 'mixed']);
+    expect(result.damage).toEqual([0, 0, 13, 20]);
+    expect(result.shots[1]).toMatchObject({ round: 'copy', source: 'vulnerability', applied: true });
+    expect(result.end.vulnerable).toEqual(vulnerable);
+  });
+  it('첫 칸과 그 직후의 복제탄에는 이전 탄창의 피해나 효과가 남지 않는다', () => {
+    const start = volley(['standard', 'standard', 'standard', 'vulnerability']).end;
+    const result = volley(['copy', 'copy', 'standard', 'copy'], start);
+    expect(result.damage).toEqual([0, 0, 13, 13]);
+    expect(result.shots[1]).toMatchObject({ source: null, applied: false });
+    expect(result.end.vulnerable).toBeNull();
+  });
+  it('첫 동조탄으로 처치해도 뒤의 미발사 탄까지 구성에 포함한다', () => {
+    const result = volley(['resonance', 'resonance', 'resonance', 'resonance'], { ...healthy, hp: 18 });
+    expect(result.damage).toEqual([22]);
+    expect(result.shots[0]?.removed).toBe(18);
   });
   it('앞선 강화탄이 최대 체력 200의 처형 조건을 연다', () => {
     const result = volley(['reinforced', 'execution', 'standard', 'standard'], { ...healthy, maxHp: 200, hp: 80 });

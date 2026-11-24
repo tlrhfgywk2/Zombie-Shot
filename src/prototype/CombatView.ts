@@ -13,15 +13,20 @@ const notes: Record<Round, string> = {
   execution: `체력 ${ammo.execution.threshold}% 이하에서 +${ammo.execution.base * ammo.execution.bonus}`,
   vulnerability: `취약 ${ammo.vulnerability.percent}% · ${ammo.vulnerability.turns}턴 부여·갱신`,
   pain: `이 탄의 취약 보너스 ${ammo.pain.bonusFactor}배`,
+  resonance: `최다 한 종류의 탄 수 × ${ammo.resonance.perRound} 추가`,
+  mixed: `장전한 탄 종류 수 × ${ammo.mixed.perType} 추가`,
+  copy: '직전 탄의 피해·효과 복제',
 };
 const phases = { planning: '사격 준비', firing: '발사 중', approach: '접근 중', victory: '승리', defeat: '접촉 · 패배' };
 
 function shotNote(shot: Shot) {
-  if (shot.applied) return `취약 ${ammo.vulnerability.percent}% · ${ammo.vulnerability.turns}턴`;
-  const effect = { follow_up: '후속', finisher: '종결', execution: '처형' } as const;
+  if (!shot.source) return '복제 대상 없음';
+  const labels: Partial<Record<Round, string>> = { follow_up: '후속', finisher: '종결', execution: '처형', resonance: '동조', mixed: '혼합' };
   const parts = [];
-  if (shot.round in effect && shot.bonus) parts.push(`${effect[shot.round as keyof typeof effect]} +${shot.bonus}`);
-  if (shot.percent) parts.push(`취약 +${shot.percent}%`);
+  if (shot.round === 'copy') parts.push(`${ammo[shot.source].name} 복제`);
+  if (shot.bonus) parts.push(`${labels[shot.source]} +${shot.bonus}`);
+  if (shot.applied) parts.push(`취약 ${ammo.vulnerability.percent}% · ${ammo.vulnerability.turns}턴`);
+  else if (shot.percent) parts.push(`취약 +${shot.percent}%`);
   return parts.join(' · ');
 }
 
@@ -39,7 +44,7 @@ export function mountCombat(root: HTMLElement) {
       <div class="planner-head"><h2>${P220.name} <small>탄창</small></h2><button type="button" data-reset>다시 시작</button></div>
       <div class="lab-slots" aria-label="발사 순서"></div>
       <div class="lab-edit"><span data-selected></span><button data-shift="-1" aria-label="앞 칸으로 이동">←</button><button data-shift="1" aria-label="뒤 칸으로 이동">→</button><button data-clear>칸 비우기</button></div>
-      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}"><i class="round-mark"></i><span><b>${ammo[id].name}</b><small>${notes[id]}</small></span><strong aria-label="기본 피해 ${ammo[id].base}">${ammo[id].base}</strong></button>`).join('')}</div>
+      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}"><i class="round-mark"></i><span><b>${ammo[id].name}</b><small>${notes[id]}</small></span><strong aria-label="${id === 'copy' ? '직전 탄 피해' : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong></button>`).join('')}</div>
       <button class="lab-fire" data-fire>발사</button>
     </section></div>
     <section class="lab-record"><h2>사격 기록</h2><div data-log></div></section>
