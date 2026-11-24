@@ -154,4 +154,3 @@ describe('발사 잠금과 초기화', () => {
     expect(controller.state).toBe(initial);
   });
 });
-

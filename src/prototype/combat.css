@@ -1,0 +1,76 @@
+.combat-lab { height: 100dvh; overflow: auto; padding: 18px max(20px, calc((100vw - 1340px) / 2)) 32px; color: #e6ebe4; background: #101411; font-variant-numeric: tabular-nums; }
+.combat-lab h1, .combat-lab h2, .combat-lab h3, .combat-lab p, .combat-lab ol { margin: 0; }
+.combat-lab button, .lab-settings input { background: #222a24; border: 1px solid #404a40; color: inherit; border-radius: 5px; padding: 7px 12px; cursor: pointer; }
+.combat-lab button:disabled { opacity: .5; cursor: default; }
+.combat-lab button:enabled:hover { border-color: #a5be91; }
+.lab-head, .field-head, .planner-head, .lab-edit { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.lab-head { margin-bottom: 15px; }
+.lab-head h1 { display: flex; gap: 10px; align-items: center; font-size: 24px; letter-spacing: -.05em; }
+.lab-head h1 small, .planner-head h2 small { color: #a3b19f; font-size: .73em; font-weight: 550; }
+.lab-head .build-id { font: 12px monospace; color: #a0ada0; }
+.round-mark { display: inline-block; width: 8px; height: 22px; border-radius: 50% 50% 2px 2px; border-bottom: 3px double #586a48; background: var(--ammo-color, var(--acid)); flex: none; }
+.lab-columns { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(365px, 1fr); gap: 16px; }
+.lab-field, .lab-planner, .lab-record, .lab-settings { background: #171d19; border: 1px solid #39433a; border-radius: 8px; min-width: 0; }
+.lab-field { display: flex; flex-direction: column; overflow: hidden; }
+.field-head, .lab-planner, .lab-record, .lab-settings { padding: 16px; }
+.combat-lab h2 { font-size: 1.22rem; }
+.combat-lab h3 { font-size: 1rem; margin: 15px 0 8px; }
+.field-head strong { color: var(--acid); }
+.combat-lab[data-phase=defeat] .field-head strong { color: #ff9890; }
+.lab-scene { position: relative; flex: 1; min-height: 220px; overflow: hidden; }
+.lab-scene canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.lab-meters { display: grid; grid-template-columns: 1.4fr 1fr 1.3fr 1fr 1fr; gap: 8px; padding: 14px 16px; }
+.lab-meters span, .lab-meters b { display: block; }
+.lab-meters span, .lab-edit span, .lab-record p { color: #afbcad; }
+.lab-meters b { font-size: max(1rem, var(--combat-value-prominent)); margin-top: 4px; overflow-wrap: anywhere; }
+.lab-slots { display: grid; grid-auto-columns: minmax(0,1fr); grid-auto-flow: column; gap: 6px; margin: 15px 0 6px; }
+.lab-slots button { text-align: left; padding: 8px; }
+.lab-slots button[aria-pressed=true] { border-color: var(--acid); background: #2b3423; }
+.lab-slots small, .lab-choices small { display: block; color: #acb9a9; }
+.lab-slots b { display: block; font-size: var(--combat-value-prominent); white-space: nowrap; }
+.lab-edit { justify-content: end; gap: 5px; }
+.lab-edit span { margin-right: auto; font-size: .86rem; }
+.lab-edit button { font-size: .85rem; }
+.lab-choices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px; }
+.lab-choices button { text-align: left; display: flex; align-items: center; gap: 8px; padding: 8px; min-height: 52px; }
+.lab-choices b { font-size: var(--combat-value-prominent); }
+.lab-choices strong { margin-left: auto; font-size: max(1rem,var(--combat-value-size)); }
+.lab-choices small { margin-top: 2px; line-height: 1.25; }
+.lab-choices .round-mark { width: 6px; height: 18px; }
+[data-round=standard] { --ammo-color: #ccd7bd; } [data-round=reinforced] { --ammo-color: #efa45a; }
+[data-round=follow_up] { --ammo-color: #81c4cf; } [data-round=finisher] { --ammo-color: #d0a0eb; }
+[data-round=execution] { --ammo-color: #ed887a; } [data-round=vulnerability] { --ammo-color: #ddc77e; }
+[data-round=pain] { --ammo-color: #d588a6; }
+.combat-lab .lab-fire { width: 100%; padding: 11px; margin-top: 12px; font-weight: 800; background: var(--acid); color: #182013; border-color: transparent; }
+.lab-record, .lab-settings { margin-top: 12px; }
+.lab-record h2 { margin-bottom: 9px; }
+.lab-record ol { list-style: none; padding: 0; }
+.lab-record li { display: grid; grid-template-columns: 1fr 1fr 1.2fr 2fr; align-items: baseline; gap: 8px; border-top: 1px solid #333c33; padding: 5px 0; font-size: var(--combat-value-size); }
+.lab-record li small { color: #c3d3b2; }
+.lab-settings summary { cursor: pointer; font-weight: 700; }
+.lab-settings form { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.lab-settings label { display: grid; gap: 4px; }
+.lab-settings input { width: 110px; font: inherit; }
+@media (max-width: 760px) {
+  .combat-lab { padding: 10px 9px 24px; }
+  .lab-head { margin-bottom: 7px; }
+  .lab-head h1 { font-size: 20px; }
+  .lab-columns { grid-template-columns: 1fr; gap: 8px; }
+  .lab-scene { flex: none; height: clamp(125px, 20dvh, 190px); min-height: 0; }
+  .field-head, .lab-planner, .lab-record, .lab-settings { padding: 9px 10px; }
+  .lab-meters { padding: 7px 9px; gap: 5px; }
+  .lab-meters span { font-size: .76rem; }
+  .lab-meters b { font-size: .96rem; }
+  .lab-slots { margin-top: 8px; }
+  .lab-choices { gap: 4px; }
+  .lab-choices button { min-height: 41px; padding: 5px; gap: 5px; }
+  .lab-choices small { font-size: .72rem; }
+  .combat-lab h3 { margin: 7px 0 5px; }
+  .lab-slots button { padding: 5px 7px; }
+  .lab-edit button { min-height: 30px; }
+  .combat-lab .lab-fire { margin-top: 7px; }
+  .lab-record li { grid-template-columns: .85fr .65fr 1.2fr; }
+  .lab-record li small:not(:empty) { grid-column: 1/-1; }
+  .lab-record li small:empty { display: none; }
+  .lab-settings input { width: 90px; }
+}

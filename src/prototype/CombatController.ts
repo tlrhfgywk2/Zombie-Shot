@@ -58,4 +58,3 @@ export class CombatController {
     return true;
   }
 }
-

@@ -1,0 +1,142 @@
+/* global document, MutationObserver, innerWidth */
+import assert from 'node:assert/strict';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { preview } from 'vite';
+
+const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ? pathToFileURL(process.env.PLAYWRIGHT_MODULE).href : 'playwright');
+const dir = new URL('../docs/validation/combat-core/', import.meta.url);
+await mkdir(dir, { recursive: true });
+const server = await preview({ preview: { host: '127.0.0.1', port: 0 } });
+const url = `http://127.0.0.1:${server.httpServer.address().port}/Zombie-Shot/`;
+let browser;
+try {
+  browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || 'msedge', args: ['--enable-unsafe-swiftshader'] });
+  const results = [];
+  for (const [name, width, height] of [['데스크톱', 1440, 900], ['세로', 390, 844]]) {
+    const page = await browser.newPage({ viewport: { width, height }, hasTouch: width < 500 });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.location().url + " " + msg.text()); });
+    await page.addInitScript(() => {
+      localStorage.setItem('zombie-shot.presentation', '{"speed":2,"firingStance":"aimed"}');
+      localStorage.setItem('zombie-shot.save', '{"weapon":"m500","capacity":6,"upgrades":[99],"difficulty":10}');
+    });
+    await page.goto(url);
+    const loc = selector => page.locator(selector);
+    const click = selector => loc(selector).click();
+    const wait = phase => loc(`main[data-phase="${phase}"]`).waitFor();
+    const read = selector => loc(selector).innerText();
+    const capture = async state => {
+      await page.screenshot({ type: 'jpeg', quality: 85, path: fileURLToPath(new URL(`${name}-${state}.jpg`, dir)) });
+    };
+    const scenario = async (hp, distance = 1, approach = 1) => {
+      const details = loc('.lab-settings');
+      if (!(await details.evaluate(el => el.open))) await click('.lab-settings summary');
+      for (const [key, value] of Object.entries({ maxHp: hp, distance, approach })) await loc(`[name="${key}"]`).fill(String(value));
+      await click('form button');
+      await click('.lab-settings summary');
+      await loc('.lab-head').scrollIntoViewIfNeeded();
+    };
+    await wait('planning');
+    assert.equal(await loc('[data-slot]').count(), 4);
+    assert.equal(await loc('[data-round]').count(), 7);
+    assert.equal(await loc('.presentation-debug').count(), 0);
+    assert.ok(await loc('canvas').isVisible());
+    await capture('준비');
+    for (const i of [0,1,2,3]) {
+      await click(`[data-slot="${i}"]`);
+      await click('[data-clear]');
+    }
+    assert.ok(await loc('[data-fire]').isDisabled());
+    await capture('빈탄창');
+    await click('[data-slot="0"]');
+    for (const round of ['reinforced', 'vulnerability', 'follow_up', 'finisher']) await click(`[data-round="${round}"]`);
+    await click('[data-slot="0"]');
+    await click('[data-shift="1"]');
+    assert.deepEqual(await loc('[data-slot]').evaluateAll(els => els.map(e => e.dataset.roundId)), ['vulnerability','reinforced','follow_up','finisher']);
+    await page.evaluate(() => {
+      const button = document.querySelector('[data-fire]');
+      button.click();
+      button.dispatchEvent(new Event('click', { bubbles: true }));
+    });
+    await wait('planning');
+    assert.deepEqual(await loc('[data-log] li b').allTextContents(), ['피해 0','피해 25','피해 26','피해 20']);
+    assert.equal(await read('[data-distance]'), '2');
+    assert.equal(await read('[data-actions]'), '1');
+    assert.equal(await read('[data-status]'), '25% · 1턴');
+    await loc('.lab-head').scrollIntoViewIfNeeded();
+    await capture('취약');
+    await loc('[data-log]').scrollIntoViewIfNeeded();
+    await capture('기록');
+    await click('[data-reset]');
+    const resetDuring = async phase => {
+      await page.evaluate(target => new Promise(resolve => {
+        const lab = document.querySelector('main');
+        const observer = new MutationObserver(() => {
+          if (lab.dataset.phase === target) {
+            observer.disconnect();
+            document.querySelector('[data-reset]').click();
+            resolve();
+          }
+        });
+        observer.observe(lab, { attributes: true });
+        document.querySelector('[data-fire]').click();
+      }), phase);
+      await page.waitForTimeout(1500);
+      await wait('planning');
+      assert.equal(await read('[data-hp]'), '100 / 100');
+      assert.equal(await read('[data-distance]'), '3');
+      assert.equal(await read('[data-turns]'), '0');
+      assert.equal(await read('[data-actions]'), '0');
+      assert.equal(await loc('[data-log] li').count(), 0);
+    };
+    await resetDuring('firing');
+    await resetDuring('approach');
+    await scenario(15);
+    await click('[data-slot="0"]');
+    for (const round of ['standard','finisher','standard','standard']) await click(`[data-round="${round}"]`);
+    await click('[data-fire]');
+    await wait('victory');
+    assert.equal(await read('[data-turns]'), '1');
+    assert.equal(await read('[data-actions]'), '0');
+    assert.equal(await loc('[data-slot]').filter({ hasText: '미발사' }).count(), 2);
+    assert.match(await read('[data-log]'), /실제 감소 5/);
+    await loc('.lab-head').scrollIntoViewIfNeeded();
+    await capture('조기승리');
+    await scenario(41);
+    await click('[data-slot="1"]');
+    await click('[data-round="standard"]');
+    await click('[data-fire]');
+    await wait('defeat');
+    assert.equal(await read('[data-hp]'), '1 / 41');
+    assert.equal(await read('[data-distance]'), '0');
+    assert.equal(await read('[data-turns]'), '1');
+    assert.equal(await read('[data-actions]'), '1');
+    assert.ok(await loc('[data-fire]').isDisabled());
+    const overflow = await page.evaluate(() => [...document.querySelectorAll('.combat-lab, .lab-slots button, .lab-choices button, .lab-meters, .lab-record')].some(el => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().right > innerWidth + 1));
+    assert.equal(overflow, false);
+    await loc('.lab-head').scrollIntoViewIfNeeded();
+    await capture('접촉패배');
+    await page.goto(url + '?presentationDebug=1');
+    await loc('.presentation-debug').waitFor();
+    const debug = loc('.presentation-debug');
+    const beforeDepth = await debug.getAttribute('data-enemy-depth');
+    await page.evaluate(() => document.querySelector('[data-fire]').click());
+    await loc('[data-log] li:nth-child(2)').waitFor();
+    assert.equal(await read('[data-distance]'), '3');
+    assert.equal(await debug.getAttribute('data-enemy-depth'), beforeDepth);
+    await wait('planning');
+    await page.waitForFunction(z => Number(document.querySelector('.presentation-debug').dataset.enemyDepth) > Number(z), beforeDepth);
+    assert.equal(await read('[data-distance]'), '2');
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('zombie-shot.save')).weapon), 'm500');
+    assert.deepEqual(errors, []);
+    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: [0,25,26,20], 조기승리발사수: 2, 접촉패배잔여체력: 1, 가로넘침: overflow, 실행오류: errors });
+    await page.close();
+  }
+  await writeFile(new URL('화면검증.json', dir), JSON.stringify(results, null, 2) + '\n');
+  console.log(results);
+} finally {
+  await browser?.close();
+  await new Promise(resolve => server.httpServer.close(resolve));
+}

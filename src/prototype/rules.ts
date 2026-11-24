@@ -87,4 +87,3 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
   const vulnerable = status && status.remaining > 1 ? { ...status, remaining: status.remaining - 1 } : null;
   yield { kind: 'cleanup', state: { ...state, phase: 'planning', vulnerable } };
 }
-
