@@ -41,6 +41,8 @@
 [data-round=follow_up] { --ammo-color: #81c4cf; } [data-round=finisher] { --ammo-color: #d0a0eb; }
 [data-round=execution] { --ammo-color: #ed887a; } [data-round=vulnerability] { --ammo-color: #ddc77e; }
 [data-round=pain] { --ammo-color: #d588a6; }
+[data-round=resonance] { --ammo-color: #8bcca6; } [data-round=mixed] { --ammo-color: #b3abef; }
+[data-round=copy] { --ammo-color: #9cbadf; }
 .combat-lab .lab-fire { width: 100%; padding: 11px; margin-top: 12px; font-weight: 800; background: var(--acid); color: #182013; border-color: transparent; }
 .lab-record, .lab-settings { margin-top: 12px; }
 .lab-record h2 { margin-bottom: 9px; }

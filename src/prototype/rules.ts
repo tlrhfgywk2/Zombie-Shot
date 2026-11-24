@@ -8,6 +8,9 @@ export const ammo = {
   execution: { name: '처형탄', base: 6, threshold: 30, bonus: 2.5 },
   vulnerability: { name: '취약탄', base: 0, percent: 25, turns: 2 },
   pain: { name: '고통탄', base: 10, bonusFactor: 2 },
+  resonance: { name: '동조탄', base: 6, perRound: 4 },
+  mixed: { name: '혼합탄', base: 8, perType: 2 },
+  copy: { name: '복제탄', base: 0 },
 } as const;
 export type Round = keyof typeof ammo;
 export function isRound(value: unknown): value is Round {
@@ -30,16 +33,19 @@ export function startEncounter(scenario: Scenario): Encounter {
   if (!validScenario(scenario)) throw new RangeError('전투 설정에는 양의 정수가 필요합니다.');
   return { ...scenario, hp: scenario.maxHp, turns: 0, actions: 0, vulnerable: null, phase: 'planning' };
 }
-export interface Shot {
+interface ShotEffect {
+  source: Exclude<Round, 'copy'> | null;
+  damage: number;
+  bonus: number;
+  percent: number;
+  applied: boolean;
+}
+export interface Shot extends ShotEffect {
   index: number;
   round: Round;
   before: number;
   after: number;
-  damage: number;
   removed: number;
-  bonus: number;
-  percent: number;
-  applied: boolean;
 }
 export function lockMagazine(slots: readonly (Round | null)[], capacity: number): readonly Round[] | null {
   const copy = Array.from(slots);
@@ -52,23 +58,30 @@ export type Frame = Event & { state: Encounter };
 // 한 발이 만든 상태를 다음 발이 그대로 읽는다. 렌더러와 타이머는 이 계산에 참여하지 않는다.
 export function* resolveVolley(start: Encounter, locked: readonly Round[]): Generator<Frame> {
   let state: Encounter = { ...start, phase: 'firing' };
-  let previousDamage = 0;
+  const counts = new Map<Round, number>();
+  for (const round of locked) counts.set(round, (counts.get(round) ?? 0) + 1);
+  const largestGroup = Math.max(0, ...counts.values());
+  let effect: ShotEffect = { source: null, damage: 0, bonus: 0, percent: 0, applied: false };
   for (const [index, round] of locked.entries()) {
-    const base = ammo[round].base;
-    let bonus = 0;
-    if (round === 'follow_up') bonus = previousDamage * ammo.follow_up.previousRatio;
-    if (round === 'finisher' && index === locked.length - 1) bonus = base * ammo.finisher.lastBonus;
-    if (round === 'execution' && state.hp * 100 <= state.maxHp * ammo.execution.threshold) bonus = base * ammo.execution.bonus;
-    let percent = state.vulnerable?.percent ?? 0;
-    if (round === 'pain') percent *= ammo.pain.bonusFactor;
-    const damage = Math.floor((base + bonus) * (100 + percent) / 100 + 0.5);
+    // 복제탄은 직전 발의 판정 결과를 그대로 한 번 더 적용한다.
+    if (round !== 'copy') {
+      const base = ammo[round].base;
+      let bonus = 0;
+      if (round === 'follow_up') bonus = effect.damage * ammo.follow_up.previousRatio;
+      if (round === 'finisher' && index === locked.length - 1) bonus = base * ammo.finisher.lastBonus;
+      if (round === 'execution' && state.hp * 100 <= state.maxHp * ammo.execution.threshold) bonus = base * ammo.execution.bonus;
+      if (round === 'resonance') bonus = largestGroup * ammo.resonance.perRound;
+      if (round === 'mixed') bonus = counts.size * ammo.mixed.perType;
+      let percent = state.vulnerable?.percent ?? 0;
+      if (round === 'pain') percent *= ammo.pain.bonusFactor;
+      const damage = Math.floor((base + bonus) * (100 + percent) / 100 + 0.5);
+      effect = { source: round, damage, bonus, percent, applied: round === 'vulnerability' };
+    }
     const before = state.hp;
-    const after = Math.max(0, before - damage);
-    const applied = round === 'vulnerability';
-    const vulnerable = applied ? { percent: ammo.vulnerability.percent, remaining: ammo.vulnerability.turns } : state.vulnerable;
+    const after = Math.max(0, before - effect.damage);
+    const vulnerable = effect.applied ? { percent: ammo.vulnerability.percent, remaining: ammo.vulnerability.turns } : state.vulnerable;
     state = { ...state, hp: after, vulnerable };
-    yield { kind: 'shot', state, shot: { index, round, before, after, damage, removed: before - after, bonus, percent, applied } };
-    previousDamage = damage;
+    yield { kind: 'shot', state, shot: { index, round, before, after, removed: before - after, ...effect } };
     if (!after) break;
   }
   state = { ...state, turns: state.turns + 1 };
