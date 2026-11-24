@@ -84,6 +84,7 @@ export function mountCombat(root: HTMLElement) {
   const slots = game.slots.map((_, index) => {
     const button = document.createElement('button');
     button.dataset.slot = String(index);
+    button.setAttribute('aria-keyshortcuts', String(index + 1));
     element('.lab-slots').append(button);
     return button;
   });
@@ -133,9 +134,15 @@ export function mountCombat(root: HTMLElement) {
   window.addEventListener('keydown', event => {
     if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
     if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]')) return;
-    if (event.code !== 'Space' && event.code !== 'KeyR') return;
+    const slot = /^[1-9]$/.test(event.key) ? slots[Number(event.key) - 1] : undefined;
+    if (!slot && event.code !== 'Space' && event.code !== 'KeyR') return;
     event.preventDefault();
     if (event.repeat || game.state.phase !== 'planning') return;
+    if (slot) {
+      slot.click();
+      slot.focus();
+      return;
+    }
     if (event.code === 'KeyR') {
       game.fire();
       return;
