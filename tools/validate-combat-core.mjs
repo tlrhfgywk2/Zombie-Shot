@@ -54,6 +54,13 @@ try {
     await capture('준비');
     await click('[data-slot="3"]');
     assert.deepEqual(await magazine(), ['standard', 'standard', 'standard', '']);
+    await click('[data-round="standard"]');
+    for (const index of [0, 1, 2, 3]) {
+      await page.keyboard.press(String(index + 1));
+      assert.deepEqual(await magazine(), Array.from({ length: 4 }, (_, i) => i === index ? '' : 'standard'));
+      assert.equal(await page.evaluate(() => document.activeElement.dataset.slot), String(index));
+      await click('[data-round="standard"]');
+    }
     await page.keyboard.press('Space');
     assert.deepEqual(await magazine(), ['', '', '', '']);
     assert.equal(await loc('[data-slot="0"]').getAttribute('aria-pressed'), 'true');
@@ -69,6 +76,7 @@ try {
     assert.deepEqual(await magazine(), loaded);
     await page.keyboard.press('r');
     await loc('[data-log] li').first().waitFor();
+    await page.keyboard.press('3');
     await page.keyboard.press('Space');
     assert.deepEqual(await magazine(), loaded);
     await wait('planning');
