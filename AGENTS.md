@@ -18,11 +18,13 @@ PC의 전투 의사결정 정보는 한눈에 읽혀야 한다. 체력, 화력, 
 - `release` is the validated promotion branch; do not modify it during normal development.
 - `main` is the stable baseline; do not modify it during normal development.
 - Use `develop -> task branch -> PR -> develop` for normal feature/fix work.
-- For PRs whose base is `develop`, the agent is explicitly authorized and expected to complete integration without waiting for manual user approval: push the task branch, open or update the PR, wait for all required PR checks, and when every required check passes and the PR is mergeable with no unresolved blocking issue, merge the PR into `develop` itself.
+- 작업 브랜치에서 구현·로컬 검증·커밋·푸시 후 PR을 연다. 최신 기준에 대한 필수 CI 통과와 검토 대화 해결을 확인하고 사용자의 명시적 병합 결정까지 PR을 열어 둔다. 자동 병합을 예약하지 않는다.
 - After merging into `develop`, verify that the new `develop` head contains the merged work and that the GitHub Pages deployment for that exact integration revision completes successfully. If deployment fails because of the submitted change or repository workflow, investigate and fix it before reporting the task complete.
 - Do not auto-merge into `release` or `main`. Promotion to those branches remains a separate explicit user decision unless the user specifically instructs otherwise.
 - Exactly one workflow may publish `develop` to `gh-pages`. Task branches must not overwrite public Pages.
 - The deployed game must retain its subtle visible `BUILD <short-sha>` marker. The marker and deployment must identify the same source revision; never hard-code or remove it. Local previews may show `BUILD LOCAL`.
+
+- 병합 뒤 작업 브랜치의 로컬·원격 끝 커밋을 각각 확인한다. 통합 브랜치의 조상이거나 병합된 PR의 정확한 헤드이며 병합 커밋이 통합 이력에 남아 있는 경우에만 정리한다. 활성 작업 트리·열린 PR·보호 브랜치·배포 브랜치를 보존하고 삭제 직전 끝 커밋을 다시 확인한다.
 
 ## Validation
 
