@@ -10,6 +10,7 @@ import { getReacquisitionDuration, PRESENTATION_EFFECTS, PRESENTATION_MOTION, PR
 import { anchorPresentationLayoutToStage, constrainWeaponPosition, getAimQuaternion, getPresentationLayout, type PresentationLayout } from './PresentationMath';
 import { getResponsiveLayoutMode, getViewportSize } from './ResponsiveLayout';
 import { createAttachmentModel, createCartridge, createMagazineModel, createPistolModel, createZombieModel } from './SceneModels';
+import { WeaponHeatVisual } from './WeaponHeatVisual';
 
 interface MuzzleSmokeEffect {
   root: THREE.Group;
@@ -49,6 +50,7 @@ export class GamePresentation {
   private set specialThreat(value: boolean) { this.actor.special = value; }
   onSelectTarget?: (id: string) => void;
   private readonly pistolModel = createPistolModel();
+  private readonly weaponHeatVisual = new WeaponHeatVisual(this.pistolModel.materials);
   private readonly magazineModel = createMagazineModel();
   private readonly muzzleFlash = new THREE.PointLight(0xffb34a, 0, 7);
   private readonly cartridges: THREE.Group[] = [];
@@ -193,6 +195,10 @@ export class GamePresentation {
     if (snap) this.resetZombie(depth);
     this.setZombie(depth, 1, 1);
     this.aimPistolAtTarget(this.getZombieTarget());
+  }
+
+  setWeaponHeat(heat: number, immediate = false): void {
+    this.weaponHeatVisual.setHeat(heat, immediate);
   }
 
   resetTestScene(distance: number): void {
@@ -1425,6 +1431,7 @@ export class GamePresentation {
     }
     this.elapsed += delta;
     this.updateShotEffects(delta);
+    this.weaponHeatVisual.update(delta);
     if (this.prototypeFlash > 0) {
       this.prototypeFlash = Math.max(0, this.prototypeFlash - delta);
       const fraction = this.prototypeFlash / 0.14;

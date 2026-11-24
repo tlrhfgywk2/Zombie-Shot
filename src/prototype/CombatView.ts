@@ -1,5 +1,6 @@
 import { BUILD_LABEL } from '../buildInfo';
 import { GamePresentation } from '../presentation/GamePresentation';
+import { heatDamageMultiplier } from './combatBalance';
 import { CombatController } from './CombatController';
 import { ammo, defaultScenario, isRound, P220 } from './rules';
 import type { Frame, Round, Shot } from './rules';
@@ -18,6 +19,8 @@ const notes: Record<Round, string> = {
   copy: '직전 탄의 피해·효과 복제',
 };
 const phases = { planning: '사격 준비', firing: '발사 중', approach: '접근 중', victory: '승리', defeat: '접촉 · 패배' };
+const heatFormat = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 });
+const multiplierFormat = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function shotNote(shot: Shot) {
   if (!shot.source) return '복제 대상 없음';
@@ -39,12 +42,17 @@ export function mountCombat(root: HTMLElement) {
       <div class="lab-scene"></div>
       <div class="lab-meters"><div><span>체력</span><b data-hp></b></div><div><span>접촉까지</span><b data-distance></b></div>
         <div><span>취약</span><b data-status></b></div><div><span>완료 턴</span><b data-turns></b></div><div><span>적 행동</span><b data-actions></b></div></div>
+      <div class="lab-heat"><div>무기 열 <b data-weapon-heat></b></div><div>피해 배율 <b data-heat-multiplier></b></div></div>
     </section>
     <section class="lab-planner" aria-label="탄창 편집">
       <div class="planner-head"><h2>${P220.name} <small>탄창</small></h2><button type="button" data-reset>다시 시작</button></div>
       <div class="lab-slots" aria-label="발사 순서"></div>
       <div class="lab-edit"><span data-selected></span><button data-shift="-1" aria-label="앞 칸으로 이동">←</button><button data-shift="1" aria-label="뒤 칸으로 이동">→</button><button data-clear>칸 비우기</button></div>
-      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}"><i class="round-mark"></i><span><b>${ammo[id].name}</b><small>${notes[id]}</small></span><strong aria-label="${id === 'copy' ? '직전 탄 피해' : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong></button>`).join('')}</div>
+      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}">
+        <i class="round-mark"></i><b class="lab-ammo-name">${ammo[id].name}</b><small>${notes[id]}</small>
+        <strong aria-label="${id === 'copy' ? '직전 탄 피해' : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong>
+        <span class="lab-ammo-heat">열 <b>+${ammo[id].heat}</b></span>
+      </button>`).join('')}</div>
       <button class="lab-fire" data-fire>발사</button>
     </section></div>
     <section class="lab-record"><h2>사격 기록</h2><div data-log></div></section>
@@ -107,6 +115,7 @@ export function mountCombat(root: HTMLElement) {
     if (kind === 'shot') scene.showTestShot(ammo[shots.at(-1)!.round].name);
     if (kind === 'approach' || kind === 'cleanup' || kind === 'defeat') scene.setTestDistance(state.distance, kind !== 'approach');
     if (kind === 'victory') scene.showTestVictory();
+    scene.setWeaponHeat(state.weaponHeat, kind === 'reset' || kind === 'victory' || kind === 'defeat');
     element('[data-phase-label]').textContent = phases[state.phase];
     element('.combat-lab').dataset.phase = state.phase;
     element('[data-hp]').textContent = `${state.hp} / ${state.maxHp}`;
@@ -114,6 +123,8 @@ export function mountCombat(root: HTMLElement) {
     element('[data-status]').textContent = state.vulnerable ? `${state.vulnerable.percent}% · ${state.vulnerable.remaining}턴` : '없음';
     element('[data-turns]').textContent = String(state.turns);
     element('[data-actions]').textContent = String(state.actions);
+    element('[data-weapon-heat]').textContent = heatFormat.format(state.weaponHeat);
+    element('[data-heat-multiplier]').textContent = `×${multiplierFormat.format(heatDamageMultiplier(state.weaponHeat))}`;
     slots.forEach((button, i) => {
       const round = game.slots[i];
       const unfired = state.phase === 'victory' && i >= shots.length;

@@ -5,6 +5,7 @@ import { AMMO_DEFINITIONS } from '../data/ammoDefinitions';
 
 export interface PistolModel {
   root: THREE.Group;
+  materials: readonly THREE.MeshStandardMaterial[];
   stageAnchor: THREE.Object3D;
   grip: THREE.Group;
   gripBody: THREE.Mesh;
@@ -186,7 +187,8 @@ export const createPistolModel = (): PistolModel => {
   slide.add(attachmentSockets.optic);
   grip.add(attachmentSockets.magazine, attachmentSockets.grip);
 
-  return { root, stageAnchor, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, chamberRoundSeat, attachmentSockets };
+  const materials = [frameMaterial, slideMaterial, darkMetal, polymer];
+  return { root, materials, stageAnchor, grip, gripBody, slide, muzzle, magazineSeatAnchor, ejectionPort, chamberRoundSeat, attachmentSockets };
 };
 
 export const createAttachmentModel = (id: AttachmentId): THREE.Group => {
