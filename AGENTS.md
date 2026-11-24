@@ -18,7 +18,7 @@ PC의 전투 의사결정 정보는 한눈에 읽혀야 한다. 체력, 화력, 
 - `release` is the validated promotion branch; do not modify it during normal development.
 - `main` is the stable baseline; do not modify it during normal development.
 - Use `develop -> task branch -> PR -> develop` for normal feature/fix work.
-- 작업 브랜치에서 구현·로컬 검증·커밋·푸시 후 PR을 연다. 최신 기준에 대한 필수 CI 통과와 검토 대화 해결을 확인하고 사용자의 명시적 병합 결정까지 PR을 열어 둔다. 자동 병합을 예약하지 않는다.
+- 작업 브랜치에서 구현·로컬 검증·커밋·푸시 후 `develop` 대상 PR을 연다. 에이전트가 요청사항에 맞게 변경분을 직접 검토하고, 최신 `develop` 기준 필수 CI가 통과했으며 검토 대화가 모두 해결되고 병합에 문제가 없으면 사용자 확인을 기다리지 않고 직접 병합한다. 수정이 필요하면 반영한 뒤 새 커밋을 다시 검토하고 검사 결과를 확인한다.
 - After merging into `develop`, verify that the new `develop` head contains the merged work and that the GitHub Pages deployment for that exact integration revision completes successfully. If deployment fails because of the submitted change or repository workflow, investigate and fix it before reporting the task complete.
 - Do not auto-merge into `release` or `main`. Promotion to those branches remains a separate explicit user decision unless the user specifically instructs otherwise.
 - Exactly one workflow may publish `develop` to `gh-pages`. Task branches must not overwrite public Pages.
