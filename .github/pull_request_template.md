@@ -1,46 +1,23 @@
-## Summary
+## 목적과 범위
 
-## Changes
+해결할 문제, 의도한 동작, 변경한 기능과 영향을 받는 경로를 적는다.
 
-## Validation
+## 수락 기준과 검증
 
-- [ ] Tests
-- [ ] Lint
-- [ ] Production build
-- [ ] Browser validation if visual
-- [ ] Desktop 1440x900 if visual
-- [ ] Portrait 390x844 if visual
+| 기준 | 실행한 명령 또는 재현 절차 | 결과와 증거 |
+|---|---|---|
+| 도메인·제어기 | | |
+| 명세·정적 검사·타입 검사·빌드 | | |
+| 실제 화면과 경계 상태 (해당 시) | | |
 
-## Deployment impact
+검증한 헤드 및 시험 병합 SHA, CI 링크, 수행하지 못한 검사와 남은 위험을 적는다.
 
-For normal PRs targeting `develop`, the agent may merge after required checks pass and must verify the resulting Pages deployment. `release` and `main` promotions remain manual unless explicitly requested.
+## 병합 점검
 
-## Codex Handoff
+- [ ] 현재 기준 브랜치와 PR 헤드의 검사가 모두 통과했다.
+- [ ] 검토 의견을 해결했고 사용자가 병합을 결정했다.
+- [ ] 병합 뒤 통합 커밋과 해당 배포를 검증하고 작업 브랜치의 현재 끝 커밋을 대조한다. 열려 있는 PR·작업 트리·보호 규칙을 확인한 뒤 통합이 입증된 브랜치만 정리한다.
 
-### Goal
+## 작업 인계
 
-### Current status
-
-### Completed
-
-### Remaining
-
-### Confirmed findings
-
-### Failed / rejected approaches
-
-### Validation completed
-
-- Tests:
-- Lint:
-- Build:
-- Browser:
-- Pages:
-
-### Important files
-
-### Exact next step
-
-### Resume instructions
-
-Start from this PR's head branch. Read `AGENTS.md`, this PR description, recent commits, and the current diff before editing.
+목표와 진행 상태, 완료·잔여 항목, 확인한 사실과 배제한 접근, 중요 파일, 다음 명령을 적는다. 재개 시 이 PR의 헤드에서 `AGENTS.md`, PR 본문, 최근 커밋, 기준 브랜치와의 차이를 확인한다.

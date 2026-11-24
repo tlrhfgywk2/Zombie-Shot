@@ -80,6 +80,7 @@ export class GamePresentation {
   private animationInProgress = false;
   private resizeObserver?: ResizeObserver;
   private animationFrame = 0;
+  private prototypeFlash = 0;
   private shotEffectSequence = 0;
   private playbackSpeed = 1;
   private firingSpeed = 1;
@@ -184,6 +185,41 @@ export class GamePresentation {
 
   wait(milliseconds: number): Promise<void> {
     return this.tween(milliseconds, () => undefined);
+  }
+
+  // 시험장의 거리는 논리 단위다. 먼 설정도 카메라 시야 안에 들어오도록 투영한다.
+  setTestDistance(distance: number, snap: boolean): void {
+    const depth = 2 + 5 * Math.log2(1 + distance);
+    if (snap) this.resetZombie(depth);
+    this.setZombie(depth, 1, 1);
+    this.aimPistolAtTarget(this.getZombieTarget());
+  }
+
+  resetTestScene(distance: number): void {
+    this.prototypeFlash = 0;
+    this.pistolModel.slide.position.x = 0;
+    this.muzzleFlash.intensity = 0;
+    for (const effect of [...this.muzzleSmokePool, ...this.casingPool]) {
+      effect.active = false;
+      effect.root.visible = false;
+    }
+    this.presentationState = '탄창 편집';
+    this.setTestDistance(distance, true);
+  }
+
+  showTestShot(name: string): void {
+    this.presentationState = name;
+    this.aimPistolAtTarget(this.getZombieTarget());
+    this.prototypeFlash = 0.14;
+    this.muzzleFlash.intensity = 8;
+    this.spawnMuzzleSmoke();
+    this.ejectShellCasing();
+  }
+
+  showTestVictory(): void {
+    this.zombieFallen = true;
+    this.zombieModel.root.rotation.z = 1.38;
+    this.zombieModel.root.position.y = -0.78;
   }
 
   setZombie(distance: number, hpRatio: number, level: number, type: EnemyType = 'normal', ignited = false): void {
@@ -982,6 +1018,7 @@ export class GamePresentation {
       }
     });
     if (firstActive && firstActive.age < 0.08) this.captureSmokeDiagnostic(firstActive);
+    this.debugOverlay.dataset.enemyDepth = this.zombieModel.root.position.z.toFixed(3);
     this.debugOverlay.textContent = [
       '프레젠테이션 진단 모드',
       '초록 고리=착좌 · 빨강 팔면체=삽입 · 청록=총구 · 노랑=배출구 · 자홍=연기',
@@ -1388,6 +1425,12 @@ export class GamePresentation {
     }
     this.elapsed += delta;
     this.updateShotEffects(delta);
+    if (this.prototypeFlash > 0) {
+      this.prototypeFlash = Math.max(0, this.prototypeFlash - delta);
+      const fraction = this.prototypeFlash / 0.14;
+      this.muzzleFlash.intensity = 8 * fraction;
+      this.pistolModel.slide.position.x = -PRESENTATION_MOTION.slideTravel * fraction;
+    }
     this.updatePresentationDebug();
     for (const actor of this.enemyActors) {
       const model = actor.model;

@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - develop
+      - main
+      - release
 
 permissions:
   contents: read
@@ -23,6 +25,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: 검사 리비전 기록
+        run: git rev-parse HEAD
+
+      - name: 전투 시험장 도메인·제어기 계약
+        run: npm test -- src/prototype/combat.test.ts
 
       - name: Test
         run: npm test

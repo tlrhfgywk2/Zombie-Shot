@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const server = await createServer({ root, server: { middlewareMode: true }, appType: 'custom' });
+const server = await createServer({ root, optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true }, appType: 'custom' });
 let data;
 try {
   const spec = await server.ssrLoadModule('/src/data/ammoSpec.ts');
