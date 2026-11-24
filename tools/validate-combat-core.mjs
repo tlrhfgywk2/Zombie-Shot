@@ -30,6 +30,7 @@ try {
     const click = selector => loc(selector).click();
     const wait = phase => loc(`main[data-phase="${phase}"]`).waitFor();
     const read = selector => loc(selector).innerText();
+    const magazine = () => loc('[data-slot]').evaluateAll(els => els.map(e => e.dataset.roundId));
     const capture = async state => {
       await page.screenshot({ type: 'jpeg', quality: 85, path: fileURLToPath(new URL(`${name}-${state}.jpg`, dir)) });
     };
@@ -44,31 +45,38 @@ try {
     await wait('planning');
     assert.equal(await loc('[data-slot]').count(), 4);
     assert.equal(await loc('[data-round]').count(), 10);
+    assert.equal(await read('[data-hp]'), '∞');
     assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0']);
     assert.equal(await read('[data-weapon-heat]'), '0');
     assert.equal(await read('[data-heat-multiplier]'), '×1.00');
     assert.equal(await loc('.presentation-debug').count(), 0);
     assert.ok(await loc('canvas').isVisible());
     await capture('준비');
-    for (const i of [0,1,2,3]) {
-      await click(`[data-slot="${i}"]`);
-      await click('[data-clear]');
-    }
+    await click('[data-slot="3"]');
+    assert.deepEqual(await magazine(), ['standard', 'standard', 'standard', '']);
+    await page.keyboard.press('Space');
+    assert.deepEqual(await magazine(), ['', '', '', '']);
+    assert.equal(await loc('[data-slot="0"]').getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.evaluate(() => document.activeElement.dataset.slot), '0');
     assert.ok(await loc('[data-fire]').isDisabled());
+    await page.keyboard.press('r');
+    assert.equal(await read('[data-turns]'), '0');
+    assert.equal(await loc('[data-log] li').count(), 0);
     await capture('빈탄창');
-    await click('[data-slot="0"]');
     for (const round of ['reinforced', 'vulnerability', 'follow_up', 'finisher']) await click(`[data-round="${round}"]`);
-    await click('[data-slot="0"]');
     await click('[data-shift="1"]');
-    assert.deepEqual(await loc('[data-slot]').evaluateAll(els => els.map(e => e.dataset.roundId)), ['vulnerability','reinforced','follow_up','finisher']);
-    await page.evaluate(() => {
-      const button = document.querySelector('[data-fire]');
-      button.click();
-      button.dispatchEvent(new Event('click', { bubbles: true }));
-    });
+    const loaded = ['vulnerability', 'reinforced', 'follow_up', 'finisher'];
+    assert.deepEqual(await magazine(), loaded);
+    await page.keyboard.press('r');
+    await loc('[data-log] li').first().waitFor();
+    await page.keyboard.press('Space');
+    assert.deepEqual(await magazine(), loaded);
     await wait('planning');
-    const damage = await loc('[data-log] li b').allTextContents();
-    assert.deepEqual(damage, ['피해 0','피해 26','피해 28','피해 23']);
+    assert.deepEqual(await loc('[data-base-damage]').allTextContents(), ['0', '20', '8', '8']);
+    assert.deepEqual(await loc('[data-pre-heat-damage]').allTextContents(), ['0', '25', '26.25', '20']);
+    const damage = (await loc('[data-final-damage]').allTextContents()).map(Number);
+    assert.deepEqual(damage, [0, 26, 28, 23]);
+    assert.equal(await read('[data-hp]'), '∞');
     assert.equal(await read('[data-weapon-heat]'), '12.5');
     assert.equal(await read('[data-heat-multiplier]'), '×1.13');
     assert.equal(await read('[data-distance]'), '2');
@@ -94,7 +102,7 @@ try {
       }), phase);
       await page.waitForTimeout(1500);
       await wait('planning');
-      assert.equal(await read('[data-hp]'), '100 / 100');
+      assert.equal(await read('[data-hp]'), '∞');
       assert.equal(await read('[data-distance]'), '3');
       assert.equal(await read('[data-turns]'), '0');
       assert.equal(await read('[data-actions]'), '0');
@@ -104,7 +112,7 @@ try {
     await resetDuring('firing');
     await resetDuring('approach');
     await scenario(15);
-    await click('[data-slot="0"]');
+    await page.keyboard.press('Space');
     for (const round of ['standard','finisher','standard','standard']) await click(`[data-round="${round}"]`);
     await click('[data-fire]');
     await wait('victory');
@@ -130,7 +138,8 @@ try {
     assert.equal(overflow, false);
     await loc('.lab-head').scrollIntoViewIfNeeded();
     await capture('접촉패배');
-    await scenario(500, 5);
+    await scenario('', 5);
+    assert.equal(await read('[data-hp]'), '∞');
     for (const [turn, heat, multiplier] of [[1, '32', '×1.32'], [2, '48', '×1.48']]) {
       await click('[data-fire]');
       await wait('planning');
@@ -156,7 +165,7 @@ try {
     assert.equal(await read('[data-distance]'), '2');
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('zombie-shot.save')).weapon), 'm500');
     assert.deepEqual(errors, []);
-    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: damage.map(value => Number(value.split(' ')[1])), 턴냉각후열: [32, 48], 조기승리발사수: 2, 접촉패배잔여체력: 1, 가로넘침: overflow, 실행오류: errors });
+    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: damage, 턴냉각후열: [32, 48], 조기승리발사수: 2, 접촉패배잔여체력: 1, 가로넘침: overflow, 실행오류: errors });
     await page.close();
   }
   await writeFile(new URL('화면검증.json', dir), JSON.stringify(results, null, 2) + '\n');

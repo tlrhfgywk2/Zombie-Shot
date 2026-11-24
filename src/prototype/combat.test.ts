@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { heatDamageMultiplier } from './combatBalance';
 import { CombatController } from './CombatController';
-import { lockMagazine, P220, resolveVolley, startEncounter } from './rules';
+import { defaultScenario, lockMagazine, P220, resolveVolley, startEncounter } from './rules';
 import type { Encounter, Round } from './rules';
 
 const ordinary = ['standard', 'standard', 'standard', 'standard'] as const;
@@ -139,6 +139,7 @@ describe('발사 잠금과 초기화', () => {
     expect(controller.fire()).toBe(true);
     expect(controller.fire()).toBe(false);
     expect(controller.edit(0, 'pain')).toBe(false);
+    expect(controller.clearMagazine()).toBe(false);
     vi.runAllTimers();
     expect(controller.shots).toHaveLength(4);
     expect(controller.slots).toBe(slots);
@@ -164,7 +165,7 @@ describe('발사 잠금과 초기화', () => {
     pending();
     vi.runAllTimers();
     expect(controller.state).toBe(state);
-    expect(state).toMatchObject({ hp: 100, distance: 3, phase: 'planning', vulnerable: null, actions: 0, turns: 0, weaponHeat: 0 });
+    expect(state).toMatchObject({ hp: Infinity, distance: 3, phase: 'planning', vulnerable: null, actions: 0, turns: 0, weaponHeat: 0 });
     expect(controller.slots).toBe(slots);
     expect(slots[0]).toBe('vulnerability');
     expect(controller.shots).toEqual([]);
@@ -179,6 +180,7 @@ describe('발사 잠금과 초기화', () => {
     const controller = new CombatController(() => {});
     const initial = controller.state;
     expect(controller.reset({ maxHp: 0, distance: 1, approach: 1 })).toBe(false);
+    expect(controller.reset({ maxHp: Infinity, distance: Infinity, approach: 1 })).toBe(false);
     expect(controller.state).toBe(initial);
   });
 });
@@ -225,6 +227,20 @@ describe('무기 열', () => {
     expect(result.end.vulnerable).toEqual(vulnerable);
   });
 
+  it('복제탄을 포함해 기록에 기본·발열 전·최종 피해를 따로 보존한다', () => {
+    const result = volley(['reinforced', 'follow_up', 'copy'], { ...healthy, vulnerable, weaponHeat: 50 });
+    expect(result.shots.map(({ baseDamage, preHeatDamage, damage }) => [baseDamage, preHeatDamage, damage]))
+      .toEqual([[20, 25, 38], [8, 33.75, 52], [8, 33.75, 53]]);
+  });
+
+  it('기본 무한 체력에 피해를 기록해도 체력과 처형 조건은 바뀌지 않는다', () => {
+    const first = volley(['execution', 'standard', 'standard', 'standard'], startEncounter(defaultScenario));
+    expect(first.shots[0]).toMatchObject({ before: Infinity, after: Infinity, baseDamage: 6, damage: 6, bonus: 0, removed: 0 });
+    expect(first.shots).toHaveLength(4);
+    const second = volley(ordinary, first.end);
+    expect(second.end).toMatchObject({ hp: Infinity, phase: 'planning', turns: 2 });
+  });
+
   it('취약과 열의 곱이 14.5인 경우 최종 피해는 15다', () => {
     expect(volley(['standard'], { ...healthy, vulnerable, weaponHeat: 16 }).damage).toEqual([15]);
   });
@@ -252,11 +268,16 @@ describe('무기 열', () => {
   it('턴 사이 탄창을 비우고 다시 채워도 열이 유지되며 새 전투에서는 초기화된다', () => {
     vi.useFakeTimers();
     try {
-      const controller = new CombatController(() => {});
+      const onChange = vi.fn();
+      const controller = new CombatController(onChange);
+      controller.reset({ ...defaultScenario, maxHp: 100 });
       controller.fire();
       vi.runAllTimers();
       expect(controller.state.weaponHeat).toBe(32);
-      for (let i = 0; i < P220.capacity; i++) controller.edit(i, null);
+      onChange.mockClear();
+      expect(controller.clearMagazine()).toBe(true);
+      expect(controller.slots).toEqual([null, null, null, null]);
+      expect(onChange).toHaveBeenCalledTimes(1);
       expect(controller.fire()).toBe(false);
       for (let i = 0; i < P220.capacity; i++) controller.edit(i, 'standard');
       expect(controller.state.weaponHeat).toBe(32);

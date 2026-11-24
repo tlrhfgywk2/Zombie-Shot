@@ -19,6 +19,13 @@ export class CombatController {
     return true;
   }
 
+  clearMagazine(): boolean {
+    if (this.state.phase !== 'planning') return false;
+    this.slots = Object.freeze(this.slots.map(() => null));
+    this.onChange();
+    return true;
+  }
+
   fire(): boolean {
     if (this.state.phase !== 'planning') return false;
     const locked = lockMagazine(this.slots, P220.capacity);
