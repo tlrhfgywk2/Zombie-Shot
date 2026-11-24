@@ -1,11 +1,14 @@
 /* global document, MutationObserver, innerWidth */
 import assert from 'node:assert/strict';
 import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { preview } from 'vite';
 
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE ? pathToFileURL(process.env.PLAYWRIGHT_MODULE).href : 'playwright');
-const dir = new URL('../docs/validation/combat-core/', import.meta.url);
+const dir = process.env.COMBAT_VALIDATION_DIR
+  ? new URL('.', pathToFileURL(join(process.env.COMBAT_VALIDATION_DIR, '화면검증.json')))
+  : new URL('../docs/validation/combat-core/', import.meta.url);
 await mkdir(dir, { recursive: true });
 const server = await preview({ preview: { host: '127.0.0.1', port: 0 } });
 const url = `http://127.0.0.1:${server.httpServer.address().port}/Zombie-Shot/`;
@@ -41,6 +44,9 @@ try {
     await wait('planning');
     assert.equal(await loc('[data-slot]').count(), 4);
     assert.equal(await loc('[data-round]').count(), 10);
+    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0']);
+    assert.equal(await read('[data-weapon-heat]'), '0');
+    assert.equal(await read('[data-heat-multiplier]'), '×1.00');
     assert.equal(await loc('.presentation-debug').count(), 0);
     assert.ok(await loc('canvas').isVisible());
     await capture('준비');
@@ -61,7 +67,10 @@ try {
       button.dispatchEvent(new Event('click', { bubbles: true }));
     });
     await wait('planning');
-    assert.deepEqual(await loc('[data-log] li b').allTextContents(), ['피해 0','피해 25','피해 26','피해 20']);
+    const damage = await loc('[data-log] li b').allTextContents();
+    assert.deepEqual(damage, ['피해 0','피해 26','피해 28','피해 23']);
+    assert.equal(await read('[data-weapon-heat]'), '12.5');
+    assert.equal(await read('[data-heat-multiplier]'), '×1.13');
     assert.equal(await read('[data-distance]'), '2');
     assert.equal(await read('[data-actions]'), '1');
     assert.equal(await read('[data-status]'), '25% · 1턴');
@@ -89,6 +98,7 @@ try {
       assert.equal(await read('[data-distance]'), '3');
       assert.equal(await read('[data-turns]'), '0');
       assert.equal(await read('[data-actions]'), '0');
+      assert.equal(await read('[data-weapon-heat]'), '0');
       assert.equal(await loc('[data-log] li').count(), 0);
     };
     await resetDuring('firing');
@@ -102,22 +112,37 @@ try {
     assert.equal(await read('[data-actions]'), '0');
     assert.equal(await loc('[data-slot]').filter({ hasText: '미발사' }).count(), 2);
     assert.match(await read('[data-log]'), /실제 감소 5/);
+    assert.equal(await read('[data-weapon-heat]'), '0');
     await loc('.lab-head').scrollIntoViewIfNeeded();
     await capture('조기승리');
-    await scenario(41);
+    await scenario(51);
     await click('[data-slot="1"]');
     await click('[data-round="standard"]');
     await click('[data-fire]');
     await wait('defeat');
-    assert.equal(await read('[data-hp]'), '1 / 41');
+    assert.equal(await read('[data-hp]'), '1 / 51');
     assert.equal(await read('[data-distance]'), '0');
     assert.equal(await read('[data-turns]'), '1');
     assert.equal(await read('[data-actions]'), '1');
+    assert.equal(await read('[data-weapon-heat]'), '0');
     assert.ok(await loc('[data-fire]').isDisabled());
     const overflow = await page.evaluate(() => [...document.querySelectorAll('.combat-lab, .lab-slots button, .lab-choices button, .lab-meters, .lab-record')].some(el => el.scrollWidth > el.clientWidth + 1 || el.getBoundingClientRect().right > innerWidth + 1));
     assert.equal(overflow, false);
     await loc('.lab-head').scrollIntoViewIfNeeded();
     await capture('접촉패배');
+    await scenario(500, 5);
+    for (const [turn, heat, multiplier] of [[1, '32', '×1.32'], [2, '48', '×1.48']]) {
+      await click('[data-fire]');
+      await wait('planning');
+      assert.equal(await read('[data-turns]'), String(turn));
+      assert.equal(await read('[data-weapon-heat]'), heat);
+      assert.equal(await read('[data-heat-multiplier]'), multiplier);
+      await loc('.lab-head').scrollIntoViewIfNeeded();
+      await capture(`열-${heat}`);
+    }
+    await click('[data-reset]');
+    assert.equal(await read('[data-weapon-heat]'), '0');
+    await capture('열-초기화');
     await page.goto(url + '?presentationDebug=1');
     await loc('.presentation-debug').waitFor();
     const debug = loc('.presentation-debug');
@@ -131,7 +156,7 @@ try {
     assert.equal(await read('[data-distance]'), '2');
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('zombie-shot.save')).weapon), 'm500');
     assert.deepEqual(errors, []);
-    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: [0,25,26,20], 조기승리발사수: 2, 접촉패배잔여체력: 1, 가로넘침: overflow, 실행오류: errors });
+    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: damage.map(value => Number(value.split(' ')[1])), 턴냉각후열: [32, 48], 조기승리발사수: 2, 접촉패배잔여체력: 1, 가로넘침: overflow, 실행오류: errors });
     await page.close();
   }
   await writeFile(new URL('화면검증.json', dir), JSON.stringify(results, null, 2) + '\n');

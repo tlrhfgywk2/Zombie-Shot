@@ -58,6 +58,21 @@ export const PRESENTATION_EFFECTS = {
   casingOutwardSpeed: 1.2,
 } as const;
 
+export const WEAPON_HEAT_VISUAL = {
+  interpolationSpeed: 9,
+  tintColor: 0xff6748,
+  emissiveColor: 0xff481c,
+  maxEmissiveIntensity: 1.1,
+  // 열, 표면 착색 비율, 최대 발광 대비 비율
+  stops: [
+    [0, 0, 0],
+    [25, 0.22, 0.08],
+    [50, 0.4, 0.23],
+    [100, 0.64, 0.56],
+    [150, 0.8, 1],
+  ],
+} as const;
+
 export const getReacquisitionDuration = (visualKickStrength: number): number => {
   if (!Number.isFinite(visualKickStrength) || visualKickStrength < 0) throw new Error('재조준 시간에는 0 이상의 연출 강도이 필요합니다.');
   return Math.round(PRESENTATION_TIMING.reacquireBase + visualKickStrength * PRESENTATION_TIMING.reacquirePerRecoil);
