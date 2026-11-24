@@ -51,8 +51,15 @@
 .lab-record, .lab-settings { margin-top: 12px; }
 .lab-record h2 { margin-bottom: 9px; }
 .lab-record ol { list-style: none; padding: 0; }
-.lab-record li { display: grid; grid-template-columns: 1fr 1fr 1.2fr 2fr; align-items: baseline; gap: 8px; border-top: 1px solid #333c33; padding: 5px 0; font-size: var(--combat-value-size); }
-.lab-record li small { color: #c3d3b2; }
+.lab-record li { display: grid; grid-template-columns: minmax(7rem,.75fr) minmax(17rem,2fr) minmax(0,1.4fr); align-items: center; gap: 8px 16px; border-top: 1px solid #333c33; padding: 8px 0; font-size: var(--combat-value-size); }
+.lab-shot-name { font-size: var(--combat-value-prominent); }
+.lab-shot-damage { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+.lab-shot-damage span, .lab-shot-damage b { display: block; }
+.lab-shot-damage span { color: #afbcad; font-size: .82rem; }
+.lab-shot-damage b { font-size: var(--combat-value-prominent); overflow-wrap: anywhere; }
+.lab-shot-damage em, .lab-shot-damage [data-final-damage] { color: #ffd5b7; }
+.lab-shot-damage em { font-style: normal; white-space: nowrap; }
+.lab-record li small { color: #c3d3b2; overflow-wrap: anywhere; }
 .lab-settings summary { cursor: pointer; font-weight: 700; }
 .lab-settings form { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
 .lab-settings label { display: grid; gap: 4px; }
@@ -76,8 +83,6 @@
   .lab-slots button { padding: 5px 7px; }
   .lab-edit button { min-height: 30px; }
   .combat-lab .lab-fire { margin-top: 7px; }
-  .lab-record li { grid-template-columns: .85fr .65fr 1.2fr; }
-  .lab-record li small:not(:empty) { grid-column: 1/-1; }
-  .lab-record li small:empty { display: none; }
+  .lab-record li { grid-template-columns: minmax(0,1fr); gap: 4px; }
   .lab-settings input { width: 90px; }
 }

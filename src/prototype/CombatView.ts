@@ -21,6 +21,7 @@ const notes: Record<Round, string> = {
 const phases = { planning: '사격 준비', firing: '발사 중', approach: '접근 중', victory: '승리', defeat: '접촉 · 패배' };
 const heatFormat = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 });
 const multiplierFormat = new Intl.NumberFormat('ko-KR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const damageFormat = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 3 });
 
 function shotNote(shot: Shot) {
   if (!shot.source) return '복제 대상 없음';
@@ -31,6 +32,20 @@ function shotNote(shot: Shot) {
   if (shot.applied) parts.push(`취약 ${ammo.vulnerability.percent}% · ${ammo.vulnerability.turns}턴`);
   else if (shot.percent) parts.push(`취약 +${shot.percent}%`);
   return parts.join(' · ');
+}
+
+function shotRecord(shot: Shot): string {
+  const health = Number.isFinite(shot.before)
+    ? `체력 ${shot.before} → ${shot.after}${shot.damage !== shot.removed ? ` · 실제 감소 ${shot.removed}` : ''}`
+    : '';
+  const detail = [shotNote(shot), health].filter(Boolean).join(' · ');
+  return `<li><strong class="lab-shot-name">${shot.index + 1} · ${ammo[shot.round].name}</strong>
+    <div class="lab-shot-damage">
+      <div><span>기본 피해</span><b data-base-damage>${damageFormat.format(shot.baseDamage)}</b></div>
+      <div><span>특성·취약 적용</span><b data-pre-heat-damage>${damageFormat.format(shot.preHeatDamage)}</b></div>
+      <div><span>최종 피해 <em>×${multiplierFormat.format(heatDamageMultiplier(shot.heatBefore))}</em></span><b data-final-damage>${damageFormat.format(shot.damage)}</b></div>
+    </div>
+    ${detail ? `<small>${detail}</small>` : ''}</li>`;
 }
 
 export function mountCombat(root: HTMLElement) {
@@ -53,11 +68,11 @@ export function mountCombat(root: HTMLElement) {
         <strong aria-label="${id === 'copy' ? '직전 탄 피해' : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong>
         <span class="lab-ammo-heat">열 <b>+${ammo[id].heat}</b></span>
       </button>`).join('')}</div>
-      <button class="lab-fire" data-fire>발사</button>
+      <button class="lab-fire" data-fire aria-keyshortcuts="R">발사</button>
     </section></div>
     <section class="lab-record"><h2>사격 기록</h2><div data-log></div></section>
     <details class="lab-settings"><summary>전투 설정</summary><form>
-      <label>최대 체력<input name="maxHp" type="number" min="1" step="1" required value="${defaultScenario.maxHp}"></label>
+      <label>최대 체력<input name="maxHp" type="number" min="1" step="1" placeholder="무한"></label>
       <label>시작 거리<input name="distance" type="number" min="1" step="1" required value="${defaultScenario.distance}"></label>
       <label>턴당 접근 거리<input name="approach" type="number" min="1" step="1" required value="${defaultScenario.approach}"></label>
       <button>적용 후 다시 시작</button></form></details>
@@ -75,7 +90,9 @@ export function mountCombat(root: HTMLElement) {
   const form = element<HTMLFormElement>('form');
   form.addEventListener('submit', event => {
     event.preventDefault();
+    const maxHp = form.elements.namedItem('maxHp') as HTMLInputElement;
     for (const input of form.querySelectorAll('input')) {
+      if (input === maxHp && input.value === '') continue;
       if (!Number.isSafeInteger(input.valueAsNumber)) {
         input.setCustomValidity('표현 가능한 양의 정수를 입력하세요.');
         input.reportValidity();
@@ -83,7 +100,7 @@ export function mountCombat(root: HTMLElement) {
       }
     }
     const value = (key: string) => (form.elements.namedItem(key) as HTMLInputElement).valueAsNumber;
-    game.reset({ maxHp: value('maxHp'), distance: value('distance'), approach: value('approach') });
+    game.reset({ maxHp: maxHp.value === '' ? defaultScenario.maxHp : maxHp.valueAsNumber, distance: value('distance'), approach: value('approach') });
   });
   form.addEventListener('input', e => (e.target as HTMLInputElement).setCustomValidity(''));
   root.addEventListener('click', e => {
@@ -93,8 +110,13 @@ export function mountCombat(root: HTMLElement) {
     if (button.hasAttribute('data-reset')) { game.reset(); return; }
     if (button.hasAttribute('data-fire')) { game.fire(); return; }
     if (game.state.phase !== 'planning') return;
-    if (slot !== undefined) selected = Number(slot);
-    else if (isRound(round)) {
+    if (slot !== undefined) {
+      selected = Number(slot);
+      if (game.slots[selected] !== null) {
+        game.edit(selected, null);
+        return;
+      }
+    } else if (isRound(round)) {
       game.edit(selected, round);
       selected = (selected + 1) % slots.length;
     } else if (shift) {
@@ -108,6 +130,21 @@ export function mountCombat(root: HTMLElement) {
     render();
   });
 
+  window.addEventListener('keydown', event => {
+    if (event.defaultPrevented || event.isComposing || event.ctrlKey || event.altKey || event.metaKey) return;
+    if (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (event.code !== 'Space' && event.code !== 'KeyR') return;
+    event.preventDefault();
+    if (event.repeat || game.state.phase !== 'planning') return;
+    if (event.code === 'KeyR') {
+      game.fire();
+      return;
+    }
+    selected = 0;
+    game.clearMagazine();
+    slots[0]?.focus();
+  });
+
   function render(kind?: Frame['kind'] | 'reset') {
     const { state, shots } = game;
     const planning = state.phase === 'planning';
@@ -118,7 +155,7 @@ export function mountCombat(root: HTMLElement) {
     scene.setWeaponHeat(state.weaponHeat, kind === 'reset' || kind === 'victory' || kind === 'defeat');
     element('[data-phase-label]').textContent = phases[state.phase];
     element('.combat-lab').dataset.phase = state.phase;
-    element('[data-hp]').textContent = `${state.hp} / ${state.maxHp}`;
+    element('[data-hp]').textContent = state.maxHp === Infinity ? '∞' : `${state.hp} / ${state.maxHp}`;
     element('[data-distance]').textContent = String(state.distance);
     element('[data-status]').textContent = state.vulnerable ? `${state.vulnerable.percent}% · ${state.vulnerable.remaining}턴` : '없음';
     element('[data-turns]').textContent = String(state.turns);
@@ -131,6 +168,7 @@ export function mountCombat(root: HTMLElement) {
       button.dataset.roundId = round ?? '';
       button.innerHTML = `<small>${i + 1} ${unfired ? '· 미발사' : ''}</small><b>${round ? ammo[round].name : '빈 칸'}</b>`;
       button.setAttribute('aria-pressed', String(selected === i));
+      button.title = planning && round ? '탄 빼기' : '';
       button.disabled = !planning;
     });
     element('[data-selected]').textContent = `${selected + 1}번 칸 편집`;
@@ -139,7 +177,7 @@ export function mountCombat(root: HTMLElement) {
       button.disabled = !planning || dest < 0 || dest >= slots.length;
     });
     element<HTMLButtonElement>('[data-fire]').disabled = !planning || game.slots.includes(null);
-    element('[data-log]').innerHTML = shots.length ? `<ol>${shots.map(s => `<li><span>${s.index + 1} · ${ammo[s.round].name}</span><b>피해 ${s.damage}</b><span>체력 ${s.before} → ${s.after}</span><small>${[shotNote(s), s.damage !== s.removed ? '실제 감소 ' + s.removed : ''].filter(Boolean).join(' · ')}</small></li>`).join('')}</ol>` : '<p>아직 발사한 탄이 없습니다.</p>';
+    element('[data-log]').innerHTML = shots.length ? `<ol>${shots.map(shotRecord).join('')}</ol>` : '<p>아직 발사한 탄이 없습니다.</p>';
   }
   game.reset();
 }

@@ -20,9 +20,10 @@ export function isRound(value: unknown): value is Round {
 }
 
 export interface Scenario { maxHp: number; distance: number; approach: number }
-export const defaultScenario: Readonly<Scenario> = { maxHp: 100, distance: 3, approach: 1 };
+export const defaultScenario: Readonly<Scenario> = { maxHp: Infinity, distance: 3, approach: 1 };
 export function validScenario({ maxHp, distance, approach }: Scenario): boolean {
-  return [maxHp, distance, approach].every(n => Number.isSafeInteger(n) && n > 0);
+  const positiveInteger = (value: number) => Number.isSafeInteger(value) && value > 0;
+  return (maxHp === Infinity || positiveInteger(maxHp)) && positiveInteger(distance) && positiveInteger(approach);
 }
 export interface Encounter extends Scenario {
   hp: number;
@@ -33,7 +34,7 @@ export interface Encounter extends Scenario {
   phase: 'planning' | 'firing' | 'approach' | 'victory' | 'defeat';
 }
 export function startEncounter(scenario: Scenario): Encounter {
-  if (!validScenario(scenario)) throw new RangeError('전투 설정에는 양의 정수가 필요합니다.');
+  if (!validScenario(scenario)) throw new RangeError('체력은 무한 또는 양의 정수, 거리와 접근은 양의 정수여야 합니다.');
   return { ...scenario, hp: scenario.maxHp, weaponHeat: WEAPON_HEAT_BALANCE.initial, turns: 0, actions: 0, vulnerable: null, phase: 'planning' };
 }
 interface ShotEffect {
@@ -43,6 +44,8 @@ interface ShotEffect {
 export interface Shot extends ShotEffect {
   index: number;
   round: Round;
+  baseDamage: number;
+  preHeatDamage: number;
   damage: number;
   percent: number;
   applied: boolean;
@@ -79,7 +82,9 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
       let bonus = 0;
       if (round === 'follow_up') bonus = previousDamage * ammo.follow_up.previousRatio;
       if (round === 'finisher' && index === locked.length - 1) bonus = base * ammo.finisher.lastBonus;
-      if (round === 'execution' && state.hp * 100 <= state.maxHp * ammo.execution.threshold) bonus = base * ammo.execution.bonus;
+      if (round === 'execution' && Number.isFinite(state.maxHp) && state.hp * 100 <= state.maxHp * ammo.execution.threshold) {
+        bonus = base * ammo.execution.bonus;
+      }
       if (round === 'resonance') bonus = largestGroup * ammo.resonance.perRound;
       if (round === 'mixed') bonus = counts.size * ammo.mixed.perType;
       effect = { source: round, bonus };
@@ -89,16 +94,21 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     const applied = source === 'vulnerability';
     let percent = source ? state.vulnerable?.percent ?? 0 : 0;
     if (source === 'pain') percent *= ammo.pain.bonusFactor;
-    const intrinsicDamage = source ? ammo[source].base + bonus : 0;
+    const baseDamage = source ? ammo[source].base : 0;
+    const scaledDamage = (baseDamage + bonus) * (100 + percent);
+    const preHeatDamage = scaledDamage / 100;
     // 두 배율을 백분율로 곱한 뒤 나눠서 14.5 같은 경계값의 오차를 줄인다.
-    const damage = Math.floor(intrinsicDamage * (100 + percent) * heatDamagePercent(heatBefore) / 10_000 + 0.5);
+    const damage = Math.floor(scaledDamage * heatDamagePercent(heatBefore) / 10_000 + 0.5);
     const before = state.hp;
     const after = Math.max(0, before - damage);
     const vulnerable = applied ? { percent: ammo.vulnerability.percent, remaining: ammo.vulnerability.turns } : state.vulnerable;
     const heatAfter = heatBefore + ammo[round].heat;
     previousDamage = damage;
     state = { ...state, hp: after, vulnerable, weaponHeat: heatAfter };
-    yield { kind: 'shot', state, shot: { index, round, before, after, removed: before - after, damage, percent, applied, heatBefore, heatAfter, ...effect } };
+    const removed = before === Infinity ? 0 : before - after;
+    yield { kind: 'shot', state, shot: {
+      index, round, before, after, removed, baseDamage, preHeatDamage, damage, percent, applied, heatBefore, heatAfter, ...effect,
+    } };
     if (!after) break;
   }
   state = { ...state, turns: state.turns + 1, weaponHeat: state.weaponHeat * (1 - WEAPON_HEAT_BALANCE.turnCoolingRate) };
