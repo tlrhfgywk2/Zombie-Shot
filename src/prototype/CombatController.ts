@@ -1,5 +1,7 @@
 import { defaultScenario, isRound, lockMagazine, P220, resolveVolley, startEncounter, validScenario } from './rules';
 import type { EchoHit, Frame, Round, Scenario, Shot } from './rules';
+import { traceControllerCombat, traceTransition, traceTurn } from './analysis/trace';
+import type { CombatTraceSink } from './analysis/trace';
 
 export class CombatController {
   private scenario: Scenario = { ...defaultScenario };
@@ -9,8 +11,11 @@ export class CombatController {
   echoes: EchoHit[] = [];
   private generation = 0;
   private timer?: ReturnType<typeof setTimeout>;
+  private trace?: ReturnType<typeof traceControllerCombat>;
+  private tracedTurn = 0;
 
-  constructor(private readonly onChange: (event?: Frame['kind'] | 'reset') => void) {}
+  constructor(private readonly onChange: (event?: Frame['kind'] | 'reset') => void,
+    private readonly createTrace?: () => CombatTraceSink) {}
 
   edit(index: number, round: Round | null): boolean {
     if (this.state.phase !== 'planning' || !Number.isInteger(index) || index < 0 || index >= this.slots.length) return false;
@@ -32,7 +37,11 @@ export class CombatController {
     const locked = lockMagazine(this.slots, P220.capacity);
     if (!locked) return false;
     const generation = ++this.generation;
-    const volley = resolveVolley(this.state, locked);
+    if (this.createTrace) {
+      this.trace ??= traceControllerCombat(this.createTrace());
+      this.tracedTurn = this.state.turns + 1;
+    }
+    const volley = resolveVolley(this.state, locked, this.trace);
     this.state = { ...this.state, phase: 'firing' };
     this.shots = [];
     this.echoes = [];
@@ -62,7 +71,13 @@ export class CombatController {
     ++this.generation;
     clearTimeout(this.timer);
     this.scenario = { ...scenario };
-    this.state = startEncounter(scenario);
+    const next = startEncounter(scenario);
+    if (this.trace) {
+      this.trace.cancelPending();
+      traceTransition(traceTurn(this.trace, this.tracedTurn), 'reset', this.state, next);
+      this.trace = undefined;
+    }
+    this.state = next;
     this.shots = [];
     this.echoes = [];
     this.onChange('reset');

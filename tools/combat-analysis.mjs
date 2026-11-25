@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { closeSync, openSync, writeFileSync } from 'node:fs';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -15,10 +17,12 @@ const help = `전투 시험장 분석
   search      재고·고정 칸을 지키는 중복 없는 조합 검색
   stress      고정 회귀 검사와 시드 기반 무작위 조우
   replay      --config로 지정한 스트레스 결과에서 실패 재현
+  trace       생산 판정 단계별 피해와 전투 이벤트 기록
   --sequence 탄ID,탄ID,탄ID,탄ID    사용할 순서
   --against 탄ID,탄ID,탄ID,탄ID     비교 기준 순서
   --limit 정수                      검색 또는 무작위 검사 상한
   --index 정수                      재현할 실패 번호 (0부터 시작)
+  --stream 경로                     trace 전체 이벤트를 NDJSON으로 저장
   --seed 정수                       재현 시드
   --out 경로                        결과 저장 (생략하면 표준 출력)`;
 
@@ -40,14 +44,48 @@ function encode(_key, value) {
   return value;
 }
 
+async function traceCombat(scenario, options, streamPath, metadata, rules, simulator) {
+  const { CombatTraceBuffer } = await loadModule('src/prototype/analysis/trace.ts');
+  const buffer = new CombatTraceBuffer(options.capacity);
+  const sink = buffer.sink('combat-1');
+  const normalized = simulator.normalizeScenario(scenario);
+  const temporary = streamPath && resolve(streamPath) + '.' + randomUUID() + '.tmp';
+  if (temporary) await mkdir(dirname(temporary), { recursive: true });
+  const fd = temporary ? openSync(temporary, 'wx') : undefined;
+  const line = row => writeFileSync(fd, JSON.stringify(row, encode) + '\n');
+  try {
+    let run;
+    try {
+      if (fd !== undefined) {
+        line({ kind: 'metadata', ...metadata, scenario: normalized });
+        const remember = sink.emit;
+        sink.emit = event => { remember(event); line(event); };
+      }
+      run = simulator.simulate(normalized, { resolve: (state, slots) => rules.resolveVolley(state, slots, sink) });
+      if (fd !== undefined) line({ kind: 'summary', outcome: run.outcome, metrics: run.metrics });
+    } finally {
+      if (fd !== undefined) closeSync(fd);
+    }
+    if (temporary) await rename(temporary, resolve(streamPath));
+    return { scenario: normalized, metrics: run.metrics, outcome: run.outcome, trace: buffer.export(options.filter),
+      filter: options.filter ?? {}, stream: streamPath ?? null };
+  } catch (error) {
+    if (temporary) await rm(temporary, { force: true });
+    throw error;
+  }
+}
+
 async function main() {
   const { positionals, values } = parseArgs({ allowPositionals: true, options: {
     config: { type: 'string' }, out: { type: 'string' }, sequence: { type: 'string' }, against: { type: 'string' },
-    seed: { type: 'string' }, limit: { type: 'string' }, index: { type: 'string' }, help: { type: 'boolean', short: 'h' },
+    seed: { type: 'string' }, limit: { type: 'string' }, index: { type: 'string' }, stream: { type: 'string' },
+    help: { type: 'boolean', short: 'h' },
   } });
   const [command] = positionals;
   if (!command || values.help) { console.log(help); return; }
   if (positionals.length !== 1) throw new Error('명령은 한 번에 하나만 지정하세요.');
+  if (values.stream && command !== 'trace') throw new Error('--stream은 trace에서 사용하세요.');
+  if (values.out && values.stream && resolve(values.out) === resolve(values.stream)) throw new Error('요약과 전체 이벤트의 출력 경로를 다르게 지정하세요.');
   const input = values.config ? JSON.parse((await readFile(values.config, 'utf8')).replace(/^\uFEFF/, '')) : {};
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('설정은 JSON 객체여야 합니다.');
   const scenario = input.scenario ?? {};
@@ -56,6 +94,9 @@ async function main() {
   if (values.seed !== undefined) scenario.seed = Number(values.seed);
   const rules = await loadModule('src/prototype/rules.ts');
   const simulator = await loadModule('src/prototype/analysis/simulator.ts');
+  const sourceStatus = git('status', '--porcelain', '--', 'src/prototype', 'tools/combat-analysis.mjs', 'src/exploration/ExplorationRun.ts');
+  const metadata = { schemaVersion: 1, revision: git('rev-parse', 'HEAD'),
+    sourceDirty: sourceStatus === null ? null : Boolean(sourceStatus), command };
   let result;
   switch (command) {
     case 'catalog':
@@ -103,11 +144,12 @@ async function main() {
       if (replay.failure) process.exitCode = 1;
       break;
     }
+    case 'trace':
+      result = await traceCombat(scenario, input.trace ?? {}, values.stream, metadata, rules, simulator);
+      break;
     default: throw new Error(`알 수 없는 명령입니다.\n${help}`);
   }
-  const sourceStatus = git('status', '--porcelain', '--', 'src/prototype', 'tools/combat-analysis.mjs', 'src/exploration/ExplorationRun.ts');
-  const content = JSON.stringify({ schemaVersion: 1, revision: git('rev-parse', 'HEAD'),
-    sourceDirty: sourceStatus === null ? null : Boolean(sourceStatus), command, result }, encode, 2) + '\n';
+  const content = JSON.stringify({ ...metadata, result }, encode, 2) + '\n';
   if (values.out) {
     await mkdir(dirname(resolve(values.out)), { recursive: true });
     await writeFile(values.out, content);

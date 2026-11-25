@@ -127,7 +127,6 @@ export function simulate(config: SimulationConfig = {}, options: SimulationOptio
     const start = state;
     const { totalDamage, shots, hits } = metrics;
     let peakHeat = start.weaponHeat;
-    const delayedBaseBySlot: number[] = [];
     for (const frame of (options.resolve ?? resolveVolley)(state, sequence)) {
       const before = state;
       state = frame.state;
@@ -143,11 +142,9 @@ export function simulate(config: SimulationConfig = {}, options: SimulationOptio
         metrics.conditionalBaseDamage += shot.bonus;
         metrics.directDamage += shot.damage;
         for (const hit of shot.hits) countHit(metrics, hit);
-        const source = shot.source && ammo[shot.source];
-        if (source && 'echoDamage' in source) delayedBaseBySlot[shot.index] = source.echoDamage;
       } else if (frame.kind === 'echo') {
         metrics.delayedDamage += frame.echo.hit.damage;
-        metrics.rawBaseDamage += delayedBaseBySlot[frame.echo.shotIndex]!;
+        metrics.rawBaseDamage += frame.echo.rawBaseDamage;
         countHit(metrics, frame.echo.hit);
       }
       frames?.push(frame);

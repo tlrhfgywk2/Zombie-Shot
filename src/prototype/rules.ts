@@ -1,5 +1,7 @@
 import { heatDamagePercent, WEAPON_HEAT_BALANCE } from './combatBalance';
 import type { AmmoFamily } from '../combat/types';
+import { traceHp, traceTransition, traceTurn } from './analysis/trace';
+import type { CombatTraceSink, HitOrigin, TraceWriter } from './analysis/trace';
 
 export const P220 = { name: 'P220', capacity: 4 } as const;
 
@@ -84,17 +86,18 @@ export interface DamageInstance {
   removed: number;
 }
 
-export interface EchoHit { shotIndex: number; hit: DamageInstance }
+export interface EchoHit { shotIndex: number; rawBaseDamage: number; hit: DamageInstance }
 
-function modifiedDamage(power: number, percent: number, heat: number): number {
+function modifiedDamage(power: number, percent: number, heatPercent: number): number {
   // 두 배율을 곱한 뒤 마지막에 한 번만 반올림한다.
-  return Math.floor(power * (100 + percent) * heatDamagePercent(heat) / 10_000 + 0.5);
+  return Math.floor(power * (100 + percent) * heatPercent / 10_000 + 0.5);
 }
 
-type DamageSource = Round | 'echo' | 'playerEffect' | 'environment';
+export type DamageSource = Round | 'echo' | 'playerEffect' | 'environment';
 
 // 보정이 끝난 독립 타격 한 건과 그 직후의 표적 상태를 함께 반환한다.
-export function resolveDamage(state: Encounter, source: DamageSource, modified: number, ownTransferBps = 0) {
+export function resolveDamage(state: Encounter, source: DamageSource, modified: number, ownTransferBps = 0,
+  trace?: { write: TraceWriter; origin: HitOrigin }) {
   if (state.hp <= 0 || state.phase === 'victory' || state.phase === 'defeat' || !(modified > 0)) return;
   if (!Number.isInteger(modified)) throw new RangeError('보정 피해는 반올림이 끝난 정수여야 합니다.');
   if (!Number.isSafeInteger(ownTransferBps) || ownTransferBps < 0) throw new RangeError('전이율은 0 이상의 정수 베이시스 포인트여야 합니다.');
@@ -102,8 +105,9 @@ export function resolveDamage(state: Encounter, source: DamageSource, modified: 
   const qualifies = source !== 'environment';
   const previous = state.previousQualifyingHit;
   // 체력 입력 범위의 큰 정수에서도 곱셈 중간값의 반올림 없이 한 번만 내린다.
+  const appliedTransferBps = qualifies && previous ? Math.max(previous.ownTransferBps, ownTransferBps) : 0;
   const impactBonus = qualifies && previous
-    ? Number(BigInt(previous.finalDamage) * BigInt(Math.max(previous.ownTransferBps, ownTransferBps)) / 10_000n) : 0;
+    ? Number(BigInt(previous.finalDamage) * BigInt(appliedTransferBps) / 10_000n) : 0;
   const woundDamage = state.wound;
   const damage = modified + woundDamage + impactBonus;
   const after = Math.max(0, before - damage);
@@ -118,6 +122,11 @@ export function resolveDamage(state: Encounter, source: DamageSource, modified: 
     next.previousQualifyingHit = { finalDamage: damage, ownTransferBps };
     next.qualifyingHitCount++;
   }
+  trace?.write({ kind: 'hit', ...trace.origin, source, modifiedDamage: modified, qualifies, ownTransferBps, appliedTransferBps,
+    previousHit: previous && { ...previous }, storedHit: next.previousQualifyingHit && { ...next.previousQualifyingHit },
+    countBefore: state.qualifyingHitCount, countAfter: next.qualifyingHitCount, woundBefore: state.wound, woundAfter: next.wound,
+    woundBonus: woundDamage, impactBonus, finalDamage: damage, hpBefore: traceHp(before), hpAfter: traceHp(after),
+    effectiveHpDamage: removed, overkill: before === Infinity ? 0 : damage - removed });
   return { hit, state: next };
 }
 export function lockMagazine(slots: readonly (Round | null)[], capacity: number): readonly Round[] | null {
@@ -129,7 +138,7 @@ type Event = { kind: 'shot'; shot: Shot } | { kind: 'echo'; echo: EchoHit } | { 
 export type Frame = Event & { state: Encounter };
 
 // 한 발이 만든 상태를 다음 발이 그대로 읽는다. 렌더러와 타이머는 이 계산에 참여하지 않는다.
-export function* resolveVolley(start: Encounter, locked: readonly Round[]): Generator<Frame, void> {
+export function* resolveVolley(start: Encounter, locked: readonly Round[], trace?: CombatTraceSink): Generator<Frame, void> {
   if (start.phase !== 'planning') return;
   let state: Encounter = { ...start, phase: 'firing' };
   const counts = new Map<Round, number>();
@@ -137,12 +146,17 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     if (!isRound(round)) return;
     counts.set(round, (counts.get(round) ?? 0) + 1);
   }
+  const write = traceTurn(trace, start.turns + 1);
+  traceTransition(write, 'turn-start', start, state);
   const largestGroup = Math.max(0, ...counts.values());
   let effect: ShotEffect & { pursuitDamage?: number } = { source: null, bonus: 0 };
   let previousDamage = 0;
   let previousFamily: AmmoFamily | undefined;
   // 단일 표적과 이번 턴을 공유한다. 전투 초기화 시 이 일제사격 자체가 폐기된다.
   const pendingEchoes: { shotIndex: number; power: number; heat: number }[] = [];
+  const logEcho = write && ((shotIndex: number, action: 'created' | 'resolved' | 'cancelled') => {
+    write({ kind: 'pending', action, shot: shotIndex + 1, ammo: locked[shotIndex]!, source: 'echo', effectId: `echo-${shotIndex + 1}` });
+  });
   for (const [index, round] of locked.entries()) {
     if (state.hp <= 0) break;
     // 복제탄은 원본 탄의 조건부 보너스를 보존하고, 발사 시점의 배율로 피해를 계산한다.
@@ -164,6 +178,7 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     }
     const { source, bonus } = effect;
     const heatBefore = state.weaponHeat;
+    const heatPercent = heatDamagePercent(heatBefore);
     const applied = source === 'vulnerability';
     let percent = source ? state.vulnerable?.percent ?? 0 : 0;
     if (source === 'pain') percent *= ammo.pain.bonusFactor;
@@ -181,8 +196,11 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     let damage = 0;
     previousDamage = 0;
     for (const [hitIndex, baseHit] of baseHits.entries()) {
-      const power = baseHit + (hitIndex === 0 ? bonus : 0);
-      const resolved = resolveDamage(state, round, modifiedDamage(power, percent, heatBefore), transferBps);
+      const conditionalBaseDamage = hitIndex === 0 ? bonus : 0;
+      const power = baseHit + conditionalBaseDamage;
+      const resolved = resolveDamage(state, round, modifiedDamage(power, percent, heatPercent), transferBps,
+        write && { write, origin: { shot: index + 1, hit: hitIndex + 1, ammo: round, rawBaseDamage: baseHit,
+          conditionalBaseDamage, vulnerabilityPercent: percent, heat: heatBefore, heatPercent } });
       baseDamage += baseHit;
       preHeatDamage += power * (100 + percent) / 100;
       if (resolved) {
@@ -199,40 +217,72 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     const woundApplied = after > 0 && definition && 'wound' in definition ? definition.wound : 0;
     const vulnerable = applied ? { percent: ammo.vulnerability.percent, remaining: ammo.vulnerability.turns } : state.vulnerable;
     const heatAfter = heatBefore + ammo[round].heat;
-    previousFamily = ammo[round].family;
     if (after > 0 && definition && 'echoDamage' in definition) {
       pendingEchoes.push({ shotIndex: index, power: definition.echoDamage, heat: heatBefore });
+      logEcho?.(index, 'created');
     }
     state = { ...state, wound: state.wound + woundApplied, vulnerable, weaponHeat: heatAfter };
-    if (after === 0) pendingEchoes.length = 0;
+    if (after === 0) {
+      if (logEcho) for (const echo of pendingEchoes) logEcho(echo.shotIndex, 'cancelled');
+      pendingEchoes.length = 0;
+    }
+    write?.({ kind: 'shot', shot: index + 1, ammo: round, name: ammo[round].name, family: ammo[round].family,
+      previousFamily: previousFamily ?? null, weapon: P220.name, distance: state.distance, remainingRounds: locked.length - index - 1,
+      effectRound: source, heatBefore, heatAfter, expectedHits: base === 0 && bonus === 0 ? 0 : baseHits.length,
+      resolvedHits: hits.length, woundApplied, vulnerabilityApplied: applied, vulnerabilityAfter: vulnerable && { ...vulnerable } });
+    previousFamily = ammo[round].family;
     const removed = before === Infinity ? 0 : before - after;
     yield { kind: 'shot', state, shot: {
       index, round, before, after, removed, baseDamage, preHeatDamage, damage, percent, applied, heatBefore, heatAfter, hits, woundApplied, source, bonus,
     } };
     if (!after) break;
   }
-  for (const { shotIndex, power, heat } of pendingEchoes) {
-    const resolved = resolveDamage(state, 'echo', modifiedDamage(power, state.vulnerable?.percent ?? 0, heat));
-    if (!resolved) continue;
+  traceTransition(write, 'action-complete', state);
+  traceTransition(write, 'delayed-start', state, state, pendingEchoes.length);
+  for (let i = 0; i < pendingEchoes.length; ++i) {
+    const { shotIndex, power, heat } = pendingEchoes[i]!;
+    const percent = state.vulnerable?.percent ?? 0;
+    const heatPercent = heatDamagePercent(heat);
+    const resolved = resolveDamage(state, 'echo', modifiedDamage(power, percent, heatPercent), 0,
+      write && { write, origin: { shot: shotIndex + 1, hit: 1, ammo: locked[shotIndex]!, effectId: `echo-${shotIndex + 1}`,
+        rawBaseDamage: power, conditionalBaseDamage: 0, vulnerabilityPercent: percent, heat, heatPercent } });
+    if (!resolved) {
+      logEcho?.(shotIndex, 'cancelled');
+      continue;
+    }
     const { hit } = resolved;
     state = resolved.state;
-    yield { kind: 'echo', state, echo: { shotIndex, hit } };
+    logEcho?.(shotIndex, 'resolved');
+    if (state.hp === 0 && logEcho) {
+      for (let j = i + 1; j < pendingEchoes.length; ++j) logEcho(pendingEchoes[j]!.shotIndex, 'cancelled');
+    }
+    yield { kind: 'echo', state, echo: { shotIndex, rawBaseDamage: power, hit } };
     if (state.hp === 0) break;
   }
+  const endOfFire = state;
   state = { ...state, wound: Math.floor(state.wound / 2), previousQualifyingHit: null, qualifyingHitCount: 0, turns: state.turns + 1,
     weaponHeat: state.weaponHeat * (1 - WEAPON_HEAT_BALANCE.turnCoolingRate) };
+  traceTransition(write, 'turn-end', endOfFire, state);
   yield { kind: 'turn', state };
   if (!state.hp) {
-    yield { kind: 'victory', state: { ...state, phase: 'victory', weaponHeat: WEAPON_HEAT_BALANCE.initial } };
+    const victory: Encounter = { ...state, phase: 'victory', weaponHeat: WEAPON_HEAT_BALANCE.initial };
+    traceTransition(write, 'victory', state, victory);
+    yield { kind: 'victory', state: victory };
     return;
   }
+  const beforeApproach = state;
   state = { ...state, phase: 'approach', actions: state.actions + 1, distance: Math.max(0, state.distance - state.approach) };
+  traceTransition(write, 'enemy-action', beforeApproach, state);
   yield { kind: 'approach', state };
   if (!state.distance) {
-    yield { kind: 'defeat', state: { ...state, phase: 'defeat', weaponHeat: WEAPON_HEAT_BALANCE.initial } };
+    const defeat: Encounter = { ...state, phase: 'defeat', weaponHeat: WEAPON_HEAT_BALANCE.initial };
+    traceTransition(write, 'defeat', state, defeat);
+    yield { kind: 'defeat', state: defeat };
     return;
   }
   const status = state.vulnerable;
   const vulnerable = status && status.remaining > 1 ? { ...status, remaining: status.remaining - 1 } : null;
-  yield { kind: 'cleanup', state: { ...state, phase: 'planning', vulnerable } };
+  const ready: Encounter = { ...state, phase: 'planning', vulnerable };
+  traceTransition(write, 'turn-ready', state, ready);
+  yield { kind: 'cleanup', state: ready };
 }
