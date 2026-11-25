@@ -22,7 +22,12 @@ const notes: Record<Round, string> = {
   split_round: `${ammo.split_round.hits}회 타격`,
   pursuit_round: `다른 계열 뒤 추가 타격 ${ammo.pursuit_round.pursuitDamage}`,
   echo_round: `턴 종료 시 추가 타격 ${ammo.echo_round.echoDamage}`,
+  conduit_round: `충격 전이율 ${ammo.conduit_round.transferBps / 100}%`,
+  pulse_round: `${ammo.pulse_round.hits}회 타격 · 매 타격 전이율 ${ammo.pulse_round.transferBps / 100}%`,
+  wedge_round: `1타 ${ammo.wedge_round.base} → 2타 ${ammo.wedge_round.secondHit}`,
+  convergence_round: `이번 턴 이 적에 준 타격당 +${ammo.convergence_round.perPriorHit}`,
 };
+const familyNames = { HEALTH: '체력', WOUND: '상처', IMPACT: '충격' };
 const woundDescription = '피해를 받을 때마다 상처 수치만큼 추가 피해를 받습니다. 턴이 끝나면 상처가 절반으로 줄고 소수점은 버립니다.';
 const phases = { planning: '사격 준비', firing: '발사 중', approach: '접근 중', victory: '승리', defeat: '접촉 · 패배' };
 const heatFormat = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 });
@@ -31,7 +36,7 @@ const damageFormat = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 3 }
 
 function shotNote(shot: Shot) {
   if (!shot.source) return '복제 대상 없음';
-  const labels: Partial<Record<Round, string>> = { follow_up: '후속', finisher: '종결', execution: '처형', resonance: '동조', mixed: '혼합' };
+  const labels: Partial<Record<Round, string>> = { follow_up: '후속', finisher: '종결', execution: '처형', resonance: '동조', mixed: '혼합', convergence_round: '집속' };
   const parts = [];
   if (shot.round === 'copy') parts.push(`${ammo[shot.source].name} 복제`);
   if (shot.bonus) parts.push(`${labels[shot.source]} +${shot.bonus}`);
@@ -43,7 +48,8 @@ function shotNote(shot: Shot) {
 
 function damageIndicator(hit: DamageInstance, label: string): string {
   const wound = hit.woundDamage ? ` <small>상처 +${hit.woundDamage}</small>` : '';
-  return `<span class="lab-hit"><span>${label}</span> <b data-hit-damage>${hit.damage}</b>${wound}</span>`;
+  const impact = hit.impactBonus ? ` <small>전이 +${hit.impactBonus}</small>` : '';
+  return `<span class="lab-hit"><span>${label}</span> <b data-hit-damage>${hit.damage}</b>${wound}${impact}</span>`;
 }
 
 function shotRecord(shot: Shot): string {
@@ -51,7 +57,7 @@ function shotRecord(shot: Shot): string {
     ? `체력 ${shot.before} → ${shot.after}${shot.damage !== shot.removed ? ` · 실제 감소 ${shot.removed}` : ''}`
     : '';
   const detail = [shotNote(shot), health].filter(Boolean).join(' · ');
-  const hits = shot.hits.length > 1 || shot.hits.some(hit => hit.woundDamage)
+  const hits = shot.hits.length > 1 || shot.hits.some(hit => hit.woundDamage || hit.impactBonus)
     ? `<div class="lab-hits">${shot.hits.map((hit, index) => damageIndicator(hit, `${index + 1}타`)).join('')}</div>` : '';
   return `<li><strong class="lab-shot-name">${shot.index + 1} · ${ammo[shot.round].name}</strong>
     <div class="lab-shot-damage">
@@ -84,11 +90,14 @@ export function mountCombat(root: HTMLElement) {
       <div class="planner-head"><h2>${P220.name} <small>탄창</small></h2><button type="button" data-reset>다시 시작</button></div>
       <div class="lab-slots" aria-label="발사 순서"></div>
       <div class="lab-edit"><span data-selected></span><button data-shift="-1" aria-label="앞 칸으로 이동">←</button><button data-shift="1" aria-label="뒤 칸으로 이동">→</button><button data-clear>칸 비우기</button></div>
-      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}" title="${ammo[id].family === 'WOUND' ? '상처' : '체력'} 계열">
+      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}" title="${familyNames[ammo[id].family]} 계열">
         <i class="round-mark"></i><b class="lab-ammo-name">${ammo[id].name}</b><small>${notes[id]}</small>
-        <strong aria-label="${id === 'copy' ? '직전 탄 피해' : id === 'split_round' ? '타격당 기본 피해 ' + ammo[id].base : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong>
+        <strong aria-label="${id === 'copy' ? '직전 탄 피해' : 'hits' in ammo[id] ? '타격당 기본 피해 ' + ammo[id].base : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong>
         <span class="lab-ammo-heat">열 <b>+${ammo[id].heat}</b></span>
       </button>`).join('')}</div>
+      <details class="lab-impact-rule"><summary>충격 전이란?</summary>
+        <p>같은 적에게 피해를 준 내 타격끼리 이어집니다. 직전 타격과 이번 타격 중 높은 전이율을 직전 최종 피해에 한 번 곱하고, 소수점을 버려 이번 피해에 더합니다.
+        보너스를 받아도 타격 자체의 전이율은 그대로입니다. 턴 종료 피해까지 처리하면 기록을 비웁니다.</p></details>
       <button class="lab-fire" data-fire aria-keyshortcuts="R">발사</button>
     </section></div>
     <section class="lab-record"><h2>사격 기록</h2><div data-log></div></section>

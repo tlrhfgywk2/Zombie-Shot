@@ -44,9 +44,9 @@ try {
     };
     await wait('planning');
     assert.equal(await loc('[data-slot]').count(), 4);
-    assert.equal(await loc('[data-round]').count(), 15);
+    assert.equal(await loc('[data-round]').count(), 19);
     assert.equal(await read('[data-hp]'), '∞');
-    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0', '+5', '+5', '+5', '+5', '+5']);
+    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0', ...Array(9).fill('+5')]);
     assert.equal(await read('[data-weapon-heat]'), '0');
     assert.equal(await read('[data-heat-multiplier]'), '×1.00');
     assert.equal(await loc('.presentation-debug').count(), 0);
@@ -192,6 +192,24 @@ try {
     assert.ok(await loc('.lab-wound').isHidden());
     await loc('.lab-slots').scrollIntoViewIfNeeded();
     await capture('분열탄처치');
+
+    await scenario(500, 4);
+    await page.keyboard.press('Space');
+    for (const round of ['conduit_round', 'pulse_round', 'wedge_round', 'convergence_round']) {
+      await click(`[data-round="${round}"]`);
+    }
+    await click('.lab-impact-rule summary');
+    await loc('.lab-impact-rule').scrollIntoViewIfNeeded();
+    await capture('충격전이탄약');
+    await click('[data-fire]');
+    await wait('planning');
+    assert.deepEqual(await loc('[data-final-damage]').allTextContents(), ['4', '10', '12', '16']);
+    assert.deepEqual(await loc('[data-log] li:nth-child(2) [data-hit-damage]').allTextContents(), ['5', '5']);
+    assert.deepEqual(await loc('[data-log] li:nth-child(3) [data-hit-damage]').allTextContents(), ['3', '9']);
+    assert.match(await read('[data-log] li:last-child'), /집속 \+10/);
+    assert.equal(await read('[data-hp]'), '458 / 500');
+    await loc('[data-log]').scrollIntoViewIfNeeded();
+    await capture('충격전이기록');
 
     await page.goto(url + '?presentationDebug=1');
     await loc('.presentation-debug').waitFor();

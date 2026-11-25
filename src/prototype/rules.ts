@@ -19,6 +19,10 @@ export const ammo = {
   split_round: { name: '분열탄', family: 'HEALTH', base: 3, hits: 3, heat: 5 },
   pursuit_round: { name: '추격탄', family: 'HEALTH', base: 7, pursuitDamage: 5, heat: 5 },
   echo_round: { name: '반향탄', family: 'HEALTH', base: 5, echoDamage: 5, heat: 5 },
+  conduit_round: { name: '매개탄', family: 'IMPACT', base: 4, transferBps: 4000, heat: 5 },
+  pulse_round: { name: '맥동탄', family: 'IMPACT', base: 4, hits: 2, transferBps: 2000, heat: 5 },
+  wedge_round: { name: '쐐기탄', family: 'HEALTH', base: 2, secondHit: 8, heat: 5 },
+  convergence_round: { name: '집속탄', family: 'HEALTH', base: 4, perPriorHit: 2, heat: 5 },
 } as const satisfies Record<string, { name: string; family: AmmoFamily; base: number; heat: number } & Record<string, string | number>>;
 export type Round = keyof typeof ammo;
 export function isRound(value: unknown): value is Round {
@@ -37,12 +41,15 @@ export interface Encounter extends Scenario {
   turns: number;
   actions: number;
   wound: number;
+  previousQualifyingHit: { finalDamage: number; ownTransferBps: number } | null;
+  qualifyingHitCount: number;
   vulnerable: { percent: number; remaining: number } | null;
   phase: 'planning' | 'firing' | 'approach' | 'victory' | 'defeat';
 }
 export function startEncounter(scenario: Scenario): Encounter {
   if (!validScenario(scenario)) throw new RangeError('체력은 무한 또는 양의 정수, 거리와 접근은 양의 정수여야 합니다.');
-  return { ...scenario, hp: scenario.maxHp, weaponHeat: WEAPON_HEAT_BALANCE.initial, turns: 0, actions: 0, wound: 0, vulnerable: null, phase: 'planning' };
+  return { ...scenario, hp: scenario.maxHp, weaponHeat: WEAPON_HEAT_BALANCE.initial, turns: 0, actions: 0, wound: 0,
+    previousQualifyingHit: null, qualifyingHitCount: 0, vulnerable: null, phase: 'planning' };
 }
 interface ShotEffect {
   source: Exclude<Round, 'copy'> | null;
@@ -66,6 +73,9 @@ export interface Shot extends ShotEffect {
 }
 
 export interface DamageInstance {
+  source: DamageSource;
+  ownTransferBps: number;
+  impactBonus: number;
   modifiedDamage: number;
   woundDamage: number;
   damage: number;
@@ -81,14 +91,34 @@ function modifiedDamage(power: number, percent: number, heat: number): number {
   return Math.floor(power * (100 + percent) * heatDamagePercent(heat) / 10_000 + 0.5);
 }
 
-function resolveDamage(state: Encounter, modified: number): DamageInstance | undefined {
-  if (modified <= 0 || state.hp <= 0) return;
+type DamageSource = Round | 'echo' | 'playerEffect' | 'environment';
+
+// 보정이 끝난 독립 타격 한 건과 그 직후의 표적 상태를 함께 반환한다.
+export function resolveDamage(state: Encounter, source: DamageSource, modified: number, ownTransferBps = 0) {
+  if (state.hp <= 0 || state.phase === 'victory' || state.phase === 'defeat' || !(modified > 0)) return;
+  if (!Number.isInteger(modified)) throw new RangeError('보정 피해는 반올림이 끝난 정수여야 합니다.');
+  if (!Number.isSafeInteger(ownTransferBps) || ownTransferBps < 0) throw new RangeError('전이율은 0 이상의 정수 베이시스 포인트여야 합니다.');
   const before = state.hp;
+  const qualifies = source !== 'environment';
+  const previous = state.previousQualifyingHit;
+  // 체력 입력 범위의 큰 정수에서도 곱셈 중간값의 반올림 없이 한 번만 내린다.
+  const impactBonus = qualifies && previous
+    ? Number(BigInt(previous.finalDamage) * BigInt(Math.max(previous.ownTransferBps, ownTransferBps)) / 10_000n) : 0;
   const woundDamage = state.wound;
-  const damage = modified + woundDamage;
+  const damage = modified + woundDamage + impactBonus;
   const after = Math.max(0, before - damage);
   const removed = before === Infinity ? 0 : before - after;
-  return { modifiedDamage: modified, woundDamage, damage, before, after, removed };
+  const hit: DamageInstance = { source, modifiedDamage: modified, ownTransferBps, impactBonus, woundDamage, damage, before, after, removed };
+  const next = { ...state, hp: after };
+  if (after === 0) {
+    next.wound = 0;
+    next.previousQualifyingHit = null;
+    next.qualifyingHitCount = 0;
+  } else if (qualifies) {
+    next.previousQualifyingHit = { finalDamage: damage, ownTransferBps };
+    next.qualifyingHitCount++;
+  }
+  return { hit, state: next };
 }
 export function lockMagazine(slots: readonly (Round | null)[], capacity: number): readonly Round[] | null {
   const copy = Array.from(slots);
@@ -99,7 +129,7 @@ type Event = { kind: 'shot'; shot: Shot } | { kind: 'echo'; echo: EchoHit } | { 
 export type Frame = Event & { state: Encounter };
 
 // 한 발이 만든 상태를 다음 발이 그대로 읽는다. 렌더러와 타이머는 이 계산에 참여하지 않는다.
-export function* resolveVolley(start: Encounter, locked: readonly Round[]): Generator<Frame> {
+export function* resolveVolley(start: Encounter, locked: readonly Round[]): Generator<Frame, void> {
   if (start.phase !== 'planning') return;
   let state: Encounter = { ...start, phase: 'firing' };
   const counts = new Map<Round, number>();
@@ -126,6 +156,7 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
       }
       if (round === 'resonance') bonus = largestGroup * ammo.resonance.perRound;
       if (round === 'mixed') bonus = counts.size * ammo.mixed.perType;
+      if (round === 'convergence_round') bonus = state.qualifyingHitCount * ammo[round].perPriorHit;
       effect = { source: round, bonus };
       if (round === 'pursuit_round' && previousFamily !== undefined && previousFamily !== ammo[round].family) {
         effect.pursuitDamage = ammo[round].pursuitDamage;
@@ -140,7 +171,9 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     const base = definition?.base ?? 0;
     const hitCount = definition && 'hits' in definition ? definition.hits : 1;
     const baseHits: number[] = Array(hitCount).fill(base);
+    if (definition && 'secondHit' in definition) baseHits.push(definition.secondHit);
     if (effect.pursuitDamage) baseHits.push(effect.pursuitDamage);
+    const transferBps = definition && 'transferBps' in definition ? definition.transferBps : 0;
     const hits: DamageInstance[] = [];
     const before = state.hp;
     let baseDamage = 0;
@@ -149,15 +182,16 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     previousDamage = 0;
     for (const [hitIndex, baseHit] of baseHits.entries()) {
       const power = baseHit + (hitIndex === 0 ? bonus : 0);
-      const hit = resolveDamage(state, modifiedDamage(power, percent, heatBefore));
+      const resolved = resolveDamage(state, round, modifiedDamage(power, percent, heatBefore), transferBps);
       baseDamage += baseHit;
       preHeatDamage += power * (100 + percent) / 100;
-      if (hit) {
+      if (resolved) {
+        const { hit } = resolved;
+        state = resolved.state;
         hits.push(hit);
         damage += hit.damage;
         // 후속탄은 직전 샷의 보정된 기본 피해만 읽는다.
         previousDamage += hit.modifiedDamage;
-        state = { ...state, hp: hit.after };
         if (state.hp === 0) break;
       }
     }
@@ -169,7 +203,8 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     if (after > 0 && definition && 'echoDamage' in definition) {
       pendingEchoes.push({ shotIndex: index, power: definition.echoDamage, heat: heatBefore });
     }
-    state = { ...state, wound: after > 0 ? state.wound + woundApplied : 0, vulnerable, weaponHeat: heatAfter };
+    state = { ...state, wound: state.wound + woundApplied, vulnerable, weaponHeat: heatAfter };
+    if (after === 0) pendingEchoes.length = 0;
     const removed = before === Infinity ? 0 : before - after;
     yield { kind: 'shot', state, shot: {
       index, round, before, after, removed, baseDamage, preHeatDamage, damage, percent, applied, heatBefore, heatAfter, hits, woundApplied, source, bonus,
@@ -177,13 +212,14 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     if (!after) break;
   }
   for (const { shotIndex, power, heat } of pendingEchoes) {
-    const hit = resolveDamage(state, modifiedDamage(power, state.vulnerable?.percent ?? 0, heat));
-    if (!hit) break;
-    state = { ...state, hp: hit.after, wound: hit.after > 0 ? state.wound : 0 };
+    const resolved = resolveDamage(state, 'echo', modifiedDamage(power, state.vulnerable?.percent ?? 0, heat));
+    if (!resolved) continue;
+    const { hit } = resolved;
+    state = resolved.state;
     yield { kind: 'echo', state, echo: { shotIndex, hit } };
     if (state.hp === 0) break;
   }
-  state = { ...state, wound: Math.floor(state.wound / 2), turns: state.turns + 1,
+  state = { ...state, wound: Math.floor(state.wound / 2), previousQualifyingHit: null, qualifyingHitCount: 0, turns: state.turns + 1,
     weaponHeat: state.weaponHeat * (1 - WEAPON_HEAT_BALANCE.turnCoolingRate) };
   yield { kind: 'turn', state };
   if (!state.hp) {

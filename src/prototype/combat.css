@@ -53,6 +53,11 @@
 [data-round=wounding_round] { --ammo-color: #e48ba9; } [data-round=serrated_round] { --ammo-color: #cf6a8d; }
 [data-round=split_round] { --ammo-color: #abd3a3; } [data-round=pursuit_round] { --ammo-color: #edc68e; }
 [data-round=echo_round] { --ammo-color: #b1afea; }
+[data-round=conduit_round], [data-round=pulse_round] { --ammo-color: #81c4cf; }
+.lab-choices :is([data-round=conduit_round], [data-round=pulse_round], [data-round=wedge_round], [data-round=convergence_round]) small { font-size: var(--combat-value-size); word-break: keep-all; }
+.lab-impact-rule { margin-top: 8px; color: #afbcad; }
+.lab-impact-rule summary { cursor: pointer; }
+.lab-impact-rule p { margin-top: 4px; }
 .combat-lab .lab-fire { width: 100%; padding: 11px; margin-top: 12px; font-weight: 800; background: var(--acid); color: #182013; border-color: transparent; }
 .lab-record, .lab-settings { margin-top: 12px; }
 .lab-record h2 { margin-bottom: 9px; }
