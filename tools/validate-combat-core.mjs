@@ -44,9 +44,9 @@ try {
     };
     await wait('planning');
     assert.equal(await loc('[data-slot]').count(), 4);
-    assert.equal(await loc('[data-round]').count(), 10);
+    assert.equal(await loc('[data-round]').count(), 15);
     assert.equal(await read('[data-hp]'), '∞');
-    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0']);
+    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0', '+5', '+5', '+5', '+5', '+5']);
     assert.equal(await read('[data-weapon-heat]'), '0');
     assert.equal(await read('[data-heat-multiplier]'), '×1.00');
     assert.equal(await loc('.presentation-debug').count(), 0);
@@ -160,6 +160,39 @@ try {
     await click('[data-reset]');
     assert.equal(await read('[data-weapon-heat]'), '0');
     await capture('열-초기화');
+
+    await scenario(500, 4);
+    await page.keyboard.press('Space');
+    for (const round of ['echo_round', 'serrated_round', 'pursuit_round', 'split_round']) await click(`[data-round="${round}"]`);
+    await loc('.planner-head').scrollIntoViewIfNeeded();
+    await capture('상처탄창');
+    assert.ok(await loc('.lab-wound').isHidden());
+    await click('[data-fire]');
+    await loc('[data-echo]').waitFor();
+    assert.equal(await read('[data-echo] [data-hit-damage]'), '11');
+    assert.deepEqual(await loc('[data-log] li:nth-child(3) [data-hit-damage]').allTextContents(), ['14', '12']);
+    assert.deepEqual(await loc('[data-log] li:nth-child(4) [data-hit-damage]').allTextContents(), ['9', '9', '9']);
+    await wait('planning');
+    assert.equal(await read('[data-wound]'), '3');
+    assert.equal(await read('[data-hp]'), '428 / 500');
+    assert.equal(await read('[data-weapon-heat]'), '10');
+    await loc('.lab-wound').scrollIntoViewIfNeeded();
+    await capture('상처감쇠');
+    await loc('[data-log]').scrollIntoViewIfNeeded();
+    await capture('독립타격');
+
+    await scenario(14, 4);
+    await page.keyboard.press('Space');
+    for (const round of ['wounding_round', 'split_round', 'echo_round', 'pursuit_round']) await click(`[data-round="${round}"]`);
+    await click('[data-fire]');
+    await wait('victory');
+    assert.deepEqual(await loc('[data-log] li:nth-child(2) [data-hit-damage]').allTextContents(), ['6', '6']);
+    assert.equal(await loc('[data-slot]').filter({ hasText: '미발사' }).count(), 2);
+    assert.equal(await loc('[data-echo]').count(), 0);
+    assert.ok(await loc('.lab-wound').isHidden());
+    await loc('.lab-slots').scrollIntoViewIfNeeded();
+    await capture('분열탄처치');
+
     await page.goto(url + '?presentationDebug=1');
     await loc('.presentation-debug').waitFor();
     const debug = loc('.presentation-debug');

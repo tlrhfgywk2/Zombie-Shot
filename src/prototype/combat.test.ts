@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { heatDamageMultiplier } from './combatBalance';
 import { CombatController } from './CombatController';
-import { defaultScenario, lockMagazine, P220, resolveVolley, startEncounter } from './rules';
+import { ammo, defaultScenario, lockMagazine, P220, resolveVolley, startEncounter } from './rules';
 import type { Encounter, Round } from './rules';
 
 const ordinary = ['standard', 'standard', 'standard', 'standard'] as const;
@@ -123,6 +123,108 @@ describe('취약과 접근 순서', () => {
   });
 });
 
+describe('상처와 독립 타격', () => {
+  it('절개탄과 톱니탄은 기존 상처가 적용된 뒤 상처를 부여하고 합산한다', () => {
+    const first = volley(['wounding_round', 'serrated_round']);
+    expect(first.shots[0]).toMatchObject({ damage: 5, woundApplied: 3, hits: [{ modifiedDamage: 5, woundDamage: 0 }] });
+    expect(first.shots[1]).toMatchObject({ damage: 6, woundApplied: 6, hits: [{ modifiedDamage: 3, woundDamage: 3 }] });
+    expect(first.frames.slice(0, 2).map(frame => frame.state.wound)).toEqual([3, 9]);
+    expect(first.end.wound).toBe(4);
+    expect(first.end.vulnerable).toBeNull();
+    expect(volley(['serrated_round']).shots[0]).toMatchObject({ damage: 3, woundApplied: 6, hits: [{ damage: 3 }] });
+  });
+
+  it('상처는 기본 피해 배율을 받지 않고 양의 피해 한 건당 한 번만 발동한다', () => {
+    const first = volley(['copy', 'vulnerability', 'standard'], { ...healthy, wound: 5 });
+    expect(first.shots.slice(0, 2).map(shot => shot.hits)).toEqual([[], []]);
+    expect(first.frames.slice(0, 3).map(frame => frame.state.wound)).toEqual([5, 5, 5]);
+    expect(first.shots[2]).toMatchObject({ damage: 18, hits: [{ modifiedDamage: 13, woundDamage: 5, damage: 18 }] });
+    const next = volley(['standard', 'follow_up'], { ...healthy, wound: 5 });
+    expect(next.shots[1]).toMatchObject({ bonus: 5, hits: [{ damage: 20, woundDamage: 5 }] });
+  });
+
+  it('한 턴에 한 번씩 상처가 7 → 3 → 1 → 0으로 줄어든다', () => {
+    let state = { ...healthy, wound: 7 };
+    for (const value of [3, 1, 0]) {
+      const frames = [...resolveVolley(state, [])];
+      expect(frames[0]).toMatchObject({ kind: 'turn', state: { wound: value } });
+      state = frames.at(-1)!.state;
+      expect(state.wound).toBe(value);
+    }
+  });
+
+  it.each([[0, 9, 3], [5, 24, 8]])('상처 %i에서 한 발의 분열탄 피해는 %i', (wound, damage, perHit) => {
+    const result = volley(['split_round'], { ...healthy, wound });
+    expect(result.shots).toHaveLength(1);
+    expect(result.shots[0]).toMatchObject({ damage, heatBefore: 0, heatAfter: ammo.split_round.heat });
+    expect(result.shots[0]!.hits.map(hit => hit.damage)).toEqual([perHit, perHit, perHit]);
+    expect(result.shots[0]!.hits.map(hit => hit.after)).toEqual([500 - perHit, 500 - perHit * 2, 500 - damage]);
+  });
+
+  it('추격탄은 실제 직전 발사 탄의 계열을 비교하고 새 탄창에서 초기화한다', () => {
+    const noPrevious = volley(['pursuit_round']);
+    const sameFamily = volley(['reinforced', 'pursuit_round']);
+    const differentFamily = volley(['wounding_round', 'pursuit_round']);
+    const active = volley(['wounding_round', 'pursuit_round', 'pursuit_round'], { ...healthy, wound: 2 });
+    const afterSplit = volley(['split_round', 'pursuit_round']);
+    const afterCopy = volley(['wounding_round', 'copy', 'pursuit_round']);
+    for (const result of [noPrevious, sameFamily, afterSplit, afterCopy]) {
+      expect(result.shots.at(-1)!.hits.map(hit => hit.modifiedDamage)).toEqual([7]);
+    }
+    expect(differentFamily.shots[1]!.hits.map(hit => hit.modifiedDamage)).toEqual([7, 5]);
+    expect(active.shots[1]).toMatchObject({ damage: 22, hits: [{ damage: 12 }, { damage: 10 }] });
+    expect(active.shots[2]!.hits).toHaveLength(1);
+    expect(volley(['pursuit_round'], volley(['wounding_round']).end).shots[0]!.hits).toHaveLength(1);
+  });
+
+  it('처형탄과 종결탄은 조건 발동 시에도 상처가 한 번만 추가된다', () => {
+    const target = { ...healthy, hp: 30, maxHp: 100, wound: 5 };
+    const execution = volley(['execution'], target).shots[0]!;
+    const finisher = volley(['finisher'], target).shots[0]!;
+    expect(execution.hits).toMatchObject([{ modifiedDamage: 21, woundDamage: 5, damage: 26 }]);
+    expect(finisher.hits).toMatchObject([{ modifiedDamage: 16, woundDamage: 5, damage: 21 }]);
+  });
+
+  it.each([[0, 5], [5, 10]])('상처 %i에서 반향탄의 즉시·지연 피해는 각각 %i', (wound, damage) => {
+    const result = volley(['echo_round'], { ...healthy, wound });
+    expect(result.shots).toHaveLength(1);
+    expect(result.shots[0]!.hits).toMatchObject([{ damage }]);
+    expect(result.frames.slice(1, 3)).toMatchObject([
+      { kind: 'echo', echo: { hit: { damage } }, state: { hp: 500 - damage * 2, wound, weaponHeat: ammo.echo_round.heat } },
+      { kind: 'turn', state: { wound: Math.floor(wound / 2) } },
+    ]);
+  });
+
+  it('반향은 현재 상처를 읽고 발사 순서대로 모두 해결한 뒤 상처를 감쇠한다', () => {
+    const result = volley(['echo_round', 'serrated_round', 'echo_round'], { ...healthy, wound: 2 });
+    expect(result.shots[0]!.damage).toBe(7);
+    expect(result.frames.slice(3, 6)).toMatchObject([
+      { kind: 'echo', echo: { shotIndex: 0, hit: { damage: 13, woundDamage: 8 } }, state: { wound: 8 } },
+      { kind: 'echo', echo: { shotIndex: 2, hit: { damage: 14, woundDamage: 8 } }, state: { wound: 8 } },
+      { kind: 'turn', state: { wound: 4 } },
+    ]);
+    expect(volley(['echo_round', 'vulnerability']).frames[2]).toMatchObject({ kind: 'echo', echo: { hit: { damage: 6 } } });
+  });
+
+  it('표적을 처치하면 남은 타격과 대기 중인 반향을 건너뛴다', () => {
+    const direct = volley(['echo_round', 'split_round', 'standard'], { ...healthy, hp: 10 });
+    expect(direct.shots.map(shot => shot.round)).toEqual(['echo_round', 'split_round']);
+    expect(direct.shots[1]!.hits.map(hit => hit.removed)).toEqual([3, 2]);
+    expect(direct.frames.map(frame => frame.kind)).toEqual(['shot', 'shot', 'turn', 'victory']);
+    const delayed = volley(['echo_round', 'echo_round'], { ...healthy, hp: 12 });
+    expect(delayed.frames.map(frame => frame.kind)).toEqual(['shot', 'shot', 'echo', 'turn', 'victory']);
+    expect(delayed.end).toMatchObject({ hp: 0, actions: 0, turns: 1 });
+  });
+
+  it('복제탄은 직전 탄의 독립 타격과 상태 효과를 복제하며 자체 발열만 적용한다', () => {
+    const result = volley(['wounding_round', 'copy', 'split_round', 'copy']);
+    expect(result.shots[1]).toMatchObject({ woundApplied: 3, heatBefore: 5, heatAfter: 5 });
+    expect(result.shots.slice(2).map(shot => shot.hits.length)).toEqual([3, 3]);
+    const echoes = volley(['echo_round', 'copy']).frames.filter(frame => frame.kind === 'echo');
+    expect(echoes.map(frame => frame.echo.shotIndex)).toEqual([0, 1]);
+  });
+});
+
 describe('발사 잠금과 초기화', () => {
   afterEach(() => vi.useRealTimers());
   it('불완전한 탄창, 중복 입력, 발사 중 편집, 종결 후 발사를 거부한다', () => {
@@ -182,6 +284,46 @@ describe('발사 잠금과 초기화', () => {
     expect(controller.reset({ maxHp: 0, distance: 1, approach: 1 })).toBe(false);
     expect(controller.reset({ maxHp: Infinity, distance: Infinity, approach: 1 })).toBe(false);
     expect(controller.state).toBe(initial);
+  });
+
+  it('독립 타격과 반향은 추가 탄창 칸이나 실제 발사 이벤트를 쓰지 않는다', () => {
+    vi.useFakeTimers();
+    const onChange = vi.fn();
+    const controller = new CombatController(onChange);
+    controller.edit(0, 'split_round');
+    controller.edit(1, 'echo_round');
+    controller.edit(2, 'echo_round');
+    controller.edit(3, 'serrated_round');
+    expect(controller.fire()).toBe(true);
+    expect(controller.shots).toHaveLength(1);
+    expect(controller.shots[0]!.hits).toHaveLength(3);
+    expect(controller.echoes).toHaveLength(0);
+    vi.runAllTimers();
+    expect(onChange.mock.calls.flat().filter(kind => kind === 'shot')).toHaveLength(P220.capacity);
+    expect(controller.shots.map(shot => shot.index)).toEqual([0, 1, 2, 3]);
+    expect(controller.echoes.map(event => event.shotIndex)).toEqual([1, 2]);
+    expect(controller.state).toMatchObject({ weaponHeat: 10, wound: 3, turns: 1 });
+  });
+
+  it('지연 타격의 타이머가 대기 중일 때 재시작하면 이전 전투의 반향을 처리하지 않는다', () => {
+    vi.useFakeTimers();
+    const timer = vi.spyOn(globalThis, 'setTimeout');
+    try {
+      const controller = new CombatController(() => {});
+      controller.edit(0, 'echo_round');
+      controller.edit(1, 'echo_round');
+      controller.fire();
+      vi.advanceTimersByTime(1200);
+      expect(controller.echoes).toHaveLength(1);
+      const pending = timer.mock.calls.at(-1)![0] as () => void;
+      controller.reset();
+      pending();
+      vi.runAllTimers();
+      expect(controller.state).toEqual(startEncounter(defaultScenario));
+      expect(controller.echoes).toHaveLength(0);
+    } finally {
+      timer.mockRestore();
+    }
   });
 });
 

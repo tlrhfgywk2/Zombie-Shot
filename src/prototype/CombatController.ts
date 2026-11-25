@@ -1,11 +1,12 @@
 import { defaultScenario, isRound, lockMagazine, P220, resolveVolley, startEncounter, validScenario } from './rules';
-import type { Frame, Round, Scenario, Shot } from './rules';
+import type { EchoHit, Frame, Round, Scenario, Shot } from './rules';
 
 export class CombatController {
   private scenario: Scenario = { ...defaultScenario };
   state = startEncounter(this.scenario);
   slots: readonly (Round | null)[] = Object.freeze(Array<Round>(P220.capacity).fill('standard'));
   shots: Shot[] = [];
+  echoes: EchoHit[] = [];
   private generation = 0;
   private timer?: ReturnType<typeof setTimeout>;
 
@@ -34,6 +35,7 @@ export class CombatController {
     const volley = resolveVolley(this.state, locked);
     this.state = { ...this.state, phase: 'firing' };
     this.shots = [];
+    this.echoes = [];
     const advance = () => {
       while (generation === this.generation) {
         const next = volley.next();
@@ -41,11 +43,12 @@ export class CombatController {
         const event = next.value;
         this.state = event.state;
         if (event.kind === 'shot') this.shots.push(event.shot);
+        if (event.kind === 'echo') this.echoes.push(event.echo);
         this.onChange(event.kind);
         if (generation !== this.generation) return;
         // 치명타와 접촉의 종결 판정은 같은 호출에서 끝낸다.
-        if ((event.kind === 'shot' && this.state.hp > 0) || (event.kind === 'approach' && this.state.distance > 0)) {
-          this.timer = setTimeout(advance, event.kind === 'shot' ? 300 : 500);
+        if (((event.kind === 'shot' || event.kind === 'echo') && this.state.hp > 0) || (event.kind === 'approach' && this.state.distance > 0)) {
+          this.timer = setTimeout(advance, event.kind === 'approach' ? 500 : 300);
           return;
         }
       }
@@ -61,6 +64,7 @@ export class CombatController {
     this.scenario = { ...scenario };
     this.state = startEncounter(scenario);
     this.shots = [];
+    this.echoes = [];
     this.onChange('reset');
     return true;
   }
