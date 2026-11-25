@@ -1,0 +1,1564 @@
+{
+  "revision": "a9a504e1789a77eefa609aa89b799f7aaf89d2f7",
+  "sourceDirty": false,
+  "commands": 21,
+  "scenario": {
+    "mode": "analysis",
+    "weapon": "P220",
+    "capacity": 4,
+    "maxHp": 100000,
+    "distance": 3,
+    "approach": 1,
+    "wound": 0,
+    "vulnerable": null,
+    "heat": 0,
+    "turns": 1,
+    "seed": 20261125
+  },
+  "registry": {
+    "name": "P220",
+    "capacity": 4
+  },
+  "individual": {
+    "evaluated": 38,
+    "rows": [
+      {
+        "round": "standard",
+        "name": "표준탄",
+        "cold": {
+          "totalDamage": 10,
+          "directDamage": 10,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 16,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 25,
+          "directDamage": 25,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 16,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "reinforced",
+        "name": "강화탄",
+        "cold": {
+          "totalDamage": 20,
+          "directDamage": 20,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 3,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 40,
+          "directDamage": 40,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 3,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "follow_up",
+        "name": "후속탄",
+        "cold": {
+          "totalDamage": 8,
+          "directDamage": 8,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 27,
+          "directDamage": 27,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 3,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "finisher",
+        "name": "종결탄",
+        "cold": {
+          "totalDamage": 8,
+          "directDamage": 8,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 12,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 34,
+          "directDamage": 34,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 12,
+          "conditionalBaseDamage": 8,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "execution",
+        "name": "처형탄",
+        "cold": {
+          "totalDamage": 6,
+          "directDamage": 6,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 9,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 41,
+          "directDamage": 41,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 9,
+          "conditionalBaseDamage": 15,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "vulnerability",
+        "name": "취약탄",
+        "cold": {
+          "totalDamage": 0,
+          "directDamage": 0,
+          "delayedDamage": 0,
+          "hits": 0,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": true
+        },
+        "prepared": {
+          "totalDamage": 0,
+          "directDamage": 0,
+          "delayedDamage": 0,
+          "hits": 0,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": true
+        }
+      },
+      {
+        "round": "pain",
+        "name": "고통탄",
+        "cold": {
+          "totalDamage": 10,
+          "directDamage": 10,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 7,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 28,
+          "directDamage": 28,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 7,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "resonance",
+        "name": "동조탄",
+        "cold": {
+          "totalDamage": 18,
+          "directDamage": 18,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 4,
+          "conditionalBaseDamage": 12,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 25,
+          "directDamage": 25,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 4,
+          "conditionalBaseDamage": 4,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "mixed",
+        "name": "혼합탄",
+        "cold": {
+          "totalDamage": 12,
+          "directDamage": 12,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 6,
+          "conditionalBaseDamage": 4,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 34,
+          "directDamage": 34,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 6,
+          "conditionalBaseDamage": 8,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "copy",
+        "name": "복제탄",
+        "cold": {
+          "totalDamage": 0,
+          "directDamage": 0,
+          "delayedDamage": 0,
+          "hits": 0,
+          "shots": 1,
+          "heatGenerated": 0,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 17,
+          "directDamage": 17,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 0,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "wounding_round",
+        "name": "절개탄",
+        "cold": {
+          "totalDamage": 5,
+          "directDamage": 5,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 3,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 18,
+          "directDamage": 18,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 3,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "serrated_round",
+        "name": "톱니탄",
+        "cold": {
+          "totalDamage": 3,
+          "directDamage": 3,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 6,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 15,
+          "directDamage": 15,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 6,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "split_round",
+        "name": "분열탄",
+        "cold": {
+          "totalDamage": 9,
+          "directDamage": 9,
+          "delayedDamage": 0,
+          "hits": 3,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 35,
+          "directDamage": 35,
+          "delayedDamage": 0,
+          "hits": 3,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 18,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "pursuit_round",
+        "name": "추격탄",
+        "cold": {
+          "totalDamage": 7,
+          "directDamage": 7,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 34,
+          "directDamage": 34,
+          "delayedDamage": 0,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 1,
+          "conditionalHitDamage": 13,
+          "woundDamage": 12,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "echo_round",
+        "name": "반향탄",
+        "cold": {
+          "totalDamage": 10,
+          "directDamage": 5,
+          "delayedDamage": 5,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 31,
+          "directDamage": 18,
+          "delayedDamage": 13,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 12,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "conduit_round",
+        "name": "매개탄",
+        "cold": {
+          "totalDamage": 4,
+          "directDamage": 4,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 17,
+          "directDamage": 17,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "pulse_round",
+        "name": "맥동탄",
+        "cold": {
+          "totalDamage": 8,
+          "directDamage": 8,
+          "delayedDamage": 0,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 32,
+          "directDamage": 32,
+          "delayedDamage": 0,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 12,
+          "impactDamage": 8,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "wedge_round",
+        "name": "쐐기탄",
+        "cold": {
+          "totalDamage": 10,
+          "directDamage": 10,
+          "delayedDamage": 0,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 32,
+          "directDamage": 32,
+          "delayedDamage": 0,
+          "hits": 2,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 12,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      },
+      {
+        "round": "convergence_round",
+        "name": "집속탄",
+        "cold": {
+          "totalDamage": 4,
+          "directDamage": 4,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 0,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 0,
+          "impactDamage": 0,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        },
+        "prepared": {
+          "totalDamage": 23,
+          "directDamage": 23,
+          "delayedDamage": 0,
+          "hits": 1,
+          "shots": 1,
+          "heatGenerated": 5,
+          "conditionalBaseDamage": 4,
+          "conditionalHits": 0,
+          "conditionalHitDamage": 0,
+          "woundDamage": 6,
+          "impactDamage": 5,
+          "woundApplied": 0,
+          "vulnerableApplied": false
+        }
+      }
+    ]
+  },
+  "orders": [
+    {
+      "name": "상처·다중·집속",
+      "stock": {
+        "serrated_round": 1,
+        "split_round": 1,
+        "pulse_round": 1,
+        "convergence_round": 1
+      },
+      "evaluated": 24,
+      "mean": 51.458333333333336,
+      "highest": [
+        {
+          "sequence": [
+            "serrated_round",
+            "split_round",
+            "pulse_round",
+            "convergence_round"
+          ],
+          "damage": 79
+        }
+      ],
+      "lowest": [
+        {
+          "sequence": [
+            "convergence_round",
+            "split_round",
+            "pulse_round",
+            "serrated_round"
+          ],
+          "damage": 24
+        }
+      ],
+      "spread": 55
+    },
+    {
+      "name": "고단발·충격·후속",
+      "stock": {
+        "reinforced": 1,
+        "conduit_round": 1,
+        "follow_up": 1,
+        "pulse_round": 1
+      },
+      "evaluated": 24,
+      "mean": 55.458333333333336,
+      "highest": [
+        {
+          "sequence": [
+            "reinforced",
+            "follow_up",
+            "conduit_round",
+            "pulse_round"
+          ],
+          "damage": 65
+        }
+      ],
+      "lowest": [
+        {
+          "sequence": [
+            "follow_up",
+            "reinforced",
+            "pulse_round",
+            "conduit_round"
+          ],
+          "damage": 49
+        }
+      ],
+      "spread": 16
+    },
+    {
+      "name": "지연·취약·상처",
+      "stock": {
+        "echo_round": 2,
+        "vulnerability": 1,
+        "serrated_round": 1
+      },
+      "evaluated": 12,
+      "mean": 47.166666666666664,
+      "highest": [
+        {
+          "sequence": [
+            "vulnerability",
+            "serrated_round",
+            "echo_round",
+            "echo_round"
+          ],
+          "damage": 56
+        }
+      ],
+      "lowest": [
+        {
+          "sequence": [
+            "echo_round",
+            "echo_round",
+            "serrated_round",
+            "vulnerability"
+          ],
+          "damage": 38
+        }
+      ],
+      "spread": 18
+    },
+    {
+      "name": "계열·쐐기·복제",
+      "stock": {
+        "serrated_round": 1,
+        "wedge_round": 1,
+        "pursuit_round": 1,
+        "copy": 1
+      },
+      "evaluated": 24,
+      "mean": 44.875,
+      "highest": [
+        {
+          "sequence": [
+            "serrated_round",
+            "pursuit_round",
+            "copy",
+            "wedge_round"
+          ],
+          "damage": 76
+        }
+      ],
+      "lowest": [
+        {
+          "sequence": [
+            "copy",
+            "wedge_round",
+            "pursuit_round",
+            "serrated_round"
+          ],
+          "damage": 20
+        }
+      ],
+      "spread": 56
+    }
+  ],
+  "comparisons": [
+    {
+      "name": "상처 누적",
+      "sequence": [
+        "serrated_round",
+        "serrated_round",
+        "wounding_round",
+        "serrated_round"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 48,
+      "reference": 50,
+      "delta": -2,
+      "interaction": 4,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 58,
+          "delta": 8
+        },
+        {
+          "slot": 2,
+          "damage": 51,
+          "delta": 1
+        },
+        {
+          "slot": 3,
+          "damage": 46,
+          "delta": -4
+        },
+        {
+          "slot": 4,
+          "damage": 39,
+          "delta": -11
+        }
+      ],
+      "metrics": {
+        "woundDamage": 33,
+        "impactDamage": 0,
+        "delayedDamage": 0,
+        "hits": 4,
+        "heatGenerated": 20
+      }
+    },
+    {
+      "name": "독립 타격",
+      "sequence": [
+        "wedge_round",
+        "split_round",
+        "pulse_round",
+        "split_round"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 36,
+      "reference": 50,
+      "delta": -14,
+      "interaction": -3,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 47,
+          "delta": -3
+        },
+        {
+          "slot": 2,
+          "damage": 45,
+          "delta": -5
+        },
+        {
+          "slot": 3,
+          "damage": 50,
+          "delta": 0
+        },
+        {
+          "slot": 4,
+          "damage": 47,
+          "delta": -3
+        }
+      ],
+      "metrics": {
+        "woundDamage": 0,
+        "impactDamage": 0,
+        "delayedDamage": 0,
+        "hits": 10,
+        "heatGenerated": 20
+      }
+    },
+    {
+      "name": "충격 전이",
+      "sequence": [
+        "conduit_round",
+        "pulse_round",
+        "conduit_round",
+        "pulse_round"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 33,
+      "reference": 50,
+      "delta": -17,
+      "interaction": -7,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 42,
+          "delta": -8
+        },
+        {
+          "slot": 2,
+          "damage": 50,
+          "delta": 0
+        },
+        {
+          "slot": 3,
+          "damage": 48,
+          "delta": -2
+        },
+        {
+          "slot": 4,
+          "damage": 50,
+          "delta": 0
+        }
+      ],
+      "metrics": {
+        "woundDamage": 0,
+        "impactDamage": 7,
+        "delayedDamage": 0,
+        "hits": 6,
+        "heatGenerated": 20
+      }
+    },
+    {
+      "name": "고단발",
+      "sequence": [
+        "reinforced",
+        "reinforced",
+        "reinforced",
+        "reinforced"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 84,
+      "reference": 50,
+      "delta": 34,
+      "interaction": -8,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 56,
+          "delta": 6
+        },
+        {
+          "slot": 2,
+          "damage": 59,
+          "delta": 9
+        },
+        {
+          "slot": 3,
+          "damage": 62,
+          "delta": 12
+        },
+        {
+          "slot": 4,
+          "damage": 65,
+          "delta": 15
+        }
+      ],
+      "metrics": {
+        "woundDamage": 0,
+        "impactDamage": 0,
+        "delayedDamage": 0,
+        "hits": 4,
+        "heatGenerated": 12
+      }
+    },
+    {
+      "name": "상처·전이",
+      "sequence": [
+        "serrated_round",
+        "serrated_round",
+        "conduit_round",
+        "pulse_round"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 76,
+      "reference": 50,
+      "delta": 26,
+      "interaction": 19,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 58,
+          "delta": 8
+        },
+        {
+          "slot": 2,
+          "damage": 51,
+          "delta": 1
+        },
+        {
+          "slot": 3,
+          "damage": 48,
+          "delta": -2
+        },
+        {
+          "slot": 4,
+          "damage": 50,
+          "delta": 0
+        }
+      ],
+      "metrics": {
+        "woundDamage": 42,
+        "impactDamage": 14,
+        "delayedDamage": 0,
+        "hits": 5,
+        "heatGenerated": 20
+      }
+    },
+    {
+      "name": "다중·집속",
+      "sequence": [
+        "split_round",
+        "split_round",
+        "convergence_round",
+        "convergence_round"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 57,
+      "reference": 50,
+      "delta": 7,
+      "interaction": 19,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 46,
+          "delta": -4
+        },
+        {
+          "slot": 2,
+          "damage": 45,
+          "delta": -5
+        },
+        {
+          "slot": 3,
+          "damage": 47,
+          "delta": -3
+        },
+        {
+          "slot": 4,
+          "damage": 50,
+          "delta": 0
+        }
+      ],
+      "metrics": {
+        "woundDamage": 0,
+        "impactDamage": 0,
+        "delayedDamage": 0,
+        "hits": 8,
+        "heatGenerated": 20
+      }
+    },
+    {
+      "name": "상처·지연",
+      "sequence": [
+        "echo_round",
+        "serrated_round",
+        "echo_round",
+        "conduit_round"
+      ],
+      "conditions": {},
+      "evaluated": 6,
+      "damage": 64,
+      "reference": 50,
+      "delta": 14,
+      "interaction": 20,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 47,
+          "delta": -3
+        },
+        {
+          "slot": 2,
+          "damage": 51,
+          "delta": 1
+        },
+        {
+          "slot": 3,
+          "damage": 50,
+          "delta": 0
+        },
+        {
+          "slot": 4,
+          "damage": 46,
+          "delta": -4
+        }
+      ],
+      "metrics": {
+        "woundDamage": 24,
+        "impactDamage": 10,
+        "delayedDamage": 29,
+        "hits": 6,
+        "heatGenerated": 20
+      }
+    },
+    {
+      "name": "준비된 처형",
+      "sequence": [
+        "vulnerability",
+        "reinforced",
+        "follow_up",
+        "execution"
+      ],
+      "conditions": {
+        "hp": 30000
+      },
+      "evaluated": 6,
+      "damage": 84,
+      "reference": 50,
+      "delta": 34,
+      "interaction": 10,
+      "substitutions": [
+        {
+          "slot": 1,
+          "damage": 45,
+          "delta": -5
+        },
+        {
+          "slot": 2,
+          "damage": 59,
+          "delta": 9
+        },
+        {
+          "slot": 3,
+          "damage": 54,
+          "delta": 4
+        },
+        {
+          "slot": 4,
+          "damage": 66,
+          "delta": 16
+        }
+      ],
+      "metrics": {
+        "woundDamage": 0,
+        "impactDamage": 0,
+        "delayedDamage": 0,
+        "hits": 3,
+        "heatGenerated": 22
+      }
+    }
+  ],
+  "extreme": {
+    "seed": 20261125,
+    "strategy": "seeded-sample",
+    "spaceSize": 130321,
+    "evaluated": 12000,
+    "min": 0,
+    "max": 93,
+    "mean": 43.869166666666665,
+    "p10": 30,
+    "median": 43,
+    "p90": 59,
+    "highest": [
+      {
+        "sequence": [
+          "serrated_round",
+          "serrated_round",
+          "split_round",
+          "echo_round"
+        ],
+        "damage": 93
+      },
+      {
+        "sequence": [
+          "serrated_round",
+          "split_round",
+          "reinforced",
+          "pulse_round"
+        ],
+        "damage": 88
+      },
+      {
+        "sequence": [
+          "serrated_round",
+          "split_round",
+          "reinforced",
+          "copy"
+        ],
+        "damage": 87
+      }
+    ],
+    "lowest": [
+      {
+        "sequence": [
+          "vulnerability",
+          "copy",
+          "vulnerability",
+          "vulnerability"
+        ],
+        "damage": 0
+      },
+      {
+        "sequence": [
+          "vulnerability",
+          "copy",
+          "copy",
+          "vulnerability"
+        ],
+        "damage": 0
+      },
+      {
+        "sequence": [
+          "copy",
+          "vulnerability",
+          "copy",
+          "copy"
+        ],
+        "damage": 0
+      }
+    ],
+    "upperDecile": {
+      "minimum": 59,
+      "sequencesIncludingTies": 1286,
+      "ammoCounts": {
+        "standard": 213,
+        "finisher": 229,
+        "reinforced": 957,
+        "echo_round": 237,
+        "wedge_round": 203,
+        "vulnerability": 63,
+        "pain": 193,
+        "copy": 233,
+        "resonance": 235,
+        "conduit_round": 162,
+        "mixed": 436,
+        "pulse_round": 253,
+        "follow_up": 282,
+        "wounding_round": 257,
+        "execution": 78,
+        "pursuit_round": 157,
+        "serrated_round": 608,
+        "convergence_round": 107,
+        "split_round": 241
+      }
+    }
+  },
+  "bestHits": [
+    {
+      "turn": 1,
+      "shot": 1,
+      "hit": 1,
+      "ammo": "serrated_round",
+      "source": "serrated_round",
+      "rawBaseDamage": 3,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 3,
+      "heat": 0,
+      "woundBonus": 0,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 3,
+      "countAfter": 1
+    },
+    {
+      "turn": 1,
+      "shot": 2,
+      "hit": 1,
+      "ammo": "serrated_round",
+      "source": "serrated_round",
+      "rawBaseDamage": 3,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 3,
+      "heat": 5,
+      "woundBonus": 6,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 9,
+      "countAfter": 2
+    },
+    {
+      "turn": 1,
+      "shot": 3,
+      "hit": 1,
+      "ammo": "split_round",
+      "source": "split_round",
+      "rawBaseDamage": 3,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 3,
+      "heat": 10,
+      "woundBonus": 12,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 15,
+      "countAfter": 3
+    },
+    {
+      "turn": 1,
+      "shot": 3,
+      "hit": 2,
+      "ammo": "split_round",
+      "source": "split_round",
+      "rawBaseDamage": 3,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 3,
+      "heat": 10,
+      "woundBonus": 12,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 15,
+      "countAfter": 4
+    },
+    {
+      "turn": 1,
+      "shot": 3,
+      "hit": 3,
+      "ammo": "split_round",
+      "source": "split_round",
+      "rawBaseDamage": 3,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 3,
+      "heat": 10,
+      "woundBonus": 12,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 15,
+      "countAfter": 5
+    },
+    {
+      "turn": 1,
+      "shot": 4,
+      "hit": 1,
+      "ammo": "echo_round",
+      "source": "echo_round",
+      "rawBaseDamage": 5,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 6,
+      "heat": 15,
+      "woundBonus": 12,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 18,
+      "countAfter": 6
+    },
+    {
+      "turn": 1,
+      "shot": 4,
+      "hit": 1,
+      "ammo": "echo_round",
+      "source": "echo",
+      "effectId": "echo-4",
+      "rawBaseDamage": 5,
+      "conditionalBaseDamage": 0,
+      "modifiedDamage": 6,
+      "heat": 15,
+      "woundBonus": 12,
+      "impactBonus": 0,
+      "appliedTransferBps": 0,
+      "finalDamage": 18,
+      "countAfter": 7
+    }
+  ],
+  "encounters": [
+    {
+      "name": "두 탄창",
+      "scenario": {
+        "mode": "encounter",
+        "weapon": "P220",
+        "capacity": 4,
+        "maxHp": 150,
+        "distance": 3,
+        "approach": 1,
+        "wound": 0,
+        "vulnerable": null,
+        "heat": 0,
+        "turns": 4,
+        "seed": 20261125,
+        "sequence": [
+          "serrated_round",
+          "split_round",
+          "conduit_round",
+          "convergence_round"
+        ],
+        "inventory": {
+          "serrated_round": 2,
+          "split_round": 2,
+          "conduit_round": 2,
+          "convergence_round": 2
+        }
+      },
+      "outcome": "victory",
+      "remaining": {
+        "serrated_round": 0,
+        "split_round": 0,
+        "conduit_round": 0,
+        "convergence_round": 0
+      },
+      "hp": 0,
+      "turns": [
+        {
+          "turn": 1,
+          "shots": 4,
+          "hits": 6,
+          "damage": 70,
+          "peakHeat": 20,
+          "endHeat": 10,
+          "endWound": 3,
+          "distance": 2,
+          "hp": 80
+        },
+        {
+          "turn": 2,
+          "shots": 4,
+          "hits": 6,
+          "damage": 94,
+          "peakHeat": 30,
+          "endHeat": 0,
+          "endWound": 0,
+          "distance": 2,
+          "hp": 0
+        }
+      ],
+      "total": 164,
+      "effective": 150
+    },
+    {
+      "name": "한 탄창",
+      "scenario": {
+        "mode": "encounter",
+        "weapon": "P220",
+        "capacity": 4,
+        "maxHp": 150,
+        "distance": 3,
+        "approach": 1,
+        "wound": 0,
+        "vulnerable": null,
+        "heat": 0,
+        "turns": 4,
+        "seed": 20261125,
+        "sequence": [
+          "serrated_round",
+          "split_round",
+          "conduit_round",
+          "convergence_round"
+        ],
+        "inventory": {
+          "serrated_round": 1,
+          "split_round": 1,
+          "conduit_round": 1,
+          "convergence_round": 1
+        }
+      },
+      "outcome": "inventory-exhausted",
+      "remaining": {
+        "serrated_round": 0,
+        "split_round": 0,
+        "conduit_round": 0,
+        "convergence_round": 0
+      },
+      "hp": 80,
+      "turns": [
+        {
+          "turn": 1,
+          "shots": 4,
+          "hits": 6,
+          "damage": 70,
+          "peakHeat": 20,
+          "endHeat": 10,
+          "endWound": 3,
+          "distance": 2,
+          "hp": 80
+        }
+      ],
+      "total": 70,
+      "effective": 70
+    },
+    {
+      "name": "접촉 직전",
+      "scenario": {
+        "mode": "encounter",
+        "weapon": "P220",
+        "capacity": 4,
+        "maxHp": 250,
+        "distance": 1,
+        "approach": 1,
+        "wound": 0,
+        "vulnerable": null,
+        "heat": 0,
+        "turns": 4,
+        "seed": 20261125,
+        "sequence": [
+          "serrated_round",
+          "split_round",
+          "conduit_round",
+          "convergence_round"
+        ],
+        "inventory": {
+          "serrated_round": 2,
+          "split_round": 2,
+          "conduit_round": 2,
+          "convergence_round": 2
+        }
+      },
+      "outcome": "defeat",
+      "remaining": {
+        "serrated_round": 1,
+        "split_round": 1,
+        "conduit_round": 1,
+        "convergence_round": 1
+      },
+      "hp": 180,
+      "turns": [
+        {
+          "turn": 1,
+          "shots": 4,
+          "hits": 6,
+          "damage": 70,
+          "peakHeat": 20,
+          "endHeat": 0,
+          "endWound": 3,
+          "distance": 0,
+          "hp": 180
+        }
+      ],
+      "total": 70,
+      "effective": 70
+    }
+  ],
+  "stress": [
+    {
+      "seed": 20261125,
+      "iterations": 5000,
+      "maxFailures": 1,
+      "deterministicScenarios": 11,
+      "randomScenarios": 5000,
+      "shots": 11654,
+      "hits": 13068,
+      "failures": []
+    },
+    {
+      "seed": 56009,
+      "iterations": 5000,
+      "maxFailures": 1,
+      "deterministicScenarios": 11,
+      "randomScenarios": 5000,
+      "shots": 11855,
+      "hits": 13223,
+      "failures": []
+    }
+  ]
+}
