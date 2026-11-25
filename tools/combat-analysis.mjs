@@ -13,16 +13,20 @@ const help = `전투 시험장 분석
   ordered     지정한 탄창의 발사·타격·턴별 결과
   compare     순서 비교와 한 칸 교체 대조 실험
   search      재고·고정 칸을 지키는 중복 없는 조합 검색
+  stress      고정 회귀 검사와 시드 기반 무작위 조우
+  replay      --config로 지정한 스트레스 결과에서 실패 재현
   --sequence 탄ID,탄ID,탄ID,탄ID    사용할 순서
   --against 탄ID,탄ID,탄ID,탄ID     비교 기준 순서
-  --limit 정수                      검색 상한
+  --limit 정수                      검색 또는 무작위 검사 상한
+  --index 정수                      재현할 실패 번호 (0부터 시작)
   --seed 정수                       재현 시드
   --out 경로                        결과 저장 (생략하면 표준 출력)`;
 
 async function loadModule(path) {
   const result = await build({ entryPoints: [resolve(root, path)], platform: 'node', format: 'esm', bundle: true,
     write: false, logLevel: 'silent' });
-  return import('data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64'));
+  const code = result.outputFiles[0].text + '\n//# sourceURL=' + path + '.bundle.js';
+  return import('data:text/javascript;base64,' + Buffer.from(code).toString('base64'));
 }
 
 function git(...args) {
@@ -39,7 +43,7 @@ function encode(_key, value) {
 async function main() {
   const { positionals, values } = parseArgs({ allowPositionals: true, options: {
     config: { type: 'string' }, out: { type: 'string' }, sequence: { type: 'string' }, against: { type: 'string' },
-    seed: { type: 'string' }, limit: { type: 'string' }, help: { type: 'boolean', short: 'h' },
+    seed: { type: 'string' }, limit: { type: 'string' }, index: { type: 'string' }, help: { type: 'boolean', short: 'h' },
   } });
   const [command] = positionals;
   if (!command || values.help) { console.log(help); return; }
@@ -77,6 +81,26 @@ async function main() {
       const options = { ...input.search };
       if (values.limit !== undefined) options.maxScenarios = Number(values.limit);
       result = (await loadModule('src/prototype/analysis/search.ts')).search(scenario, options);
+      break;
+    }
+    case 'stress': {
+      const options = { ...input.stress };
+      if (values.seed !== undefined) options.seed = Number(values.seed);
+      if (values.limit !== undefined) options.iterations = Number(values.limit);
+      result = (await loadModule('src/prototype/analysis/stress.ts')).runStress(options);
+      if (result.failures.length) process.exitCode = 1;
+      break;
+    }
+    case 'replay': {
+      const index = Number(values.index ?? 0);
+      if (!Number.isSafeInteger(index) || index < 0) throw new Error('실패 번호는 0 이상의 정수여야 합니다.');
+      const failure = (input.result ?? input).failures?.[index] ?? (input.caseId && input);
+      if (!failure) throw new Error('지정한 실패가 없습니다. 실패를 기록한 JSON과 번호를 지정하세요.');
+      const replay = (await loadModule('src/prototype/analysis/stress.ts')).replayStress(failure);
+      result = { original: failure, replay, reproduced: replay.failure?.invariant === failure.invariant &&
+        replay.failure?.location.turn === failure.location.turn && replay.failure?.location.shot === failure.location.shot &&
+        replay.failure?.location.hit === failure.location.hit && replay.failure?.location.event === failure.location.event };
+      if (replay.failure) process.exitCode = 1;
       break;
     }
     default: throw new Error(`알 수 없는 명령입니다.\n${help}`);
