@@ -66,6 +66,11 @@ export const fixtures: readonly Fixture[] = [
     shots: [{ hits: 0 }, { hits: 0 }, { hits: 0 }, { hits: 0 }], turnWounds: [3, 1, 0],
   },
   {
+    id: '기본 무한 표적의 피해와 상태',
+    sequence: ['echo_round', 'conduit_round', 'split_round', 'execution'], setup: { maxHp: 'infinite' },
+    shots: [{ hits: 1 }, { hits: 1 }, { hits: 3 }, { hits: 1, bonus: 0 }], turnWounds: [0],
+  },
+  {
     id: '조우 접촉 패배',
     sequence: ['pulse_round', 'finisher', 'echo_round', 'conduit_round'],
     setup: { distance: 1, turns: 3, inventory: 'unlimited' },

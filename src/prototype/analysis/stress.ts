@@ -114,7 +114,9 @@ function inspectCombat(test: StressCase, location: Location) {
     Object.assign(location, { turn, event: frame.kind, shot: null, hit: null, observed: undefined, before });
     const { state, kind } = frame;
     equal('종결 직후 후속 이벤트 금지', false, lastKind === 'victory' || lastKind === 'defeat');
-    equal('유한 표적 체력 범위', true, Number.isFinite(state.hp) && state.hp >= 0 && state.hp <= state.maxHp);
+    const infiniteTarget = before.maxHp === Infinity;
+    equal('시험장 표적의 체력 범위', true, infiniteTarget ? state.hp === Infinity
+      : Number.isFinite(state.hp) && state.hp >= 0 && state.hp <= state.maxHp);
     equal('무기 열 범위', true, Number.isFinite(state.weaponHeat) && state.weaponHeat >= 0);
     equal('턴 카운터 증가 시점', before.turns + Number(kind === 'turn'), state.turns);
     if (kind === 'shot' || kind === 'echo') {
@@ -131,7 +133,7 @@ function inspectCombat(test: StressCase, location: Location) {
         equal('발사당 한 번 발열', shot.heatBefore + ammo[shot.round].heat, shot.heatAfter);
         equal('사격 후 열', shot.heatAfter, state.weaponHeat);
         equal('총 피해와 독립 타격 합계', shot.damage, hits.reduce((sum, hit) => sum + hit.damage, 0));
-        equal('표적 체력 감소와 발사 기록', before.hp - state.hp, shot.removed);
+        equal('표적 체력 감소와 발사 기록', infiniteTarget ? 0 : before.hp - state.hp, shot.removed);
         const definition = shot.source && ammo[shot.source];
         if (state.hp > 0 && definition && 'echoDamage' in definition) pending.push(slot);
         used[shot.round] = (used[shot.round] ?? 0) + 1;
@@ -166,7 +168,7 @@ function inspectCombat(test: StressCase, location: Location) {
         }
         equal('상처는 각 양의 타격에 한 번만 적용', before.wound, hit.woundDamage);
         equal('독립 기여 합계', hit.modifiedDamage + hit.woundDamage + hit.impactBonus, hit.damage);
-        equal('유효 피해와 과잉 피해 분리', Math.min(hp, hit.damage), hit.removed);
+        equal('표적의 실제 체력 감소', infiniteTarget ? 0 : Math.min(hp, hit.damage), hit.removed);
         equal('타격 직후 체력', hp - hit.removed, hit.after);
         if (expectedShot?.damages) equal('순서별 피해 기준', expectedShot.damages[index], hit.damage);
         if (expectedShot?.impacts) equal('순서별 충격 기준', expectedShot.impacts[index], hit.impactBonus);
@@ -224,11 +226,11 @@ function inspectCombat(test: StressCase, location: Location) {
   if (fixture?.turnWounds) equal('회귀 시나리오 전체 턴 수', fixture.turnWounds.length, turns);
   if (result.state.phase === 'planning') equal('적 행동 후 준비 복귀', true, lastKind === undefined || lastKind === 'cleanup');
   else equal('종결된 시뮬레이션의 마지막 이벤트', result.state.phase, lastKind);
-  if (result.inventory !== 'unlimited' && typeof scenario.inventory === 'object') {
+  if (result.inventory !== 'unlimited' && result.scenario.inventory !== 'unlimited') {
     for (const id of registeredRounds) {
       const remaining = result.inventory[id] ?? 0;
       equal('음수 재고 금지', true, remaining >= 0);
-      equal(`실제 사격에만 재고 차감 ${id}`, (scenario.inventory[id] ?? 0) - (used[id] ?? 0), remaining);
+      equal(`실제 사격에만 재고 차감 ${id}`, (result.scenario.inventory[id] ?? 0) - (used[id] ?? 0), remaining);
     }
   }
   return result.metrics;
