@@ -2,6 +2,7 @@ import { BUILD_LABEL } from '../buildInfo';
 import { GamePresentation } from '../presentation/GamePresentation';
 import { heatDamageMultiplier } from './combatBalance';
 import { CombatController } from './CombatController';
+import { CombatTraceBuffer } from './analysis/trace';
 import { ammo, defaultScenario, isRound, P220 } from './rules';
 import type { DamageInstance, EchoHit, Frame, Round, Shot } from './rules';
 import './combat.css';
@@ -110,7 +111,14 @@ export function mountCombat(root: HTMLElement) {
   const element = <T extends HTMLElement = HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   const scene = new GamePresentation(element('.lab-scene'));
   let selected = 0;
-  const game = new CombatController(render);
+  let createTrace;
+  if (new URLSearchParams(location.search).get('combatTrace') === '1') {
+    const buffer = new CombatTraceBuffer();
+    let serial = 0;
+    createTrace = () => buffer.sink(`combat-${++serial}`);
+    Object.assign(window, { combatTrace: { recent: buffer.recent.bind(buffer), export: buffer.export.bind(buffer) } });
+  }
+  const game = new CombatController(render, createTrace);
   const slots = game.slots.map((_, index) => {
     const button = document.createElement('button');
     button.dataset.slot = String(index);

@@ -1,0 +1,26 @@
+{
+  "scenario": {
+    "mode": "encounter",
+    "weapon": "P220",
+    "capacity": 4,
+    "sequence": ["echo_round", "serrated_round", "pulse_round", "convergence_round"],
+    "inventory": { "echo_round": 2, "serrated_round": 2, "pulse_round": 2, "convergence_round": 2 },
+    "maxHp": 150,
+    "hp": 150,
+    "distance": 3,
+    "approach": 1,
+    "wound": 0,
+    "vulnerable": null,
+    "heat": 0,
+    "turns": 3,
+    "seed": 20261125
+  },
+  "search": {
+    "pool": ["echo_round", "serrated_round", "pulse_round", "convergence_round"],
+    "fixed": [null, null, null, "convergence_round"],
+    "maxScenarios": 500,
+    "keep": 3
+  },
+  "repetitions": 2,
+  "trace": { "capacity": 2048, "filter": { "source": "echo" } }
+}
