@@ -9,6 +9,7 @@ function measureRound(config: SimulationConfig, sequence: readonly Round[], slot
   let heatGenerated = 0, woundApplied = 0, woundDamage = 0, impactDamage = 0, conditionalBaseDamage = 0;
   let vulnerableApplied = false;
   let modifiedDamage = 0;
+  let conditionalHits = 0, conditionalHitDamage = 0;
   const result = simulate({ ...config, sequence, turns: 1 }, { onFrame(frame) {
     if (frame.kind === 'shot' && frame.shot.index === slot) {
       const shot = frame.shot;
@@ -26,13 +27,17 @@ function measureRound(config: SimulationConfig, sequence: readonly Round[], slot
       if (frame.kind === 'echo') delayedDamage += hit.damage;
       effectiveDamage += hit.removed;
       modifiedDamage += hit.modifiedDamage;
+      if (hit.conditionalExtraHit) {
+        conditionalHits++;
+        conditionalHitDamage += hit.damage;
+      }
       woundDamage += hit.woundDamage;
       impactDamage += hit.impactBonus;
     }
   } });
-  return { sequence, slot: slot + 1, shots, hits, directDamage, delayedDamage, totalDamage: directDamage + delayedDamage,
+  return { scenario: result.scenario, sequence, slot: slot + 1, shots, hits, directDamage, delayedDamage, totalDamage: directDamage + delayedDamage,
     effectiveDamage, modifiedDamage, conditionalBaseDamage, woundDamage, impactDamage, woundApplied,
-    vulnerableApplied, heatGenerated, outcome: result.outcome };
+    conditionalHits, conditionalHitDamage, vulnerableApplied, heatGenerated, outcome: result.outcome };
 }
 
 export function benchmark(config: SimulationConfig = {}) {
@@ -46,8 +51,7 @@ export function benchmark(config: SimulationConfig = {}) {
     cold: measureRound(config, [round, 'standard', 'standard', 'standard'], 0),
     prepared: measureRound(preparedConfig, ['serrated_round', 'vulnerability', 'conduit_round', round], 3),
   }));
-  return { config, coldConditions: scenario, preparedConditions: normalizeScenario({ ...preparedConfig, turns: 1 }),
-    evaluated: rows.length * 2, rows };
+  return { config, evaluated: rows.length * 2, rows };
 }
 
 export function compare(config: SimulationConfig, against: readonly Round[] = Array<Round>(P220.capacity).fill('standard')) {
@@ -55,19 +59,28 @@ export function compare(config: SimulationConfig, against: readonly Round[] = Ar
   const reference = simulate({ ...config, sequence: against });
   const orderOnly = [...selected.scenario.sequence].sort().join(',') === [...against].sort().join(',');
   const changedSlots = against.flatMap((round, i) => round === selected.scenario.sequence[i] ? [] : [i]);
+  // 재고 제약으로 비교 탄창 자체를 발사할 수 없으면 피해 차이를 추정할 수 없다.
+  const canCompare = (run: typeof reference) => run.turns.length > 0 && reference.turns.length > 0 &&
+    (run.turns.length === reference.turns.length || (run.outcome !== 'inventory-exhausted' && reference.outcome !== 'inventory-exhausted'));
+  const deltaFromReference = (run: typeof reference) => canCompare(run) ? run.metrics.totalDamage - reference.metrics.totalDamage : null;
   const substitutions = changedSlots.map(index => {
     const sequence = [...against];
     sequence[index] = selected.scenario.sequence[index]!;
     const single = simulate({ ...config, sequence });
     return { slot: index + 1, sequence, damage: single.metrics.totalDamage,
-      delta: single.metrics.totalDamage - reference.metrics.totalDamage, outcome: single.outcome, shots: single.metrics.shots };
+      delta: deltaFromReference(single), outcome: single.outcome, shots: single.metrics.shots };
   });
-  const delta = selected.metrics.totalDamage - reference.metrics.totalDamage;
+  const delta = deltaFromReference(selected);
+  let interactionDelta = delta;
+  for (const row of substitutions) {
+    if (interactionDelta === null || row.delta === null) { interactionDelta = null; break; }
+    interactionDelta -= row.delta;
+  }
   return {
     selected: { scenario: selected.scenario, metrics: selected.metrics, outcome: selected.outcome },
     reference: { scenario: reference.scenario, metrics: reference.metrics, outcome: reference.outcome },
     orderOnly, delta, substitutions, evaluated: substitutions.length + 2,
     // 기준 탄창의 같은 위치에 하나씩 교체한 효과를 빼고 남은 조합 상호작용.
-    interactionDelta: delta - substitutions.reduce((sum, row) => sum + row.delta, 0),
+    interactionDelta,
   };
 }

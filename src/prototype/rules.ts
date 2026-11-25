@@ -76,6 +76,7 @@ export interface Shot extends ShotEffect {
 
 export interface DamageInstance {
   source: DamageSource;
+  conditionalExtraHit?: true;
   ownTransferBps: number;
   impactBonus: number;
   modifiedDamage: number;
@@ -187,6 +188,7 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[], trace
     const hitCount = definition && 'hits' in definition ? definition.hits : 1;
     const baseHits: number[] = Array(hitCount).fill(base);
     if (definition && 'secondHit' in definition) baseHits.push(definition.secondHit);
+    const unconditionalHits = baseHits.length;
     if (effect.pursuitDamage) baseHits.push(effect.pursuitDamage);
     const transferBps = definition && 'transferBps' in definition ? definition.transferBps : 0;
     const hits: DamageInstance[] = [];
@@ -197,14 +199,16 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[], trace
     previousDamage = 0;
     for (const [hitIndex, baseHit] of baseHits.entries()) {
       const conditionalBaseDamage = hitIndex === 0 ? bonus : 0;
+      const conditionalExtraHit = hitIndex >= unconditionalHits ? true : undefined;
       const power = baseHit + conditionalBaseDamage;
       const resolved = resolveDamage(state, round, modifiedDamage(power, percent, heatPercent), transferBps,
         write && { write, origin: { shot: index + 1, hit: hitIndex + 1, ammo: round, rawBaseDamage: baseHit,
-          conditionalBaseDamage, vulnerabilityPercent: percent, heat: heatBefore, heatPercent } });
+          conditionalBaseDamage, conditionalExtraHit, vulnerabilityPercent: percent, heat: heatBefore, heatPercent } });
       baseDamage += baseHit;
       preHeatDamage += power * (100 + percent) / 100;
       if (resolved) {
         const { hit } = resolved;
+        if (conditionalExtraHit) hit.conditionalExtraHit = true;
         state = resolved.state;
         hits.push(hit);
         damage += hit.damage;

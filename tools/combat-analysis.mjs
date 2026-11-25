@@ -2,9 +2,9 @@ import { execFileSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { closeSync, openSync, writeFileSync } from 'node:fs';
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { parseArgs } from 'node:util';
+import { isDeepStrictEqual, parseArgs } from 'node:util';
 import { build } from 'esbuild';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -42,6 +42,12 @@ function encode(_key, value) {
   if (value === Infinity) return 'infinite';
   if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('결과에 유효하지 않은 수치가 있습니다.');
   return value;
+}
+
+function checkFields(value, keys, label) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label}에는 JSON 객체를 지정하세요.`);
+  const unknown = Object.keys(value).find(key => !keys.includes(key));
+  if (unknown !== undefined) throw new Error(`${label}에서 지원하지 않는 항목: ${unknown}`);
 }
 
 async function traceCombat(scenario, options, streamPath, metadata, rules, simulator) {
@@ -85,10 +91,22 @@ async function main() {
   if (!command || values.help) { console.log(help); return; }
   if (positionals.length !== 1) throw new Error('명령은 한 번에 하나만 지정하세요.');
   if (values.stream && command !== 'trace') throw new Error('--stream은 trace에서 사용하세요.');
-  if (values.out && values.stream && resolve(values.out) === resolve(values.stream)) throw new Error('요약과 전체 이벤트의 출력 경로를 다르게 지정하세요.');
+  if (values.out && values.stream && relative(resolve(values.out), resolve(values.stream)) === '') throw new Error('요약과 전체 이벤트의 출력 경로를 다르게 지정하세요.');
+  if (values.config && [values.out, values.stream].some(path => path && relative(resolve(path), resolve(values.config)) === '')) {
+    throw new Error('설정 파일과 출력 파일은 서로 다른 경로를 지정하세요.');
+  }
   const input = values.config ? JSON.parse((await readFile(values.config, 'utf8')).replace(/^\uFEFF/, '')) : {};
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('설정은 JSON 객체여야 합니다.');
-  const scenario = input.scenario ?? {};
+  if (command !== 'replay') {
+    checkFields(input, ['scenario', 'search', 'trace', 'stress', 'against', 'repetitions'], '최상위 설정');
+    if ('search' in input) checkFields(input.search, ['pool', 'fixed', 'keep', 'maxScenarios', 'maxMs'], '검색 설정');
+    if ('stress' in input) checkFields(input.stress, ['seed', 'iterations', 'maxFailures'], '스트레스 설정');
+    if ('trace' in input) {
+      checkFields(input.trace, ['capacity', 'filter'], '추적 설정');
+      if ('filter' in input.trace) checkFields(input.trace.filter, ['combatId', 'targetId', 'turn', 'ammo', 'source'], '추적 필터');
+    }
+  }
+  const scenario = input.scenario === undefined ? {} : input.scenario;
   if (!scenario || typeof scenario !== 'object' || Array.isArray(scenario)) throw new Error('scenario에는 객체를 지정하세요.');
   if (values.sequence !== undefined) scenario.sequence = values.sequence.split(',').map(r => r.trim());
   if (values.seed !== undefined) scenario.seed = Number(values.seed);
@@ -138,9 +156,11 @@ async function main() {
       const failure = (input.result ?? input).failures?.[index] ?? (input.caseId && input);
       if (!failure) throw new Error('지정한 실패가 없습니다. 실패를 기록한 JSON과 번호를 지정하세요.');
       const replay = (await loadModule('src/prototype/analysis/stress.ts')).replayStress(failure);
-      result = { original: failure, replay, reproduced: replay.failure?.invariant === failure.invariant &&
+      result = { original: failure, replay, reproduced: Boolean(replay.failure && replay.failure.invariant === failure.invariant &&
         replay.failure?.location.turn === failure.location.turn && replay.failure?.location.shot === failure.location.shot &&
-        replay.failure?.location.hit === failure.location.hit && replay.failure?.location.event === failure.location.event };
+        replay.failure.location.hit === failure.location.hit && replay.failure.location.event === failure.location.event &&
+        replay.failure.location.target === failure.location.target && isDeepStrictEqual(replay.failure.expected, failure.expected) &&
+        isDeepStrictEqual(replay.failure.actual, failure.actual)) };
       if (replay.failure) process.exitCode = 1;
       break;
     }

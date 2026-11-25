@@ -80,6 +80,7 @@ export function normalizeScenario(config: SimulationConfig = {}) {
 function createMetrics(heat: number) {
   return {
     shots: 0, hits: 0, totalDamage: 0, effectiveDamage: 0, directDamage: 0, delayedDamage: 0,
+    conditionalHits: 0, conditionalHitDamage: 0,
     rawBaseDamage: 0, conditionalBaseDamage: 0, modifiedDamage: 0, modifierDelta: 0, woundDamage: 0, impactDamage: 0,
     woundApplied: 0, heatGenerated: 0, peakHeat: heat, damagePerRound: 0, damagePerHit: 0, damagePerTurn: 0,
     consumed: {} as Inventory, damageBySource: {} as Partial<Record<DamageInstance['source'], number>>,
@@ -90,6 +91,10 @@ type Metrics = ReturnType<typeof createMetrics>;
 function countHit(metrics: Metrics, hit: DamageInstance) {
   metrics.hits++;
   metrics.totalDamage += hit.damage;
+  if (hit.conditionalExtraHit) {
+    metrics.conditionalHits++;
+    metrics.conditionalHitDamage += hit.damage;
+  }
   metrics.modifiedDamage += hit.modifiedDamage;
   metrics.woundDamage += hit.woundDamage;
   metrics.impactDamage += hit.impactBonus;

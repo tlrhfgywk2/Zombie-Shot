@@ -38,6 +38,17 @@ describe('생산 탄약 분석과 검색', () => {
     });
     expect(result.rows.find(r => r.round === 'copy')?.cold).toMatchObject({ shots: 1, hits: 0, totalDamage: 0 });
     expect(result.rows.find(r => r.round === 'pursuit_round')?.prepared.hits).toBe(2);
+    const prepared = result.rows.find(r => r.round === 'pursuit_round')!.prepared;
+    expect(prepared.conditionalHits).toBe(1);
+    expect(prepared.conditionalHitDamage).toBeGreaterThan(0);
+    expect(simulate(prepared.scenario).metrics.shots).toBe(4);
+    expect(prepared.scenario.inventory).toEqual({ serrated_round: 1, vulnerability: 1, conduit_round: 1, pursuit_round: 1 });
+  });
+  it('탄 수가 고정된 순서 비교에서 발사하지 못한 한 칸 교체군을 제외한다', () => {
+    const result = compare({ sequence: ['serrated_round', 'split_round', 'serrated_round', 'split_round'],
+      inventory: { serrated_round: 2, split_round: 2 } }, ['split_round', 'serrated_round', 'split_round', 'serrated_round']);
+    expect(result).toMatchObject({ orderOnly: true, delta: 36, interactionDelta: null });
+    expect(result.substitutions.every(row => row.delta === null && row.shots === 0)).toBe(true);
   });
   it('한 칸 교체만으로는 잔여 상호작용이 생기지 않는다', () => {
     const result = compare({ sequence: ['serrated_round', 'standard', 'standard', 'standard'] });

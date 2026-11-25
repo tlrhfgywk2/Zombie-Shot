@@ -3,11 +3,26 @@ import { CombatController } from '../CombatController';
 import { ammo, defaultScenario, resolveDamage, resolveVolley, startEncounter } from '../rules';
 import type { Round } from '../rules';
 import { CombatTraceBuffer, traceTurn } from './trace';
+import { simulate } from './simulator';
 
 const target = (maxHp = 500) => startEncounter({ ...defaultScenario, maxHp });
 afterEach(() => vi.useRealTimers());
 
 describe('실제 판정의 선택적 전투 추적', () => {
+  it('추격과 복제의 조건부 추가 타격을 실제 발생한 경우에만 한 번 분류한다', () => {
+    const buffer = new CombatTraceBuffer();
+    const sequence: Round[] = ['serrated_round', 'pursuit_round', 'copy', 'pursuit_round'];
+    const run = simulate({ sequence }, { detail: true, resolve: (state, slots) => resolveVolley(state, slots, buffer.sink('추격')) });
+    const hits = run.frames!.flatMap(f => f.kind === 'shot' ? f.shot.hits : []);
+    const extraHits = hits.filter(h => h.conditionalExtraHit);
+    expect(extraHits.map(h => h.source)).toEqual(['pursuit_round', 'copy']);
+    expect(buffer.recent().filter(e => e.kind === 'hit' && e.conditionalExtraHit).map(e => e.kind === 'hit' && e.finalDamage))
+      .toEqual(extraHits.map(h => h.damage));
+    expect(run.metrics.conditionalHits).toBe(2);
+    expect(run.metrics.conditionalHitDamage).toBe(extraHits.reduce((sum, h) => sum + h.damage, 0));
+    expect(run.metrics.totalDamage).toBe(hits.reduce((sum, h) => sum + h.damage, 0));
+    expect(simulate({ sequence, maxHp: 5 }).metrics.conditionalHits).toBe(0);
+  });
   it('실제 발사와 반향의 계산값을 기록하며 사격 결과를 보존한다', () => {
     const start = { ...target(), wound: 3 };
     const magazine: Round[] = ['echo_round', 'vulnerability', 'pulse_round', 'convergence_round'];

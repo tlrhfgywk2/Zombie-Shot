@@ -21,6 +21,7 @@ export interface HitOrigin {
   effectId?: string;
   rawBaseDamage: number;
   conditionalBaseDamage: number;
+  conditionalExtraHit?: true;
   vulnerabilityPercent: number;
   heat: number;
   heatPercent: number;

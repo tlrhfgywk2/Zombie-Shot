@@ -35,7 +35,11 @@ export function magazineSpace(config: SimulationConfig, options: SearchOptions) 
     throw new Error('재고에는 등록 탄약과 0 이상의 정수를 지정하세요.');
   }
   const stock = pool.map(r => inventory && inventory !== 'unlimited' ? inventory[r] ?? 0 : capacity);
-  for (const r of fixed) if (r !== null) stock[pool.indexOf(r)]!--;
+  for (const round of fixed) {
+    if (round === null) continue;
+    const index = pool.indexOf(round);
+    stock[index] = stock[index]! - 1;
+  }
   const memo = new Map<string, number>();
   function count(left: number, available: number[]): number {
     if (!left) return 1;
@@ -46,9 +50,9 @@ export function magazineSpace(config: SimulationConfig, options: SearchOptions) 
     let total = 0;
     for (const [i, n] of available.entries()) {
       if (n < 1) continue;
-      available[i]!--;
+      available[i] = n - 1;
       total += count(left - 1, available);
-      available[i]!++;
+      available[i] = n;
     }
     memo.set(key, total);
     return total;
@@ -65,11 +69,11 @@ export function magazineSpace(config: SimulationConfig, options: SearchOptions) 
       left--;
       for (const [i, n] of available.entries()) {
         if (n < 1) continue;
-        available[i]!--;
+        available[i] = n - 1;
         const branch = count(left, available);
         if (rank < branch) return pool[i]!;
         rank -= branch;
-        available[i]!++;
+        available[i] = n;
       }
       throw new Error('검색 번호에 대응하는 순서가 없습니다.');
     });
