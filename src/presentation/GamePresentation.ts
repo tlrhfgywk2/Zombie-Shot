@@ -83,6 +83,7 @@ export class GamePresentation {
   private resizeObserver?: ResizeObserver;
   private animationFrame = 0;
   private prototypeFlash = 0;
+  private prototypeHeavyKick = false;
   private shotEffectSequence = 0;
   private playbackSpeed = 1;
   private firingSpeed = 1;
@@ -213,13 +214,15 @@ export class GamePresentation {
     this.setTestDistance(distance, true);
   }
 
-  showTestShot(name: string): void {
+  showTestShot(name: string, heavyKick = false, explosionPower = 0): void {
     this.presentationState = name;
     this.aimPistolAtTarget(this.getZombieTarget());
     this.prototypeFlash = 0.14;
+    this.prototypeHeavyKick = heavyKick;
     this.muzzleFlash.intensity = 8;
     this.spawnMuzzleSmoke();
     this.ejectShellCasing();
+    if (explosionPower > 0) void this.animateExplosion(this.getZombieTarget(), explosionPower);
   }
 
   showTestVictory(): void {
@@ -1436,7 +1439,7 @@ export class GamePresentation {
       this.prototypeFlash = Math.max(0, this.prototypeFlash - delta);
       const fraction = this.prototypeFlash / 0.14;
       this.muzzleFlash.intensity = 8 * fraction;
-      this.pistolModel.slide.position.x = -PRESENTATION_MOTION.slideTravel * fraction;
+      this.pistolModel.slide.position.x = -PRESENTATION_MOTION.slideTravel * fraction * (this.prototypeHeavyKick ? 1.12 : 1);
     }
     this.updatePresentationDebug();
     for (const actor of this.enemyActors) {

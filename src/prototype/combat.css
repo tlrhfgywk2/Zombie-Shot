@@ -26,13 +26,16 @@
 .lab-wound { grid-column: 1 / -1; }
 .lab-wound:not([hidden]) { display: flex; align-items: baseline; gap: 8px; color: #ffacae; }
 .lab-wound b { margin-top: 0; }
+.lab-explosion:not([hidden]) { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; }
+.lab-explosion b, .lab-explosion span { color: #ffd084; }
+.lab-explosion b { margin-top: 0; }
 .lab-heat { display: flex; flex-wrap: wrap; gap: 4px 24px; padding: 7px 16px; border-top: 1px solid #39433a; color: #eebc9c; }
 .lab-heat b { margin-left: 5px; color: #ffd5b7; font-size: var(--combat-value-prominent); }
 .lab-slots { display: grid; grid-auto-columns: minmax(0,1fr); grid-auto-flow: column; gap: 6px; margin: 15px 0 6px; }
-.lab-slots button { text-align: left; padding: 8px; }
+.lab-slots button { display: flex; flex-direction: column; align-items: start; justify-content: start; text-align: left; padding: 8px; min-width: 0; }
 .lab-slots button[aria-pressed=true] { border-color: var(--acid); background: #2b3423; }
 .lab-slots small, .lab-choices small { display: block; color: #acb9a9; }
-.lab-slots b { display: block; font-size: var(--combat-value-prominent); white-space: nowrap; }
+.lab-slots b { display: block; max-width: 100%; font-size: var(--combat-value-prominent); overflow-wrap: anywhere; text-wrap: balance; }
 .lab-edit { justify-content: end; gap: 5px; }
 .lab-edit span { margin-right: auto; font-size: .86rem; }
 .lab-edit button { font-size: .85rem; }
@@ -53,11 +56,12 @@
 [data-round=wounding_round] { --ammo-color: #e48ba9; } [data-round=serrated_round] { --ammo-color: #cf6a8d; }
 [data-round=split_round] { --ammo-color: #abd3a3; } [data-round=pursuit_round] { --ammo-color: #edc68e; }
 [data-round=echo_round] { --ammo-color: #b1afea; }
+.lab-choices [data-family=EXPLOSION] { --ammo-color: #ffc069; }
 [data-round=conduit_round], [data-round=pulse_round] { --ammo-color: #81c4cf; }
-.lab-choices :is([data-round=conduit_round], [data-round=pulse_round], [data-round=wedge_round], [data-round=convergence_round]) small { font-size: var(--combat-value-size); word-break: keep-all; }
-.lab-impact-rule { margin-top: 8px; color: #afbcad; }
-.lab-impact-rule summary { cursor: pointer; }
-.lab-impact-rule p { margin-top: 4px; }
+.lab-choices :is([data-family=EXPLOSION], [data-round=conduit_round], [data-round=pulse_round], [data-round=wedge_round], [data-round=convergence_round]) small { font-size: var(--combat-value-size); word-break: keep-all; }
+.lab-impact-rule, .lab-explosion-rule { margin-top: 8px; color: #afbcad; }
+:is(.lab-impact-rule, .lab-explosion-rule) summary { cursor: pointer; }
+:is(.lab-impact-rule, .lab-explosion-rule) p { margin-top: 4px; }
 .combat-lab .lab-fire { width: 100%; padding: 11px; margin-top: 12px; font-weight: 800; background: var(--acid); color: #182013; border-color: transparent; }
 .lab-record, .lab-settings { margin-top: 12px; }
 .lab-record h2 { margin-bottom: 9px; }
@@ -75,6 +79,7 @@
 .lab-record li:not([data-echo]) .lab-hits { grid-column: 1 / -1; }
 .lab-hit { border: 1px solid #404a40; border-radius: 4px; padding: 2px 7px; color: #afbcad; }
 .lab-hit b { color: #ffd5b7; font-size: var(--combat-value-prominent); }
+.lab-hit.lab-blast-hit b { color: #ffd084; }
 .lab-hit small { white-space: nowrap; }
 .lab-settings summary { cursor: pointer; font-weight: 700; }
 .lab-settings form { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; margin-top: 12px; }

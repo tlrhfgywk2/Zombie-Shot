@@ -1,7 +1,13 @@
-import { heatDamagePercent, WEAPON_HEAT_BALANCE } from './combatBalance';
+import { recoilFirepowerPenalty } from '../combat/RecoilPenalty';
 import type { AmmoFamily } from '../combat/types';
+import { WEAPON_DEFINITIONS } from '../data/weaponDefinitions';
+import { EXPLOSION_BALANCE, heatDamagePercent, WEAPON_HEAT_BALANCE } from './combatBalance';
+import { resolveDamage, resolveShotImpact } from './shotImpact';
+import type { DamageInstance, ExplosionEvent } from './shotImpact';
+export { resolveDamage } from './shotImpact';
+export type { DamageInstance } from './shotImpact';
 
-export const P220 = { name: 'P220', capacity: 4 } as const;
+export const P220 = { name: 'P220', capacity: 4, recoilThreshold: WEAPON_DEFINITIONS.p220.recoilThreshold } as const;
 
 export const ammo = {
   standard: { name: '표준탄', family: 'HEALTH', base: 10, heat: 16 },
@@ -23,6 +29,11 @@ export const ammo = {
   pulse_round: { name: '맥동탄', family: 'IMPACT', base: 4, hits: 2, transferBps: 2000, heat: 5 },
   wedge_round: { name: '쐐기탄', family: 'HEALTH', base: 2, secondHit: 8, heat: 5 },
   convergence_round: { name: '집속탄', family: 'HEALTH', base: 4, perPriorHit: 2, heat: 5 },
+  explosive: { name: '폭발탄', family: 'EXPLOSION', base: 5, heat: 5, recoil: EXPLOSION_BALANCE.normalRecoil, stack: 4 },
+  highExplosive: { name: '고폭탄', family: 'EXPLOSION', base: 6, heat: 5, recoil: EXPLOSION_BALANCE.highRecoil, stack: 6 },
+  stickyCharge: { name: '접착폭약탄', family: 'EXPLOSION', base: 1, heat: 5, recoil: EXPLOSION_BALANCE.normalRecoil, stack: 8 },
+  dispersal: { name: '확산탄', family: 'EXPLOSION', base: 3, heat: 5, recoil: EXPLOSION_BALANCE.normalRecoil, stack: 2, adjacentStack: 2 },
+  residual: { name: '잔류탄', family: 'EXPLOSION', base: 8, heat: 5, recoil: EXPLOSION_BALANCE.normalRecoil, stack: 0, consumption: 0.25 },
 } as const satisfies Record<string, { name: string; family: AmmoFamily; base: number; heat: number } & Record<string, string | number>>;
 export type Round = keyof typeof ammo;
 export function isRound(value: unknown): value is Round {
@@ -41,6 +52,7 @@ export interface Encounter extends Scenario {
   turns: number;
   actions: number;
   wound: number;
+  explosionStack: number;
   previousQualifyingHit: { finalDamage: number; ownTransferBps: number } | null;
   qualifyingHitCount: number;
   vulnerable: { percent: number; remaining: number } | null;
@@ -48,7 +60,7 @@ export interface Encounter extends Scenario {
 }
 export function startEncounter(scenario: Scenario): Encounter {
   if (!validScenario(scenario)) throw new RangeError('체력은 무한 또는 양의 정수, 거리와 접근은 양의 정수여야 합니다.');
-  return { ...scenario, hp: scenario.maxHp, weaponHeat: WEAPON_HEAT_BALANCE.initial, turns: 0, actions: 0, wound: 0,
+  return { ...scenario, hp: scenario.maxHp, weaponHeat: WEAPON_HEAT_BALANCE.initial, turns: 0, actions: 0, wound: 0, explosionStack: 0,
     previousQualifyingHit: null, qualifyingHitCount: 0, vulnerable: null, phase: 'planning' };
 }
 interface ShotEffect {
@@ -70,18 +82,9 @@ export interface Shot extends ShotEffect {
   removed: number;
   hits: readonly DamageInstance[];
   woundApplied: number;
-}
-
-export interface DamageInstance {
-  source: DamageSource;
-  ownTransferBps: number;
-  impactBonus: number;
-  modifiedDamage: number;
-  woundDamage: number;
-  damage: number;
-  before: number;
-  after: number;
-  removed: number;
+  explosion: ExplosionEvent | null;
+  recoilGenerated: number;
+  recoilPenalty: number;
 }
 
 export interface EchoHit { shotIndex: number; hit: DamageInstance }
@@ -91,35 +94,6 @@ function modifiedDamage(power: number, percent: number, heat: number): number {
   return Math.floor(power * (100 + percent) * heatDamagePercent(heat) / 10_000 + 0.5);
 }
 
-type DamageSource = Round | 'echo' | 'playerEffect' | 'environment';
-
-// 보정이 끝난 독립 타격 한 건과 그 직후의 표적 상태를 함께 반환한다.
-export function resolveDamage(state: Encounter, source: DamageSource, modified: number, ownTransferBps = 0) {
-  if (state.hp <= 0 || state.phase === 'victory' || state.phase === 'defeat' || !(modified > 0)) return;
-  if (!Number.isInteger(modified)) throw new RangeError('보정 피해는 반올림이 끝난 정수여야 합니다.');
-  if (!Number.isSafeInteger(ownTransferBps) || ownTransferBps < 0) throw new RangeError('전이율은 0 이상의 정수 베이시스 포인트여야 합니다.');
-  const before = state.hp;
-  const qualifies = source !== 'environment';
-  const previous = state.previousQualifyingHit;
-  // 체력 입력 범위의 큰 정수에서도 곱셈 중간값의 반올림 없이 한 번만 내린다.
-  const impactBonus = qualifies && previous
-    ? Number(BigInt(previous.finalDamage) * BigInt(Math.max(previous.ownTransferBps, ownTransferBps)) / 10_000n) : 0;
-  const woundDamage = state.wound;
-  const damage = modified + woundDamage + impactBonus;
-  const after = Math.max(0, before - damage);
-  const removed = before === Infinity ? 0 : before - after;
-  const hit: DamageInstance = { source, modifiedDamage: modified, ownTransferBps, impactBonus, woundDamage, damage, before, after, removed };
-  const next = { ...state, hp: after };
-  if (after === 0) {
-    next.wound = 0;
-    next.previousQualifyingHit = null;
-    next.qualifyingHitCount = 0;
-  } else if (qualifies) {
-    next.previousQualifyingHit = { finalDamage: damage, ownTransferBps };
-    next.qualifyingHitCount++;
-  }
-  return { hit, state: next };
-}
 export function lockMagazine(slots: readonly (Round | null)[], capacity: number): readonly Round[] | null {
   const copy = Array.from(slots);
   return capacity > 0 && copy.length === capacity && copy.every(isRound) ? Object.freeze(copy) : null;
@@ -140,6 +114,7 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
   const largestGroup = Math.max(0, ...counts.values());
   let effect: ShotEffect & { pursuitDamage?: number } = { source: null, bonus: 0 };
   let previousDamage = 0;
+  let recoil = 0;
   let previousFamily: AmmoFamily | undefined;
   // 단일 표적과 이번 턴을 공유한다. 전투 초기화 시 이 일제사격 자체가 폐기된다.
   const pendingEchoes: { shotIndex: number; power: number; heat: number }[] = [];
@@ -164,7 +139,6 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     }
     const { source, bonus } = effect;
     const heatBefore = state.weaponHeat;
-    const applied = source === 'vulnerability';
     let percent = source ? state.vulnerable?.percent ?? 0 : 0;
     if (source === 'pain') percent *= ammo.pain.bonusFactor;
     const definition = source ? ammo[source] : undefined;
@@ -174,28 +148,23 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     if (definition && 'secondHit' in definition) baseHits.push(definition.secondHit);
     if (effect.pursuitDamage) baseHits.push(effect.pursuitDamage);
     const transferBps = definition && 'transferBps' in definition ? definition.transferBps : 0;
-    const hits: DamageInstance[] = [];
+    const fired = ammo[round];
+    const recoilGenerated = 'recoil' in fired ? fired.recoil : 0;
+    recoil += recoilGenerated;
+    const recoilPenalty = recoilFirepowerPenalty(recoil, P220.recoilThreshold);
     const before = state.hp;
-    let baseDamage = 0;
-    let preHeatDamage = 0;
-    let damage = 0;
-    previousDamage = 0;
-    for (const [hitIndex, baseHit] of baseHits.entries()) {
-      const power = baseHit + (hitIndex === 0 ? bonus : 0);
-      const resolved = resolveDamage(state, round, modifiedDamage(power, percent, heatBefore), transferBps);
-      baseDamage += baseHit;
-      preHeatDamage += power * (100 + percent) / 100;
-      if (resolved) {
-        const { hit } = resolved;
-        state = resolved.state;
-        hits.push(hit);
-        damage += hit.damage;
-        // 후속탄은 직전 샷의 보정된 기본 피해만 읽는다.
-        previousDamage += hit.modifiedDamage;
-        if (state.hp === 0) break;
-      }
-    }
+    const powers = baseHits.map((baseHit, i) => Math.max(0, baseHit + (i === 0 ? bonus - recoilPenalty : 0)));
+    const payload = definition && 'stack' in definition ? definition : undefined;
+    const impact = resolveShotImpact([state], 0, source ? round : null,
+      powers.map(power => modifiedDamage(power, percent, heatBefore)), transferBps, payload);
+    state = impact.formation[0]!;
+    const { hits, explosion, attemptedHits } = impact;
+    const baseDamage = baseHits.slice(0, attemptedHits).reduce((sum, value) => sum + value, 0);
+    const preHeatDamage = powers.slice(0, attemptedHits).reduce((sum, power) => sum + power * (100 + percent) / 100, 0);
+    const damage = hits.reduce((sum, hit) => sum + hit.damage, 0) + (explosion?.hits[0]?.hit.damage ?? 0);
+    previousDamage = hits.reduce((sum, hit) => sum + hit.modifiedDamage, 0);
     const after = state.hp;
+    const applied = source === 'vulnerability' && after > 0;
     const woundApplied = after > 0 && definition && 'wound' in definition ? definition.wound : 0;
     const vulnerable = applied ? { percent: ammo.vulnerability.percent, remaining: ammo.vulnerability.turns } : state.vulnerable;
     const heatAfter = heatBefore + ammo[round].heat;
@@ -208,6 +177,7 @@ export function* resolveVolley(start: Encounter, locked: readonly Round[]): Gene
     const removed = before === Infinity ? 0 : before - after;
     yield { kind: 'shot', state, shot: {
       index, round, before, after, removed, baseDamage, preHeatDamage, damage, percent, applied, heatBefore, heatAfter, hits, woundApplied, source, bonus,
+      explosion, recoilGenerated, recoilPenalty,
     } };
     if (!after) break;
   }

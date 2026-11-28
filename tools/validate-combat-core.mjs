@@ -19,8 +19,10 @@ try {
   for (const [name, width, height] of [['데스크톱', 1440, 900], ['세로', 390, 844]]) {
     const page = await browser.newPage({ viewport: { width, height }, hasTouch: width < 500 });
     const errors = [];
+    const warnings = [];
     page.on('pageerror', e => errors.push(e.message));
     page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.location().url + " " + msg.text()); });
+    page.on('console', msg => { if (msg.type() === 'warning') warnings.push(msg.text()); });
     await page.addInitScript(() => {
       localStorage.setItem('zombie-shot.presentation', '{"speed":2,"firingStance":"aimed"}');
       localStorage.setItem('zombie-shot.save', '{"weapon":"m500","capacity":6,"upgrades":[99],"difficulty":10}');
@@ -44,9 +46,9 @@ try {
     };
     await wait('planning');
     assert.equal(await loc('[data-slot]').count(), 4);
-    assert.equal(await loc('[data-round]').count(), 19);
+    assert.equal(await loc('[data-round]').count(), 24);
     assert.equal(await read('[data-hp]'), '∞');
-    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0', ...Array(9).fill('+5')]);
+    assert.deepEqual(await loc('.lab-ammo-heat b').allTextContents(), ['+16', '+3', '+5', '+12', '+9', '+5', '+7', '+4', '+6', '+0', ...Array(14).fill('+5')]);
     assert.equal(await read('[data-weapon-heat]'), '0');
     assert.equal(await read('[data-heat-multiplier]'), '×1.00');
     assert.equal(await loc('.presentation-debug').count(), 0);
@@ -211,6 +213,57 @@ try {
     await loc('[data-log]').scrollIntoViewIfNeeded();
     await capture('충격전이기록');
 
+    await scenario(500, 4);
+    await page.keyboard.press('Space');
+    for (const round of ['explosive', 'standard', 'stickyCharge', 'residual']) await click(`[data-round="${round}"]`);
+    await click('.lab-explosion-rule summary');
+    await loc('.lab-explosion-rule').scrollIntoViewIfNeeded();
+    await capture('폭발탄선택');
+    await click('.lab-explosion-rule summary');
+    await loc('.lab-slots').scrollIntoViewIfNeeded();
+    await capture('폭발탄창');
+    const baselines = await loc('.lab-slots b').evaluateAll(names => names.map(el => el.getBoundingClientRect().top));
+    assert.ok(Math.max(...baselines) - Math.min(...baselines) <= 1);
+    assert.ok(await loc('.lab-explosion').isHidden());
+    const observedStacks = await page.evaluate(() => new Promise(resolve => {
+      const record = document.querySelector('[data-log]');
+      const values = [];
+      const observer = new MutationObserver(() => {
+        const count = record.querySelectorAll('li').length;
+        if (count > values.length) values.push(Number(document.querySelector('[data-explosion-stack]').textContent));
+        if (count === 4) { observer.disconnect(); resolve(values); }
+      });
+      observer.observe(record, { childList: true });
+      document.querySelector('[data-fire]').click();
+    }));
+    assert.deepEqual(observedStacks, [4, 2, 9, 6]);
+    await wait('planning');
+    assert.deepEqual(await loc('[data-blast-damage]').allTextContents(), ['4', '2', '9']);
+    assert.equal(await read('[data-explosion-stack]'), '6');
+    await loc('.lab-explosion').scrollIntoViewIfNeeded();
+    await capture('폭발치');
+
+    await scenario(500, 4);
+    await page.keyboard.press('Space');
+    for (const round of ['wounding_round', 'dispersal', 'split_round', 'highExplosive']) await click(`[data-round="${round}"]`);
+    await click('[data-fire]');
+    await wait('planning');
+    assert.deepEqual(await loc('[data-blast-damage]').allTextContents(), ['2', '1']);
+    assert.equal(await read('[data-explosion-stack]'), '6');
+    assert.deepEqual(await loc('[data-log] li:nth-child(3) [data-hit-damage]').allTextContents(), ['6', '6', '6']);
+    assert.match(await read('[data-log] li:nth-child(3) .lab-blast-hit'), /폭발 2\s+상처 \+3/);
+    await loc('[data-log]').scrollIntoViewIfNeeded();
+    await capture('폭발과상처');
+    await scenario(1, 4);
+    await page.keyboard.press('Space');
+    for (const round of ['stickyCharge', 'highExplosive', 'dispersal', 'residual']) await click(`[data-round="${round}"]`);
+    await click('[data-fire]');
+    await wait('victory');
+    assert.equal(await loc('[data-slot]').filter({ hasText: '미발사' }).count(), 3);
+    assert.ok(await loc('.lab-explosion').isHidden());
+    await loc('.lab-slots').scrollIntoViewIfNeeded();
+    await capture('폭발탄미발사');
+
     await page.goto(url + '?presentationDebug=1');
     await loc('.presentation-debug').waitFor();
     const debug = loc('.presentation-debug');
@@ -224,7 +277,7 @@ try {
     assert.equal(await read('[data-distance]'), '2');
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('zombie-shot.save')).weapon), 'm500');
     assert.deepEqual(errors, []);
-    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: damage, 턴냉각후열: [32, 48], 조기승리발사수: 2, 접촉패배잔여체력: 1, 가로넘침: overflow, 실행오류: errors });
+    results.push({ 화면: name, 너비: width, 높이: height, 취약탄창피해: damage, 턴냉각후열: [32, 48], 조기승리발사수: 2, 접촉패배잔여체력: 1, 폭발피해: [4, 2, 9], 가로넘침: overflow, 실행오류: errors, 경고: warnings });
     await page.close();
   }
   await writeFile(new URL('화면검증.json', dir), JSON.stringify(results, null, 2) + '\n');
