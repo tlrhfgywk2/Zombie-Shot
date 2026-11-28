@@ -1,6 +1,6 @@
 import { BUILD_LABEL } from '../buildInfo';
 import { GamePresentation } from '../presentation/GamePresentation';
-import { heatDamageMultiplier } from './combatBalance';
+import { EXPLOSION_BALANCE, heatDamageMultiplier } from './combatBalance';
 import { CombatController } from './CombatController';
 import { ammo, defaultScenario, isRound, P220 } from './rules';
 import type { DamageInstance, EchoHit, Frame, Round, Shot } from './rules';
@@ -26,8 +26,14 @@ const notes: Record<Round, string> = {
   pulse_round: `${ammo.pulse_round.hits}회 타격 · 매 타격 전이율 ${ammo.pulse_round.transferBps / 100}%`,
   wedge_round: `1타 ${ammo.wedge_round.base} → 2타 ${ammo.wedge_round.secondHit}`,
   convergence_round: `이번 턴 이 적에 준 타격당 +${ammo.convergence_round.perPriorHit}`,
+  explosive: `폭발치 +${ammo.explosive.stack} · 반동 ${ammo.explosive.recoil}`,
+  highExplosive: `폭발치 +${ammo.highExplosive.stack} · 높은 반동 ${ammo.highExplosive.recoil}`,
+  stickyCharge: `폭발치 +${ammo.stickyCharge.stack} · 반동 ${ammo.stickyCharge.recoil}`,
+  dispersal: `폭발치 +${ammo.dispersal.stack} · 인접 +${ammo.dispersal.adjacentStack} · 반동 ${ammo.dispersal.recoil}`,
+  residual: `폭발치 ${ammo.residual.consumption * 100}%만 소모 · 반동 ${ammo.residual.recoil}`,
 };
-const familyNames = { HEALTH: '체력', WOUND: '상처', IMPACT: '충격' };
+const familyNames = { HEALTH: '체력', WOUND: '상처', IMPACT: '충격', EXPLOSION: '폭발' };
+const explosionDescription = `다음 명중에 기존 폭발치만큼 대상과 인접 감염체가 피해를 받습니다. 폭발치는 ${EXPLOSION_BALANCE.consumption * 100}% 소모한 뒤 새로 쌓입니다.`;
 const woundDescription = '피해를 받을 때마다 상처 수치만큼 추가 피해를 받습니다. 턴이 끝나면 상처가 절반으로 줄고 소수점은 버립니다.';
 const phases = { planning: '사격 준비', firing: '발사 중', approach: '접근 중', victory: '승리', defeat: '접촉 · 패배' };
 const heatFormat = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 2 });
@@ -43,6 +49,7 @@ function shotNote(shot: Shot) {
   if (shot.applied) parts.push(`취약 ${ammo.vulnerability.percent}% · ${ammo.vulnerability.turns}턴`);
   else if (shot.percent) parts.push(`취약 +${shot.percent}%`);
   if (shot.woundApplied) parts.push(`상처 +${shot.woundApplied}`);
+  if (shot.recoilPenalty) parts.push(`반동 화력 −${shot.recoilPenalty}`);
   return parts.join(' · ');
 }
 
@@ -57,13 +64,16 @@ function shotRecord(shot: Shot): string {
     ? `체력 ${shot.before} → ${shot.after}${shot.damage !== shot.removed ? ` · 실제 감소 ${shot.removed}` : ''}`
     : '';
   const detail = [shotNote(shot), health].filter(Boolean).join(' · ');
-  const hits = shot.hits.length > 1 || shot.hits.some(hit => hit.woundDamage || hit.impactBonus)
-    ? `<div class="lab-hits">${shot.hits.map((hit, index) => damageIndicator(hit, `${index + 1}타`)).join('')}</div>` : '';
+  const blast = shot.explosion?.hits.map(({ hit }) =>
+    `<span class="lab-hit lab-blast-hit">폭발 <b data-blast-damage>${hit.modifiedDamage}</b>${hit.woundDamage ? ` <small>상처 +${hit.woundDamage}</small>` : ''}</span>`).join('') ?? '';
+  const directDamage = shot.hits.reduce((sum, hit) => sum + hit.damage, 0);
+  const hits = blast || shot.hits.length > 1 || shot.hits.some(hit => hit.woundDamage || hit.impactBonus)
+    ? `<div class="lab-hits">${shot.hits.map((hit, index) => damageIndicator(hit, `${index + 1}타`)).join('')}${blast}</div>` : '';
   return `<li><strong class="lab-shot-name">${shot.index + 1} · ${ammo[shot.round].name}</strong>
     <div class="lab-shot-damage">
       <div><span>기본 피해</span><b data-base-damage>${damageFormat.format(shot.baseDamage)}</b></div>
       <div><span>특성·취약 적용</span><b data-pre-heat-damage>${damageFormat.format(shot.preHeatDamage)}</b></div>
-      <div><span>최종 피해 <em>×${multiplierFormat.format(heatDamageMultiplier(shot.heatBefore))}</em></span><b data-final-damage>${damageFormat.format(shot.damage)}</b></div>
+      <div><span>직접 타격 <em>×${multiplierFormat.format(heatDamageMultiplier(shot.heatBefore))}</em></span><b data-final-damage>${damageFormat.format(directDamage)}</b></div>
     </div>
     ${detail ? `<small>${detail}</small>` : ''}${hits}</li>`;
 }
@@ -83,18 +93,21 @@ export function mountCombat(root: HTMLElement) {
       <div class="lab-scene"></div>
       <div class="lab-meters"><div><span>체력</span><b data-hp></b></div><div><span>접촉까지</span><b data-distance></b></div>
         <div><span>취약</span><b data-status></b></div><div><span>완료 턴</span><b data-turns></b></div><div><span>적 행동</span><b data-actions></b></div>
-        <div class="lab-wound" hidden title="${woundDescription}" role="group" aria-label="${woundDescription}"><span>상처</span><b data-wound></b></div></div>
+        <div class="lab-wound" hidden title="${woundDescription}" role="group" aria-label="${woundDescription}"><span>상처</span><b data-wound></b></div>
+        <div class="lab-explosion" hidden title="${explosionDescription}"><span>폭발치</span><b data-explosion-stack></b></div></div>
       <div class="lab-heat"><div>무기 열 <b data-weapon-heat></b></div><div>피해 배율 <b data-heat-multiplier></b></div></div>
     </section>
     <section class="lab-planner" aria-label="탄창 편집">
       <div class="planner-head"><h2>${P220.name} <small>탄창</small></h2><button type="button" data-reset>다시 시작</button></div>
       <div class="lab-slots" aria-label="발사 순서"></div>
       <div class="lab-edit"><span data-selected></span><button data-shift="-1" aria-label="앞 칸으로 이동">←</button><button data-shift="1" aria-label="뒤 칸으로 이동">→</button><button data-clear>칸 비우기</button></div>
-      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}" title="${familyNames[ammo[id].family]} 계열">
+      <h3>탄약 선택</h3><div class="lab-choices">${choices.map(id => `<button data-round="${id}" data-family="${ammo[id].family}" title="${familyNames[ammo[id].family]} 계열">
         <i class="round-mark"></i><b class="lab-ammo-name">${ammo[id].name}</b><small>${notes[id]}</small>
         <strong aria-label="${id === 'copy' ? '직전 탄 피해' : 'hits' in ammo[id] ? '타격당 기본 피해 ' + ammo[id].base : '기본 피해 ' + ammo[id].base}">${id === 'copy' ? '↶' : ammo[id].base}</strong>
         <span class="lab-ammo-heat">열 <b>+${ammo[id].heat}</b></span>
       </button>`).join('')}</div>
+      <details class="lab-explosion-rule"><summary>폭발치란?</summary><p>${explosionDescription} 여러 번 타격해도 한 발에 한 번만 폭발합니다.
+        한 탄창의 누적 반동이 ${P220.recoilThreshold}를 넘으면 직접 화력이 감소합니다.</p></details>
       <details class="lab-impact-rule"><summary>충격 전이란?</summary>
         <p>같은 적에게 피해를 준 내 타격끼리 이어집니다. 직전 타격과 이번 타격 중 높은 전이율을 직전 최종 피해에 한 번 곱하고, 소수점을 버려 이번 피해에 더합니다.
         보너스를 받아도 타격 자체의 전이율은 그대로입니다. 턴 종료 피해까지 처리하면 기록을 비웁니다.</p></details>
@@ -186,7 +199,10 @@ export function mountCombat(root: HTMLElement) {
     const { state, shots, echoes } = game;
     const planning = state.phase === 'planning';
     if (kind === 'reset') scene.resetTestScene(state.distance);
-    if (kind === 'shot') scene.showTestShot(ammo[shots.at(-1)!.round].name);
+    if (kind === 'shot') {
+      const shot = shots.at(-1)!;
+      scene.showTestShot(ammo[shot.round].name, shot.recoilGenerated >= EXPLOSION_BALANCE.highRecoil, shot.explosion?.power);
+    }
     if (kind === 'approach' || kind === 'cleanup' || kind === 'defeat') scene.setTestDistance(state.distance, kind !== 'approach');
     if (kind === 'victory') scene.showTestVictory();
     scene.setWeaponHeat(state.weaponHeat, kind === 'reset' || kind === 'victory' || kind === 'defeat');
@@ -197,6 +213,8 @@ export function mountCombat(root: HTMLElement) {
     element('[data-status]').textContent = state.vulnerable ? `${state.vulnerable.percent}% · ${state.vulnerable.remaining}턴` : '없음';
     element('[data-wound]').textContent = String(state.wound);
     element('.lab-wound').hidden = state.wound === 0;
+    element('[data-explosion-stack]').textContent = String(state.explosionStack);
+    element('.lab-explosion').hidden = state.explosionStack === 0;
     element('[data-turns]').textContent = String(state.turns);
     element('[data-actions]').textContent = String(state.actions);
     element('[data-weapon-heat]').textContent = heatFormat.format(state.weaponHeat);
